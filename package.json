@@ -31,6 +31,7 @@
         "onCommand:vscode-docker.compose.down",
         "onCommand:vscode-docker.compose.restart",
         "onCommand:vscode-docker.compose.up",
+        "onCommand:vscode-docker.compose.up.subset",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.configureCompose",
         "onCommand:vscode-docker.containers.attachShell",
@@ -172,6 +173,10 @@
                 {
                     "command": "vscode-docker.contexts.use",
                     "when": "!vscode-docker:contextLocked"
+                },
+                {
+                    "command": "vscode-docker.compose.up.subset",
+                    "when": "vscode-docker:composeSubsetExp"
                 }
             ],
             "editor/context": [
@@ -198,6 +203,11 @@
                 {
                     "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
+                    "group": "docker"
+                },
+                {
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
                 {
@@ -230,6 +240,11 @@
                 {
                     "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
+                    "group": "docker"
+                },
+                {
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
                 {
@@ -2182,6 +2197,11 @@
             {
                 "command": "vscode-docker.compose.up",
                 "title": "%vscode-docker.commands.compose.up%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.compose.up.subset",
+                "title": "%vscode-docker.commands.compose.up.subset%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {

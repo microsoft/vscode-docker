@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
+import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
 import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
@@ -13,7 +14,7 @@ import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';
 import { getComposeServiceList } from './getComposeServiceList';
 
-async function compose(context: IActionContext, commands: ('up' | 'down')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSubset')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     const folder: vscode.WorkspaceFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.compose.workspaceFolder', 'To run Docker compose you must first open a folder or workspace in VS Code.'));
 
     let commandParameterFileUris: vscode.Uri[];
@@ -46,11 +47,16 @@ async function compose(context: IActionContext, commands: ('up' | 'down')[], mes
             let terminalCommand = await selectComposeCommand(
                 context,
                 folder,
-                command,
+                command === 'down' ? 'down' : 'up',
                 item?.relativeFilePath,
                 detached,
                 build
             );
+
+            if (command === 'upSubset' && !serviceListPlaceholder.test(terminalCommand)) {
+                // eslint-disable-next-line no-template-curly-in-string
+                terminalCommand += ' ${serviceList}';
+            }
 
             // Add the service list if needed
             terminalCommand = await addServicesListIfNeeded(context, folder, terminalCommand);
@@ -67,12 +73,22 @@ export async function composeUp(context: IActionContext, dockerComposeFileUri?: 
     return await compose(context, ['up'], localize('vscode-docker.commands.compose.chooseUp', 'Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
+export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+    return await compose(context, ['upSubset'], localize('vscode-docker.commands.compose.chooseUpSubset', 'Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
+}
+
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down'], localize('vscode-docker.commands.compose.chooseDown', 'Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
+}
+
+export async function activateComposeUpSubsetExperiment(): Promise<void> {
+    if (await ext.experimentationService.isCachedFlightEnabled('vscode-docker.composeSubset')) {
+        await vscode.commands.executeCommand('setContext', 'vscode-docker:composeSubsetExp', true);
+    }
 }
 
 const serviceListPlaceholder = /\${serviceList}/i;
