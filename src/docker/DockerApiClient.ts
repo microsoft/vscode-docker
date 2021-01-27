@@ -26,6 +26,7 @@ export interface DockerApiClient extends Disposable {
     inspectContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerContainerInspection>;
     execInContainer(context: IActionContext, ref: string, command: string[] | DockerExecCommandProvider, options?: DockerExecOptions, token?: CancellationToken): Promise<{ stdout: string, stderr: string }>;
     getContainerFile(context: IActionContext, ref: string, path: string, token?: CancellationToken): Promise<Buffer>;
+    putContainerFile(context: IActionContext, ref: string, path: string, content: Buffer, token?: CancellationToken): Promise<void>;
     getContainerLogs(context: IActionContext, ref: string, token?: CancellationToken): Promise<NodeJS.ReadableStream>;
     pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult | undefined>;
     startContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void>;

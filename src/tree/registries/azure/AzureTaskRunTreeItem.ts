@@ -20,6 +20,8 @@ export class AzureTaskRunTreeItem extends AzExtTreeItemIntermediate {
 
     private _run: AcrModels.Run;
 
+    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
+
     public constructor(parent: AzureTaskTreeItem, run: AcrModels.Run) {
         super(parent);
         this._run = run;

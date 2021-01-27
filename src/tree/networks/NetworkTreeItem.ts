@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MarkdownString } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
@@ -10,6 +11,7 @@ import { ext } from "../../extensionVariables";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 export class NetworkTreeItem extends AzExtTreeItemIntermediate {
     public static allContextRegExp: RegExp = /Network$/;
@@ -57,4 +59,23 @@ export class NetworkTreeItem extends AzExtTreeItemIntermediate {
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         return ext.dockerClient.removeNetwork(context, this.networkId);
     }
+
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        return resolveTooltipMarkdown(networkTooltipTemplate, await ext.dockerClient.inspectNetwork(actionContext, this.networkName));
+    }
 }
+
+const networkTooltipTemplate = `
+### {{ Name }}
+
+---
+
+#### Associated Containers
+{{#if (nonEmptyObj Containers)}}
+{{#each Containers}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+`;

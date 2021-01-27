@@ -31,6 +31,7 @@
         "onCommand:vscode-docker.compose.down",
         "onCommand:vscode-docker.compose.restart",
         "onCommand:vscode-docker.compose.up",
+        "onCommand:vscode-docker.compose.up.subset",
         "onCommand:vscode-docker.configure",
         "onCommand:vscode-docker.configureCompose",
         "onCommand:vscode-docker.containers.attachShell",
@@ -172,6 +173,10 @@
                 {
                     "command": "vscode-docker.contexts.use",
                     "when": "!vscode-docker:contextLocked"
+                },
+                {
+                    "command": "vscode-docker.compose.up.subset",
+                    "when": "vscode-docker:composeSubsetExp"
                 }
             ],
             "editor/context": [
@@ -198,6 +203,11 @@
                 {
                     "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
+                    "group": "docker"
+                },
+                {
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
                 {
@@ -230,6 +240,11 @@
                 {
                     "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up",
+                    "group": "docker"
+                },
+                {
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
                 {
@@ -373,11 +388,13 @@
                 },
                 {
                     "command": "vscode-docker.containers.downloadFile",
-                    "when": "view == dockerContainers && viewItem == containerFile"
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "files_1@2"
                 },
                 {
                     "command": "vscode-docker.containers.openFile",
-                    "when": "view == dockerContainers && viewItem == containerFile"
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "files_1@1"
                 },
                 {
                     "command": "vscode-docker.containers.stop",
@@ -603,6 +620,16 @@
                     "command": "vscode-docker.contexts.remove",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext/i",
                     "group": "contexts_2_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.containers.downloadFile",
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "inline@2"
+                },
+                {
+                    "command": "vscode-docker.containers.openFile",
+                    "when": "view == dockerContainers && viewItem == containerFile",
+                    "group": "inline@1"
                 }
             ]
         },
@@ -2169,6 +2196,11 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
+                "command": "vscode-docker.compose.up.subset",
+                "title": "%vscode-docker.commands.compose.up.subset%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
                 "command": "vscode-docker.configure",
                 "title": "%vscode-docker.commands.configure%",
                 "category": "%vscode-docker.commands.category.docker%"
@@ -2205,7 +2237,8 @@
             {
                 "command": "vscode-docker.containers.downloadFile",
                 "title": "%vscode-docker.commands.containers.downloadFile%",
-                "category": "%vscode-docker.commands.category.dockerContainers%"
+                "category": "%vscode-docker.commands.category.dockerContainers%",
+                "icon": "$(desktop-download)"
             },
             {
                 "command": "vscode-docker.containers.inspect",
@@ -2215,7 +2248,8 @@
             {
                 "command": "vscode-docker.containers.openFile",
                 "title": "%vscode-docker.commands.containers.openFile%",
-                "category": "%vscode-docker.commands.category.dockerContainers%"
+                "category": "%vscode-docker.commands.category.dockerContainers%",
+                "icon": "$(go-to-file)"
             },
             {
                 "command": "vscode-docker.containers.prune",
@@ -2733,6 +2767,7 @@
         "@types/request-promise-native": "^1.0.17",
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
+        "@types/tar-stream": "^2.2.0",
         "@types/vscode": "1.52.0",
         "@types/xml2js": "^0.4.7",
         "@typescript-eslint/eslint-plugin": "^4.14.0",
@@ -2779,6 +2814,7 @@
         "request-promise-native": "^1.0.9",
         "semver": "^7.3.4",
         "tar": "^6.1.0",
+        "tar-stream": "^2.2.0",
         "vscode-azureappservice": "^0.72.2",
         "vscode-azureextensionui": "^0.38.4",
         "vscode-languageclient": "^7.0.0",
