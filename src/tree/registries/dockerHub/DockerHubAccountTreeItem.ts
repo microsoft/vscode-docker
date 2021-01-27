@@ -9,7 +9,7 @@ import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
-import { getThemedIconPath } from "../../IconPath";
+import { getThemedIconPath } from "../../getThemedIconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";

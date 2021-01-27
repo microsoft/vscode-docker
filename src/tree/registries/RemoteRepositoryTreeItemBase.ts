@@ -22,7 +22,7 @@ export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem i
     public constructor(parent: RegistryTreeItemBase, repoName: string) {
         super(parent);
         this.repoName = repoName;
-        this.iconPath = new ThemeIcon('archive');
+        this.iconPath = new ThemeIcon('repo');
     }
 
     public get label(): string {

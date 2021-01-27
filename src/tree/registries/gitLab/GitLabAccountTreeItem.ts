@@ -9,7 +9,7 @@ import { PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getIconPath } from "../../IconPath";
+import { getIconPath } from "../../getThemedIconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";

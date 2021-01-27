@@ -25,14 +25,12 @@ export const imageProperties: ITreePropertyInfo<ImageProperty>[] = [
 ];
 
 export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): ThemeIcon {
-    let icon: string;
     switch (property) {
         case 'Registry':
-            icon = 'registry';
-            break;
+            return new ThemeIcon('briefcase');
         case 'Repository':
         case 'RepositoryName':
-            return new ThemeIcon('archive');
+            return new ThemeIcon('repo');
         case 'FullTag':
         case 'ImageId':
         case 'RepositoryNameAndTag':
@@ -42,8 +40,6 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Them
         default:
             return getCommonGroupIcon(property);
     }
-
-    return getThemedIconPath(icon);
 }
 
 export function getImagePropertyValue(item: DockerImage, property: ImageProperty): string {

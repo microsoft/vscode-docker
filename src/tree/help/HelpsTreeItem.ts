@@ -6,7 +6,7 @@
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from "../../localize";
-import { getThemedIconPath } from '../IconPath';
+import { getThemedIconPath } from '../getThemedIconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
 export class HelpsTreeItem extends AzExtParentTreeItem {
