@@ -2795,7 +2795,7 @@
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.84.0",
         "vscode-azureextensiondev": "^0.6.0",
-        "vscode-codicons": "0.0.13",
+        "vscode-codicons": "^0.0.14",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.1",
         "webpack": "^4.46.0",
