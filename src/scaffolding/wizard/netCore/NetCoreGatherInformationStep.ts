@@ -85,7 +85,8 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     private async ensureNetCoreBuildTasks(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
         const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
         if (hasTask('build', wizardContext.workspaceFolder) && cSharpExtension) {
-            // If a task named 'build' exists, and the C# extension is installed, return
+            // If a task named 'build' exists, and the C# extension is installed, we have everything necessary for running the service, so return
+
             return;
         } else if (!cSharpExtension) {
             wizardContext.errorHandling.suppressReportIssue = true;
