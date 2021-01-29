@@ -74,7 +74,7 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
             // Bind mount host paths are ugly on Windows, e.g. /run/desktop/mnt/host/c/Path/To/Folder
             // Let's make it nicer
             if (isWindows()) {
-                const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath).groups as { driveLetter?: string, path?: string };
+                const match = /\/run\/desktop\/mnt\/host\/(?<driveLetter>[a-z])\/(?<path>.*)/i.exec(hostPath)?.groups as { driveLetter?: string, path?: string };
                 if (match && match.driveLetter && match.path) {
                     hostPath = `${match.driveLetter.toUpperCase()}:\\${match.path.replace('/', '\\')}`;
                 }
