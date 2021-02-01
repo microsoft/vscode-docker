@@ -16,9 +16,6 @@ import { ImageRegistry, registries } from './registries';
 
 const noneRegex = /<none>/i;
 
-const lastLiveOutdatedCheckKey = 'vscode-docker.outdatedImageChecker.lastLiveCheck';
-const outdatedImagesKey = 'vscode-docker.outdatedImageChecker.outdatedImages';
-
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
     private readonly outdatedImageIds: string[] = [];
@@ -54,7 +51,6 @@ export class OutdatedImageChecker {
 
                 // Do a live check
                 context.telemetry.properties.checkSource = 'live';
-                await ext.context.globalState.update(lastLiveOutdatedCheckKey, Date.now());
 
                 const imageCheckPromises: Promise<void>[] = [];
 
@@ -75,7 +71,6 @@ export class OutdatedImageChecker {
 
                 // Load the data for all images then force the tree to refresh
                 await Promise.all(imageCheckPromises);
-                await ext.context.globalState.update(outdatedImagesKey, this.outdatedImageIds);
 
                 context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
 
@@ -96,7 +91,7 @@ export class OutdatedImageChecker {
             const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
-                return 'outdated';
+                return 'unknown';
             }
 
             let token: string | undefined;
