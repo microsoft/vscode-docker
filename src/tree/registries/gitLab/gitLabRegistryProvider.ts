@@ -17,6 +17,7 @@ export const gitLabRegistryProvider: IRegistryProvider = {
         wizardTitle: localize('vscode-docker.tree.registries.gitlab.signIn', 'Sign in to GitLab'),
         includeUsername: true,
         includePassword: true,
+        passwordPrompt: localize('vscode-docker.tree.registries.gitlab.pat', 'GitLab Personal Access Token'),
     },
     treeItemFactory: (parent, cachedProvider) => new GitLabAccountTreeItem(parent, cachedProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
