@@ -1,3 +1,21 @@
+## 1.10.0 - 15 February 2021
+### Added
+* Added tooltips to the various explorer views, which will show a great deal of helpful information. For example, the containers tooltips show connected volumes, networks, ports, and more. [#1002](https://github.com/microsoft/vscode-docker/issues/1002), [#2538](https://github.com/microsoft/vscode-docker/issues/2538), [#2592](https://github.com/microsoft/vscode-docker/issues/2592)
+* Editing files in a running Linux container is now possible. [#2465](https://github.com/microsoft/vscode-docker/issues/2465)
+* `COPY` and `ADD` statements in Dockerfiles now support the `--chmod` option. [#2624](https://github.com/microsoft/vscode-docker/issues/2624)
+* In `docker-build` and `docker-run` tasks, the `docker.host` setting is now honored. [#2590](https://github.com/microsoft/vscode-docker/issues/2590)
+* The preferred file name for Docker Compose files is now "compose.yaml". Scaffolding will still use "docker-compose.yml" for now, but "compose.yaml" files will be recognized as Compose files, allowing for right click -> Compose Up, etc. [#2618](https://github.com/microsoft/vscode-docker/issues/2618)
+* Codicons are now used for almost all icons. [#2654](https://github.com/microsoft/vscode-docker/issues/2654)
+
+### Fixed
+* The previously available feature for checking if images are out of date has been re-enabled by default. The behavior now uses HEAD requests which are not subject to Docker Hub's rate limiting. This feature can be disabled with the setting `docker.images.checkForOutdatedImages`. [#2691](https://github.com/microsoft/vscode-docker/pull/2691)
+* GitLab registry connection now supports--and requires--using personal access tokens. Users previously connecting with username and password will need to reconnect with a personal access token. Refer to the GitLab documentation on [creating personal access tokens](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for information on how to do so. [#1968](https://github.com/microsoft/vscode-docker/issues/1968), [#2688](https://github.com/microsoft/vscode-docker/issues/2688)
+* Debugging Python apps in WSL should now work correctly. [#2641](https://github.com/microsoft/vscode-docker/issues/2641)
+* On OS X Big Sur, `docker` was frequently missing from the `PATH` environment variable for unknown reasons. This issue should now be mitigated. [#2578](https://github.com/microsoft/vscode-docker/issues/2578)
+
+### Experiments (may not be visible to all users)
+* In context menus for Docker Compose files, a new option has been added to allow choosing a subset of the services in the Compose file to start--"Compose Up - Choose Services". This is equivalent to running the Compose Up command with the `${serviceList}` [magic property](https://code.visualstudio.com/docs/containers/reference#_docker-compose-up) in place. [#2646](https://github.com/microsoft/vscode-docker/issues/2646)
+
 ## 1.9.1 - 19 January 2021
 ### Fixed
 * Debugging .NET and Python is now possible in GitHub Codespaces! [#2389](https://github.com/microsoft/vscode-docker/issues/2389), [#2565](https://github.com/microsoft/vscode-docker/issues/2565)

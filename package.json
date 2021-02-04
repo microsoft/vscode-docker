@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.9.6-alpha",
+    "version": "1.10.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -1900,7 +1900,7 @@
                 },
                 "docker.images.checkForOutdatedImages": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
                 },
                 "docker.networks.groupBy": {
@@ -2760,7 +2760,7 @@
         "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
         "vscode-azureappservice": "^0.72.2",
-        "vscode-azureextensionui": "^0.38.4",
+        "vscode-azureextensionui": "^0.38.6",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.17",
