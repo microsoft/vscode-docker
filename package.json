@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.9.6-alpha",
+    "version": "1.10.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -1896,7 +1896,7 @@
                 },
                 "docker.images.checkForOutdatedImages": {
                     "type": "boolean",
-                    "default": false,
+                    "default": true,
                     "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
                 },
                 "docker.networks.groupBy": {
@@ -2229,10 +2229,7 @@
                 "command": "vscode-docker.containers.configureExplorer",
                 "title": "%vscode-docker.commands.containers.configureExplorer%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
-                "icon": {
-                    "light": "resources/light/settings.svg",
-                    "dark": "resources/dark/settings.svg"
-                }
+                "icon": "$(settings-gear)"
             },
             {
                 "command": "vscode-docker.containers.downloadFile",
@@ -2255,19 +2252,13 @@
                 "command": "vscode-docker.containers.prune",
                 "title": "%vscode-docker.commands.containers.prune%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
-                "icon": {
-                    "light": "resources/light/prune.svg",
-                    "dark": "resources/dark/prune.svg"
-                }
+                "icon": "$(clear-all)"
             },
             {
                 "command": "vscode-docker.containers.refresh",
                 "title": "%vscode-docker.commands.containers.refresh%",
                 "category": "%vscode-docker.commands.category.dockerContainers%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.containers.remove",
@@ -2328,10 +2319,7 @@
                 "command": "vscode-docker.images.configureExplorer",
                 "title": "%vscode-docker.commands.images.configureExplorer%",
                 "category": "%vscode-docker.commands.category.dockerImages%",
-                "icon": {
-                    "light": "resources/light/settings.svg",
-                    "dark": "resources/dark/settings.svg"
-                }
+                "icon": "$(settings-gear)"
             },
             {
                 "command": "vscode-docker.images.inspect",
@@ -2342,10 +2330,7 @@
                 "command": "vscode-docker.images.prune",
                 "title": "%vscode-docker.commands.images.prune%",
                 "category": "%vscode-docker.commands.category.dockerImages%",
-                "icon": {
-                    "light": "resources/light/prune.svg",
-                    "dark": "resources/dark/prune.svg"
-                }
+                "icon": "$(clear-all)"
             },
             {
                 "command": "vscode-docker.images.pull",
@@ -2361,10 +2346,7 @@
                 "command": "vscode-docker.images.refresh",
                 "title": "%vscode-docker.commands.images.refresh%",
                 "category": "%vscode-docker.commands.category.dockerImages%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.images.remove",
@@ -2400,19 +2382,13 @@
                 "command": "vscode-docker.networks.configureExplorer",
                 "title": "%vscode-docker.commands.networks.configureExplorer%",
                 "category": "%vscode-docker.commands.category.dockerNetworks%",
-                "icon": {
-                    "light": "resources/light/settings.svg",
-                    "dark": "resources/dark/settings.svg"
-                }
+                "icon": "$(settings-gear)"
             },
             {
                 "command": "vscode-docker.networks.create",
                 "title": "%vscode-docker.commands.networks.create%",
                 "category": "%vscode-docker.commands.category.dockerNetworks%",
-                "icon": {
-                    "light": "resources/light/add.svg",
-                    "dark": "resources/dark/add.svg"
-                }
+                "icon": "$(add)"
             },
             {
                 "command": "vscode-docker.networks.inspect",
@@ -2423,19 +2399,13 @@
                 "command": "vscode-docker.networks.prune",
                 "title": "%vscode-docker.commands.networks.prune%",
                 "category": "%vscode-docker.commands.category.dockerNetworks%",
-                "icon": {
-                    "light": "resources/light/prune.svg",
-                    "dark": "resources/dark/prune.svg"
-                }
+                "icon": "$(clear-all)"
             },
             {
                 "command": "vscode-docker.networks.refresh",
                 "title": "%vscode-docker.commands.networks.refresh%",
                 "category": "%vscode-docker.commands.category.dockerNetworks%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.networks.remove",
@@ -2485,10 +2455,7 @@
             {
                 "command": "vscode-docker.registries.azure.selectSubscriptions",
                 "title": "%vscode-docker.commands.registries.azure.selectSubscriptions%",
-                "icon": {
-                    "light": "resources/light/filter.svg",
-                    "dark": "resources/dark/filter.svg"
-                }
+                "icon": "$(filter)"
             },
             {
                 "command": "vscode-docker.registries.azure.untagImage",
@@ -2504,19 +2471,13 @@
                 "command": "vscode-docker.registries.azure.viewTaskLogs",
                 "title": "%vscode-docker.commands.registries.azure.viewLogs%",
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%",
-                "icon": {
-                    "light": "resources/light/viewLogs.svg",
-                    "dark": "resources/dark/viewLogs.svg"
-                }
+                "icon": "$(output)"
             },
             {
                 "command": "vscode-docker.registries.connectRegistry",
                 "title": "%vscode-docker.commands.registries.connect%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%",
-                "icon": {
-                    "light": "resources/light/connect.svg",
-                    "dark": "resources/dark/connect.svg"
-                }
+                "icon": "$(plug)"
             },
             {
                 "command": "vscode-docker.registries.copyImageDigest",
@@ -2583,19 +2544,13 @@
                 "command": "vscode-docker.registries.refresh",
                 "title": "%vscode-docker.commands.registries.refresh%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.volumes.configureExplorer",
                 "title": "%vscode-docker.commands.volumes.configureExplorer%",
                 "category": "%vscode-docker.commands.category.dockerVolumes%",
-                "icon": {
-                    "light": "resources/light/settings.svg",
-                    "dark": "resources/dark/settings.svg"
-                }
+                "icon": "$(settings-gear)"
             },
             {
                 "command": "vscode-docker.volumes.inspect",
@@ -2606,19 +2561,13 @@
                 "command": "vscode-docker.volumes.prune",
                 "title": "%vscode-docker.commands.volumes.prune%",
                 "category": "%vscode-docker.commands.category.dockerVolumes%",
-                "icon": {
-                    "light": "resources/light/prune.svg",
-                    "dark": "resources/dark/prune.svg"
-                }
+                "icon": "$(clear-all)"
             },
             {
                 "command": "vscode-docker.volumes.refresh",
                 "title": "%vscode-docker.commands.volumes.refresh%",
                 "category": "%vscode-docker.commands.category.dockerVolumes%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.volumes.remove",
@@ -2660,19 +2609,13 @@
                 "command": "vscode-docker.contexts.configureExplorer",
                 "title": "%vscode-docker.commands.contexts.configureExplorer%",
                 "category": "%vscode-docker.commands.category.contexts%",
-                "icon": {
-                    "light": "resources/light/settings.svg",
-                    "dark": "resources/dark/settings.svg"
-                }
+                "icon": "$(settings-gear)"
             },
             {
                 "command": "vscode-docker.contexts.refresh",
                 "title": "%vscode-docker.commands.contexts.refresh%",
                 "category": "%vscode-docker.commands.category.contexts%",
-                "icon": {
-                    "light": "resources/light/refresh.svg",
-                    "dark": "resources/dark/refresh.svg"
-                }
+                "icon": "$(refresh)"
             },
             {
                 "command": "vscode-docker.contexts.help",
@@ -2684,10 +2627,7 @@
                 "command": "vscode-docker.contexts.create.aci",
                 "title": "%vscode-docker.commands.contexts.create.aci%",
                 "category": "%vscode-docker.commands.category.contexts%",
-                "icon": {
-                    "light": "resources/light/add.svg",
-                    "dark": "resources/dark/add.svg"
-                }
+                "icon": "$(add)"
             }
         ],
         "views": {
@@ -2791,7 +2731,7 @@
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.84.0",
         "vscode-azureextensiondev": "^0.6.0",
-        "vscode-codicons": "0.0.13",
+        "vscode-codicons": "^0.0.14",
         "vscode-nls-dev": "^3.3.2",
         "vscode-test": "^1.4.1",
         "webpack": "^4.46.0",
@@ -2816,7 +2756,7 @@
         "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
         "vscode-azureappservice": "^0.72.2",
-        "vscode-azureextensionui": "^0.38.4",
+        "vscode-azureextensionui": "^0.38.6",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.17",

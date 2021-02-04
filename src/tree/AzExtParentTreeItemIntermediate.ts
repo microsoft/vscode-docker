@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { MarkdownString } from 'vscode';
+import { MarkdownString, ThemeIcon } from 'vscode';
 import { AzExtParentTreeItem, callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
-import { IconPath } from './IconPath';
 
 /**
  * The purpose of this class is to be an intermediate abstract class that redefines these properties from the parent as abstract.
@@ -13,7 +12,7 @@ import { IconPath } from './IconPath';
  */
 export abstract class AzExtParentTreeItemIntermediate extends AzExtParentTreeItem {
     public abstract readonly id?: string;
-    public abstract readonly iconPath?: IconPath;
+    public abstract readonly iconPath?: ThemeIcon;
     public abstract readonly description?: string;
 
     public async resolveTooltip(): Promise<string> {

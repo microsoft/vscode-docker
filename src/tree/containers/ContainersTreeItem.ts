@@ -7,7 +7,7 @@ import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azure
 import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { getThemedIconPath } from "../IconPath";
+import { getThemedIconPath } from "../getThemedIconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
@@ -116,7 +116,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         if (this.newContainerUser) {
             const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
-            dockerTutorialTreeItem.iconPath = getThemedIconPath('docker')
+            dockerTutorialTreeItem.iconPath = getThemedIconPath('docker');
             return [dockerTutorialTreeItem];
         }
         return super.getTreeItemForEmptyList()

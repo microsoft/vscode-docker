@@ -8,7 +8,7 @@ import { URL } from "url";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
 import { nonNullProp } from "../../../utils/nonNull";
-import { getIconPath } from "../../IconPath";
+import { getIconPath } from "../../getThemedIconPath";
 import { azureOAuthProvider, IAzureOAuthContext } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";

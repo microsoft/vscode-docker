@@ -10,7 +10,6 @@ import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from '../resolveTooltipMarkdown';
 import { getContainerStateIcon } from "./ContainerProperties";
@@ -86,9 +85,9 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
         };
     }
 
-    public get iconPath(): IconPath {
+    public get iconPath(): vscode.ThemeIcon {
         if (this._item.Status.includes('(unhealthy)')) {
-            return getThemedIconPath('statusWarning');
+            return new vscode.ThemeIcon('warning', new vscode.ThemeColor('problemsWarningIcon.foreground'));
         } else {
             return getContainerStateIcon(this._item.State);
         }

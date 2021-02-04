@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RequestPromiseOptions } from "request-promise-native";
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { IRepositoryAuthTreeItem } from "../../utils/registryRequestUtils";
-import { getThemedIconPath } from "../IconPath";
 import { getRegistryContextValue, repositorySuffix } from "./registryContextValues";
 import { RegistryTreeItemBase } from "./RegistryTreeItemBase";
 import { RemoteTagTreeItem } from "./RemoteTagTreeItem";
@@ -22,7 +22,7 @@ export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem i
     public constructor(parent: RegistryTreeItemBase, repoName: string) {
         super(parent);
         this.repoName = repoName;
-        this.iconPath = getThemedIconPath('repository');
+        this.iconPath = new ThemeIcon('repo');
     }
 
     public get label(): string {

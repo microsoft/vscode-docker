@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { DockerObject } from "../docker/Common";
-import { IconPath } from "./IconPath";
 import { LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
 import { CommonProperty } from "./settings/CommonProperties";
 
@@ -16,7 +16,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProper
     private _childTreeItems: AzExtTreeItem[];
 
     // Redefining this as an abstract allows inheriting classes to either do an accessor or a property
-    public abstract readonly iconPath?: IconPath;
+    public abstract readonly iconPath?: ThemeIcon;
 
     public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);

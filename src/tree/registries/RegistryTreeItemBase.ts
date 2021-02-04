@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { RequestPromiseOptions } from "request-promise-native";
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { IRegistryAuthTreeItem } from "../../utils/registryRequestUtils";
-import { getThemedIconPath } from "../IconPath";
 import { getRegistryContextValue, registrySuffix } from "./registryContextValues";
 
 /**
@@ -18,7 +18,7 @@ export abstract class RegistryTreeItemBase extends AzExtParentTreeItem implement
 
     public constructor(parent: AzExtParentTreeItem | undefined) {
         super(parent);
-        this.iconPath = getThemedIconPath('registry');
+        this.iconPath = new ThemeIcon('briefcase');
     }
 
     public get contextValue(): string {

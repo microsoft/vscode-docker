@@ -5,8 +5,8 @@
 
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
+import { ThemeIcon } from 'vscode';
 import { AzExtTreeItemIntermediate } from '../AzExtTreeItemIntermediate';
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 
@@ -49,7 +49,7 @@ export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
         return dayjs(this.time).fromNow();
     }
 
-    public get iconPath(): IconPath {
-        return getThemedIconPath('tag');
+    public get iconPath(): ThemeIcon {
+        return new ThemeIcon('bookmark');
     }
 }

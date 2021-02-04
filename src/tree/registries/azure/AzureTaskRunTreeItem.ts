@@ -6,9 +6,9 @@
 import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
+import { ThemeColor, ThemeIcon } from "vscode";
 import { nonNullProp } from "../../../utils/nonNull";
 import { AzExtTreeItemIntermediate } from "../../AzExtTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from "../../IconPath";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
 dayjs.extend(relativeTime);
@@ -51,22 +51,17 @@ export class AzureTaskRunTreeItem extends AzExtTreeItemIntermediate {
         return this._run.outputImages && this._run.outputImages[0];
     }
 
-    public get iconPath(): IconPath {
-        let icon: string;
+    public get iconPath(): ThemeIcon {
         switch (this._run.status) {
             case 'Succeeded':
-                icon = 'statusOk';
-                break;
+                return new ThemeIcon('check', new ThemeColor('debugIcon.startForeground'));
             case 'Failed':
-                icon = 'statusError';
-                break;
+                return new ThemeIcon('error', new ThemeColor('problemsErrorIcon.foreground'));
             case 'Running':
-                icon = 'statusRun'
-                break;
+                return new ThemeIcon('debug-start', new ThemeColor('debugIcon.startForeground'));
             default:
-                icon = 'statusWarning';
+                return new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground'));
         }
-        return getThemedIconPath(icon);
     }
 
     public get properties(): unknown {

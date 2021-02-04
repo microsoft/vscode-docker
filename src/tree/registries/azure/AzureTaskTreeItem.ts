@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry";
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";
-import { getThemedIconPath } from "../../IconPath";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
@@ -24,7 +24,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     public constructor(parent: AzureTasksTreeItem, task: AcrModels.Task | undefined) {
         super(parent);
         this._task = task;
-        this.iconPath = getThemedIconPath('task');
+        this.iconPath = new ThemeIcon('tasklist');
         this.id = this._task ? this._task.id : undefined;
     }
 

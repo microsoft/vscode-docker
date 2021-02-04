@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeColor, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, GenericTreeItem, parseError } from "vscode-azureextensionui";
-import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";
@@ -14,7 +14,7 @@ export class RegistryConnectErrorTreeItem extends GenericTreeItem {
         super(parent, {
             label: parseError(err).message,
             contextValue: 'registryConnectError',
-            iconPath: getThemedIconPath('statusWarning')
+            iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')),
         });
 
         this.provider = getRegistryProviders().find(rp => rp.id === this.cachedProvider.id);
