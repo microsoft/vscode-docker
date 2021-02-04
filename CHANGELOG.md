@@ -9,7 +9,7 @@
 
 ### Fixed
 * The previously available feature for checking if images are out of date has been re-enabled by default. The behavior now uses HEAD requests which are not subject to Docker Hub's rate limiting. This feature can be disabled with the setting `docker.images.checkForOutdatedImages`. [#2691](https://github.com/microsoft/vscode-docker/pull/2691)
-* GitLab registry connection now supports--and requires--using personal access tokens. Users previously connecting with username and password will need to reconnect with a personal access token. [#1968](https://github.com/microsoft/vscode-docker/issues/1968), [#2688](https://github.com/microsoft/vscode-docker/issues/2688)
+* GitLab registry connection now supports--and requires--using personal access tokens. Users previously connecting with username and password will need to reconnect with a personal access token. Refer to the GitLab documentation on [creating personal access tokens](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for information on how to do so. [#1968](https://github.com/microsoft/vscode-docker/issues/1968), [#2688](https://github.com/microsoft/vscode-docker/issues/2688)
 * Debugging Python apps in WSL should now work correctly. [#2641](https://github.com/microsoft/vscode-docker/issues/2641)
 * On OS X Big Sur, `docker` was frequently missing from the `PATH` environment variable for unknown reasons. This issue should now be mitigated. [#2578](https://github.com/microsoft/vscode-docker/issues/2578)
 
