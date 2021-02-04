@@ -10,15 +10,11 @@ import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azuree
 import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
-import { localize } from '../../../localize';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
 
 const noneRegex = /<none>/i;
-
-const lastLiveOutdatedCheckKey = 'vscode-docker.outdatedImageChecker.lastLiveCheck';
-const outdatedImagesKey = 'vscode-docker.outdatedImageChecker.outdatedImages';
 
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
@@ -32,12 +28,13 @@ export class OutdatedImageChecker {
         const httpSettings = vscode.workspace.getConfiguration('http');
         const strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
         this.defaultRequestOptions = {
-            method: 'GET',
+            method: 'HEAD',
             json: true,
             resolveWithFullResponse: true,
             strictSSL: strictSSL,
             headers: {
                 'X-Meta-Source-Client': ociClientId,
+                'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json',
             },
         };
     }
@@ -52,43 +49,33 @@ export class OutdatedImageChecker {
                 context.errorHandling.suppressReportIssue = true;
                 context.errorHandling.suppressDisplay = true;
 
-                const lastCheck = ext.context.globalState.get<number | undefined>(lastLiveOutdatedCheckKey, undefined);
+                // Do a live check
+                context.telemetry.properties.checkSource = 'live';
 
-                if (lastCheck && Date.now() - lastCheck < 24 * 60 * 60 * 1000) {
-                    // Use the cached data
-                    context.telemetry.properties.checkSource = 'cache';
-                    this.outdatedImageIds.push(...ext.context.globalState.get<string[]>(outdatedImagesKey, []));
-                } else {
-                    // Do a live check
-                    context.telemetry.properties.checkSource = 'live';
-                    await ext.context.globalState.update(lastLiveOutdatedCheckKey, Date.now());
+                const imageCheckPromises: Promise<void>[] = [];
 
-                    const imageCheckPromises: Promise<void>[] = [];
+                for (const image of images) {
+                    const imageRegistry = getImagePropertyValue(image, 'Registry');
+                    const matchingRegistry = registries.find(r => r.registryMatch.test(imageRegistry));
 
-                    for (const image of images) {
-                        const imageRegistry = getImagePropertyValue(image, 'Registry');
-                        const matchingRegistry = registries.find(r => r.registryMatch.test(imageRegistry));
-
-                        if (matchingRegistry) {
-                            imageCheckPromises.push((async () => {
-                                if (await this.checkImage(context, matchingRegistry, image) === 'outdated') {
-                                    this.outdatedImageIds.push(image.Id);
-                                }
-                            })());
-                        }
+                    if (matchingRegistry) {
+                        imageCheckPromises.push((async () => {
+                            if (await this.checkImage(context, matchingRegistry, image) === 'outdated') {
+                                this.outdatedImageIds.push(image.Id);
+                            }
+                        })());
                     }
-
-                    context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
-
-                    // Load the data for all images then force the tree to refresh
-                    await Promise.all(imageCheckPromises);
-                    await ext.context.globalState.update(outdatedImagesKey, this.outdatedImageIds);
-
-                    context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
-
-                    // Don't wait
-                    void ext.imagesRoot.refresh(context);
                 }
+
+                context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
+
+                // Load the data for all images then force the tree to refresh
+                await Promise.all(imageCheckPromises);
+
+                context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
+
+                // Don't wait
+                void ext.imagesRoot.refresh(context);
             });
         }
 
@@ -104,23 +91,23 @@ export class OutdatedImageChecker {
             const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
-                return 'outdated';
+                return 'unknown';
             }
 
             let token: string | undefined;
 
             // 1. Get an OAuth token to access the resource. No Authorization header is required for public scopes.
             if (registry.getToken) {
-                token = await registry.getToken(this.defaultRequestOptions, `repository:library/${repo}:pull`);
+                token = await registry.getToken({ ...this.defaultRequestOptions, method: 'GET' }, `repository:library/${repo}:pull`);
             }
 
-            // 2. Get the latest image ID from the manifest
-            const latestConfigImageId = await this.getLatestConfigImageId(registry, repo, tag, token);
+            // 2. Get the latest image digest ID from the manifest
+            const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag, token);
 
             // 3. Compare it with the current image's value
             const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
 
-            if (latestConfigImageId.toLowerCase() !== imageInspectInfo?.Config?.Image?.toLowerCase()) {
+            if (imageInspectInfo?.RepoDigests?.[0]?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0) {
                 return 'outdated';
             }
 
@@ -130,7 +117,7 @@ export class OutdatedImageChecker {
         }
     }
 
-    private async getLatestConfigImageId(registry: ImageRegistry, repo: string, tag: string, oAuthToken: string | undefined): Promise<string> {
+    private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string, oAuthToken: string | undefined): Promise<string> {
         const manifestOptions: request.RequestPromiseOptions = {
             ...this.defaultRequestOptions,
             auth: oAuthToken ? {
@@ -139,15 +126,6 @@ export class OutdatedImageChecker {
         };
 
         const manifestResponse = await request(`${registry.baseUrl}/${repo}/manifests/${tag}`, manifestOptions) as Response;
-        /* eslint-disable @typescript-eslint/tslint/config */
-        const firstHistory = JSON.parse(manifestResponse?.body?.history?.[0]?.v1Compatibility);
-        const latestConfigImageId: string = firstHistory?.config?.Image;
-        /* eslint-enable @typescript-eslint/tslint/config */
-
-        if (!latestConfigImageId) {
-            throw new Error(localize('vscode-docker.outdatedImageChecker.noManifest', 'Failed to acquire manifest token for image: \'{0}:{1}\'', repo, tag));
-        }
-
-        return latestConfigImageId;
+        return manifestResponse.headers['docker-content-digest'] as string;
     }
 }
