@@ -2760,7 +2760,7 @@
         "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
         "vscode-azureappservice": "^0.72.2",
-        "vscode-azureextensionui": "^0.38.5",
+        "vscode-azureextensionui": "^0.38.6",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.17",
