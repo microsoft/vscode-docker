@@ -25,7 +25,6 @@ export { Lazy, AsyncLazy } from './src/utils/lazy';
 export { bufferToString } from './src/utils/spawnAsync';
 export { ext } from './src/extensionVariables';
 export { httpsRequestBinary } from './src/utils/httpRequest';
-export { IKeytar } from './src/utils/keytar';
 export { inferCommand, inferPackageName, InspectMode, NodePackage } from './src/utils/nodeUtils';
 export { nonNullProp } from './src/utils/nonNull';
 export { getDockerOSType } from "./src/utils/osUtils";

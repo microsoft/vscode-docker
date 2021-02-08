@@ -30,7 +30,6 @@ import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
-import { Keytar } from './utils/keytar';
 import { isLinux, isMac, isWindows } from './utils/osUtils';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -59,10 +58,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
-
-    if (!ext.keytar) {
-        ext.keytar = Keytar.tryCreate();
-    }
 
     registerUIExtensionVariables(ext);
 }
