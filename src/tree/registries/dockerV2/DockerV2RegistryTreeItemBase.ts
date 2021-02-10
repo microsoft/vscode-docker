@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from "request-promise-native";
+import { Request } from "node-fetch";
 import { URL } from "url";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
@@ -53,10 +53,12 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
         return !!this._nextLink;
     }
 
-    public async addAuth(options: request.RequestPromiseOptions): Promise<void> {
+    public async signRequest(request: Request): Promise<Request> {
         if (this.authHelper) {
-            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, this.authContext);
+            return this.authHelper.signRequest(this.cachedProvider, request, this.authContext);
         }
+
+        return request;
     }
 
     public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {

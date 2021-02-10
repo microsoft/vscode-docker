@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
+import { Request } from "node-fetch";
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem } from "vscode-azureextensionui";
 import { IRegistryAuthTreeItem } from "../../utils/registryRequestUtils";
@@ -41,7 +41,7 @@ export abstract class RegistryTreeItemBase extends AzExtParentTreeItem implement
     /**
      * This will be called before each registry request to add authentication
      */
-    public abstract addAuth(options: RequestPromiseOptions): Promise<void>;
+    public abstract signRequest(request: Request): Promise<Request>;
 
     /**
      * Describes credentials used to log in to the docker cli before pushing or pulling an image

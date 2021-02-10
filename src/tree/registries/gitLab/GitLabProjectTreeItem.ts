@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
+import { Request } from "node-fetch";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
@@ -59,8 +59,8 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         return !!this._nextLink;
     }
 
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        await this.parent.addAuth(options);
+    public async signRequest(request: Request): Promise<Request> {
+        return this.parent.signRequest(request);
     }
 
     public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
+import { Request } from "node-fetch";
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { IRepositoryAuthTreeItem } from "../../utils/registryRequestUtils";
@@ -37,7 +37,7 @@ export abstract class RemoteRepositoryTreeItemBase extends AzExtParentTreeItem i
      * Optional method to implement if repo-level requests should have different authentication than registry-level requests
      * For example, if the registry supports OAuth you might get a token that has just repo-level permissions instead of registry-level permissions
      */
-    public addAuth?(options: RequestPromiseOptions): Promise<void>;
+    public signRequest?(request: Request): Promise<Request>;
 
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
         if (ti1 instanceof RemoteTagTreeItem && ti2 instanceof RemoteTagTreeItem) {
