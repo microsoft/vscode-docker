@@ -23,7 +23,9 @@ export const registries: ImageRegistry[] = [
             if (!dockerHubAuthContext) {
                 try {
                     const options: RequestOptionsLike = {
-                        // TODO: Fix this
+                        headers: {
+                            'X-Meta-Source-Client': ociClientId,
+                        },
                     };
 
                     await httpRequest2('https://registry-1.docker.io/v2/', options);
