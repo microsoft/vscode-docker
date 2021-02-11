@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request';
-import * as rp from 'request-promise-native';
-import * as vscode from 'vscode';
+import { default as fetch, Request } from 'node-fetch';
+import { localize } from '../../../localize';
+import { basicAuthHeader, bearerAuthHeader } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
@@ -16,33 +16,32 @@ import { IAuthProvider, IOAuthContext } from './IAuthProvider';
  */
 class BasicOAuthProvider implements IAuthProvider {
 
-    public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<request.AuthOptions> {
+    public async signRequest(cachedProvider: ICachedRegistryProvider, request: Request, authContext?: IOAuthContext): Promise<Request> {
         if (!authContext) {
-            return {
-                username: cachedProvider.username,
-                password: await getRegistryPassword(cachedProvider),
-            };
+            request.headers.set('Authorization', basicAuthHeader(cachedProvider.username, await getRegistryPassword(cachedProvider)));
+            return request;
         }
 
-        /* eslint-disable camelcase */
-        const response = <{ access_token: string }>await rp.post(authContext.realm.toString(), {
-            form: {
-                grant_type: 'password',
-                service: authContext.service,
-                scope: authContext.scope,
+        const tokenRequest = new Request(authContext.realm.toString(), {
+            method: 'POST',
+            headers: {
+                Authorization: basicAuthHeader(cachedProvider.username, await getRegistryPassword(cachedProvider)),
+                'grant_type': 'password',
+                'service': authContext.service,
+                'scope': authContext.scope
             },
-            auth: {
-                username: cachedProvider.username,
-                password: await getRegistryPassword(cachedProvider),
-            },
-            strictSSL: vscode.workspace.getConfiguration('http')?.get<boolean>('proxyStrictSSL', true) ?? true,
-            json: true,
         });
-        /* eslint-enable camelcase */
 
-        return {
-            bearer: response.access_token,
-        };
+        const tokenResponse = await fetch(tokenRequest);
+
+        if (tokenResponse.status >= 200 && tokenResponse.status < 300) {
+            const body = await tokenResponse.json();
+            // eslint-disable-next-line @typescript-eslint/tslint/config
+            request.headers.set('Authorization', bearerAuthHeader(body.token));
+            return request;
+        } else {
+            throw new Error(localize('vscode-docker.registries.auth.basic.failedToAcquireToken', 'Failed to acquire OAuth token from {0}. Status: {1}', authContext.realm.toString(), tokenResponse.status));
+        }
     }
 
     public async getDockerCliCredentials(cachedProvider: ICachedRegistryProvider, authContext?: IOAuthContext): Promise<IDockerCliCredentials> {

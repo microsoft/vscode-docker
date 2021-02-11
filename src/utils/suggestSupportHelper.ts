@@ -13,22 +13,23 @@ import parser = require('../parser');
 export class SuggestSupportHelper {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public suggestImages(word: string): Promise<vscode.CompletionItem[]> {
-        return hub.searchImagesInRegistryHub(word, true).then((results) => {
-            return results.map((image) => {
-                let stars = '';
-                if (image.star_count > 0) {
-                    stars = ' ' + image.star_count + ' ' + (image.star_count > 1 ? 'stars' : 'star');
-                }
+        // return hub.searchImagesInRegistryHub(word, true).then((results) => {
+        //     return results.map((image) => {
+        //         let stars = '';
+        //         if (image.star_count > 0) {
+        //             stars = ' ' + image.star_count + ' ' + (image.star_count > 1 ? 'stars' : 'star');
+        //         }
 
-                return {
-                    label: image.name,
-                    kind: vscode.CompletionItemKind.Value,
-                    detail: hub.tagsForImage(image) + stars,
-                    insertText: image.name,
-                    documentation: image.description,
-                }
-            });
-        });
+        //         return {
+        //             label: image.name,
+        //             kind: vscode.CompletionItemKind.Value,
+        //             detail: hub.tagsForImage(image) + stars,
+        //             insertText: image.name,
+        //             documentation: image.description,
+        //         }
+        //     });
+        // });
+        return Promise.resolve([]);
     }
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in

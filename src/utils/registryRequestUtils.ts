@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Response } from "request";
-import * as request from 'request-promise-native';
+import { default as fetch, Headers, Request } from 'node-fetch';
 import { URL } from "url";
-import { workspace } from "vscode";
 import { ociClientId } from "../constants";
+import { localize } from '../localize';
 
-export function getNextLinkFromHeaders(response: Response): string | undefined {
-    const linkHeader: string | undefined = response.headers && <string>response.headers.link;
+export function getNextLinkFromHeaders(response: IResponse<unknown>): string | undefined {
+    const linkHeader: string | undefined = response.headers?.get('link');
     if (linkHeader) {
         const match = linkHeader.match(/<(.*)>; rel="next"/i);
         return match ? match[1] : undefined;
@@ -19,25 +18,14 @@ export function getNextLinkFromHeaders(response: Response): string | undefined {
     }
 }
 
-export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: request.RequestPromiseOptions): Promise<IResponse<T>> {
-    let httpSettings = workspace.getConfiguration('http');
-    let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
+export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestInit): Promise<IResponse<T>> {
     const options = {
-        method,
-        json: true,
-        resolveWithFullResponse: true,
-        strictSSL: strictSSL,
+        method: method,
         headers: {
             'X-Meta-Source-Client': ociClientId,
         },
-        ...customOptions
-    }
-
-    if (node.addAuth) {
-        await node.addAuth(options);
-    } else {
-        await (<IRepositoryAuthTreeItem>node).parent.addAuth(options);
-    }
+        ...customOptions,
+    };
 
     const baseUrl = node.baseUrl || (<IRepositoryAuthTreeItem>node).parent.baseUrl;
     let fullUrl: string = url;
@@ -46,15 +34,33 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         fullUrl = parsed.toString();
     }
 
-    return <IResponse<T>>await request(fullUrl, options);
+    let request = new Request(fullUrl, options);
+
+    if (node.signRequest) {
+        request = await node.signRequest(request);
+    } else {
+        request = await (<IRepositoryAuthTreeItem>node).parent.signRequest(request);
+    }
+
+    const response = await fetch(request);
+
+    if (response.status >= 200 && response.status < 300) {
+        return {
+            body: await response.json() as T,
+            headers: response.headers,
+        }
+    } else {
+        throw new Error(localize('vscode-docker.utils.registry.failedRequest', 'Failed to perform registry request to {0}, with status {1}', fullUrl, response.status));
+    }
 }
 
-interface IResponse<T> extends Response {
-    body: T;
+interface IResponse<T> {
+    body: T,
+    headers: Headers,
 }
 
 export interface IRegistryAuthTreeItem {
-    addAuth(options: request.RequestPromiseOptions): Promise<void>;
+    signRequest(request: Request): Promise<Request>;
     baseUrl: string;
 }
 

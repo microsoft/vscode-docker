@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request-promise-native';
+import { default as fetch, Request } from 'node-fetch';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 
@@ -24,44 +24,48 @@ export function getResourceGroupFromId(id: string): string {
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
     /* eslint-disable camelcase */
     const options = {
-        form: {
+        headers: {
             grant_type: 'refresh_token',
             service: registryHost,
-            scope,
+            scope: scope,
             refresh_token: undefined
         },
-        json: true
+        method: 'POST',
     };
 
     try {
         if (refreshTokens[registryHost]) {
-            options.form.refresh_token = refreshTokens[registryHost];
-            const responseFromCachedToken = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
+            options.headers.refresh_token = refreshTokens[registryHost];
+            const responseFromCachedToken = <{ access_token: string }>await (await fetch(`https://${registryHost}/oauth2/token`, options)).json();
             return responseFromCachedToken.access_token;
         }
     } catch { /* No-op, fall back to a new refresh token */ }
 
-    options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
-    const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
+    options.headers.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
+    const response = <{ access_token: string }>await (await fetch(`https://${registryHost}/oauth2/token`, options)).json();
     return response.access_token;
     /* eslint-enable camelcase */
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
-    const aadTokenResponse = await subContext.credentials.getToken();
+    // const aadTokenResponse = await subContext.credentials.getToken();
 
-    /* eslint-disable-next-line camelcase */
-    const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
-        form: {
+    const options = {
+        method: 'POST',
+        headers: {
             /* eslint-disable-next-line camelcase */
             grant_type: 'access_token',
             service: registryHost,
             tenant: subContext.tenantId,
-            /* eslint-disable-next-line camelcase */
-            access_token: aadTokenResponse.accessToken,
         },
-        json: true
-    });
+    };
+
+    let request = new Request(`https://${registryHost}/oauth2/exchange`, options);
+
+    request = await subContext.credentials.signRequest(request) as Request;
+
+    /* eslint-disable-next-line camelcase */
+    const response = <{ refresh_token: string }>await (await fetch(request)).json();
 
     return response.refresh_token;
 }

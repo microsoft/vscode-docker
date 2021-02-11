@@ -4,82 +4,92 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import * as https from 'https';
-import request = require('request');
-import url = require('url');
+import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
+import { localize } from '../localize';
+// import url = require('url');
 import { addUserAgent } from './addUserAgent';
 
-function convertToOptions(options: https.RequestOptions | string): https.RequestOptions {
-    if (typeof options === 'string') {
-        // Must use Node's url, not vscode.Uri
-        let optionsAsUrl = url.parse(options);
-        return <https.RequestOptions>optionsAsUrl;
-    } else {
-        return options;
+export async function httpsRequest(opts: RequestInit): Promise<string> {
+    // let convertedOpts = convertToOptions(opts);
+    // addUserAgent(convertedOpts);
+
+    // return new Promise<string>((resolve, reject) => {
+    //     let req = https.request(convertedOpts, (res) => {
+    //         let data = '';
+    //         res.on('data', (d: string) => {
+    //             data += d;
+    //         })
+    //         res.on('end', () => {
+    //             resolve(data);
+    //         })
+    //     });
+    //     req.end();
+    //     req.on('error', reject);
+    // });
+    return '';
+}
+
+export class HttpResponse2<T> {
+    public constructor(private readonly innerResponse: Response) { }
+
+    public async json(): Promise<T> {
+        return await this.innerResponse.json() as T;
+    }
+
+    public get headers(): { [key: string]: string | string[] } {
+        return this.innerResponse.headers.raw();
     }
 }
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
-export async function httpsRequest(opts: https.RequestOptions | string): Promise<string> {
-    let convertedOpts = convertToOptions(opts);
-    addUserAgent(convertedOpts);
-
-    return new Promise<string>((resolve, reject) => {
-        let req = https.request(convertedOpts, (res) => {
-            let data = '';
-            res.on('data', (d: string) => {
-                data += d;
-            })
-            res.on('end', () => {
-                resolve(data);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
+export function basicAuthHeader(username: string, password: string): string {
+    const buffer = Buffer.from(`${username}:${password}`);
+    return `Basic: ${buffer.toString('base64')}`;
 }
 
-export async function httpsRequestBinary(opts: https.RequestOptions | string): Promise<Buffer> {
-    let convertedOpts = convertToOptions(opts);
-    addUserAgent(convertedOpts);
+export function bearerAuthHeader(token: string): string {
+    return `Bearer: ${token}`;
+}
 
-    let buffer = Buffer.alloc(0);
-    return new Promise<Buffer>((resolve, reject) => {
-        let req = https.request(convertedOpts, (res) => {
-            res.on('data', (d: Buffer) => {
-                buffer = Buffer.concat([buffer, d]);
-            });
-            res.on('end', () => {
-                resolve(buffer);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
+export async function httpRequest2<T>(url: string, options?: RequestInit, signRequest?: (request: Request) => Promise<Request>): Promise<HttpResponse2<T>> {
+    let request = new Request(url, options ?? {});
+
+    if (signRequest) {
+        request = await signRequest(request);
+    }
+
+    const response = await fetch(request);
+
+    if (response.status >= 200 && response.status < 300) {
+        return new HttpResponse2(response);
+    } else {
+        // TODO: this error loses our info
+        throw new Error(localize('vscode-docker.utils.httpRequest', 'Failed request to {0}, with status code {1}: {2}', url, response.status, response.statusText));
+    }
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        try {
-            // Prepare write stream to write to a file.
-            const writeStream = fse.createWriteStream(fileName);
-            writeStream.on('close', () => {
-                resolve();
-            });
+    // return new Promise<void>((resolve, reject) => {
+    //     try {
+    //         // Prepare write stream to write to a file.
+    //         const writeStream = fse.createWriteStream(fileName);
+    //         writeStream.on('close', () => {
+    //             resolve();
+    //         });
 
-            writeStream.on('error', error => {
-                writeStream.close();
-                reject(error);
-            })
+    //         writeStream.on('error', error => {
+    //             writeStream.close();
+    //             reject(error);
+    //         })
 
-            // Pipe the request to the writestream
-            const req = request
-                .get(downloadUrl)
-                .on('error', reject);
-            req.pipe(writeStream);
+    //         // Pipe the request to the writestream
+    //         const req = request
+    //             .get(downloadUrl)
+    //             .on('error', reject);
+    //         req.pipe(writeStream);
 
-        } catch (err) {
-            reject(err);
-        }
-    });
+    //     } catch (err) {
+    //         reject(err);
+    //     }
+    // });
+    return Promise.resolve();
 }

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
+import { Request } from "node-fetch";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
@@ -73,19 +73,19 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return !!this._nextLink;
     }
 
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
+    public async signRequest(request: Request): Promise<Request> {
         if (this._token) {
-            options.headers = {
-                Authorization: 'JWT ' + this._token
-            }
+            request.headers.set('Authorization', 'JWT ' + this._token);
         }
+
+        return request;
     }
 
     private async refreshToken(): Promise<void> {
         this._token = undefined;
         const url = 'v2/users/login';
         const body = { username: this.username, password: await this.getPassword() };
-        const response = await registryRequest<IToken>(this, 'POST', url, { body });
+        const response = await registryRequest<IToken>(this, 'POST', url, { body: JSON.stringify(body) });
         this._token = response.body.token;
     }
 }
