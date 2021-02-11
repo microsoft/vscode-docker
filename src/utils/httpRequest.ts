@@ -3,32 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// import * as fse from 'fs-extra';
+import * as fse from 'fs-extra';
 import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
-// import url = require('url');
-// import { addUserAgent } from './addUserAgent';
-
-export async function httpsRequest(opts: RequestInit): Promise<string> {
-    // let convertedOpts = convertToOptions(opts);
-    // addUserAgent(convertedOpts);
-
-    // return new Promise<string>((resolve, reject) => {
-    //     let req = https.request(convertedOpts, (res) => {
-    //         let data = '';
-    //         res.on('data', (d: string) => {
-    //             data += d;
-    //         })
-    //         res.on('end', () => {
-    //             resolve(data);
-    //         })
-    //     });
-    //     req.end();
-    //     req.on('error', reject);
-    // });
-    return '';
-}
 
 export class HttpResponse2<T> {
     private bodyPromise: Promise<T> | undefined;
@@ -119,30 +97,20 @@ export interface HeadersLike {
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
-    // return new Promise<void>((resolve, reject) => {
-    //     try {
-    //         // Prepare write stream to write to a file.
-    //         const writeStream = fse.createWriteStream(fileName);
-    //         writeStream.on('close', () => {
-    //             resolve();
-    //         });
+    const response = await fetch(downloadUrl);
+    const writeStream = fse.createWriteStream(fileName);
+    response.body.pipe(writeStream);
 
-    //         writeStream.on('error', error => {
-    //             writeStream.close();
-    //             reject(error);
-    //         })
+    return new Promise((resolve, reject) => {
+        writeStream.on('close', () => {
+            resolve();
+        });
 
-    //         // Pipe the request to the writestream
-    //         const req = request
-    //             .get(downloadUrl)
-    //             .on('error', reject);
-    //         req.pipe(writeStream);
-
-    //     } catch (err) {
-    //         reject(err);
-    //     }
-    // });
-    return Promise.resolve();
+        writeStream.on('error', error => {
+            writeStream.close();
+            reject(error);
+        });
+    });
 }
 
 export interface IOAuthContext {
