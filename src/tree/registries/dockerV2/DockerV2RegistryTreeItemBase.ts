@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Request } from "node-fetch";
 import { URL } from "url";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
+import { IOAuthContext, RequestLike } from "../../../utils/httpRequest";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
+import { IAuthProvider } from "../auth/IAuthProvider";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
@@ -53,7 +53,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
         return !!this._nextLink;
     }
 
-    public async signRequest(request: Request): Promise<Request> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         if (this.authHelper) {
             return this.authHelper.signRequest(this.cachedProvider, request, this.authContext);
         }

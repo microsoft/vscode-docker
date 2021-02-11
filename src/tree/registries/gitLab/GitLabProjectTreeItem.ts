@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Request } from "node-fetch";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
+import { RequestLike } from "../../../utils/httpRequest";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";
 import { GitLabAccountTreeItem } from "./GitLabAccountTreeItem";
@@ -59,7 +59,7 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         return !!this._nextLink;
     }
 
-    public async signRequest(request: Request): Promise<Request> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         return this.parent.signRequest(request);
     }
 

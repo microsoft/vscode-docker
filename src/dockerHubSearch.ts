@@ -5,7 +5,6 @@
 
 'use strict';
 
-import { RequestInit } from 'node-fetch';
 import { ociClientId } from './constants';
 import { localize } from './localize';
 import { httpsRequest } from './utils/httpRequest';

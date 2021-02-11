@@ -3,9 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { default as fetch, Request } from 'node-fetch';
+import { Node } from 'dockerode';
+import FormData = require('form-data');
+import { Body, Request } from 'node-fetch';
+import { URLSearchParams } from 'url';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
+import { httpRequest2, RequestOptionsLike } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 
@@ -23,8 +27,8 @@ export function getResourceGroupFromId(id: string): string {
 
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
     /* eslint-disable camelcase */
-    const options = {
-        headers: {
+    const options: RequestOptionsLike = {
+        form: {
             grant_type: 'refresh_token',
             service: registryHost,
             scope: scope,
@@ -35,24 +39,22 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
 
     try {
         if (refreshTokens[registryHost]) {
-            options.headers.refresh_token = refreshTokens[registryHost];
-            const responseFromCachedToken = <{ access_token: string }>await (await fetch(`https://${registryHost}/oauth2/token`, options)).json();
-            return responseFromCachedToken.access_token;
+            options.form.refresh_token = refreshTokens[registryHost];
+            const responseFromCachedToken = await httpRequest2<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+            return (await responseFromCachedToken.json()).access_token;
         }
     } catch { /* No-op, fall back to a new refresh token */ }
 
-    options.headers.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
-    const response = <{ access_token: string }>await (await fetch(`https://${registryHost}/oauth2/token`, options)).json();
-    return response.access_token;
+    options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
+    const response = await httpRequest2<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+    return (await response.json()).access_token;
     /* eslint-enable camelcase */
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
-    // const aadTokenResponse = await subContext.credentials.getToken();
-
-    const options = {
+    const options: RequestOptionsLike = {
         method: 'POST',
-        headers: {
+        form: {
             /* eslint-disable-next-line camelcase */
             grant_type: 'access_token',
             service: registryHost,
@@ -60,12 +62,19 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
         },
     };
 
-    let request = new Request(`https://${registryHost}/oauth2/exchange`, options);
+    // eslint-disable-next-line camelcase
+    const response = await httpRequest2<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
+        // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
+        await subContext.credentials.signRequest(request);
+        const token = (request.headers.get('authorization') as string).replace(/Bearer\s/i, '');
 
-    request = await subContext.credentials.signRequest(request) as Request;
+        // eslint-disable-next-line camelcase
+        const formData = new URLSearchParams({ ...options.form, access_token: token });
 
-    /* eslint-disable-next-line camelcase */
-    const response = <{ refresh_token: string }>await (await fetch(request)).json();
+        const newRequest = new Request(request.url, { method: 'POST', body: formData });
 
-    return response.refresh_token;
+        return newRequest;
+    });
+
+    return (await response.json()).refresh_token;
 }

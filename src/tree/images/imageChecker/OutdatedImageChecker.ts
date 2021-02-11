@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { default as fetch, RequestInit } from 'node-fetch';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
-import { bearerAuthHeader, httpRequest2 } from '../../../utils/httpRequest';
+import { httpRequest2, RequestOptionsLike } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
@@ -19,7 +18,7 @@ const noneRegex = /<none>/i;
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
     private readonly outdatedImageIds: string[] = [];
-    private readonly defaultRequestOptions: RequestInit;
+    private readonly defaultRequestOptions: RequestOptionsLike;
 
     public constructor() {
         const dockerConfig = vscode.workspace.getConfiguration('docker');
@@ -107,22 +106,7 @@ export class OutdatedImageChecker {
     }
 
     private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string): Promise<string> {
-        const manifestOptions: RequestInit = {
-            ...this.defaultRequestOptions,
-            headers: {
-                Authorization: bearerAuthHeader(oAuthToken),
-            } : undefined,
-        };
-
-        const manifestResponse = await fetch(`${registry.baseUrl}/${repo}/manifests/${tag}`, manifestOptions);
-
-        const manifestResponse = await httpRequest2(`${registry.baseUrl}/${repo}/manifests/${tag}`, manifestOptions, registry.signRequest)
-
-        if (manifestResponse.status >= 200 && manifestResponse.status < 300) {
-            return manifestResponse.headers.get('docker-content-digest');
-        } else {
-            // This error isn't visible to users so don't need to localize
-            throw new Error('Image digest lookup failed.');
-        }
+        const manifestResponse = await httpRequest2(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => registry.signRequest(request, `repository:library/${repo}:pull`));
+        return manifestResponse.headers['docker-content-digest'] as string;
     }
 }

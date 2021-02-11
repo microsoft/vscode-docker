@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { default as fetch, Headers, Request } from 'node-fetch';
 import { URL } from "url";
 import { ociClientId } from "../constants";
-import { localize } from '../localize';
+import { httpRequest2, RequestLike } from './httpRequest';
 
 export function getNextLinkFromHeaders(response: IResponse<unknown>): string | undefined {
-    const linkHeader: string | undefined = response.headers?.get('link');
+    const linkHeader: string | undefined = response.headers.link as string;
     if (linkHeader) {
         const match = linkHeader.match(/<(.*)>; rel="next"/i);
         return match ? match[1] : undefined;
@@ -34,33 +33,27 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         fullUrl = parsed.toString();
     }
 
-    let request = new Request(fullUrl, options);
-
-    if (node.signRequest) {
-        request = await node.signRequest(request);
-    } else {
-        request = await (<IRepositoryAuthTreeItem>node).parent.signRequest(request);
-    }
-
-    const response = await fetch(request);
-
-    if (response.status >= 200 && response.status < 300) {
-        return {
-            body: await response.json() as T,
-            headers: response.headers,
+    const response = await httpRequest2<T>(fullUrl, options, async (request) => {
+        if (node.signRequest) {
+            return node.signRequest(request);
+        } else {
+            return (<IRepositoryAuthTreeItem>node).parent?.signRequest(request);
         }
-    } else {
-        throw new Error(localize('vscode-docker.utils.registry.failedRequest', 'Failed to perform registry request to {0}, with status {1}', fullUrl, response.status));
-    }
+    });
+
+    return {
+        body: await response.json(),
+        headers: response.headers,
+    };
 }
 
 interface IResponse<T> {
     body: T,
-    headers: Headers,
+    headers: { [key: string]: string | string[] },
 }
 
 export interface IRegistryAuthTreeItem {
-    signRequest(request: Request): Promise<Request>;
+    signRequest(request: RequestLike): Promise<RequestLike>;
     baseUrl: string;
 }
 

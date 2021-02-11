@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Request } from "node-fetch";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
+import { RequestLike } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { getIconPath } from "../../getThemedIconPath";
@@ -72,7 +72,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return !!this._nextLink;
     }
 
-    public async signRequest(request: Request): Promise<Request> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         request.headers.set('PRIVATE-TOKEN', await this.getPassword());
         return request;
     }

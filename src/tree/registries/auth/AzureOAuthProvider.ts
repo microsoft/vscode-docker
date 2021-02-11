@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Request } from 'node-fetch';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { acquireAcrAccessToken, acquireAcrRefreshToken } from '../../../utils/azureUtils';
-import { bearerAuthHeader } from '../../../utils/httpRequest';
+import { bearerAuthHeader, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
-import { IAuthProvider, IOAuthContext } from './IAuthProvider';
+import { IAuthProvider } from './IAuthProvider';
 
 export interface IAzureOAuthContext extends IOAuthContext {
     subscriptionContext: ISubscriptionContext
@@ -17,7 +16,7 @@ export interface IAzureOAuthContext extends IOAuthContext {
 
 class AzureOAuthProvider implements IAuthProvider {
 
-    public async signRequest(cachedProvider: ICachedRegistryProvider, request: Request, authContext: IAzureOAuthContext): Promise<Request> {
+    public async signRequest(cachedProvider: ICachedRegistryProvider, request: RequestLike, authContext: IAzureOAuthContext): Promise<RequestLike> {
         request.headers.set('Authorization', bearerAuthHeader(await acquireAcrAccessToken(authContext.realm.host, authContext.subscriptionContext, authContext.scope)));
         return request;
     }

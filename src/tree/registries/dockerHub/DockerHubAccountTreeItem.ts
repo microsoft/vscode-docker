@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Request } from "node-fetch";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
+import { RequestLike } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath } from "../../getThemedIconPath";
@@ -73,7 +73,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return !!this._nextLink;
     }
 
-    public async signRequest(request: Request): Promise<Request> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         if (this._token) {
             request.headers.set('Authorization', 'JWT ' + this._token);
         }

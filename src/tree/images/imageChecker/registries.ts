@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { default as fetch, Request, RequestInit } from 'node-fetch';
-import { localize } from '../../../localize';
-import { IOAuthContext } from '../../registries/auth/IAuthProvider';
-import { getWwwAuthenticateContext } from '../../registries/auth/oAuthUtils';
+import { ociClientId } from '../../../constants';
+import { bearerAuthHeader, getWwwAuthenticateContext, HttpError, httpRequest2, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
 
 export interface ImageRegistry {
     registryMatch: RegExp;
     baseUrl: string;
-    signRequest?(request: Request): Promise<Request>;
+    signRequest?(request: RequestLike, scope: string): Promise<RequestLike>;
 }
 
 let dockerHubAuthContext: IOAuthContext | undefined;
@@ -20,28 +18,36 @@ export const registries: ImageRegistry[] = [
     {
         registryMatch: /docker[.]io\/library/i,
         baseUrl: 'https://registry-1.docker.io/v2/library',
-        signRequest: async (request: Request): Promise<Request> => {
+        signRequest: async (request: RequestLike, scope: string): Promise<RequestLike> => {
             if (!dockerHubAuthContext) {
-                const response = await fetch('https://registry-1.docker.io/v2/', requestOptions);
-                dockerHubAuthContext = getWwwAuthenticateContext(response);
+                try {
+                    const options: RequestOptionsLike = {
+                        // TODO: Fix this
+                    };
+
+                    await httpRequest2('https://registry-1.docker.io/v2/', options);
+                } catch (error) {
+                    if (!(error instanceof HttpError) ||
+                        !(dockerHubAuthContext = getWwwAuthenticateContext(error))) {
+                        // If it's not an HttpError, or getWwwAuthenticateContext came back undefined, rethrow
+                        throw error;
+                    }
+                }
             }
 
-            const authRequestOptions: RequestInit = {
-                ...requestOptions,
+            const authRequestOptions: RequestOptionsLike = {
                 headers: {
+                    'X-Meta-Source-Client': ociClientId,
                     service: dockerHubAuthContext.service,
                     scope: scope,
                 },
             };
 
-            const tokenResponse = await fetch(dockerHubAuthContext.realm.toString(), authRequestOptions);
+            const tokenResponse = await httpRequest2<{ token: string }>(dockerHubAuthContext.realm.toString(), authRequestOptions);
+            const token = (await tokenResponse.json()).token;
 
-            if (tokenResponse.status >= 200 && tokenResponse.status < 300) {
-                // eslint-disable-next-line @typescript-eslint/tslint/config
-                return (await tokenResponse.json()).token;
-            } else {
-                throw new Error(localize('vscode-docker.outdatedImageChecker.noToken', 'Failed to acquire Docker Hub OAuth token for scope: \'{0}\'', scope));
-            }
+            request.headers.set('Authorization', bearerAuthHeader(token));
+            return request;
         }
     },
     {
