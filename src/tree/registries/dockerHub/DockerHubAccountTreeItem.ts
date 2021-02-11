@@ -85,7 +85,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         this._token = undefined;
         const url = 'v2/users/login';
         const body = { username: this.username, password: await this.getPassword() };
-        const response = await registryRequest<IToken>(this, 'POST', url, { body: JSON.stringify(body) });
+        const response = await registryRequest<IToken>(this, 'POST', url, { body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
         this._token = response.body.token;
     }
 }

@@ -22,11 +22,13 @@ class BasicOAuthProvider implements IAuthProvider {
 
         const options: RequestInit = {
             method: 'POST',
-            headers: {
-                Authorization: basicAuthHeader(cachedProvider.username, await getRegistryPassword(cachedProvider)),
+            form: {
                 'grant_type': 'password',
                 'service': authContext.service,
                 'scope': authContext.scope
+            },
+            headers: {
+                Authorization: basicAuthHeader(cachedProvider.username, await getRegistryPassword(cachedProvider)),
             },
         };
 
