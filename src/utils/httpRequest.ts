@@ -51,11 +51,11 @@ export class HttpResponse2<T> {
 
 export function basicAuthHeader(username: string, password: string): string {
     const buffer = Buffer.from(`${username}:${password}`);
-    return `Basic: ${buffer.toString('base64')}`;
+    return `Basic ${buffer.toString('base64')}`;
 }
 
 export function bearerAuthHeader(token: string): string {
-    return `Bearer: ${token}`;
+    return `Bearer ${token}`;
 }
 
 export async function httpRequest2<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse2<T>> {
