@@ -5,9 +5,9 @@
 
 'use strict';
 
-import { ociClientId } from './constants';
-import { localize } from './localize';
-import { httpsRequest } from './utils/httpRequest';
+// import { ociClientId } from './constants';
+// import { localize } from './localize';
+// import { httpsRequest } from './utils/httpRequest';
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     // let tags: string[] = [];

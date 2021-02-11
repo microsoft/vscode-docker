@@ -3,9 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Node } from 'dockerode';
-import FormData = require('form-data');
-import { Body, Request } from 'node-fetch';
+import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
@@ -25,8 +23,8 @@ export function getResourceGroupFromId(id: string): string {
     return parseResourceId(id)[2];
 }
 
+/* eslint-disable camelcase */
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
-    /* eslint-disable camelcase */
     const options: RequestOptionsLike = {
         form: {
             grant_type: 'refresh_token',
@@ -48,33 +46,27 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
     options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
     const response = await httpRequest2<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
     return (await response.json()).access_token;
-    /* eslint-enable camelcase */
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
     const options: RequestOptionsLike = {
         method: 'POST',
         form: {
-            /* eslint-disable-next-line camelcase */
             grant_type: 'access_token',
             service: registryHost,
             tenant: subContext.tenantId,
         },
     };
 
-    // eslint-disable-next-line camelcase
     const response = await httpRequest2<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
         // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
         await subContext.credentials.signRequest(request);
         const token = (request.headers.get('authorization') as string).replace(/Bearer\s/i, '');
 
-        // eslint-disable-next-line camelcase
         const formData = new URLSearchParams({ ...options.form, access_token: token });
-
-        const newRequest = new Request(request.url, { method: 'POST', body: formData });
-
-        return newRequest;
+        return new Request(request.url, { method: 'POST', body: formData });
     });
 
     return (await response.json()).refresh_token;
 }
+/* eslint-enable camelcase */

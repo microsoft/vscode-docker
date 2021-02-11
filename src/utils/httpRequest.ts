@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
+// import * as fse from 'fs-extra';
 import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
 // import url = require('url');
-import { addUserAgent } from './addUserAgent';
+// import { addUserAgent } from './addUserAgent';
 
 export async function httpsRequest(opts: RequestInit): Promise<string> {
     // let convertedOpts = convertToOptions(opts);
