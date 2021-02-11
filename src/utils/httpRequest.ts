@@ -32,6 +32,7 @@ export async function httpsRequest(opts: RequestInit): Promise<string> {
 
 export class HttpResponse2<T> {
     private bodyPromise: Promise<T> | undefined;
+    private normalizedHeaders: { [key: string]: string } | undefined;
 
     public constructor(private readonly innerResponse: Response) { }
 
@@ -44,8 +45,15 @@ export class HttpResponse2<T> {
         return this.bodyPromise;
     }
 
-    public get headers(): { [key: string]: string | string[] } {
-        return this.innerResponse.headers.raw();
+    public get headers(): { [key: string]: string } {
+        if (!this.normalizedHeaders) {
+            this.normalizedHeaders = {};
+            for (const key of this.innerResponse.headers.keys()) {
+                this.normalizedHeaders[key] = this.innerResponse.headers.get(key);
+            }
+        }
+
+        return this.normalizedHeaders;
     }
 }
 

@@ -106,7 +106,14 @@ export class OutdatedImageChecker {
     }
 
     private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string): Promise<string> {
-        const manifestResponse = await httpRequest2(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => registry.signRequest(request, `repository:library/${repo}:pull`));
-        return manifestResponse.headers['docker-content-digest'] as string;
+        const manifestResponse = await httpRequest2(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => {
+            if (registry.signRequest) {
+                return registry.signRequest(request, `repository:library/${repo}:pull`);
+            }
+
+            return request;
+        });
+
+        return manifestResponse.headers['docker-content-digest'];
     }
 }

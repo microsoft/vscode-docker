@@ -42,7 +42,7 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
     });
 
     return {
-        body: /application\/json|application\/vnd.docker.distribution.manifest.*prettyjws/i.test(response.headers['content-type'] as string) ? await response.json() : undefined,
+        body: method !== 'DELETE' ? await response.json() : undefined,
         headers: response.headers,
     };
 }

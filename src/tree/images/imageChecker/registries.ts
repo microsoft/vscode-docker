@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { URL } from 'url';
 import { ociClientId } from '../../../constants';
 import { bearerAuthHeader, getWwwAuthenticateContext, HttpError, httpRequest2, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
 
@@ -36,6 +37,7 @@ export const registries: ImageRegistry[] = [
             }
 
             const authRequestOptions: RequestOptionsLike = {
+                method: 'GET',
                 headers: {
                     'X-Meta-Source-Client': ociClientId,
                     service: dockerHubAuthContext.service,
@@ -43,7 +45,11 @@ export const registries: ImageRegistry[] = [
                 },
             };
 
-            const tokenResponse = await httpRequest2<{ token: string }>(dockerHubAuthContext.realm.toString(), authRequestOptions);
+            const url = new URL(dockerHubAuthContext.realm.toString());
+            url.searchParams.append('service', dockerHubAuthContext.service);
+            url.searchParams.append('scope', scope);
+
+            const tokenResponse = await httpRequest2<{ token: string }>(url.toString(), authRequestOptions);
             const token = (await tokenResponse.json()).token;
 
             request.headers.set('Authorization', bearerAuthHeader(token));
