@@ -11,10 +11,6 @@ export async function runWithExtensionSettings<TCallback>(newValues: { [key: str
 
     const oldValues: { [key: string]: any } = {};
 
-    for (const key of Object.keys(newValues)) {
-        oldValues[key] = config.inspect(key)?.globalValue;
-    }
-
     try {
         for (const key of Object.keys(newValues)) {
             oldValues[key] = config.inspect(key)?.globalValue;
