@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
+import { RequestLike } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath } from "../../getThemedIconPath";
@@ -73,19 +73,19 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return !!this._nextLink;
     }
 
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         if (this._token) {
-            options.headers = {
-                Authorization: 'JWT ' + this._token
-            }
+            request.headers.set('Authorization', 'JWT ' + this._token);
         }
+
+        return request;
     }
 
     private async refreshToken(): Promise<void> {
         this._token = undefined;
         const url = 'v2/users/login';
         const body = { username: this.username, password: await this.getPassword() };
-        const response = await registryRequest<IToken>(this, 'POST', url, { body });
+        const response = await registryRequest<IToken>(this, 'POST', url, { body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
         this._token = response.body.token;
     }
 }

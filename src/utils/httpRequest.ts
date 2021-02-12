@@ -4,82 +4,152 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import * as https from 'https';
-import request = require('request');
-import url = require('url');
-import { addUserAgent } from './addUserAgent';
+import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
+import { URL, URLSearchParams } from 'url';
+import { localize } from '../localize';
 
-function convertToOptions(options: https.RequestOptions | string): https.RequestOptions {
-    if (typeof options === 'string') {
-        // Must use Node's url, not vscode.Uri
-        let optionsAsUrl = url.parse(options);
-        return <https.RequestOptions>optionsAsUrl;
+export async function httpRequest<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse<T>> {
+    const requestOptions: RequestInit = options;
+    if (options.form) {
+        // URLSearchParams is a silly way to say "it's form data"
+        requestOptions.body = new URLSearchParams(options.form);
+    }
+
+    let request = new Request(url, options ?? {});
+
+    if (signRequest) {
+        request = await signRequest(request) as Request;
+    }
+
+    const response = await fetch(request);
+
+    if (response.status >= 200 && response.status < 300) {
+        return new HttpResponse(response);
     } else {
-        return options;
+        throw new HttpErrorResponse(response);
     }
 }
 
-// tslint:disable-next-line:promise-function-async // Grandfathered in
-export async function httpsRequest(opts: https.RequestOptions | string): Promise<string> {
-    let convertedOpts = convertToOptions(opts);
-    addUserAgent(convertedOpts);
+export class HttpResponse<T> {
+    private bodyPromise: Promise<T> | undefined;
+    private normalizedHeaders: { [key: string]: string } | undefined;
 
-    return new Promise<string>((resolve, reject) => {
-        let req = https.request(convertedOpts, (res) => {
-            let data = '';
-            res.on('data', (d: string) => {
-                data += d;
-            })
-            res.on('end', () => {
-                resolve(data);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
+    public constructor(private readonly innerResponse: Response) { }
+
+    public async json(): Promise<T> {
+        if (!this.bodyPromise) {
+            // This allows multiple calls to `json()` without eating up the stream
+            this.bodyPromise = this.innerResponse.json();
+        }
+
+        return this.bodyPromise;
+    }
+
+    public get headers(): { [key: string]: string } {
+        if (!this.normalizedHeaders) {
+            this.normalizedHeaders = {};
+            for (const key of this.innerResponse.headers.keys()) {
+                this.normalizedHeaders[key] = this.innerResponse.headers.get(key);
+            }
+        }
+
+        return this.normalizedHeaders;
+    }
 }
 
-export async function httpsRequestBinary(opts: https.RequestOptions | string): Promise<Buffer> {
-    let convertedOpts = convertToOptions(opts);
-    addUserAgent(convertedOpts);
+export class HttpErrorResponse extends Error {
+    public constructor(public readonly response: ResponseLike) {
+        super(localize('vscode-docker.utils.httpRequest', 'Request to {0} failed with status {1}: {2}', response.url, response.status, response.statusText));
+    }
 
-    let buffer = Buffer.alloc(0);
-    return new Promise<Buffer>((resolve, reject) => {
-        let req = https.request(convertedOpts, (res) => {
-            res.on('data', (d: Buffer) => {
-                buffer = Buffer.concat([buffer, d]);
-            });
-            res.on('end', () => {
-                resolve(buffer);
-            })
-        });
-        req.end();
-        req.on('error', reject);
-    });
+    // This method lets parseError from vscode-azureextensionui get the HTTP status code as the error code
+    public get code(): number {
+        return this.response.status;
+    }
+}
+
+type RequestMethod = 'HEAD' | 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH';
+
+export interface RequestOptionsLike {
+    headers?: { [key: string]: string };
+    method?: RequestMethod; // This is an enum type because it enforces the above valid options on callers (which do not directly use node-fetch's Request object)
+    form?: { [key: string]: string };
+}
+
+export interface RequestLike {
+    url: string;
+    headers: HeadersLike;
+    method: string; // This is a string because node-fetch's Request defines it as such
+}
+
+export interface HeadersLike {
+    get(header: string): string | string[];
+    set(header: string, value: string): void;
+}
+
+export interface ResponseLike {
+    headers: HeadersLike;
+    url: string;
+    status: number;
+    statusText: string;
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        try {
-            // Prepare write stream to write to a file.
-            const writeStream = fse.createWriteStream(fileName);
-            writeStream.on('close', () => {
-                resolve();
-            });
+    const response = await fetch(downloadUrl);
+    const writeStream = fse.createWriteStream(fileName);
+    response.body.pipe(writeStream);
 
-            writeStream.on('error', error => {
-                writeStream.close();
-                reject(error);
-            })
+    return new Promise((resolve, reject) => {
+        writeStream.on('close', () => {
+            resolve();
+        });
 
-            // Pipe the request to the writestream
-            const req = request
-                .get(downloadUrl)
-                .on('error', reject);
-            req.pipe(writeStream);
-
-        } catch (err) {
-            reject(err);
-        }
+        writeStream.on('error', error => {
+            writeStream.close();
+            reject(error);
+        });
     });
+}
+
+export function basicAuthHeader(username: string, password: string): string {
+    const buffer = Buffer.from(`${username}:${password}`);
+    return `Basic ${buffer.toString('base64')}`;
+}
+
+export function bearerAuthHeader(token: string): string {
+    return `Bearer ${token}`;
+}
+
+export interface IOAuthContext {
+    realm: URL,
+    service: string,
+    scope?: string,
+}
+
+const realmRegExp = /realm=\"([^"]+)\"/i;
+const serviceRegExp = /service=\"([^"]+)\"/i;
+const scopeRegExp = /scope=\"([^"]+)\"/i;
+
+export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthContext | undefined {
+    if (error.response?.status === 401) {
+        const wwwAuthHeader: string | undefined = error.response?.headers?.get('www-authenticate') as string;
+
+        const realmMatch = wwwAuthHeader?.match(realmRegExp);
+        const serviceMatch = wwwAuthHeader?.match(serviceRegExp);
+        const scopeMatch = wwwAuthHeader?.match(scopeRegExp);
+
+        const realmUrl = new URL(realmMatch?.[1]);
+
+        if (!realmUrl || !serviceMatch?.[1]) {
+            return undefined;
+        }
+
+        return {
+            realm: realmUrl,
+            service: serviceMatch[1],
+            scope: scopeMatch?.[1],
+        }
+    }
+
+    return undefined;
 }

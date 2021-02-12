@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Response } from 'request';
-import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
 import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
+import { httpRequest, RequestOptionsLike } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
@@ -19,19 +18,14 @@ const noneRegex = /<none>/i;
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
     private readonly outdatedImageIds: string[] = [];
-    private readonly defaultRequestOptions: request.RequestPromiseOptions;
+    private readonly defaultRequestOptions: RequestOptionsLike;
 
     public constructor() {
         const dockerConfig = vscode.workspace.getConfiguration('docker');
         this.shouldLoad = dockerConfig.get('images.checkForOutdatedImages');
 
-        const httpSettings = vscode.workspace.getConfiguration('http');
-        const strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
         this.defaultRequestOptions = {
             method: 'HEAD',
-            json: true,
-            resolveWithFullResponse: true,
-            strictSSL: strictSSL,
             headers: {
                 'X-Meta-Source-Client': ociClientId,
                 'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json',
@@ -94,17 +88,11 @@ export class OutdatedImageChecker {
                 return 'unknown';
             }
 
-            let token: string | undefined;
+            // 0. If there's a method to sign the request, it will be called on the registry
+            // 1. Get the latest image digest ID from the manifest
+            const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag);
 
-            // 1. Get an OAuth token to access the resource. No Authorization header is required for public scopes.
-            if (registry.getToken) {
-                token = await registry.getToken({ ...this.defaultRequestOptions, method: 'GET' }, `repository:library/${repo}:pull`);
-            }
-
-            // 2. Get the latest image digest ID from the manifest
-            const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag, token);
-
-            // 3. Compare it with the current image's value
+            // 2. Compare it with the current image's value
             const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
 
             if (imageInspectInfo?.RepoDigests?.[0]?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0) {
@@ -117,15 +105,15 @@ export class OutdatedImageChecker {
         }
     }
 
-    private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string, oAuthToken: string | undefined): Promise<string> {
-        const manifestOptions: request.RequestPromiseOptions = {
-            ...this.defaultRequestOptions,
-            auth: oAuthToken ? {
-                bearer: oAuthToken,
-            } : undefined,
-        };
+    private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string): Promise<string> {
+        const manifestResponse = await httpRequest(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => {
+            if (registry.signRequest) {
+                return registry.signRequest(request, `repository:library/${repo}:pull`);
+            }
 
-        const manifestResponse = await request(`${registry.baseUrl}/${repo}/manifests/${tag}`, manifestOptions) as Response;
-        return manifestResponse.headers['docker-content-digest'] as string;
+            return request;
+        });
+
+        return manifestResponse.headers['docker-content-digest'];
     }
 }

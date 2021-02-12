@@ -3,14 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Response } from "request";
-import * as request from 'request-promise-native';
 import { URL } from "url";
-import { workspace } from "vscode";
 import { ociClientId } from "../constants";
+import { httpRequest, RequestLike } from './httpRequest';
 
-export function getNextLinkFromHeaders(response: Response): string | undefined {
-    const linkHeader: string | undefined = response.headers && <string>response.headers.link;
+export function getNextLinkFromHeaders(response: IResponse<unknown>): string | undefined {
+    const linkHeader: string | undefined = response.headers.link as string;
     if (linkHeader) {
         const match = linkHeader.match(/<(.*)>; rel="next"/i);
         return match ? match[1] : undefined;
@@ -19,25 +17,14 @@ export function getNextLinkFromHeaders(response: Response): string | undefined {
     }
 }
 
-export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: request.RequestPromiseOptions): Promise<IResponse<T>> {
-    let httpSettings = workspace.getConfiguration('http');
-    let strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
+export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestInit): Promise<IResponse<T>> {
     const options = {
-        method,
-        json: true,
-        resolveWithFullResponse: true,
-        strictSSL: strictSSL,
+        method: method,
         headers: {
             'X-Meta-Source-Client': ociClientId,
         },
-        ...customOptions
-    }
-
-    if (node.addAuth) {
-        await node.addAuth(options);
-    } else {
-        await (<IRepositoryAuthTreeItem>node).parent.addAuth(options);
-    }
+        ...customOptions,
+    };
 
     const baseUrl = node.baseUrl || (<IRepositoryAuthTreeItem>node).parent.baseUrl;
     let fullUrl: string = url;
@@ -46,15 +33,27 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         fullUrl = parsed.toString();
     }
 
-    return <IResponse<T>>await request(fullUrl, options);
+    const response = await httpRequest<T>(fullUrl, options, async (request) => {
+        if (node.signRequest) {
+            return node.signRequest(request);
+        } else {
+            return (<IRepositoryAuthTreeItem>node).parent?.signRequest(request);
+        }
+    });
+
+    return {
+        body: method !== 'DELETE' ? await response.json() : undefined,
+        headers: response.headers,
+    };
 }
 
-interface IResponse<T> extends Response {
-    body: T;
+interface IResponse<T> {
+    body: T,
+    headers: { [key: string]: string | string[] },
 }
 
 export interface IRegistryAuthTreeItem {
-    addAuth(options: request.RequestPromiseOptions): Promise<void>;
+    signRequest(request: RequestLike): Promise<RequestLike>;
     baseUrl: string;
 }
 

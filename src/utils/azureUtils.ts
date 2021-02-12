@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request-promise-native';
+import { Request } from 'node-fetch';
+import { URLSearchParams } from 'url';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
+import { httpRequest, RequestOptionsLike } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 
@@ -21,47 +23,50 @@ export function getResourceGroupFromId(id: string): string {
     return parseResourceId(id)[2];
 }
 
+/* eslint-disable camelcase */
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
-    /* eslint-disable camelcase */
-    const options = {
+    const options: RequestOptionsLike = {
         form: {
             grant_type: 'refresh_token',
             service: registryHost,
-            scope,
+            scope: scope,
             refresh_token: undefined
         },
-        json: true
+        method: 'POST',
     };
 
     try {
         if (refreshTokens[registryHost]) {
             options.form.refresh_token = refreshTokens[registryHost];
-            const responseFromCachedToken = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
-            return responseFromCachedToken.access_token;
+            const responseFromCachedToken = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+            return (await responseFromCachedToken.json()).access_token;
         }
     } catch { /* No-op, fall back to a new refresh token */ }
 
     options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
-    const response = <{ access_token: string }>await request.post(`https://${registryHost}/oauth2/token`, options);
-    return response.access_token;
-    /* eslint-enable camelcase */
+    const response = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+    return (await response.json()).access_token;
 }
 
 export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
-    const aadTokenResponse = await subContext.credentials.getToken();
-
-    /* eslint-disable-next-line camelcase */
-    const response = <{ refresh_token: string }>await request.post(`https://${registryHost}/oauth2/exchange`, {
+    const options: RequestOptionsLike = {
+        method: 'POST',
         form: {
-            /* eslint-disable-next-line camelcase */
             grant_type: 'access_token',
             service: registryHost,
             tenant: subContext.tenantId,
-            /* eslint-disable-next-line camelcase */
-            access_token: aadTokenResponse.accessToken,
         },
-        json: true
+    };
+
+    const response = await httpRequest<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
+        // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
+        await subContext.credentials.signRequest(request);
+        const token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
+
+        const formData = new URLSearchParams({ ...options.form, access_token: token });
+        return new Request(request.url, { method: 'POST', body: formData });
     });
 
-    return response.refresh_token;
+    return (await response.json()).refresh_token;
 }
+/* eslint-enable camelcase */
