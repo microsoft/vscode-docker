@@ -5,7 +5,7 @@
 
 import { URL } from 'url';
 import { ociClientId } from '../../../constants';
-import { bearerAuthHeader, getWwwAuthenticateContext, HttpError, httpRequest, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
+import { bearerAuthHeader, getWwwAuthenticateContext, HttpErrorResponse, httpRequest, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
 
 export interface ImageRegistry {
     registryMatch: RegExp;
@@ -30,9 +30,9 @@ export const registries: ImageRegistry[] = [
 
                     await httpRequest('https://registry-1.docker.io/v2/', options);
                 } catch (error) {
-                    if (!(error instanceof HttpError) ||
+                    if (!(error instanceof HttpErrorResponse) ||
                         !(dockerHubAuthContext = getWwwAuthenticateContext(error))) {
-                        // If it's not an HttpError, or getWwwAuthenticateContext came back undefined, rethrow
+                        // If it's not an HttpErrorResponse, or getWwwAuthenticateContext came back undefined, rethrow
                         throw error;
                     }
                 }

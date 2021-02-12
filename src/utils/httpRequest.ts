@@ -8,7 +8,7 @@ import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
 
-export async function httpRequest<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse2<T>> {
+export async function httpRequest<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse<T>> {
     const requestOptions: RequestInit = options;
     if (options.form) {
         // URLSearchParams is a silly way to say "it's form data"
@@ -24,13 +24,13 @@ export async function httpRequest<T>(url: string, options?: RequestOptionsLike, 
     const response = await fetch(request);
 
     if (response.status >= 200 && response.status < 300) {
-        return new HttpResponse2(response);
+        return new HttpResponse(response);
     } else {
-        throw new HttpError(response);
+        throw new HttpErrorResponse(response);
     }
 }
 
-export class HttpResponse2<T> {
+export class HttpResponse<T> {
     private bodyPromise: Promise<T> | undefined;
     private normalizedHeaders: { [key: string]: string } | undefined;
 
@@ -57,8 +57,8 @@ export class HttpResponse2<T> {
     }
 }
 
-export class HttpError extends Error {
-    public constructor(public readonly response: Response) {
+export class HttpErrorResponse extends Error {
+    public constructor(public readonly response: ResponseLike) {
         super(localize('vscode-docker.utils.httpRequest', 'Request to {0} failed with status {1}: {2}', response.url, response.status, response.statusText));
     }
 
@@ -85,6 +85,13 @@ export interface RequestLike {
 export interface HeadersLike {
     get(header: string): string | string[];
     set(header: string, value: string): void;
+}
+
+export interface ResponseLike {
+    headers: HeadersLike;
+    url: string;
+    status: number;
+    statusText: string;
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
@@ -123,9 +130,9 @@ const realmRegExp = /realm=\"([^"]+)\"/i;
 const serviceRegExp = /service=\"([^"]+)\"/i;
 const scopeRegExp = /scope=\"([^"]+)\"/i;
 
-export function getWwwAuthenticateContext(error: HttpError): IOAuthContext | undefined {
+export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthContext | undefined {
     if (error.response?.status === 401) {
-        const wwwAuthHeader: string | undefined = error.response?.headers?.get('www-authenticate');
+        const wwwAuthHeader: string | undefined = error.response?.headers?.get('www-authenticate') as string;
 
         const realmMatch = wwwAuthHeader?.match(realmRegExp);
         const serviceMatch = wwwAuthHeader?.match(serviceRegExp);
