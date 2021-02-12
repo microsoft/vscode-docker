@@ -86,7 +86,7 @@ export class PythonDebugHelper implements DebugHelper {
             type: 'python',
             request: 'launch',
             pathMappings: debugConfiguration.python.pathMappings,
-            justMyCode: debugConfiguration.python.justMyCode || true,
+            justMyCode: debugConfiguration.python.justMyCode ?? true,
             django: debugConfiguration.python.django || projectType === 'django',
             jinja: debugConfiguration.python.jinja || projectType === 'flask',
             dockerOptions: {
@@ -100,7 +100,7 @@ export class PythonDebugHelper implements DebugHelper {
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
             module: debugConfiguration.module || pythonRunTaskOptions.module,
             program: debugConfiguration.file || pythonRunTaskOptions.file,
-            redirectOutput: debugConfiguration.redirectOutput || true,
+            redirectOutput: debugConfiguration.redirectOutput as boolean | undefined ?? true,
             args: args,
             cwd: '.',
 

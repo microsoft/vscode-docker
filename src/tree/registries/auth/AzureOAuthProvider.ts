@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as request from 'request';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { acquireAcrAccessToken, acquireAcrRefreshToken } from '../../../utils/azureUtils';
+import { bearerAuthHeader, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
-import { IAuthProvider, IOAuthContext } from './IAuthProvider';
+import { IAuthProvider } from './IAuthProvider';
 
 export interface IAzureOAuthContext extends IOAuthContext {
     subscriptionContext: ISubscriptionContext
@@ -16,10 +16,9 @@ export interface IAzureOAuthContext extends IOAuthContext {
 
 class AzureOAuthProvider implements IAuthProvider {
 
-    public async getAuthOptions(cachedProvider: ICachedRegistryProvider, authContext: IAzureOAuthContext): Promise<request.AuthOptions> {
-        return {
-            bearer: await acquireAcrAccessToken(authContext.realm.host, authContext.subscriptionContext, authContext.scope),
-        };
+    public async signRequest(cachedProvider: ICachedRegistryProvider, request: RequestLike, authContext: IAzureOAuthContext): Promise<RequestLike> {
+        request.headers.set('Authorization', bearerAuthHeader(await acquireAcrAccessToken(authContext.realm.host, authContext.subscriptionContext, authContext.scope)));
+        return request;
     }
 
     public async getDockerCliCredentials(cachedProvider: ICachedRegistryProvider, authContext?: IAzureOAuthContext): Promise<IDockerCliCredentials> {

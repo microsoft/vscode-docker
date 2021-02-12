@@ -5,10 +5,10 @@
 
 'use strict';
 
-import https = require('https');
-import { ociClientId } from './constants';
-import { localize } from './localize';
-import { httpsRequest } from './utils/httpRequest';
+import { URL } from "url";
+import { ociClientId } from "./constants";
+import { localize } from "./localize";
+import { httpRequest } from "./utils/httpRequest";
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     let tags: string[] = [];
@@ -82,15 +82,11 @@ export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promi
 // }
 /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 function invokeHubSearch(imageName: string, count: number, cache: boolean): Promise<IHubSearchResponse> {
+    const url = new URL('https://registry.hub.docker.com/v1/search');
+    url.searchParams.append('q', imageName);
+    url.searchParams.append('n', count.toString());
     // https://registry.hub.docker.com/v1/search?q=redis&n=1
-    return fetchHttpsJson<IHubSearchResponse>(
-        {
-            hostname: 'registry.hub.docker.com',
-            port: 443,
-            path: '/v1/search?q=' + encodeURIComponent(imageName) + '&n=' + count,
-            method: 'GET',
-        },
-        cache);
+    return fetchHttpsJson<IHubSearchResponse>(url.toString(), cache);
 }
 export interface IHubSearchResponse {
     /* eslint-disable-next-line camelcase */
@@ -117,31 +113,26 @@ export interface IHubSearchResponseResult {
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-let JSON_CACHE: { [key: string]: Promise<any> } = {};
+let JSON_CACHE: { [key: string]: any } = {};
 
-/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
-function fetchHttpsJson<T>(opts: https.RequestOptions, cache: boolean): Promise<T> {
-    if (!cache) {
-        return doFetchHttpsJson(opts);
+async function fetchHttpsJson<T>(url: string, cache: boolean): Promise<T> {
+    let cacheKey = url.toString();
+
+    if (!cache || !JSON_CACHE[cacheKey]) {
+        JSON_CACHE[cacheKey] = await doFetchHttpsJson(url);
     }
 
-    let cacheKey = (opts.method + ' ' + opts.hostname + ' ' + opts.path);
-    if (!JSON_CACHE[cacheKey]) {
-        JSON_CACHE[cacheKey] = doFetchHttpsJson(opts);
-    }
-
-    // new promise to avoid cancelling
-    return new Promise<T>((resolve, reject) => {
-        JSON_CACHE[cacheKey].then(resolve, reject);
-    });
+    return JSON_CACHE[cacheKey] as T;
 }
 
-/* eslint-disable-next-line , @typescript-eslint/promise-function-async */ // Grandfathered in
-function doFetchHttpsJson<T>(opts: https.RequestOptions): Promise<T> {
-    opts.headers = opts.headers || {};
-    opts.headers.Accept = 'application/json';
-    opts.headers['X-Meta-Source-Client'] = ociClientId;
-    return httpsRequest(opts).then((data) => {
-        return JSON.parse(data);
-    })
+async function doFetchHttpsJson<T>(url: string): Promise<T> {
+    const options = {
+        headers: {
+            Accept: 'application/json',
+            'X-Meta-Source-Client': ociClientId,
+        }
+    }
+
+    const response = await httpRequest<T>(url.toString(), options);
+    return response.json();
 }

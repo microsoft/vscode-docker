@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { getWwwAuthenticateContext, HttpErrorResponse } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { IAuthProvider } from "../auth/IAuthProvider";
-import { getWwwAuthenticateContext } from "../auth/oAuthUtils";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { getRegistryContextValue, registryProviderSuffix, registrySuffix } from "../registryContextValues";
 import { DockerV2RegistryTreeItemBase } from "./DockerV2RegistryTreeItemBase";
@@ -38,7 +38,8 @@ export class GenericDockerV2RegistryTreeItem extends DockerV2RegistryTreeItemBas
                 // NOTE: Trailing slash is necessary (https://github.com/microsoft/vscode-docker/issues/1142)
                 await registryRequest(this, 'GET', 'v2/');
             } catch (error) {
-                if ((this.authContext = getWwwAuthenticateContext(error))) {
+                if (error instanceof HttpErrorResponse &&
+                    (this.authContext = getWwwAuthenticateContext(error))) {
                     // We got authentication context successfully--set scope and move on to requesting the items
                     this.authContext.scope = 'registry:catalog:*';
                 } else {

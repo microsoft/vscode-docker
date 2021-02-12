@@ -9,7 +9,6 @@ import * as mocha from 'mocha';
 import * as path from "path";
 import * as vscode from "vscode";
 import { ext } from "../extension.bundle";
-import { TestKeytar } from "../test/testKeytar";
 import { TestUserInput } from 'vscode-azureextensiondev';
 
 export namespace constants {
@@ -69,8 +68,6 @@ suiteSetup(async function (this: mocha.Context): Promise<void> {
     console.log('global.test.ts: suiteSetup');
 
     ext.runningTests = true;
-    // Otherwise the app can blocking asking for keychain access
-    ext.keytar = new TestKeytar();
 
     console.log("Refreshing tree to make sure extension is activated");
     await vscode.commands.executeCommand('vscode-docker.registries.refresh');
