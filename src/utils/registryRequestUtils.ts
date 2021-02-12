@@ -5,7 +5,7 @@
 
 import { URL } from "url";
 import { ociClientId } from "../constants";
-import { httpRequest2, RequestLike } from './httpRequest';
+import { httpRequest, RequestLike } from './httpRequest';
 
 export function getNextLinkFromHeaders(response: IResponse<unknown>): string | undefined {
     const linkHeader: string | undefined = response.headers.link as string;
@@ -33,7 +33,7 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         fullUrl = parsed.toString();
     }
 
-    const response = await httpRequest2<T>(fullUrl, options, async (request) => {
+    const response = await httpRequest<T>(fullUrl, options, async (request) => {
         if (node.signRequest) {
             return node.signRequest(request);
         } else {

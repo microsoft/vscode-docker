@@ -7,7 +7,7 @@ import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
 import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
-import { httpRequest2, RequestOptionsLike } from './httpRequest';
+import { httpRequest, RequestOptionsLike } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 
@@ -38,13 +38,13 @@ export async function acquireAcrAccessToken(registryHost: string, subContext: IS
     try {
         if (refreshTokens[registryHost]) {
             options.form.refresh_token = refreshTokens[registryHost];
-            const responseFromCachedToken = await httpRequest2<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+            const responseFromCachedToken = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
             return (await responseFromCachedToken.json()).access_token;
         }
     } catch { /* No-op, fall back to a new refresh token */ }
 
     options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
-    const response = await httpRequest2<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+    const response = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
     return (await response.json()).access_token;
 }
 
@@ -58,10 +58,10 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
         },
     };
 
-    const response = await httpRequest2<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
+    const response = await httpRequest<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
         // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
         await subContext.credentials.signRequest(request);
-        const token = (request.headers.get('authorization') as string).replace(/Bearer\s/i, '');
+        const token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
 
         const formData = new URLSearchParams({ ...options.form, access_token: token });
         return new Request(request.url, { method: 'POST', body: formData });

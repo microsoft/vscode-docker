@@ -8,6 +8,28 @@ import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
 
+export async function httpRequest<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse2<T>> {
+    const requestOptions: RequestInit = options;
+    if (options.form) {
+        // URLSearchParams is a silly way to say "it's form data"
+        requestOptions.body = new URLSearchParams(options.form);
+    }
+
+    let request = new Request(url, options ?? {});
+
+    if (signRequest) {
+        request = await signRequest(request) as Request;
+    }
+
+    const response = await fetch(request);
+
+    if (response.status >= 200 && response.status < 300) {
+        return new HttpResponse2(response);
+    } else {
+        throw new HttpError(response);
+    }
+}
+
 export class HttpResponse2<T> {
     private bodyPromise: Promise<T> | undefined;
     private normalizedHeaders: { [key: string]: string } | undefined;
@@ -32,37 +54,6 @@ export class HttpResponse2<T> {
         }
 
         return this.normalizedHeaders;
-    }
-}
-
-export function basicAuthHeader(username: string, password: string): string {
-    const buffer = Buffer.from(`${username}:${password}`);
-    return `Basic ${buffer.toString('base64')}`;
-}
-
-export function bearerAuthHeader(token: string): string {
-    return `Bearer ${token}`;
-}
-
-export async function httpRequest2<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse2<T>> {
-    const requestOptions: RequestInit = options;
-    if (options.form) {
-        // URLSearchParams is a silly way to say "it's form data"
-        requestOptions.body = new URLSearchParams(options.form);
-    }
-
-    let request = new Request(url, options ?? {});
-
-    if (signRequest) {
-        request = await signRequest(request) as Request;
-    }
-
-    const response = await fetch(request);
-
-    if (response.status >= 200 && response.status < 300) {
-        return new HttpResponse2(response);
-    } else {
-        throw new HttpError(response);
     }
 }
 
@@ -111,6 +102,15 @@ export async function streamToFile(downloadUrl: string, fileName: string): Promi
             reject(error);
         });
     });
+}
+
+export function basicAuthHeader(username: string, password: string): string {
+    const buffer = Buffer.from(`${username}:${password}`);
+    return `Basic ${buffer.toString('base64')}`;
+}
+
+export function bearerAuthHeader(token: string): string {
+    return `Bearer ${token}`;
 }
 
 export interface IOAuthContext {

@@ -5,7 +5,7 @@
 
 import { URL } from 'url';
 import { ociClientId } from '../../../constants';
-import { bearerAuthHeader, getWwwAuthenticateContext, HttpError, httpRequest2, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
+import { bearerAuthHeader, getWwwAuthenticateContext, HttpError, httpRequest, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
 
 export interface ImageRegistry {
     registryMatch: RegExp;
@@ -28,7 +28,7 @@ export const registries: ImageRegistry[] = [
                         },
                     };
 
-                    await httpRequest2('https://registry-1.docker.io/v2/', options);
+                    await httpRequest('https://registry-1.docker.io/v2/', options);
                 } catch (error) {
                     if (!(error instanceof HttpError) ||
                         !(dockerHubAuthContext = getWwwAuthenticateContext(error))) {
@@ -51,7 +51,7 @@ export const registries: ImageRegistry[] = [
             url.searchParams.append('service', dockerHubAuthContext.service);
             url.searchParams.append('scope', scope);
 
-            const tokenResponse = await httpRequest2<{ token: string }>(url.toString(), authRequestOptions);
+            const tokenResponse = await httpRequest<{ token: string }>(url.toString(), authRequestOptions);
             const token = (await tokenResponse.json()).token;
 
             request.headers.set('Authorization', bearerAuthHeader(token));

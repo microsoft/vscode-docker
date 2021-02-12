@@ -8,7 +8,7 @@ import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azuree
 import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
-import { httpRequest2, RequestOptionsLike } from '../../../utils/httpRequest';
+import { httpRequest, RequestOptionsLike } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
@@ -106,7 +106,7 @@ export class OutdatedImageChecker {
     }
 
     private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string): Promise<string> {
-        const manifestResponse = await httpRequest2(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => {
+        const manifestResponse = await httpRequest(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => {
             if (registry.signRequest) {
                 return registry.signRequest(request, `repository:library/${repo}:pull`);
             }

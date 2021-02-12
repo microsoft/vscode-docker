@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { basicAuthHeader, bearerAuthHeader, httpRequest2, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
+import { basicAuthHeader, bearerAuthHeader, httpRequest, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
@@ -32,7 +32,7 @@ class BasicOAuthProvider implements IAuthProvider {
             },
         };
 
-        const tokenResponse = await httpRequest2<{ token: string }>(authContext.realm.toString(), options);
+        const tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), options);
         request.headers.set('Authorization', bearerAuthHeader((await tokenResponse.json()).token));
         return request;
     }

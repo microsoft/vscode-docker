@@ -8,7 +8,7 @@
 import { URL } from "url";
 import { ociClientId } from "./constants";
 import { localize } from "./localize";
-import { httpRequest2 } from "./utils/httpRequest";
+import { httpRequest } from "./utils/httpRequest";
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
     let tags: string[] = [];
@@ -133,6 +133,6 @@ async function doFetchHttpsJson<T>(url: string): Promise<T> {
         }
     }
 
-    const response = await httpRequest2<T>(url.toString(), options);
+    const response = await httpRequest<T>(url.toString(), options);
     return response.json();
 }
