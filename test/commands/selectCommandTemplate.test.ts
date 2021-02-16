@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { runWithSetting } from '../runWithSetting';
+import { runWithExtensionSettings } from '../runWithExtensionSettings';
 import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext, isNewContextType } from '../../extension.bundle';
 import { TestInput } from 'vscode-azureextensiondev';
 import { IActionContext } from 'vscode-azureextensionui';
@@ -605,7 +605,7 @@ async function runWithCommandSetting(
             valuesToMask: undefined,
         };
 
-        const cmdResult: string = await runWithSetting('commands.build', settingsValues, async () => {
+        const cmdResult: string = await runWithExtensionSettings({ 'commands.build': settingsValues }, async () => {
             return await testUserInput.runWithInputs(pickInputs, async () => {
                 return await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {});
             });
