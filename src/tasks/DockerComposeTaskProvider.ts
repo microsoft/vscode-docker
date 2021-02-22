@@ -29,6 +29,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         const definition = cloneObject(task.definition);
         definition.dockerCompose = definition.dockerCompose || {};
         definition.dockerCompose.files = definition.dockerCompose.files || [];
+        definition.dockerCompose.envFiles = definition.dockerCompose.envFiles || [];
 
         await this.validateResolvedDefinition(context, definition.dockerCompose);
 
@@ -60,6 +61,12 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 throw new Error(localize('vscode-docker.tasks.composeProvider.invalidFile', 'One or more docker-compose files does not exist or could not be accessed.'));
             }
         }
+
+        for (const file of dockerCompose.envFiles) {
+            if (!(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(file, context.folder))))) {
+                throw new Error(localize('vscode-docker.tasks.composeProvider.invalidEnvFile', 'One or more environment files does not exist or could not be accessed.'));
+            }
+        }
     }
 
     private async resolveCommandLine(options: DockerComposeOptions): Promise<CommandLineBuilder> {
@@ -76,6 +83,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             return CommandLineBuilder
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
+                .withArrayArgs('--env-file', options.envFiles)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
                 .withFlagArg('--build', !!options.up.build)
@@ -87,6 +95,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             return CommandLineBuilder
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
+                .withArrayArgs('--env-file', options.envFiles)
                 .withArg('down')
                 .withNamedArg('--rmi', options.down.removeImages)
                 .withFlagArg('--volumes', options.down.removeVolumes)

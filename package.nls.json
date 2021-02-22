@@ -109,6 +109,7 @@
     "vscode-docker.tasks.docker-compose.dockerCompose.down.removeImages": "Images to remove.",
     "vscode-docker.tasks.docker-compose.dockerCompose.down.removeVolumes": "Whether or not to remove named and anonymous volumes.",
     "vscode-docker.tasks.docker-compose.dockerCompose.down.customOptions": "Any other options to add to the `docker-compose down` command.",
+    "vscode-docker.tasks.docker-compose.dockerCompose.envFiles.description": "Files of environment variables read in and applied to the Docker containers.",
     "vscode-docker.tasks.docker-compose.dockerCompose.files.description": "The docker-compose files to include, in order.",
     "vscode-docker.config.docker.promptForRegistryWhenPushingImages": "Prompt for registry selection if the image is not explicitly tagged.",
     "vscode-docker.config.template.build.template": "The command template.",
