@@ -793,6 +793,11 @@
                                         "description": "%vscode-docker.debug.python.django%",
                                         "default": false
                                     },
+                                    "fastapi": {
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.debug.python.fastapi%",
+                                        "default": false
+                                    },
                                     "jinja": {
                                         "type": "boolean",
                                         "description": "%vscode-docker.debug.python.jinja%",
@@ -803,6 +808,7 @@
                                         "description": "%vscode-docker.debug.python.projectType%",
                                         "enum": [
                                             "django",
+                                            "fastapi",
                                             "flask",
                                             "general"
                                         ]

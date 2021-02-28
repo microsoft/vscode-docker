@@ -64,6 +64,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 subPath = path.join('netCore', `${this.fileType}.template`);
                 break;
             case 'Python: Django':
+            case 'Python: FastAPI':
             case 'Python: Flask':
             case 'Python: General':
                 subPath = path.join('python', `${this.fileType}.template`);

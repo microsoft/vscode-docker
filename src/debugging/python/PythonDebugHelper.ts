@@ -26,6 +26,7 @@ export interface PythonDebugOptions {
     justMyCode?: boolean;
     projectType?: PythonProjectType;
     django?: boolean;
+    fastapi?: boolean;
     jinja?: boolean;
     args?: string[];
 }
@@ -87,6 +88,7 @@ export class PythonDebugHelper implements DebugHelper {
             pathMappings: debugConfiguration.python.pathMappings,
             justMyCode: debugConfiguration.python.justMyCode || true,
             django: debugConfiguration.python.django || projectType === 'django',
+            fastapi: debugConfiguration.python.fastapi || projectType === 'fastapi',
             jinja: debugConfiguration.python.jinja || projectType === 'flask',
             dockerOptions: {
                 containerName: containerName,
@@ -125,6 +127,8 @@ export class PythonDebugHelper implements DebugHelper {
         switch (projectType) {
             case 'django':
                 return 'Starting development server at (https?://\\S+|[0-9]+)';
+            case 'fastapi':
+                return '(Listening at: (https?://\\S+|[0-9]+) \(113392\))|(Uvicorn running on (https?://\\S+|[0-9]+) \(Press CTRL+C to quit\))' // HEY!
             case 'flask':
                 return 'Running on (https?://\\S+|[0-9]+)';
             default:

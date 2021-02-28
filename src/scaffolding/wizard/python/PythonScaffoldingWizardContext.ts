@@ -29,6 +29,8 @@ export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContex
 
     if (wizardContext.platform === 'Python: Django' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
         promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('django')]));
+    } else if (wizardContext.platform === 'Python: FastAPI' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
+        promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('fastapi')]));
     } else if (wizardContext.platform === 'Python: Flask' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
         promptSteps.push(new ChoosePortsStep([PythonDefaultPorts.get('flask')]));
     }

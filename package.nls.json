@@ -30,6 +30,7 @@
     "vscode-docker.debug.python.pathMappings.remoteRoot": "The container path.",
     "vscode-docker.debug.python.justMyCode": "Debug only user-written code.",
     "vscode-docker.debug.python.django": "Django debugging.",
+    "vscode-docker.debug.python.fastapi": "FastAPI debugging.",
     "vscode-docker.debug.python.jinja": "Jinja template debugging (e.g. Flask).",
     "vscode-docker.debug.python.projectType": "Type of the Python app.",
     "vscode-docker.debug.python.args": "Arguments passed to the Python app.",

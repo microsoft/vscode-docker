@@ -9,6 +9,7 @@ export const AllPlatforms = [
     '.NET: ASP.NET Core',
     '.NET: Core Console',
     'Python: Django',
+    'Python: FastAPI',
     'Python: Flask',
     'Python: General',
     'Java',
