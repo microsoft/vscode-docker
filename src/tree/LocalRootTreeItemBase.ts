@@ -407,5 +407,5 @@ export function getTreeId(object: DockerObject): string {
     // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
     // *and* change the ID when the state of the object changes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}`;
+    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}${(object as any).Status}`;
 }

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext, DockerImage } from '../../extension.bundle';
-import { runWithSetting } from '../runWithSetting';
+import { runWithExtensionSettings } from '../runWithExtensionSettings';
 import { generateCreatedTimeInMs, ITestTreeItem, IValidateTreeOptions, validateTree } from './validateTree';
 
 const testImages: DockerImage[] = [
@@ -106,10 +106,8 @@ interface IValidateImagesTreeOptions extends IValidateTreeOptions {
 }
 
 async function validateImagesTree(options: IValidateImagesTreeOptions, expectedNodes: ITestTreeItem[]): Promise<void> {
-    await runWithSetting('truncateLongRegistryPaths', options.truncate, async () => {
-        await runWithSetting('truncateMaxLength', options.truncateLength, async () => {
-            await validateTree(ext.imagesRoot, 'images', options, { images: testImages }, expectedNodes);
-        });
+    await runWithExtensionSettings({ 'truncateLongRegistryPaths': options.truncate, 'truncateMaxLength': options.truncateLength }, async () => {
+        await validateTree(ext.imagesRoot, 'images', options, { images: testImages }, expectedNodes);
     });
 }
 

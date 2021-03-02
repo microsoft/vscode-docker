@@ -1325,6 +1325,13 @@
                                     }
                                 }
                             },
+                            "envFiles": {
+                                "type": "array",
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.envFiles.description%",
+                                "items": {
+                                    "type": "string"
+                                }
+                            },
                             "files": {
                                 "type": "array",
                                 "description": "%vscode-docker.tasks.docker-compose.dockerCompose.files.description%",
