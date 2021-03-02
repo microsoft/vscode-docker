@@ -86,11 +86,13 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
         if (hasTask('build', wizardContext.workspaceFolder) && cSharpExtension) {
             // If a task named 'build' exists, and the C# extension is installed, we have everything necessary for running the service, so return
-
             return;
         } else if (!cSharpExtension) {
             wizardContext.errorHandling.suppressReportIssue = true;
             throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
+        } else if (new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) < new semver.SemVer('1.23.9')) { // 1.23.9 contains the fix to not overwrite existing assets
+            wizardContext.errorHandling.suppressReportIssue = true;
+            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version 1.23.9 or higher of the C# extension is installed.'));
         }
 
         // Get the settings for the C# asset generation prompt...
