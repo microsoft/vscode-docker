@@ -13,6 +13,9 @@ import { getNetCoreProjectInfo } from '../../../utils/netCoreUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
 
+// 1.23.9 contains the fix to not overwrite existing assets
+const minCSharpVersionString = '1.23.9';
+
 // All supported .NET versions no longer have "core" in the name
 const aspNetBaseImage = 'mcr.microsoft.com/dotnet/aspnet';
 const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
@@ -83,16 +86,18 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     }
 
     private async ensureNetCoreBuildTasks(wizardContext: NetCoreScaffoldingWizardContext): Promise<void> {
-        const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
-        if (hasTask('build', wizardContext.workspaceFolder) && cSharpExtension) {
-            // If a task named 'build' exists, and the C# extension is installed, we have everything necessary for running the service, so return
+        let cSharpExtensionExports: CSharpExtensionExports;
+        try {
+            cSharpExtensionExports = await this.getMinimumCSharpExtensionExports();
+        } catch (err) {
+            // Suppress report issue and rethrow
+            wizardContext.errorHandling.suppressReportIssue = true;
+            throw err;
+        }
+
+        if (hasTask('build', wizardContext.workspaceFolder)) {
+            // If a task named 'build' exists, and the C# extension with sufficient version is installed, we have everything necessary for running the service, so return
             return;
-        } else if (!cSharpExtension) {
-            wizardContext.errorHandling.suppressReportIssue = true;
-            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
-        } else if (new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) < new semver.SemVer('1.23.9')) { // 1.23.9 contains the fix to not overwrite existing assets
-            wizardContext.errorHandling.suppressReportIssue = true;
-            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version 1.23.9 or higher of the C# extension is installed.'));
         }
 
         // Get the settings for the C# asset generation prompt...
@@ -109,8 +114,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
                     title: localize('vscode-docker.scaffold.netCoreGatherInformationStep.activatingCSharp', 'Activating C# extension...')
                 },
                 async () => {
-                    // Await the initialization, which includes Omnisharp server init
-                    const cSharpExtensionExports: CSharpExtensionExports = cSharpExtension.isActive ? await cSharpExtension.activate() : cSharpExtension.exports;
+                    // Await the C# extension initialization, which includes Omnisharp server init
                     await cSharpExtensionExports.initializationFinished();
                 }
             );
@@ -124,5 +128,19 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             // Restore the settings for the C# asset generation prompt to their previous value
             await cSharpPromptConfig.update(cSharpPromptSetting, oldSuppressSettings.globalValue, vscode.ConfigurationTarget.Global);
         }
+    }
+
+    private async getMinimumCSharpExtensionExports(): Promise<CSharpExtensionExports> {
+        const minCSharpVersion = new semver.SemVer(minCSharpVersionString);
+        const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
+        const cSharpExtensionVersion: semver.SemVer | undefined = cSharpExtension ? new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) : undefined;
+
+        if (!cSharpExtension || !cSharpExtensionVersion) {
+            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
+        } else if (cSharpExtensionVersion < minCSharpVersion) {
+            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version {0} or higher of the C# extension is installed.', minCSharpVersionString));
+        }
+
+        return cSharpExtension.isActive ? await cSharpExtension.activate() : cSharpExtension.exports;
     }
 }
