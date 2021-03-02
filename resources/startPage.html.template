@@ -157,7 +157,7 @@
                     <ul>
                         <li>Connect and view a container registry in the <a href="command:dockerRegistries.focus">Docker Explorer</a> using <a href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Connect Registry</a></li>
                         <li>Publish images with <a href="command:vscode-docker.images.push?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Images: Push</a></li>
-                        {{#if showAzure}}<li>Deploy to <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Azure App Service</a> or to <a href="command:vscode-docker.registries.deployImageToAci?%7B%22commandReason%22%3A%22startPage%22%7D">Azure Container Instances</a></li>{{/if}}
+                        <li>Deploy to <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Azure App Service</a> or to <a href="command:vscode-docker.registries.deployImageToAci?%7B%22commandReason%22%3A%22startPage%22%7D">Azure Container Instances</a></li>
                     </ul>
                 </div>
             </div>
