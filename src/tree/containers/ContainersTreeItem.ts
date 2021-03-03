@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjs from "dayjs";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
@@ -92,7 +91,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
                 // We make status a sticky value. The result is that in the life of a DockerContainerInfo object, the Status property value will not change after it is first accessed.
                 // That way, when a newly-polled DockerContainerInfo has a *different* status (e.g. it goes from "a few seconds ago" to "a minute ago"), we recognize the difference from old -> new, and areArraysEqual below returns false.
                 if (!item.lastStatus) {
-                    item.lastStatus = dayjs(item.CreatedTime).fromNow();
+                    item.lastStatus = item.Status;
                 }
 
                 return item.lastStatus;
