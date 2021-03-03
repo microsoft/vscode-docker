@@ -1,4 +1,7 @@
 ## 1.10.0 - 15 March 2021
+### Added
+* Scaffolding and debugging for Python FastAPI is now added. Thanks @Kludex! [#2615](https://github.com/microsoft/vscode-docker/issues/2615)
+
 ### Fixed
 * The use of keytar has been removed since VS Code now has a secret storage API. Users will need to log in to their registries again. [#2699](https://github.com/microsoft/vscode-docker/issues/2699)
 * Adding Dockerfiles to a (ASP).NET app will now automatically generate the required .NET build task, using the C# extension. [#2669](https://github.com/microsoft/vscode-docker/issues/2669)
