@@ -19,7 +19,6 @@ import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = DockerContainer & {
     showFiles: boolean;
-    lastStatus?: string;
 };
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
@@ -88,13 +87,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             case 'State':
                 return item.State;
             case 'Status':
-                // We make status a sticky value. The result is that in the life of a DockerContainerInfo object, the Status property value will not change after it is first accessed.
-                // That way, when a newly-polled DockerContainerInfo has a *different* status (e.g. it goes from "a few seconds ago" to "a minute ago"), we recognize the difference from old -> new, and areArraysEqual below returns false.
-                if (!item.lastStatus) {
-                    item.lastStatus = item.Status;
-                }
-
-                return item.lastStatus;
+                return item.Status;
             case 'Compose Project Name':
                 return getComposeProjectName(item);
             default:
