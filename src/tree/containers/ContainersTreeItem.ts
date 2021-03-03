@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as dayjs from "dayjs";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
@@ -18,7 +19,8 @@ import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = DockerContainer & {
-    showFiles: boolean
+    showFiles: boolean;
+    lastStatus?: string;
 };
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
@@ -87,7 +89,13 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             case 'State':
                 return item.State;
             case 'Status':
-                return item.Status;
+                // We make status a sticky value. The result is that in the life of a DockerContainerInfo object, the Status property value will not change after it is first accessed.
+                // That way, when a newly-polled DockerContainerInfo has a *different* status (e.g. it goes from "a few seconds ago" to "a minute ago"), we recognize the difference from old -> new, and areArraysEqual below returns false.
+                if (!item.lastStatus) {
+                    item.lastStatus = dayjs(item.CreatedTime).fromNow();
+                }
+
+                return item.lastStatus;
             case 'Compose Project Name':
                 return getComposeProjectName(item);
             default:
@@ -120,6 +128,19 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             return [dockerTutorialTreeItem];
         }
         return super.getTreeItemForEmptyList()
+    }
+
+    protected areArraysEqual(array1: DockerContainerInfo[] | undefined, array2: DockerContainerInfo[] | undefined): boolean {
+        if (!super.areArraysEqual(array1, array2)) {
+            // If they aren't the same according to the base class implementation, they are definitely not the same according to this either
+            return false;
+        }
+
+        // Containers' labels/descriptions (status in particular) can change. If they do, we want to cause a refresh. But, we also don't want to change the tree ID based on status.
+        return !array1.some((item, index) => {
+            return this.getTreeItemLabel(item) !== this.getTreeItemLabel(array2[index]) ||
+                this.getTreeItemDescription(item) !== this.getTreeItemDescription(array2[index]);
+        });
     }
 
     private isNewContainerUser(): boolean {
