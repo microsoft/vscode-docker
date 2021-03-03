@@ -1,3 +1,10 @@
+## 1.10.0 - 15 March 2021
+### Fixed
+* The use of keytar has been removed since VS Code now has a secret storage API. Users will need to log in to their registries again. [#2699](https://github.com/microsoft/vscode-docker/issues/2699)
+* Adding Dockerfiles to a (ASP).NET app will now automatically generate the required .NET build task, using the C# extension. [#2669](https://github.com/microsoft/vscode-docker/issues/2669)
+* Python `docker-run` tasks should now respect the `dockerRun` `command` option in tasks.json. [#2725](https://github.com/microsoft/vscode-docker/issues/2725)
+* Microsoft Container Registry (MCR) images were sometimes incorrectly being flagged as out-of-date. [#2730](https://github.com/microsoft/vscode-docker/issues/2730)
+
 ## 1.10.0 - 15 February 2021
 ### Added
 * Added tooltips to the various explorer views, which will show a great deal of helpful information. For example, the containers tooltips show connected volumes, networks, ports, and more. [#1002](https://github.com/microsoft/vscode-docker/issues/1002), [#2538](https://github.com/microsoft/vscode-docker/issues/2538), [#2592](https://github.com/microsoft/vscode-docker/issues/2592)
