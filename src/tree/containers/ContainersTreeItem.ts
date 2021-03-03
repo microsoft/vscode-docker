@@ -18,7 +18,7 @@ import { containerProperties, ContainerProperty } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = DockerContainer & {
-    showFiles: boolean
+    showFiles: boolean;
 };
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
@@ -120,6 +120,19 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             return [dockerTutorialTreeItem];
         }
         return super.getTreeItemForEmptyList()
+    }
+
+    protected areArraysEqual(array1: DockerContainerInfo[] | undefined, array2: DockerContainerInfo[] | undefined): boolean {
+        if (!super.areArraysEqual(array1, array2)) {
+            // If they aren't the same according to the base class implementation, they are definitely not the same according to this either
+            return false;
+        }
+
+        // Containers' labels/descriptions (status in particular) can change. If they do, we want to cause a refresh. But, we also don't want to change the tree ID based on status (in `getTreeId()` in LocalRootTreeItemBase.ts).
+        return !array1.some((item, index) => {
+            return this.getTreeItemLabel(item) !== this.getTreeItemLabel(array2[index]) ||
+                this.getTreeItemDescription(item) !== this.getTreeItemDescription(array2[index]);
+        });
     }
 
     private isNewContainerUser(): boolean {
