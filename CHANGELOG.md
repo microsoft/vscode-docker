@@ -4,6 +4,7 @@
 
 ### Fixed
 * The use of keytar has been removed since VS Code now has a secret storage API. Users will need to log in to their registries again. [#2699](https://github.com/microsoft/vscode-docker/issues/2699)
+* In the files explorer, folders containing spaces should work. [#2739](https://github.com/microsoft/vscode-docker/issues/2739)
 * Adding Dockerfiles to a (ASP).NET app will now automatically generate the required .NET build task, using the C# extension. [#2669](https://github.com/microsoft/vscode-docker/issues/2669)
 * Python `docker-run` tasks should now respect the `dockerRun` `command` option in tasks.json. [#2725](https://github.com/microsoft/vscode-docker/issues/2725)
 * Microsoft Container Registry (MCR) images were sometimes incorrectly being flagged as out-of-date. [#2730](https://github.com/microsoft/vscode-docker/issues/2730)
