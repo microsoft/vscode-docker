@@ -47,6 +47,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
                 break;
 
             case 'Python: Django':
+            case 'Python: FastAPI':
             case 'Python: Flask':
             case 'Python: General':
                 scaffoldContext.platform = 'python';
@@ -68,6 +69,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case '.NET: ASP.NET Core':
             case '.NET: Core Console':
             case 'Python: Django':
+            case 'Python: FastAPI':
             case 'Python: Flask':
             case 'Python: General':
                 return wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'debugging';
