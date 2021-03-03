@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { inferPythonArgs } from '../../utils/pythonUtils';
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
@@ -65,6 +66,10 @@ export class PythonTaskHelper implements TaskHelper {
                 }
             }
             runOptions.module = 'flask';
+            runOptions.file = undefined;
+        } else if (options.projectType === 'fastapi') {
+            runOptions.args.unshift(`${path.basename(runOptions.file, '.py')}:app`);
+            runOptions.module = 'uvicorn';
             runOptions.file = undefined;
         }
 

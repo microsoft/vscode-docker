@@ -129,7 +129,7 @@ export class PythonDebugHelper implements DebugHelper {
             case 'django':
                 return 'Starting development server at (https?://\\S+|[0-9]+)';
             case 'fastapi':
-                return '(Listening at: (https?://\\S+|[0-9]+) \(113392\))|(Uvicorn running on (https?://\\S+|[0-9]+) \(Press CTRL+C to quit\))' // HEY!
+                return 'Uvicorn running on (https?://\\S+|[0-9]+)';
             case 'flask':
                 return 'Running on (https?://\\S+|[0-9]+)';
             default:
