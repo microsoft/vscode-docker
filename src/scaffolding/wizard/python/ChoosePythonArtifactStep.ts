@@ -12,17 +12,20 @@ import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext
 
 const moduleRegex = /([a-z_]+[.])*([a-z_])/i;
 
+// Exclude Python files in the .venv folder from showing in the pick list
+const excludePattern = '.venv/**';
+
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {
     public constructor() {
         super(
             localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. manage.py, app.py)'),
-            ['**/*.{[Pp][Yy]}'],
+            ['**/manage.py', '**/app.py', '**/*.{[Pp][Yy]}'], // Including manage.py and app.py here pushes them to the top of the pick list; resolveFilesOfPattern dedupes
             localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.')
         );
     }
 
     public async prompt(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
-        const items = await resolveFilesOfPattern(wizardContext.workspaceFolder, this.globPatterns) ?? [];
+        const items = await resolveFilesOfPattern(wizardContext.workspaceFolder, this.globPatterns, excludePattern) ?? [];
 
         const pickChoices: IAzureQuickPickItem<Item | undefined>[] = items.map(i => {
             return {

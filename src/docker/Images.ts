@@ -13,9 +13,15 @@ export interface DockerImage extends DockerObject {
 export interface DockerImageInspection extends DockerObject {
     readonly Config?: {
         readonly ExposedPorts?: { readonly [portAndProtocol: string]: unknown; };
-        readonly Image?: string;
     };
+
+    readonly RepoDigests?: string[];
 
     readonly Os: string;
     readonly Name: undefined; // Not defined for inspection
+    readonly Containers?: { // Not a real part of image inspection, but we add it because it's desperately needed
+        [containerId: string]: {
+            readonly Name: string;
+        }
+    };
 }

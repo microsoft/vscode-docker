@@ -3,38 +3,33 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Response } from 'request';
-import * as request from 'request-promise-native';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
-import { localize } from '../../../localize';
+import { httpRequest, RequestOptionsLike } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
 
 const noneRegex = /<none>/i;
 
-const lastLiveOutdatedCheckKey = 'vscode-docker.outdatedImageChecker.lastLiveCheck';
-const outdatedImagesKey = 'vscode-docker.outdatedImageChecker.outdatedImages';
-
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
     private readonly outdatedImageIds: string[] = [];
-    private readonly defaultRequestOptions: request.RequestPromiseOptions;
+    private readonly defaultRequestOptions: RequestOptionsLike;
 
     public constructor() {
         const dockerConfig = vscode.workspace.getConfiguration('docker');
         this.shouldLoad = dockerConfig.get('images.checkForOutdatedImages');
 
-        const httpSettings = vscode.workspace.getConfiguration('http');
-        const strictSSL = httpSettings.get<boolean>('proxyStrictSSL', true);
         this.defaultRequestOptions = {
-            method: 'GET',
-            json: true,
-            resolveWithFullResponse: true,
-            strictSSL: strictSSL,
+            method: 'HEAD',
+            headers: {
+                'X-Meta-Source-Client': ociClientId,
+                'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json',
+            },
         };
     }
 
@@ -48,43 +43,33 @@ export class OutdatedImageChecker {
                 context.errorHandling.suppressReportIssue = true;
                 context.errorHandling.suppressDisplay = true;
 
-                const lastCheck = ext.context.globalState.get<number | undefined>(lastLiveOutdatedCheckKey, undefined);
+                // Do a live check
+                context.telemetry.properties.checkSource = 'live';
 
-                if (lastCheck && Date.now() - lastCheck < 24 * 60 * 60 * 1000) {
-                    // Use the cached data
-                    context.telemetry.properties.checkSource = 'cache';
-                    this.outdatedImageIds.push(...ext.context.globalState.get<string[]>(outdatedImagesKey, []));
-                } else {
-                    // Do a live check
-                    context.telemetry.properties.checkSource = 'live';
-                    await ext.context.globalState.update(lastLiveOutdatedCheckKey, Date.now());
+                const imageCheckPromises: Promise<void>[] = [];
 
-                    const imageCheckPromises: Promise<void>[] = [];
+                for (const image of images) {
+                    const imageRegistry = getImagePropertyValue(image, 'Registry');
+                    const matchingRegistry = registries.find(r => r.registryMatch.test(imageRegistry));
 
-                    for (const image of images) {
-                        const imageRegistry = getImagePropertyValue(image, 'Registry');
-                        const matchingRegistry = registries.find(r => r.registryMatch.test(imageRegistry));
-
-                        if (matchingRegistry) {
-                            imageCheckPromises.push((async () => {
-                                if (await this.checkImage(context, matchingRegistry, image) === 'outdated') {
-                                    this.outdatedImageIds.push(image.Id);
-                                }
-                            })());
-                        }
+                    if (matchingRegistry) {
+                        imageCheckPromises.push((async () => {
+                            if (await this.checkImage(context, matchingRegistry, image) === 'outdated') {
+                                this.outdatedImageIds.push(image.Id);
+                            }
+                        })());
                     }
-
-                    context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
-
-                    // Load the data for all images then force the tree to refresh
-                    await Promise.all(imageCheckPromises);
-                    await ext.context.globalState.update(outdatedImagesKey, this.outdatedImageIds);
-
-                    context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
-
-                    // Don't wait
-                    void ext.imagesRoot.refresh(context);
                 }
+
+                context.telemetry.measurements.imagesChecked = imageCheckPromises.length;
+
+                // Load the data for all images then force the tree to refresh
+                await Promise.all(imageCheckPromises);
+
+                context.telemetry.measurements.outdatedImages = this.outdatedImageIds.length;
+
+                // Don't wait
+                void ext.imagesRoot.refresh(context);
             });
         }
 
@@ -100,23 +85,19 @@ export class OutdatedImageChecker {
             const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
-                return 'outdated';
+                return 'unknown';
             }
 
-            let token: string | undefined;
+            // 0. If there's a method to sign the request, it will be called on the registry
+            // 1. Get the latest image digest ID from the manifest
+            const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag);
 
-            // 1. Get an OAuth token to access the resource. No Authorization header is required for public scopes.
-            if (registry.getToken) {
-                token = await registry.getToken(this.defaultRequestOptions, `repository:library/${repo}:pull`);
-            }
-
-            // 2. Get the latest image ID from the manifest
-            const latestConfigImageId = await this.getLatestConfigImageId(registry, repo, tag, token);
-
-            // 3. Compare it with the current image's value
+            // 2. Compare it with the current image's value
             const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
 
-            if (latestConfigImageId.toLowerCase() !== imageInspectInfo?.Config?.Image?.toLowerCase()) {
+            // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date
+            //    The logic is reversed so that if something goes wrong, we will err toward calling it up-to-date
+            if (imageInspectInfo?.RepoDigests?.every(digest => digest?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0)) {
                 return 'outdated';
             }
 
@@ -126,24 +107,15 @@ export class OutdatedImageChecker {
         }
     }
 
-    private async getLatestConfigImageId(registry: ImageRegistry, repo: string, tag: string, oAuthToken: string | undefined): Promise<string> {
-        const manifestOptions: request.RequestPromiseOptions = {
-            ...this.defaultRequestOptions,
-            auth: oAuthToken ? {
-                bearer: oAuthToken,
-            } : undefined,
-        };
+    private async getLatestImageDigest(registry: ImageRegistry, repo: string, tag: string): Promise<string> {
+        const manifestResponse = await httpRequest(`${registry.baseUrl}/${repo}/manifests/${tag}`, this.defaultRequestOptions, async (request) => {
+            if (registry.signRequest) {
+                return registry.signRequest(request, `repository:library/${repo}:pull`);
+            }
 
-        const manifestResponse = await request(`${registry.baseUrl}/${repo}/manifests/${tag}`, manifestOptions) as Response;
-        /* eslint-disable @typescript-eslint/tslint/config */
-        const firstHistory = JSON.parse(manifestResponse?.body?.history?.[0]?.v1Compatibility);
-        const latestConfigImageId: string = firstHistory?.config?.Image;
-        /* eslint-enable @typescript-eslint/tslint/config */
+            return request;
+        });
 
-        if (!latestConfigImageId) {
-            throw new Error(localize('vscode-docker.outdatedImageChecker.noManifest', 'Failed to acquire manifest token for image: \'{0}:{1}\'', repo, tag));
-        }
-
-        return latestConfigImageId;
+        return manifestResponse.headers['docker-content-digest'];
     }
 }

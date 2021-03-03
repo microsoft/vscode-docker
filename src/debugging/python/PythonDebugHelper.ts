@@ -7,6 +7,7 @@ import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
+import { getVSCodeRemoteInfo, RemoteKind } from '../../utils/getVSCodeRemoteInfo';
 import { isLinux } from '../../utils/osUtils';
 import { PythonProjectType } from '../../utils/pythonUtils';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
@@ -86,7 +87,7 @@ export class PythonDebugHelper implements DebugHelper {
             type: 'python',
             request: 'launch',
             pathMappings: debugConfiguration.python.pathMappings,
-            justMyCode: debugConfiguration.python.justMyCode || true,
+            justMyCode: debugConfiguration.python.justMyCode ?? true,
             django: debugConfiguration.python.django || projectType === 'django',
             fastapi: debugConfiguration.python.fastapi || projectType === 'fastapi',
             jinja: debugConfiguration.python.jinja || projectType === 'flask',
@@ -101,7 +102,7 @@ export class PythonDebugHelper implements DebugHelper {
             internalConsoleOptions: debugConfiguration.internalConsoleOptions || "openOnSessionStart",
             module: debugConfiguration.module || pythonRunTaskOptions.module,
             program: debugConfiguration.file || pythonRunTaskOptions.file,
-            redirectOutput: debugConfiguration.redirectOutput || true,
+            redirectOutput: debugConfiguration.redirectOutput as boolean | undefined ?? true,
             args: args,
             cwd: '.',
 
@@ -137,9 +138,9 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     private async getDebugAdapterHost(context: DockerDebugContext): Promise<string> {
-        // For Windows and Mac, we ask debugpy to listen on localhost:{randomPort} and then
+        // For Windows, Mac, and WSL, we ask debugpy to listen on localhost:{randomPort} and then
         // we use 'host.docker.internal' in the launcher to get the host's ip address.
-        if (!isLinux()) {
+        if (!isLinux() || getVSCodeRemoteInfo(context.actionContext).remoteKind === RemoteKind.wsl) {
             return 'localhost';
         }
 

@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TreeItem, TreeItemCollapsibleState } from "vscode";
+import { ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
 import { AzExtTreeItem } from "vscode-azureextensionui";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
@@ -32,26 +31,21 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContain
         return 'containerGroup';
     }
 
-    public get iconPath(): IconPath {
-        let icon: string;
+    public get iconPath(): ThemeIcon {
         switch (this.parent.groupBySetting) {
             case 'ContainerId':
             case 'ContainerName':
             case 'Networks':
-                icon = 'network';
-                break;
+                return new ThemeIcon('repo-forked');
             case 'Ports':
             case 'Status':
             case 'Compose Project Name':
-                icon = 'applicationGroup';
-                break;
+                return new ThemeIcon('multiple-windows');
             case 'State':
                 return getContainerStateIcon(this.group);
             default:
                 return getImageGroupIcon(this.parent.groupBySetting);
         }
-
-        return getThemedIconPath(icon);
     }
 
     public isAncestorOfImpl(expectedContextValue: string | RegExp): boolean {

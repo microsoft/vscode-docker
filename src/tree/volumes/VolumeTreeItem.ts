@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MarkdownString, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 export class VolumeTreeItem extends AzExtTreeItemIntermediate {
     public static contextValue: string = 'volume';
@@ -40,11 +41,30 @@ export class VolumeTreeItem extends AzExtTreeItemIntermediate {
         return ext.volumesRoot.getTreeItemDescription(this._item);
     }
 
-    public get iconPath(): IconPath {
-        return getThemedIconPath('volume');
+    public get iconPath(): ThemeIcon {
+        return new ThemeIcon('file-symlink-directory');
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         return ext.dockerClient.removeVolume(context, this.volumeName);
     }
+
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        return resolveTooltipMarkdown(volumeTooltipTemplate, await ext.dockerClient.inspectVolume(actionContext, this.volumeName));
+    }
 }
+
+const volumeTooltipTemplate = `
+### {{ Name }}
+
+---
+
+#### Associated Containers
+{{#if (nonEmptyObj Containers)}}
+{{#each Containers}}
+  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{/each}}
+{{else}}
+_None_
+{{/if}}
+`;

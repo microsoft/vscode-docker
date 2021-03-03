@@ -24,7 +24,7 @@ export interface DockerContainer extends DockerObject {
     readonly Image: string;
     readonly ImageID: string;
     readonly NetworkSettings?: {
-        readonly Networks?: { readonly [key: string]: unknown };
+        readonly Networks?: { readonly [networkName: string]: unknown };
     };
     readonly Ports?: DockerPort[];
     readonly Labels?: {

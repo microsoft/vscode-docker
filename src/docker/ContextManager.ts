@@ -198,6 +198,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
             actionContext.telemetry.properties.isActivationEvent = 'true';
             actionContext.errorHandling.rethrow = true; // Errors are handled outside of this scope
+            actionContext.errorHandling.suppressDisplay = true;
 
             ext.treeInitError = undefined;
 

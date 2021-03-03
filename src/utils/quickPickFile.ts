@@ -17,8 +17,8 @@ export interface Item extends vscode.QuickPickItem {
     absoluteFolderPath: string;
 }
 
-async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string): Promise<vscode.Uri[]> {
-    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), undefined, FILE_SEARCH_MAX_RESULT, undefined);
+async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string, excludePattern?: string): Promise<vscode.Uri[]> {
+    return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), excludePattern ? new vscode.RelativePattern(folder, excludePattern) : undefined, FILE_SEARCH_MAX_RESULT, undefined);
 }
 
 export function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
@@ -60,11 +60,11 @@ function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[
     return result;
 }
 
-export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePatterns: string[])
+export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, filePatterns: string[], excludePattern?: string)
     : Promise<Item[] | undefined> {
     let uris: vscode.Uri[] = [];
     await Promise.all(filePatterns.map(async (pattern: string) => {
-        uris.push(...await getFileUris(rootFolder, pattern));
+        uris.push(...await getFileUris(rootFolder, pattern, excludePattern));
     }));
     // de-dupe
     uris = uris.filter((uri, index) => uris.findIndex(uri2 => uri.toString() === uri2.toString()) === index);

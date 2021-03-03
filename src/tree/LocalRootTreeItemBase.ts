@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationChangeEvent, ConfigurationTarget, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
+import { ConfigurationChangeEvent, ConfigurationTarget, ThemeColor, ThemeIcon, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IParsedError, parseError, registerEvent } from "vscode-azureextensionui";
 import { showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
@@ -13,7 +13,6 @@ import { ext } from "../extensionVariables";
 import { localize } from "../localize";
 import { dockerInstallStatusProvider } from "../utils/DockerInstallStatusProvider";
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
-import { getThemedIconPath } from "./IconPath";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
@@ -122,7 +121,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         return [new GenericTreeItem(this, {
             label: localize('vscode-docker.tree.noItemsFound', 'No items found'),
-            iconPath: getThemedIconPath('info'),
+            iconPath: new ThemeIcon('info'),
             contextValue: 'dockerNoItems'
         })];
     }
@@ -337,11 +336,11 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
 
         const result: AzExtTreeItem[] = dockerInstalled
             ? [
-                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is Docker running?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') }),
+                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is Docker running?'), contextValue: 'dockerConnectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) }),
                 new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunningError', '  Error: {0}', error.message), contextValue: 'dockerConnectionError' }),
                 new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
             ]
-            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is Docker installed?'), contextValue: 'dockerConnectionError', iconPath: getThemedIconPath('statusWarning') })];
+            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is Docker installed?'), contextValue: 'dockerConnectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) })];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
@@ -408,5 +407,5 @@ export function getTreeId(object: DockerObject): string {
     // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
     // *and* change the ID when the state of the object changes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}`;
+    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}${(object as any).Status}`;
 }

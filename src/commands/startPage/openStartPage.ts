@@ -26,12 +26,9 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
     } else if (!isHigherMinorVersion(extensionVersion.value, ext.context.globalState.get(lastVersionKey, '0.0.1'))) {
         // Don't show: already showed during this major/minor
         return;
-    } else if (!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.openStartPage'))) {
-        // Don't show: flight not enabled
-        return;
     }
 
-    // Show!
+    // Let's show!
     await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
     void vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
 }

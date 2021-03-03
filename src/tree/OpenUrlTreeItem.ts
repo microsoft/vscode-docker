@@ -5,16 +5,15 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
-import { getThemedIconPath } from "./IconPath";
 
 export class OpenUrlTreeItem extends GenericTreeItem {
     private _url: string;
 
-    public constructor(parent: AzExtParentTreeItem, label: string, url: string, iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon) {
+    public constructor(parent: AzExtParentTreeItem, label: string, url: string, iconPath?: vscode.ThemeIcon) {
         super(parent, {
             commandId: 'vscode-docker.openUrl',
             contextValue: 'openUrl',
-            iconPath: iconPath ?? getThemedIconPath('web'),
+            iconPath: iconPath ?? new vscode.ThemeIcon('globe'),
             includeInTreeItemPicker: true,
             label
         });

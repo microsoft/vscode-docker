@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { getThemedIconPath } from "../IconPath";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";
 import { IConnectRegistryWizardContext } from "./connectWizard/IConnectRegistryWizardContext";
@@ -42,7 +42,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             return [new GenericTreeItem(this, {
                 label: localize('vscode-docker.tree.registries.connectRegistry', 'Connect Registry...'),
                 contextValue: 'connectRegistry',
-                iconPath: getThemedIconPath('connect'),
+                iconPath: new ThemeIcon('plug'),
                 includeInTreeItemPicker: true,
                 commandId: 'vscode-docker.registries.connectRegistry'
             })];

@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import { DockerApiClient, DockerContainer, DockerVolume, DockerNetwork, DockerImage, AzExtParentTreeItem, AzExtTreeItem, ext, IActionContext } from '../../extension.bundle';
-import { runWithSetting } from '../runWithSetting';
+import { runWithExtensionSettings } from '../runWithExtensionSettings';
 
 export function generateCreatedTimeInMs(days: number): number {
     const daysInMs = days * 24 * 60 * 60 * 1000;
@@ -31,29 +31,30 @@ export interface ITestTreeItem {
 
 export async function validateTree(rootTreeItem: AzExtParentTreeItem, treePrefix: string, treeOptions: IValidateTreeOptions, mockClientOptions: IMockClientOptions, expectedNodes: ITestTreeItem[]): Promise<AzExtTreeItem[]> {
     let actualNodes: AzExtTreeItem[] = [];
-    await runWithSetting(`${treePrefix}.sortBy`, treeOptions.sortBy, async () => {
-        await runWithSetting(`${treePrefix}.groupBy`, treeOptions.groupBy, async () => {
-            await runWithSetting(`${treePrefix}.label`, treeOptions.label, async () => {
-                await runWithSetting(`${treePrefix}.description`, treeOptions.description, async () => {
-                    await runWithMockClient(mockClientOptions, async () => {
-                        const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} }, ui: undefined, valuesToMask: undefined };
-                        await rootTreeItem.refresh(context);
 
-                        actualNodes = await rootTreeItem.getCachedChildren(context);
+    const settings: { [key: string]: string | string[] } = {};
+    settings[`${treePrefix}.sortBy`] = treeOptions.sortBy;
+    settings[`${treePrefix}.groupBy`] = treeOptions.groupBy;
+    settings[`${treePrefix}.label`] = treeOptions.label;
+    settings[`${treePrefix}.description`] = treeOptions.description;
 
-                        const actual = await Promise.all(actualNodes.map(async node => {
-                            const actualNode: ITestTreeItem = convertToTestTreeItem(node);
-                            if (node instanceof AzExtParentTreeItem) {
-                                const children = await node.getCachedChildren(context);
-                                actualNode.children = children.map(convertToTestTreeItem);
-                            }
-                            return actualNode;
-                        }));
+    await runWithExtensionSettings(settings, async () => {
+        await runWithMockClient(mockClientOptions, async () => {
+            const context: IActionContext = { telemetry: { properties: {}, measurements: {} }, errorHandling: { issueProperties: {} }, ui: undefined, valuesToMask: undefined };
+            await rootTreeItem.refresh(context);
 
-                        assert.deepStrictEqual(actual, expectedNodes);
-                    });
-                });
-            });
+            actualNodes = await rootTreeItem.getCachedChildren(context);
+
+            const actual = await Promise.all(actualNodes.map(async node => {
+                const actualNode: ITestTreeItem = convertToTestTreeItem(node);
+                if (node instanceof AzExtParentTreeItem) {
+                    const children = await node.getCachedChildren(context);
+                    actualNode.children = children.map(convertToTestTreeItem);
+                }
+                return actualNode;
+            }));
+
+            assert.deepStrictEqual(actual, expectedNodes);
         });
     });
     return actualNodes;

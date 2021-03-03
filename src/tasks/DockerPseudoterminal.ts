@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
+import { addDockerSettingsToEnv } from '../utils/addDockerSettingsToEnv';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { spawnAsync } from '../utils/spawnAsync';
@@ -63,10 +64,11 @@ export class DockerPseudoterminal implements Pseudoterminal {
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
         this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
-        // TODO: Maybe support remote Docker hosts and do addDockerSettingsToEnvironment?
+        const newEnv = { ...process.env };
+        addDockerSettingsToEnv(newEnv, process.env);
         await spawnAsync(
             commandLine,
-            { cwd: folder.uri.fsPath },
+            { cwd: folder.uri.fsPath, env: newEnv },
             (stdout: string) => {
                 this.writeOutput(stdout);
             },

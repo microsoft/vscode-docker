@@ -6,7 +6,7 @@
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from "../../localize";
-import { getThemedIconPath } from '../IconPath';
+import { getThemedIconPath } from '../getThemedIconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
 export class HelpsTreeItem extends AzExtParentTreeItem {
@@ -17,6 +17,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         return this.values ?? (this.values = [
             this.readDocumentationTreeItem,
+            this.watchVideosTreeItem,
             this.getStartedTreeItem,
             this.openStartPageTreeItem,
             this.reviewIssuesTreeItem,
@@ -38,11 +39,23 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get readDocumentationTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.readDocumentation', 'Docker Extension Documentation'),
+            localize('views.help.readDocumentation', 'Read Extension Documentation'),
             'https://aka.ms/helppanel_docs',
-            getThemedIconPath('book')
+            new ThemeIcon('book')
         );
-        node.id = '1';
+        node.id = '0';
+
+        return node;
+    }
+
+    private get watchVideosTreeItem(): AzExtTreeItem {
+        const node = new OpenUrlTreeItem(
+            this,
+            localize('views.help.watchVideos', 'Watch Extension Tutorial Videos'),
+            'https://aka.ms/helppanel_videos',
+            new ThemeIcon('play-circle')
+        );
+        node.id = '10';
 
         return node;
     }
@@ -52,9 +65,9 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.getStarted', 'Get Started with Docker Tutorial'),
             'https://aka.ms/helppanel_getstarted',
-            getThemedIconPath('star-empty')
+            new ThemeIcon('star-empty')
         );
-        node.id = '2';
+        node.id = '20';
 
         return node;
     }
@@ -70,7 +83,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
                 includeInTreeItemPicker: true,
             }
         );
-        node.id = '3';
+        node.id = '30';
 
         return node;
     }
@@ -80,9 +93,9 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this,
             localize('views.help.reviewIssues', 'Review Issues'),
             'https://aka.ms/helppanel_reviewissues',
-            getThemedIconPath('issues')
+            new ThemeIcon('issues')
         );
-        node.id = '4';
+        node.id = '40';
 
         return node;
     }
@@ -94,11 +107,11 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
                 label: localize('views.help.reportIssue', 'Report Issue'),
                 contextValue: 'Report Issue',
                 commandId: 'vscode-docker.help.reportIssue',
-                iconPath: getThemedIconPath('comment'),
+                iconPath: new ThemeIcon('comment'),
                 includeInTreeItemPicker: true,
             }
         );
-        node.id = '5';
+        node.id = '50';
 
         return node;
     }
@@ -114,7 +127,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
                 includeInTreeItemPicker: true,
             }
         );
-        node.id = '6';
+        node.id = '60';
 
         return node;
     }

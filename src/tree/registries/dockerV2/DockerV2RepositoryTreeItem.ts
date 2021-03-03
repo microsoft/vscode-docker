@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
+import { IOAuthContext, RequestLike } from "../../../utils/httpRequest";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { IAuthProvider, IOAuthContext } from "../auth/IAuthProvider";
+import { IAuthProvider } from "../auth/IAuthProvider";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";
@@ -42,11 +42,13 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
         );
     }
 
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
         if (this.authHelper) {
-            const authContext: IOAuthContext | undefined = this.authContext ? { ...this.authContext, scope: `repository:${this.repoName}:${options.method === 'DELETE' ? '*' : 'pull'}` } : undefined;
-            options.auth = await this.authHelper.getAuthOptions(this.cachedProvider, authContext);
+            const authContext: IOAuthContext | undefined = this.authContext ? { ...this.authContext, scope: `repository:${this.repoName}:${request.method === 'DELETE' ? '*' : 'pull'}` } : undefined;
+            return this.authHelper.signRequest(this.cachedProvider, request, authContext);
         }
+
+        return request;
     }
 
     public hasMoreChildrenImpl(): boolean {

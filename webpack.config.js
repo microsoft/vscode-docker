@@ -35,12 +35,6 @@ let config = dev.getDefaultWebpackConfig({
         './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js'
     },
 
-    externals:
-    {
-        // ./getCoreNodeModule.js (path from keytar.ts) uses a dynamic require which can't be webpacked
-        './getCoreNodeModule': 'commonjs getCoreNodeModule',
-    }, // end of externals
-
     loaderRules: [
         {
             // Fix error:
@@ -105,9 +99,6 @@ let config = dev.getDefaultWebpackConfig({
         // Copy files to dist folder where the runtime can find them
         new CopyWebpackPlugin({
             patterns: [
-                // getCoreNodeModule.js -> dist/node_modules/getCoreNodeModule.js
-                { from: './out/src/utils/getCoreNodeModule.js', to: 'node_modules' },
-
                 // node_modules/vscode-codicons/dist/codicon.css, .ttf -> dist/node_modules/vscode-codicons/dist/codicon.css, .ttf
                 { from: './node_modules/vscode-codicons/dist/codicon.css', to: 'node_modules/vscode-codicons/dist' },
                 { from: './node_modules/vscode-codicons/dist/codicon.ttf', to: 'node_modules/vscode-codicons/dist' },

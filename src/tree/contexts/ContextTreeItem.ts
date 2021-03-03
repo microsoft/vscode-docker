@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { MarkdownString, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContext, DockerContextInspection } from "../../docker/Contexts";
 import { ext } from "../../extensionVariables";
 import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { getTreeId } from "../LocalRootTreeItemBase";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 export class ContextTreeItem extends AzExtTreeItemIntermediate {
     public static allContextRegExp: RegExp = /Context;/;
@@ -65,9 +66,9 @@ export class ContextTreeItem extends AzExtTreeItemIntermediate {
         return this._item.Current;
     }
 
-    public get iconPath(): IconPath {
+    public get iconPath(): ThemeIcon {
         if (this._item.Current) {
-            return getThemedIconPath('connect');
+            return new ThemeIcon('plug');
         }
     }
 
@@ -82,4 +83,21 @@ export class ContextTreeItem extends AzExtTreeItemIntermediate {
     public async use(context: IActionContext): Promise<void> {
         return ext.dockerContextManager.use(context, this.name);
     }
+
+    public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        return resolveTooltipMarkdown(contextTooltipTemplate, await this.inspect(actionContext));
+    }
 }
+
+const contextTooltipTemplate = `
+### {{ Name }}
+
+---
+
+#### Docker Host Endpoint
+{{#if Endpoints.docker.Host}}
+{{ Endpoints.docker.Host }}
+{{else}}
+_{{ Metadata.Type }}_
+{{/if}}
+`;

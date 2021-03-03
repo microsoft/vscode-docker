@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RequestPromiseOptions } from "request-promise-native";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
+import { RequestLike } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
-import { getIconPath } from "../../IconPath";
+import { getIconPath } from "../../getThemedIconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { RegistryConnectErrorTreeItem } from "../RegistryConnectErrorTreeItem";
@@ -23,7 +23,6 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public baseUrl: string = 'https://gitlab.com/';
     public cachedProvider: ICachedRegistryProvider;
 
-    private _token?: string;
     private _nextLink?: string;
 
     public constructor(parent: AzExtParentTreeItem, provider: ICachedRegistryProvider) {
@@ -49,51 +48,33 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
     public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
+        }
 
-            try {
-                await this.refreshToken();
-            } catch (err) {
-                // If creds are invalid, the above refreshToken will fail
+        try {
+            const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;
+            let response = await registryRequest<IProject[]>(this, 'GET', url);
+            this._nextLink = getNextLinkFromHeaders(response);
+            return this.createTreeItemsWithErrorHandling(
+                response.body,
+                'invalidGitLabProject',
+                n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace.toLowerCase()),
+                n => n.path_with_namespace
+            );
+        } catch (err) {
+            const errorType: string = parseError(err).errorType.toLowerCase();
+            if (errorType === '401' || errorType === 'unauthorized') {
                 return [new RegistryConnectErrorTreeItem(this, err, this.cachedProvider)];
             }
         }
-
-        const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;
-        let response = await registryRequest<IProject[]>(this, 'GET', url);
-        this._nextLink = getNextLinkFromHeaders(response);
-        return this.createTreeItemsWithErrorHandling(
-            response.body,
-            'invalidGitLabProject',
-            n => new GitLabProjectTreeItem(this, n.id.toString(), n.path_with_namespace.toLowerCase()),
-            n => n.path_with_namespace
-        );
     }
 
     public hasMoreChildrenImpl(): boolean {
         return !!this._nextLink;
     }
 
-    public async addAuth(options: RequestPromiseOptions): Promise<void> {
-        if (this._token) {
-            options.auth = {
-                bearer: this._token
-            }
-        }
-    }
-
-    private async refreshToken(): Promise<void> {
-        this._token = undefined;
-        const options = {
-            form: {
-                /* eslint-disable-next-line camelcase */
-                grant_type: "password",
-                username: this.username,
-                password: await this.getPassword()
-            }
-        };
-
-        const response = await registryRequest<IToken>(this, 'POST', 'oauth/token', options);
-        this._token = response.body.access_token;
+    public async signRequest(request: RequestLike): Promise<RequestLike> {
+        request.headers.set('PRIVATE-TOKEN', await this.getPassword());
+        return request;
     }
 }
 
@@ -101,9 +82,4 @@ interface IProject {
     id: number;
     /* eslint-disable-next-line camelcase */
     path_with_namespace: string;
-}
-
-interface IToken {
-    /* eslint-disable-next-line camelcase */
-    access_token: string
 }

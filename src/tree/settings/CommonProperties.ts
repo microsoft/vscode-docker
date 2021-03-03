@@ -5,9 +5,9 @@
 
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
+import { ThemeIcon } from 'vscode';
 import { DockerObject } from '../../docker/Common';
 import { localize } from '../../localize';
-import { getThemedIconPath, IconPath } from '../IconPath';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
 dayjs.extend(relativeTime);
@@ -43,15 +43,15 @@ export function getCommonPropertyValue(item: DockerObject, property: CommonPrope
     }
 }
 
-export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): IconPath {
+export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): ThemeIcon {
     let icon: string;
     switch (property) {
         case 'CreatedTime':
-            icon = 'time';
+            icon = 'watch';
             break;
         default:
             throw new RangeError(localize('vscode-docker.tree.settings.unexpected2', 'Unexpected property "{0}".', property));
     }
 
-    return getThemedIconPath(icon);
+    return new ThemeIcon(icon);
 }

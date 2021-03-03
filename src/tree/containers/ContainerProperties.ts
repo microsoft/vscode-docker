@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeColor, ThemeIcon } from "vscode";
 import { localize } from "../../localize";
-import { getThemedIconPath, IconPath } from "../IconPath";
 import { imageProperties, ImageProperty } from "../images/ImageProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
@@ -21,8 +21,7 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'Compose Project Name', description: localize('vscode-docker.tree.containers.properties.composeProjectName', 'Value used to associate containers launched by a \'docker-compose up\' command') },
 ];
 
-export function getContainerStateIcon(state: string): IconPath {
-    let icon: string;
+export function getContainerStateIcon(state: string): ThemeIcon {
     switch (state.toLowerCase()) {
         case 'created':
         case 'dead':
@@ -31,17 +30,13 @@ export function getContainerStateIcon(state: string): IconPath {
         case 'terminated':
         case 'unknown':
         case 'waiting':
-            icon = 'statusStop';
-            break;
+            return new ThemeIcon('debug-stop', new ThemeColor('debugIcon.stopForeground'));
         case 'paused':
-            icon = 'statusPause';
-            break;
+            return new ThemeIcon('debug-pause', new ThemeColor('debugIcon.pauseForeground'));
         case 'restarting':
-            icon = 'restart';
-            break;
+            return new ThemeIcon('debug-restart', new ThemeColor('debugIcon.restartForeground'));
         case 'running':
         default:
-            icon = 'statusRun';
+            return new ThemeIcon('debug-start', new ThemeColor('debugIcon.startForeground'));
     }
-    return getThemedIconPath(icon);
 }

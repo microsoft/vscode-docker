@@ -6,9 +6,9 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import * as request from 'request-promise-native';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { streamToFile } from '../../utils/httpRequest';
 import { isWindows } from '../../utils/osUtils';
 import { execAsync } from '../../utils/spawnAsync';
 
@@ -60,8 +60,7 @@ async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
     }
 
     ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.acquiringScript', 'Acquiring latest VsDbg install script...'));
-    const responseStream = await request(acquisition.url);
-    await fse.writeFile(acquisition.scriptPath, responseStream);
+    await streamToFile(acquisition.url, acquisition.scriptPath);
 
     await ext.context.globalState.update(scriptAcquiredDateKey, Date.now());
     ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.scriptAcquired', 'Script acquired.'));
