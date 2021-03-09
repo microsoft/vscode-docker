@@ -23,7 +23,7 @@ export function registerListeners(): void {
 
         registerEvent('composefilesave', workspace.onDidSaveTextDocument, async (context: IActionContext, doc: TextDocument) => {
             // If it's not a compose file, skip
-            if (!/compose.*\.ya?ml$/i.test(doc.fileName)) {
+            if (doc.languageId !== 'dockercompose') {
                 context.telemetry.suppressAll = true;
                 return;
             }
