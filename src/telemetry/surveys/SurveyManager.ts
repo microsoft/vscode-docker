@@ -33,7 +33,6 @@ export class SurveyManager {
 
         for (const survey of currentSurveys) {
             // Generate a slush of +/- 3 seconds
-            // eslint-disable-next-line @typescript-eslint/tslint/config
             const slush = Math.round(Math.random() * slushTime * 2) - slushTime;
 
             const timer = setTimeout(

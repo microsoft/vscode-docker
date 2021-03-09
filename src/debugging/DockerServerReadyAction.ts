@@ -223,7 +223,6 @@ class DockerLogsTracker extends vscode.Disposable {
             this.logStream = await ext.dockerClient.getContainerLogs(context, this.containerName) as LogStream;
 
             this.logStream.on('data', (data) => {
-                // eslint-disable-next-line @typescript-eslint/tslint/config
                 this.detector.detectPattern(data.toString());
             });
         });
@@ -353,7 +352,6 @@ class DockerServerReadyDebugConfigurationProvider implements vscode.DebugConfigu
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/tslint/config
 export function registerServerReadyAction(context: vscode.ExtensionContext): void {
     context.subscriptions.push(vscode.debug.onDidTerminateDebugSession(session => {
         DockerDebugAdapterTrackerFactory.stop(session);
