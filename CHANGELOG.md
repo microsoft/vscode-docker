@@ -1,4 +1,4 @@
-## 1.10.0 - 15 March 2021
+## 1.11.0 - 15 March 2021
 ### Added
 * Scaffolding and debugging for Python FastAPI is now added. Thanks @Kludex! [#2615](https://github.com/microsoft/vscode-docker/issues/2615)
 
