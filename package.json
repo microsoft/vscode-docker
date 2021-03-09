@@ -173,10 +173,6 @@
                 {
                     "command": "vscode-docker.contexts.use",
                     "when": "!vscode-docker:contextLocked"
-                },
-                {
-                    "command": "vscode-docker.compose.up.subset",
-                    "when": "vscode-docker:composeSubsetExp"
                 }
             ],
             "editor/context": [
@@ -206,7 +202,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
@@ -243,7 +239,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },

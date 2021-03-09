@@ -144,7 +144,7 @@ function parseWindowsDirectoryItems(input: string, parentPath: string): Director
 export async function listLinuxContainerDirectory(executor: DockerContainerExecutor, parentPath: string): Promise<DirectoryItem[]> {
     const commandProvider: DockerExecCommandProvider = shell => {
         return shell === 'windows'
-            ? ['/bin/sh', '-c', `"ls -la \"${parentPath}\""`]
+            ? ['/bin/sh', '-c', `"ls -la '${parentPath}'"`]
             : ['/bin/sh', '-c', `ls -la "${parentPath}"`];
     };
 

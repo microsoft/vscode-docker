@@ -18,7 +18,7 @@ jobs:
 
 - job: macOS
   pool:
-    vmImage: macOS-latest
+    vmImage: macOS-10.14
   steps:
   - template: common/setup.yml
   - template: common/governance.yml   # Force governance before test to avoid false-positives.

@@ -373,12 +373,12 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
             isDockerStatusChanged = pollingDockerStatus !== this._currentDockerStatus;
         }
 
-        const hasChanged = !this.areArraysEqual(this._currentItems, this._itemsFromPolling) || isDockerStatusChanged
+        const hasChanged = !this.areArraysEqual(this._currentItems, this._itemsFromPolling) || isDockerStatusChanged;
         this._currentDockerStatus = pollingDockerStatus;
         return hasChanged;
     }
 
-    private areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
+    protected areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
         if (array1 === array2) {
             return true;
         } else if (array1 && array2) {
@@ -407,5 +407,5 @@ export function getTreeId(object: DockerObject): string {
     // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
     // *and* change the ID when the state of the object changes
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}${(object as any).Status}`;
+    return `${object.Id}${object.Name}${(object as any).State}${(object as any).Current}${(object as any).Outdated}`;
 }
