@@ -2724,7 +2724,7 @@
         "@types/semver": "^7.3.4",
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/tar-stream": "^2.2.0",
-        "@types/vscode": "1.55.0",
+        "@types/vscode": "1.54.0",
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.15.0",
         "@typescript-eslint/eslint-plugin-tslint": "^4.15.0",
