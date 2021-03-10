@@ -85,6 +85,7 @@ export class ContextTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        actionContext.telemetry.properties.tooltipType = 'context';
         return resolveTooltipMarkdown(contextTooltipTemplate, await this.inspect(actionContext));
     }
 }

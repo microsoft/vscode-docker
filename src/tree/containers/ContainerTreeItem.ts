@@ -136,6 +136,7 @@ export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implement
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
+        actionContext.telemetry.properties.tooltipType = 'container';
         return resolveTooltipMarkdown(containerTooltipTemplate, { NormalizedName: this.containerName, ...await ext.dockerClient.inspectContainer(actionContext, this.containerId) });
     }
 

@@ -60,6 +60,7 @@ export class NetworkTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        actionContext.telemetry.properties.tooltipType = 'network';
         return resolveTooltipMarkdown(networkTooltipTemplate, await ext.dockerClient.inspectNetwork(actionContext, this.networkName));
     }
 }
