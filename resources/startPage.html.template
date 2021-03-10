@@ -86,7 +86,7 @@
         {{#if showWhatsNew}}
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-star-empty" aria-label="What's new"></i>
+                <i class="codicon codicon-star-empty" alt=""></i>
             </div>
             <div>
                 <div>
@@ -104,7 +104,7 @@
         {{/if}}
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-new-file" aria-label="Add Docker files"></i>
+                <i class="codicon codicon-new-file" alt=""></i>
             </div>
             <div>
                 <div>
@@ -120,7 +120,7 @@
         </div>
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-play" aria-label="Run an image"></i>
+                <i class="codicon codicon-play" alt=""></i>
             </div>
             <div>
                 <div>
@@ -166,7 +166,7 @@
         </div>
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-cloud-upload" aria-label="Publish to the Cloud"></i>
+                <i class="codicon codicon-cloud-upload" alt=""></i>
             </div>
             <div>
                 <div>
