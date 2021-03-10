@@ -94,9 +94,9 @@
                 </div>
                 <div>
                     <ul>
-                        <li>Try the new <a href="command:vscode-docker.compose.up.subset?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Compose Up - Select Services</a> command in the command palette ({{#if isMac}}<kbd>⇧</kbd><kbd>⌘</kbd><kbd>P</kbd>{{else}}<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>{{/if}})</li>
-                        <li>The <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> view now has advanced tooltips containing a lot of useful info.</li>
-                        <li>Expand a container node in the <a href="command:dockerContainers.focus">Docker Explorer: Containers</a> panel to browse the container file system.</li>
+                        <li>The <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> view now has advanced tooltips! Hover your mouse over an item to see useful info.</li>
+                        <li>You can now open and download the files in a running container! Expand a container node to get started.</li>
+                        <li>Right-click on a Docker Compose file to try our new <a href="command:vscode-docker.compose.up.subset?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Compose Up - Select Services</a> command!</li>
                     </ul>
                 </div>
             </div>
