@@ -50,6 +50,7 @@ export class VolumeTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        actionContext.telemetry.properties.tooltipType = 'volume';
         return resolveTooltipMarkdown(volumeTooltipTemplate, await ext.dockerClient.inspectVolume(actionContext, this.volumeName));
     }
 }
