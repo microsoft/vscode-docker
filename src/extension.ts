@@ -103,16 +103,20 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             scheme: 'file',
             pattern: COMPOSE_FILE_GLOB_PATTERN
         };
+        const COMPOSE_MODE_ID: vscode.DocumentFilter = {
+            language: 'dockercompose',
+            scheme: 'file',
+        };
         let yamlHoverProvider = new DockerComposeHoverProvider(
             new DockerComposeParser(),
             composeVersionKeys.All
         );
         ctx.subscriptions.push(
-            vscode.languages.registerHoverProvider(YAML_MODE_ID, yamlHoverProvider)
+            vscode.languages.registerHoverProvider([YAML_MODE_ID, COMPOSE_MODE_ID], yamlHoverProvider)
         );
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
-                YAML_MODE_ID,
+                [YAML_MODE_ID, COMPOSE_MODE_ID],
                 new DockerComposeCompletionItemProvider(),
                 "."
             )
