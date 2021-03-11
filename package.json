@@ -2189,10 +2189,7 @@
                     "other": true,
                     "comments": false,
                     "strings": true
-                },
-                "editor.insertSpaces": true,
-                "editor.tabSize": 2,
-                "editor.autoIndent": "advanced"
+                }
             }
         },
         "commands": [

@@ -100,7 +100,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         const COMPOSE_MODE_ID: vscode.DocumentFilter = {
             language: 'dockercompose',
-            scheme: 'file'
+            scheme: 'file',
         };
         let composeHoverProvider = new DockerComposeHoverProvider(
             new DockerComposeParser(),
