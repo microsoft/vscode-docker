@@ -77,6 +77,7 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
+        actionContext.telemetry.properties.tooltipType = 'image';
         return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, NormalizedSize: getCommonPropertyValue(this._item, 'Size'), ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
     }
 }
