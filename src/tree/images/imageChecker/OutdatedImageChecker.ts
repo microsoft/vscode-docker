@@ -95,7 +95,9 @@ export class OutdatedImageChecker {
             // 2. Compare it with the current image's value
             const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
 
-            if (imageInspectInfo?.RepoDigests?.[0]?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0) {
+            // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date
+            //    The logic is reversed so that if something goes wrong, we will err toward calling it up-to-date
+            if (imageInspectInfo?.RepoDigests?.every(digest => digest?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0)) {
                 return 'outdated';
             }
 

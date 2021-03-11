@@ -9,7 +9,7 @@ import { ext } from "../extensionVariables";
 import { scaffold } from "../scaffolding/scaffold";
 import { scaffoldCompose } from "../scaffolding/scaffoldCompose";
 import { scaffoldDebugConfig } from "../scaffolding/scaffoldDebugConfig";
-import { activateComposeUpSubsetExperiment, composeDown, composeRestart, composeUp, composeUpSubset } from "./compose/compose";
+import { composeDown, composeRestart, composeUp, composeUpSubset } from "./compose/compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
 import { composeGroupDown, composeGroupLogs, composeGroupRestart } from "./containers/composeGroup";
@@ -119,7 +119,6 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.compose.restart', composeRestart);
     registerWorkspaceCommand('vscode-docker.compose.up', composeUp);
     registerWorkspaceCommand('vscode-docker.compose.up.subset', composeUpSubset);
-    void activateComposeUpSubsetExperiment();
     registerCommand('vscode-docker.pruneSystem', pruneSystem);
 
     registerWorkspaceCommand('vscode-docker.containers.attachShell', attachShellContainer);

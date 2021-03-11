@@ -83,9 +83,28 @@
             </div>
         </div>
         <hr />
+        {{#if showWhatsNew}}
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-new-file" aria-label="Add Docker files"></i>
+                <i class="codicon codicon-star-empty" alt=""></i>
+            </div>
+            <div>
+                <div>
+                    <h2>What's New</h2>
+                </div>
+                <div>
+                    <ul>
+                        <li>The <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> now has advanced tooltips! Hover your mouse over an item to see useful info.</li>
+                        <li>You can now open and download the files in a running container! Expand a container node to get started.</li>
+                        <li>Right-click on a Docker Compose file to try our new <a href="command:vscode-docker.compose.up.subset?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Compose Up - Select Services</a> command!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+        <div class="row">
+            <div class="icon">
+                <i class="codicon codicon-new-file" alt=""></i>
             </div>
             <div>
                 <div>
@@ -101,7 +120,7 @@
         </div>
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-play" aria-label="Run an image"></i>
+                <i class="codicon codicon-play" alt=""></i>
             </div>
             <div>
                 <div>
@@ -147,7 +166,7 @@
         </div>
         <div class="row">
             <div class="icon">
-                <i class="codicon codicon-cloud-upload" aria-label="Publish to the Cloud"></i>
+                <i class="codicon codicon-cloud-upload" alt=""></i>
             </div>
             <div>
                 <div>
@@ -157,7 +176,7 @@
                     <ul>
                         <li>Connect and view a container registry in the <a href="command:dockerRegistries.focus">Docker Explorer</a> using <a href="command:vscode-docker.registries.connectRegistry?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Registries: Connect Registry</a></li>
                         <li>Publish images with <a href="command:vscode-docker.images.push?%7B%22commandReason%22%3A%22startPage%22%7D">Docker Images: Push</a></li>
-                        {{#if showAzure}}<li>Deploy to <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Azure App Service</a> or to <a href="command:vscode-docker.registries.deployImageToAci?%7B%22commandReason%22%3A%22startPage%22%7D">Azure Container Instances</a></li>{{/if}}
+                        <li>Deploy to <a href="command:vscode-docker.registries.deployImageToAzure?%7B%22commandReason%22%3A%22startPage%22%7D">Azure App Service</a> or to <a href="command:vscode-docker.registries.deployImageToAci?%7B%22commandReason%22%3A%22startPage%22%7D">Azure Container Instances</a></li>
                     </ul>
                 </div>
             </div>

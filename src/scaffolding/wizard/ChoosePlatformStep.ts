@@ -54,6 +54,7 @@ export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardCon
             case '.NET: Core Console':
                 return getNetCoreSubWizardOptions(wizardContext);
             case 'Python: Django':
+            case 'Python: FastAPI':
             case 'Python: Flask':
             case 'Python: General':
                 return getPythonSubWizardOptions(wizardContext);

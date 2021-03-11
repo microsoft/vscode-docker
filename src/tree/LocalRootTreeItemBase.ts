@@ -373,12 +373,12 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
             isDockerStatusChanged = pollingDockerStatus !== this._currentDockerStatus;
         }
 
-        const hasChanged = !this.areArraysEqual(this._currentItems, this._itemsFromPolling) || isDockerStatusChanged
+        const hasChanged = !this.areArraysEqual(this._currentItems, this._itemsFromPolling) || isDockerStatusChanged;
         this._currentDockerStatus = pollingDockerStatus;
         return hasChanged;
     }
 
-    private areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
+    protected areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
         if (array1 === array2) {
             return true;
         } else if (array1 && array2) {

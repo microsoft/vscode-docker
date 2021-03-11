@@ -6,7 +6,6 @@
 import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
-import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
 import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
@@ -83,12 +82,6 @@ export async function composeDown(context: IActionContext, dockerComposeFileUri?
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down', 'up'], localize('vscode-docker.commands.compose.chooseRestart', 'Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
-}
-
-export async function activateComposeUpSubsetExperiment(): Promise<void> {
-    if (await ext.experimentationService.isCachedFlightEnabled('vscode-docker.composeSubset')) {
-        await vscode.commands.executeCommand('setContext', 'vscode-docker:composeSubsetExp', true);
-    }
 }
 
 const serviceListPlaceholder = /\${serviceList}/i;

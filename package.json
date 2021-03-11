@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.10.5-alpha",
+    "version": "1.11.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -118,6 +118,7 @@
         "onFileSystem:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
+        "onLanguage:dockercompose",
         "onView:dockerContainers",
         "onView:dockerImages",
         "onView:dockerNetworks",
@@ -173,10 +174,6 @@
                 {
                     "command": "vscode-docker.contexts.use",
                     "when": "!vscode-docker:contextLocked"
-                },
-                {
-                    "command": "vscode-docker.compose.up.subset",
-                    "when": "vscode-docker:composeSubsetExp"
                 }
             ],
             "editor/context": [
@@ -206,7 +203,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
@@ -243,7 +240,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i && vscode-docker:composeSubsetExp",
+                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
@@ -810,6 +807,11 @@
                                         "description": "%vscode-docker.debug.python.django%",
                                         "default": false
                                     },
+                                    "fastapi": {
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.debug.python.fastapi%",
+                                        "default": false
+                                    },
                                     "jinja": {
                                         "type": "boolean",
                                         "description": "%vscode-docker.debug.python.jinja%",
@@ -820,6 +822,7 @@
                                         "description": "%vscode-docker.debug.python.projectType%",
                                         "enum": [
                                             "django",
+                                            "fastapi",
                                             "flask",
                                             "general"
                                         ]
@@ -1328,6 +1331,13 @@
                                         "type": "string",
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.customOptions%"
                                     }
+                                }
+                            },
+                            "envFiles": {
+                                "type": "array",
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.envFiles.description%",
+                                "items": {
+                                    "type": "string"
                                 }
                             },
                             "files": {

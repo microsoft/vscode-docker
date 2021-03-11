@@ -7,12 +7,13 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import { Platform } from './platform';
 
-export type PythonProjectType = 'django' | 'flask' | 'general';
+export type PythonProjectType = 'django' | 'fastapi' | 'flask' | 'general';
 
 export const PythonFileExtension = ".py";
 export const PythonDefaultDebugPort: number = 5678;
 export const PythonDefaultPorts = new Map<PythonProjectType, number | undefined>([
     ['django', 8000],
+    ['fastapi', 8000],
     ['flask', 5000],
     ['general', undefined],
 ]);
@@ -35,6 +36,11 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
                 '--nothreading',
                 '--noreload'
             ];
+        case 'fastapi':
+            return [
+                '--host', '0.0.0.0',
+                '--port', `${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
+            ]
         case 'flask':
             return [
                 'run',
@@ -52,6 +58,8 @@ export function getPythonProjectType(platform: Platform): PythonProjectType | un
     switch (platform) {
         case 'Python: Django':
             return 'django';
+        case 'Python: FastAPI':
+            return 'fastapi';
         case 'Python: Flask':
             return 'flask';
         case 'Python: General':

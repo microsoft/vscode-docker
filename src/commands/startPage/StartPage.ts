@@ -21,7 +21,7 @@ interface StartPageContext {
     dockerIconUri: string;
     showStartPageChecked: 'checked' | '';
     isMac: boolean;
-    showAzure: boolean;
+    showWhatsNew: boolean;
 }
 
 class StartPage {
@@ -71,7 +71,7 @@ class StartPage {
             dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker_blue.png')).toString(),
             showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
             isMac: isMac(),
-            showAzure: await ext.experimentationService.isCachedFlightEnabled('vscode-docker.startPageAzureText'),
+            showWhatsNew: !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew')),
         };
 
         const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));

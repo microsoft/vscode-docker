@@ -18,6 +18,10 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
                 wizardContext.pythonProjectType = 'django';
                 await this.getDjangoCmdParts(wizardContext);
                 break;
+            case 'Python: FastAPI':
+                wizardContext.pythonProjectType = 'fastapi';
+                await this.getFastAPICmdParts(wizardContext);
+                break;
             case 'Python: Flask':
                 wizardContext.pythonProjectType = 'flask';
                 await this.getFlaskCmdParts(wizardContext);
@@ -64,6 +68,38 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             'sh',
             '-c',
             `${debugCmdPart} ${app.join(' ')} ${args.join(' ')}`,
+        ];
+
+        wizardContext.debugPorts = [PythonDefaultDebugPort];
+    }
+
+    private async getFastAPICmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
+        const { args, bindPort } = this.getCommonProps(wizardContext);
+
+        let asgiModule: string;
+
+        if ('module' in wizardContext.pythonArtifact) {
+            asgiModule = wizardContext.pythonArtifact.module;
+        } else if ('file' in wizardContext.pythonArtifact) {
+            asgiModule = wizardContext.pythonArtifact.file.replace(/\.[^/.]+$/, '');
+        }
+
+        // Replace forward-slashes with dots.
+        asgiModule = asgiModule.replace(/\//g, '.');
+
+        wizardContext.pythonCmdParts = [
+            'gunicorn',
+            '--bind',
+            `0.0.0.0:${bindPort}`,
+            '-k',
+            'uvicorn.workers.UvicornWorker',
+            `${asgiModule}:app`,
+        ];
+
+        wizardContext.pythonDebugCmdParts = [
+            'sh',
+            '-c',
+            `${debugCmdPart} -m uvicorn ${asgiModule}:app ${args.join(' ')}`,
         ];
 
         wizardContext.debugPorts = [PythonDefaultDebugPort];
