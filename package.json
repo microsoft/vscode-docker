@@ -118,6 +118,7 @@
         "onFileSystem:docker",
         "onLanguage:dockerfile",
         "onLanguage:yaml",
+        "onLanguage:dockercompose",
         "onView:dockerContainers",
         "onView:dockerImages",
         "onView:dockerNetworks",

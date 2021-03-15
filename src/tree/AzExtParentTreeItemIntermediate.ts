@@ -24,7 +24,6 @@ export abstract class AzExtParentTreeItemIntermediate extends AzExtParentTreeIte
                 // TODO: when possible we should remove this
                 // @ts-expect-error
                 return await callWithTelemetryAndErrorHandling('resolveTooltip', async (actionContext: IActionContext) => {
-                    actionContext.telemetry.suppressIfSuccessful = true;
                     actionContext.errorHandling.suppressDisplay = true;
                     actionContext.errorHandling.rethrow = true;
 
