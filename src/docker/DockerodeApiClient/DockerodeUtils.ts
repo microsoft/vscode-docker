@@ -47,7 +47,6 @@ export function refreshDockerode(currentContext: DockerContext): Dockerode {
     // If the docker.dockerodeOptions setting is present, use it only
     const config = workspace.getConfiguration('docker');
     const overrideDockerodeOptions = config.get('dockerodeOptions');
-    // eslint-disable-next-line @typescript-eslint/tslint/config
     if (overrideDockerodeOptions && Object.keys(overrideDockerodeOptions).length > 0) {
         return new Dockerode(<Dockerode.DockerOptions>overrideDockerodeOptions);
     }

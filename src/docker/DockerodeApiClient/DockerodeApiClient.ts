@@ -112,7 +112,6 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                     const stderr = new stream.PassThrough();
 
                     // TODO: Get demuxStream() included in type definition.
-                    // eslint-disable-next-line @typescript-eslint/tslint/config
                     container.modem.demuxStream(execStream, stdout, stderr);
 
                     stdout.on('data', chunk => {
@@ -329,7 +328,6 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             return {
                 ...ni,
                 Driver: ni.Driver as DriverType,
-                // eslint-disable-next-line @typescript-eslint/tslint/config
                 CreatedTime: new Date(ni.Created).valueOf(),
             }
         });
@@ -341,7 +339,6 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         return {
             ...result,
-            // eslint-disable-next-line @typescript-eslint/tslint/config
             CreatedTime: new Date(result.Created).valueOf(),
         };
     }
@@ -369,7 +366,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         return result.map(vi => {
             return {
                 ...vi,
-                // eslint-disable-next-line @typescript-eslint/tslint/config, @typescript-eslint/no-explicit-any
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 CreatedTime: new Date((vi as any).CreatedAt).valueOf(),
                 Id: undefined, // Not defined for volumes
             }
@@ -391,7 +388,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         return {
             ...result,
-            // eslint-disable-next-line @typescript-eslint/tslint/config, @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             CreatedTime: new Date((result as any).CreatedAt).valueOf(),
             Id: undefined, // Not defined for volumes
             Containers: containersObject,
