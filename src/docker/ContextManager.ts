@@ -74,7 +74,6 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         // The file watchers are not strictly necessary; they serve to help the extension detect context switches
         // that are done in CLI. Worst case, a user would have to restart VSCode.
-        /* eslint-disable @typescript-eslint/tslint/config */
         try {
             if (fse.existsSync(dockerConfigFile)) {
                 this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
@@ -86,7 +85,6 @@ export class DockerContextManager implements ContextManager, Disposable {
                 this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
             }
         } catch { } // Best effort
-        /* eslint-enable @typescript-eslint/tslint/config */
     }
 
     public dispose(): void {
@@ -191,9 +189,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         return this.newCli.getValue();
     }
 
-    // eslint-disable-next-line @typescript-eslint/tslint/config
     private async loadContexts(): Promise<DockerContext[]> {
-        // eslint-disable-next-line @typescript-eslint/tslint/config
         let loadResult = await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
             // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
             actionContext.telemetry.properties.isActivationEvent = 'true';
