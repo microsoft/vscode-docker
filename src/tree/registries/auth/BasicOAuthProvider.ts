@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { basicAuthHeader, bearerAuthHeader, httpRequest, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
+import { basicAuthHeader, bearerAuthHeader, httpRequest, HttpResponse, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
@@ -21,7 +21,6 @@ class BasicOAuthProvider implements IAuthProvider {
         }
 
         const options: RequestInit = {
-            method: 'POST',
             form: {
                 'grant_type': 'password',
                 'service': authContext.service,
@@ -32,7 +31,16 @@ class BasicOAuthProvider implements IAuthProvider {
             },
         };
 
-        const tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), options);
+        let tokenResponse: HttpResponse<{ token: string }>;
+        try {
+            // First try with POST
+            tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), { method: 'POST', ...options });
+        } catch {
+            // If that fails, try falling back to GET
+            // (If that fails we'll just throw)
+            tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), { method: 'GET', ...options });
+        }
+
         request.headers.set('Authorization', bearerAuthHeader((await tokenResponse.json()).token));
         return request;
     }
