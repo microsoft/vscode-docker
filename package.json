@@ -614,6 +614,11 @@
                     "group": "contexts_1_general@2"
                 },
                 {
+                    "command": "vscode-docker.contexts.use",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i && !vscode-docker:contextLocked",
+                    "group": "inline"
+                },
+                {
                     "command": "vscode-docker.contexts.remove",
                     "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /^customContext/i",
                     "group": "contexts_2_destructive@1"
@@ -2607,7 +2612,8 @@
             {
                 "command": "vscode-docker.contexts.use",
                 "title": "%vscode-docker.commands.contexts.use%",
-                "category": "%vscode-docker.commands.category.contexts%"
+                "category": "%vscode-docker.commands.category.contexts%",
+                "icon": "$(check)"
             },
             {
                 "command": "vscode-docker.contexts.remove",
