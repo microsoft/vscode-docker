@@ -43,7 +43,6 @@ export class JavaGatherInformationStep extends GatherInformationStep<JavaScaffol
             } else {
                 // Otherwise it's a gradle file, parse with that
                 this.javaProjectType = 'gradle';
-                // eslint-disable-next-line @typescript-eslint/tslint/config
                 const gradleObject = <GradleContents>await gradleParser.parseText(contents);
 
                 wizardContext.version = gradleObject?.jar?.version || gradleObject?.version || '0.0.1';
