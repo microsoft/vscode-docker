@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent } from 'vscode-azureextensionui';
 import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -26,7 +26,21 @@ export interface DockerAttachConfiguration extends NetCoreDockerDebugConfigurati
 export class DockerDebugConfigurationProvider implements DebugConfigurationProvider {
     public constructor(
         private readonly helpers: { [key in DockerPlatform]: DebugHelper }
-    ) { }
+    ) {
+        // Listen for debug termination events to shut down debug containers as needed
+        registerEvent('debugTermination', debug.onDidTerminateDebugSession, async (context: IActionContext, session: DebugSession) => {
+            context.errorHandling.suppressDisplay = true;
+            context.telemetry.suppressAll = true;
+            await this.removeDebugContainerIfNeeded(context, session.configuration);
+        });
+
+        // Listen for debug start events to emit ports being listened on as needed
+        registerEvent('debugStart', debug.onDidStartDebugSession, async (context: IActionContext, session: DebugSession) => {
+            context.errorHandling.suppressDisplay = true;
+            context.telemetry.suppressAll = true;
+            await this.outputPortsAtDebuggingIfNeeded(context, session.configuration);
+        });
+    }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
         const add: MessageItem = { title: localize('vscode-docker.debug.configProvider.addDockerFiles', 'Add Docker Files') };
@@ -98,8 +112,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
         if (resolvedConfiguration) {
             await this.validateResolvedConfiguration(resolvedConfiguration);
-            await this.registerRemoveContainerAfterDebugging(context.actionContext, resolvedConfiguration);
-            await this.registerOutputPortsAtDebugging(context.actionContext, resolvedConfiguration);
+            await this.removeDebugContainerIfNeeded(context.actionContext, resolvedConfiguration);
         }
 
         return resolvedConfiguration;
@@ -113,67 +126,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    private async registerRemoveContainerAfterDebugging(context: IActionContext, resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
-        if ((resolvedConfiguration.dockerOptions?.removeContainerAfterDebug ?? true) &&
-            resolvedConfiguration.dockerOptions?.containerName) {
-            try {
-                await ext.dockerClient.removeContainer(context, resolvedConfiguration.dockerOptions.containerName);
-            } catch { }
-
-            // Now register the container for removal after the debug session ends
-            const disposable = debug.onDidTerminateDebugSession(async session => {
-                const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
-
-                // Don't do anything if this isn't our debug session, or if it's a subprocess debug session (which is how Python does hot reload sessions)
-                if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName && !(sessionConfiguration?.subProcessId)) {
-                    try {
-                        await ext.dockerClient.removeContainer(context, resolvedConfiguration.dockerOptions.containerName);
-                    } finally {
-                        disposable.dispose();
-                    }
-                }
-            });
-        }
-    }
-
-    private async registerOutputPortsAtDebugging(context: IActionContext, resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
-        if (resolvedConfiguration?.dockerOptions?.containerName) {
-            const disposable = debug.onDidStartDebugSession(async session => {
-                const sessionConfiguration = <ResolvedDebugConfiguration>session.configuration;
-
-                // Don't do anything if this isn't our debug session
-                if (sessionConfiguration?.dockerOptions?.containerName === resolvedConfiguration.dockerOptions.containerName) {
-                    try {
-                        const inspectInfo = await ext.dockerClient.inspectContainer(context, resolvedConfiguration.dockerOptions.containerName);
-                        const portMappings: string[] = [];
-
-                        if (inspectInfo?.NetworkSettings?.Ports) {
-                            for (const containerPort of Object.keys(inspectInfo.NetworkSettings.Ports)) {
-                                const mappings = inspectInfo.NetworkSettings.Ports[containerPort];
-
-                                if (mappings) {
-                                    for (const mapping of mappings) {
-                                        if (mapping?.HostPort) {
-                                            // TODO: if we ever do non-localhost debugging this would need to change
-                                            portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (portMappings.length > 0) {
-                            ext.outputChannel.appendLine(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
-                            ext.outputChannel.appendLine(portMappings.join('\n'));
-                        }
-                    } finally {
-                        disposable.dispose();
-                    }
-                }
-            });
-        }
-    }
-
     private getHelper(platform: DockerPlatform): DebugHelper {
         const helper = this.helpers[platform];
 
@@ -182,5 +134,44 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
 
         return helper;
+    }
+
+    private async removeDebugContainerIfNeeded(context: IActionContext, configuration: ResolvedDebugConfiguration): Promise<void> {
+        if ((configuration?.dockerOptions?.removeContainerAfterDebug ?? true) && // removeContainerAfterDebug must be undefined or true
+            configuration?.dockerOptions?.containerName && // containerName must be specified
+            !(configuration?.subProcessId)) { // Must not have subProcessId, i.e. not a subprocess debug session (which is how Python does hot reload sessions)
+            try {
+                await ext.dockerClient.removeContainer(context, configuration.dockerOptions.containerName);
+            } catch { } // Best effort
+        }
+    }
+
+    private async outputPortsAtDebuggingIfNeeded(context: IActionContext, configuration: ResolvedDebugConfiguration): Promise<void> {
+        if (configuration?.dockerOptions?.containerName) {
+            try {
+                const inspectInfo = await ext.dockerClient.inspectContainer(context, configuration.dockerOptions.containerName);
+                const portMappings: string[] = [];
+
+                if (inspectInfo?.NetworkSettings?.Ports) {
+                    for (const containerPort of Object.keys(inspectInfo.NetworkSettings.Ports)) {
+                        const mappings = inspectInfo.NetworkSettings.Ports[containerPort];
+
+                        if (mappings) {
+                            for (const mapping of mappings) {
+                                if (mapping?.HostPort) {
+                                    // TODO: if we ever do non-localhost debugging this would need to change
+                                    portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (portMappings.length > 0) {
+                    ext.outputChannel.appendLine(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
+                    ext.outputChannel.appendLine(portMappings.join('\n'));
+                }
+            } catch { } // Best effort
+        }
     }
 }
