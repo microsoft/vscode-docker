@@ -13,15 +13,12 @@ services:
 {{#if ports}}
     ports:
 {{#each ports}}
-{{#unless (eq . 443)}}
       - {{ . }}
-{{/unless}}
 {{/each}}
 {{/if}}
 {{#if ports}}
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:{{ ports.[0] }}
 {{/if}}
     volumes:
 {{#if (eq netCorePlatformOS 'Windows')}}
