@@ -146,6 +146,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 
         const ssl = !!helperOptions.configureSsl; // SSL will be enabled only if helperOptions.configureSsl is explicitly true
+        context.actionContext.telemetry.properties.netCoreSslSetting = helperOptions.configureSsl === undefined ? 'undefined' : helperOptions.configureSsl.toString();
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
 
         runOptions.env = runOptions.env || {};
