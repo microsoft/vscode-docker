@@ -12,6 +12,7 @@ import { parseError } from 'vscode-azureextensionui';
 import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
@@ -258,8 +259,15 @@ export class NetCoreTaskHelper implements TaskHelper {
         }
 
         if (userSecrets || ssl) {
+            // Try to get a container username from the image (best effort only)
+            let userName: string | undefined;
+            try {
+                const imageInspection = await ext.dockerClient.inspectImage(undefined, runOptions.image);
+                userName = imageInspection?.Config?.User;
+            } catch { } // Best effort
+
             const hostSecretsFolders = getHostSecretsFolders();
-            const containerSecretsFolders = getContainerSecretsFolders(runOptions.os);
+            const containerSecretsFolders = getContainerSecretsFolders(runOptions.os, userName);
 
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.hostUserSecretsFolder,
