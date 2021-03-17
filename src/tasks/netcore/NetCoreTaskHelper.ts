@@ -43,15 +43,6 @@ export interface NetCoreTaskScaffoldingOptions {
     platformOS?: PlatformOS;
 }
 
-interface LaunchProfile {
-    applicationUrl?: string;
-    commandName?: string;
-}
-
-interface LaunchSettings {
-    profiles?: { [key: string]: LaunchProfile };
-}
-
 const UserSecretsRegex = /UserSecretsId/i;
 const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
 const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
@@ -154,7 +145,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.os = runOptions.os || 'Linux';
         runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
 
-        const ssl = helperOptions.configureSsl !== undefined ? helperOptions.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, helperOptions);
+        const ssl = !!helperOptions.configureSsl; // SSL will be enabled only if helperOptions.configureSsl is explicitly true
         const userSecrets = ssl === true ? true : await this.inferUserSecrets(helperOptions);
 
         runOptions.env = runOptions.env || {};
@@ -162,11 +153,6 @@ export class NetCoreTaskHelper implements TaskHelper {
 
         if (userSecrets) {
             runOptions.env.ASPNETCORE_ENVIRONMENT = runOptions.env.ASPNETCORE_ENVIRONMENT || 'Development';
-
-            if (ssl) {
-                // tslint:disable-next-line: no-http-string
-                runOptions.env.ASPNETCORE_URLS = runOptions.env.ASPNETCORE_URLS || 'https://+:443;http://+:80';
-            }
         }
 
         runOptions.volumes = await this.inferVolumes(context.folder, runOptions, helperOptions, ssl, userSecrets); // Volumes specifically are unioned with the user input (their input does not override except where the container path is the same)
@@ -197,27 +183,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         }
 
         return result;
-    }
-
-    public static async inferSsl(folder: WorkspaceFolder, helperOptions: NetCoreTaskOptions): Promise<boolean> {
-        try {
-            const launchSettingsPath = path.join(path.dirname(helperOptions.appProject), 'Properties', 'launchSettings.json');
-
-            if (await fse.pathExists(launchSettingsPath)) {
-                const launchSettings = <LaunchSettings>await fse.readJson(launchSettingsPath);
-
-                if (launchSettings && launchSettings.profiles) {
-                    // launchSettings.profiles is a dictionary instead of an array, so need to get the values and look for one that has commandName: 'Project'
-                    const projectProfile = Object.values(launchSettings.profiles).find(p => p.commandName === 'Project');
-
-                    if (projectProfile && projectProfile.applicationUrl && /https:\/\//i.test(projectProfile.applicationUrl)) {
-                        return true;
-                    }
-                }
-            }
-        } catch { }
-
-        return false;
     }
 
     public static async isWebApp(appProject: string): Promise<boolean> {
