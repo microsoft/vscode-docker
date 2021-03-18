@@ -30,7 +30,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         const crmClient = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         const appSvcClient = createAzureClient(context, armAppService.WebSiteManagementClient);
 
-        // If we're in execute, then `shouldExecute` passed and `this.treeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
+        // If we're in `execute`, then `shouldExecute` passed and `this.tagTreeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
         const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as AzureRegistryTreeItem;
 
         // 1. Get the registry resource. We will need the ID.
