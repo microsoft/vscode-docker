@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import { env, Progress, Uri, window } from "vscode";
+import { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
+import { env, Uri, window } from "vscode";
 import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, createAzureClient, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
@@ -20,7 +20,9 @@ import { registryExpectedContextValues } from '../../../tree/registries/registry
 import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
+import { nonNullProp } from "../../../utils/nonNull";
+import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
+import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
 
 export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
@@ -55,7 +57,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const siteConfig: WebSiteManagementModels.SiteConfig = await getNewSiteConfig(node);
     const executeSteps: AzureWizardExecuteStep<IAppServiceWizardContext>[] = [
         new DockerSiteCreateStep(siteConfig),
-        new DockerWebhookCreateStep(node)
+        new DockerAssignAcrPullRoleStep(node),
+        new DockerWebhookCreateStep(node),
     ];
 
     const title = localize('vscode-docker.commands.registries.azure.deployImage.title', 'Create new web app');
@@ -85,22 +88,18 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
     let username: string | undefined;
     let password: string | undefined;
     let appSettings: WebSiteManagementModels.NameValuePair[] = [];
+    let acrUseManagedIdentityCreds: boolean | undefined;
     if (registryTI instanceof DockerHubNamespaceTreeItem) {
         username = registryTI.parent.username;
         password = await registryTI.parent.getPassword();
+    } else if (registryTI instanceof AzureRegistryTreeItem) {
+        // Don't need username / password, just linuxFxVersion (set below) and acrUseManagedIdentityCreds = true
+        acrUseManagedIdentityCreds = true;
+        appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
     } else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
 
-        if (registryTI instanceof AzureRegistryTreeItem) {
-            const cred = await registryTI.tryGetAdminCredentials();
-            if (!cred) {
-                throw new Error(localize('vscode-docker.commands.registries.azure.deployImage.notAdminEnabled', 'Azure App service currently only supports running images from Azure Container Registries with admin enabled'));
-            } else {
-                username = cred.username;
-                password = nonNullProp(cred, 'passwords')[0].value;
-            }
-            appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
-        } else if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
+        if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
             username = registryTI.cachedProvider.username;
             password = await getRegistryPassword(registryTI.cachedProvider);
         } else {
@@ -119,37 +118,7 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
 
     return {
         linuxFxVersion,
-        appSettings
+        appSettings,
+        acrUseManagedIdentityCreds,
     };
-}
-
-class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
-    public priority: number = 140;
-
-    private _siteConfig: WebSiteManagementModels.SiteConfig;
-
-    public constructor(siteConfig: WebSiteManagementModels.SiteConfig) {
-        super();
-        this._siteConfig = siteConfig;
-    }
-
-    public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const creatingNewApp: string = localize('vscode-docker.commands.registries.azure.deployImage.creatingWebApp', 'Creating web app "{0}"...', context.newSiteName);
-        ext.outputChannel.appendLine(creatingNewApp);
-        progress.report({ message: creatingNewApp });
-
-        const armAppService = await import('@azure/arm-appservice');
-        const client: WebSiteManagementClient = createAzureClient(context, armAppService.WebSiteManagementClient);
-        context.site = await client.webApps.createOrUpdate(nonNullValueAndProp(context.resourceGroup, 'name'), nonNullProp(context, 'newSiteName'), {
-            name: context.newSiteName,
-            kind: 'app,linux',
-            location: nonNullValueAndProp(context.location, 'name'),
-            serverFarmId: nonNullValueAndProp(context.plan, 'id'),
-            siteConfig: this._siteConfig
-        });
-    }
-
-    public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !context.site;
-    }
 }
