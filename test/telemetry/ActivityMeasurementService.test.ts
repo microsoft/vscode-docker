@@ -6,7 +6,15 @@
 import * as assert from 'assert';
 import { ActivityMeasurementService } from '../../extension.bundle';
 import { TestMemento } from '../TestMemento';
-import { assertSameDate } from '../assertEx';
+
+function assertSameDate(a: number, b: number): void {
+    const dateA = new Date(a);
+    const dateB = new Date(b);
+
+    assert(dateA.getFullYear() === dateB.getFullYear());
+    assert(dateA.getMonth() === dateB.getMonth());
+    assert(dateA.getDate() === dateB.getDate());
+}
 
 suite('(unit) telemetry/ActivityMeasurementService', async () => {
     test('Default data returned', async () => {
