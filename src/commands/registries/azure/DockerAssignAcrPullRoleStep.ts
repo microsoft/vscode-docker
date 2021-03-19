@@ -48,6 +48,11 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
             roleDefinitionId: acrPullRoleDefinition.id,
             principalType: 'ServicePrincipal',
         });
+
+        // 5. Set the web app to use the desired ACR image, which was not done in DockerSiteCreateStep. Get the config and then update it.
+        const config = await appSvcClient.webApps.getConfiguration(context.site.resourceGroup, context.site.name);
+        config.linuxFxVersion = `DOCKER|${registryTreeItem.baseImagePath}/${this.tagTreeItem.repoNameAndTag}`;
+        await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {

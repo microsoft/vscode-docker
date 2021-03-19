@@ -88,14 +88,18 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
     let username: string | undefined;
     let password: string | undefined;
     let appSettings: WebSiteManagementModels.NameValuePair[] = [];
-    let acrUseManagedIdentityCreds: boolean | undefined;
-    if (registryTI instanceof DockerHubNamespaceTreeItem) {
+
+    if (registryTI instanceof AzureRegistryTreeItem) {
+        appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
+
+        // Don't need an image, username, or password--just create an empty web app to assign permissions and then configure with an image
+        return {
+            acrUseManagedIdentityCreds: true,
+            appSettings
+        };
+    } else if (registryTI instanceof DockerHubNamespaceTreeItem) {
         username = registryTI.parent.username;
         password = await registryTI.parent.getPassword();
-    } else if (registryTI instanceof AzureRegistryTreeItem) {
-        // Don't need username / password, just linuxFxVersion (set below) and acrUseManagedIdentityCreds = true
-        acrUseManagedIdentityCreds = true;
-        appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
     } else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
 
@@ -118,7 +122,6 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
 
     return {
         linuxFxVersion,
-        appSettings,
-        acrUseManagedIdentityCreds,
+        appSettings
     };
 }
