@@ -36,11 +36,29 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         // 1. Get the registry resource. We will need the ID.
         const registry = await crmClient.registries.get(registryTreeItem.resourceGroup, registryTreeItem.registryName);
 
-        // 2. Get the role definition for the AcrPull role. We will need the definition ID.
+        if (!(registry?.id)) {
+            throw new Error(
+                localize('vscode-docker.commands.registries.deployImage.noRegistryId', 'Unable to get details from Container Registry {0}', registryTreeItem.baseUrl)
+            );
+        }
+
+        // 2. Get the role definition for the AcrPull role. We will need the definition ID. This role is built-in and should always exist.
         const acrPullRoleDefinition = (await authClient.roleDefinitions.list(registry.id, { filter: `roleName eq 'AcrPull'` }))[0];
+
+        if (!(acrPullRoleDefinition?.id)) {
+            throw new Error(
+                localize('vscode-docker.commands.registries.deployImage.noRoleDefinition', 'Unable to get AcrPull role definition on subscription {0}', context.subscriptionId)
+            );
+        }
 
         // 3. Get the info for the now-created web site. We will need the principal ID.
         const siteInfo = await appSvcClient.webApps.get(context.site.resourceGroup, context.site.name);
+
+        if (!(siteInfo?.identity?.principalId)) {
+            throw new Error(
+                localize('vscode-docker.commands.registries.deployImage.noPrincipalid', 'Unable to get identity principal ID for web site {0}', context.site.name)
+            );
+        }
 
         // 4. On the registry, assign the AcrPull role to the principal representing the website
         await authClient.roleAssignments.create(registry.id, (await import('uuid')).v4(), {
@@ -51,6 +69,13 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         // 5. Set the web app to use the desired ACR image, which was not done in DockerSiteCreateStep. Get the config and then update it.
         const config = await appSvcClient.webApps.getConfiguration(context.site.resourceGroup, context.site.name);
+
+        if (!config) {
+            throw new Error(
+                localize('vscode-docker.commands.registries.deployImage.updateConfig', 'Unable to get configuration for web site {0}', context.site.name)
+            );
+        }
+
         config.linuxFxVersion = `DOCKER|${registryTreeItem.baseImagePath}/${this.tagTreeItem.repoNameAndTag}`;
         await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }
