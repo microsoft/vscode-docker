@@ -128,9 +128,13 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             return false;
         }
 
-        // If they are both undefined, return true (matches the behavior of the base class implementation)
+        // If they are both undefined, return true
+        // If only one is undefined, return false
+        // This matches the behavior of the base class implementation, and guards against null refs below
         if (array1 === undefined && array2 === undefined) {
             return true;
+        } else if (array1 === undefined || array2 === undefined) {
+            return false;
         }
 
         // Containers' labels/descriptions (status in particular) can change. If they do, we want to cause a refresh. But, we also don't want to change the tree ID based on status (in `getTreeId()` in LocalRootTreeItemBase.ts).
