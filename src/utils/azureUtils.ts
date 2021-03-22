@@ -74,6 +74,7 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
 
 export async function promptForAciCloud(context: IActionContext): Promise<string> {
     let result: string;
+    const other = 'Other';
     const wellKnownClouds: IAzureQuickPickItem<string>[] = [
         {
             label: localize('vscode-docker.azureUtils.publicCloud', 'Public'),
@@ -92,16 +93,16 @@ export async function promptForAciCloud(context: IActionContext): Promise<string
             data: 'AzureUSGovernment',
         },
         {
-            label: localize('vscode-docker.azureUtils.otherCloud', 'Other...'),
-            data: 'Other',
+            label: localize('vscode-docker.azureUtils.otherCloud', 'Other (specify)...'),
+            data: other,
         },
     ];
 
-    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose a cloud to log in to') });
+    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
 
-    if (choice.data === 'Other') {
+    if (choice.data === other) {
         // The user wants to enter a different cloud name, so prompt with an input box
-        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter a cloud name') });
+        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
     } else {
         result = choice.data;
     }
