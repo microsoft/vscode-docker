@@ -128,6 +128,11 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             return false;
         }
 
+        // If they are both undefined, return true (matches the behavior of the base class implementation)
+        if (array1 === undefined && array2 === undefined) {
+            return true;
+        }
+
         // Containers' labels/descriptions (status in particular) can change. If they do, we want to cause a refresh. But, we also don't want to change the tree ID based on status (in `getTreeId()` in LocalRootTreeItemBase.ts).
         return !array1.some((item, index) => {
             return this.getTreeItemLabel(item) !== this.getTreeItemLabel(array2[index]) ||
