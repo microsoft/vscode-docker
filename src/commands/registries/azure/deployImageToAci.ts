@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { ContextTreeItem } from '../../../tree/contexts/ContextTreeItem';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { promptForAciCloud } from '../../../utils/azureUtils';
 import { executeAsTask } from '../../../utils/executeAsTask';
 import { execAsync } from '../../../utils/spawnAsync';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
@@ -81,4 +80,43 @@ async function getImagePorts(fullTag: string): Promise<number[]> {
         const error = parseError(err);
         throw new Error(localize('vscode-docker.commands.registries.deployImageToAci.portsError', 'Unable to determine ports to expose. The error is: {0}', error.message));
     }
+}
+
+async function promptForAciCloud(context: IActionContext): Promise<string> {
+    let result: string;
+    const other = 'Other';
+    const wellKnownClouds: IAzureQuickPickItem<string>[] = [
+        {
+            label: localize('vscode-docker.azureUtils.publicCloud', 'Public'),
+            data: 'AzureCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'),
+            data: 'AzureGermanCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.chinaCloud', 'China'),
+            data: 'AzureChinaCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.usGovtCloud', 'US Government'),
+            data: 'AzureUSGovernment',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.otherCloud', 'Other (specify)...'),
+            data: other,
+        },
+    ];
+
+    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
+
+    if (choice.data === other) {
+        // The user wants to enter a different cloud name, so prompt with an input box
+        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
+    } else {
+        result = choice.data;
+    }
+
+    context.telemetry.properties.cloudChoice = result;
+    return result;
 }

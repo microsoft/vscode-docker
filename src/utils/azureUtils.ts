@@ -5,8 +5,7 @@
 
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { IActionContext, IAzureQuickPickItem, ISubscriptionContext } from 'vscode-azureextensionui';
-import { ext } from '../extensionVariables';
+import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { httpRequest, RequestOptionsLike } from './httpRequest';
 
@@ -71,42 +70,3 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     return (await response.json()).refresh_token;
 }
 /* eslint-enable camelcase */
-
-export async function promptForAciCloud(context: IActionContext): Promise<string> {
-    let result: string;
-    const other = 'Other';
-    const wellKnownClouds: IAzureQuickPickItem<string>[] = [
-        {
-            label: localize('vscode-docker.azureUtils.publicCloud', 'Public'),
-            data: 'AzureCloud',
-        },
-        {
-            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'),
-            data: 'AzureGermanCloud',
-        },
-        {
-            label: localize('vscode-docker.azureUtils.chinaCloud', 'China'),
-            data: 'AzureChinaCloud',
-        },
-        {
-            label: localize('vscode-docker.azureUtils.usGovtCloud', 'US Government'),
-            data: 'AzureUSGovernment',
-        },
-        {
-            label: localize('vscode-docker.azureUtils.otherCloud', 'Other (specify)...'),
-            data: other,
-        },
-    ];
-
-    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
-
-    if (choice.data === other) {
-        // The user wants to enter a different cloud name, so prompt with an input box
-        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
-    } else {
-        result = choice.data;
-    }
-
-    context.telemetry.properties.cloudChoice = result;
-    return result;
-}
