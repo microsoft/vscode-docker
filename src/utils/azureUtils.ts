@@ -5,7 +5,8 @@
 
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { ISubscriptionContext } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, ISubscriptionContext } from 'vscode-azureextensionui';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { httpRequest, RequestOptionsLike } from './httpRequest';
 
@@ -70,3 +71,41 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     return (await response.json()).refresh_token;
 }
 /* eslint-enable camelcase */
+
+export async function promptForAciCloud(context: IActionContext): Promise<string> {
+    let result: string;
+    const wellKnownClouds: IAzureQuickPickItem<string>[] = [
+        {
+            label: localize('vscode-docker.azureUtils.publicCloud', 'Public'),
+            data: 'AzureCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'),
+            data: 'AzureGermanCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.chinaCloud', 'China'),
+            data: 'AzureChinaCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.usGovtCloud', 'US Government'),
+            data: 'AzureUSGovernment',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.otherCloud', 'Other...'),
+            data: 'Other',
+        },
+    ];
+
+    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose a cloud to log in to') });
+
+    if (choice.data === 'Other') {
+        // The user wants to enter a different cloud name, so prompt with an input box
+        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter a cloud name') });
+    } else {
+        result = choice.data;
+    }
+
+    context.telemetry.properties.cloudChoice = result;
+    return result;
+}

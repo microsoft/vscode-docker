@@ -10,6 +10,7 @@ import { localize } from '../../../localize';
 import { ContextTreeItem } from '../../../tree/contexts/ContextTreeItem';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { promptForAciCloud } from '../../../utils/azureUtils';
 import { executeAsTask } from '../../../utils/executeAsTask';
 import { execAsync } from '../../../utils/spawnAsync';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
@@ -51,7 +52,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
         await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     } catch {
         // If it fails, try logging in and make one more attempt
-        await executeAsTask(context, 'docker login azure', title, options);
+        await executeAsTask(context, `docker login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
         await executeAsTask(context, command, title, options);
     }
 }
