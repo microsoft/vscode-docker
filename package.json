@@ -2738,7 +2738,7 @@
         "copy-webpack-plugin": "^6.4.1",
         "eslint": "^7.19.0",
         "eslint-plugin-import": "^2.22.1",
-        "eslint-plugin-unicorn": "^28.0.0",
+        "eslint-plugin-unicorn": "^29.0.0",
         "gulp": "^4.0.2",
         "gulp-eslint": "^6.0.0",
         "gulp-sourcemaps": "^3.0.0",
@@ -2774,12 +2774,12 @@
         "semver": "^7.3.4",
         "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
-        "uuid": "^3.4.0",
+        "uuid": "^8.3.2",
         "vscode-azureappservice": "^0.74.0",
-        "vscode-azureextensionui": "^0.39.2",
+        "vscode-azureextensionui": "^0.39.7",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
-        "vscode-tas-client": "^0.1.17",
+        "vscode-tas-client": "^0.1.22",
         "xml2js": "^0.4.23"
     }
 }
