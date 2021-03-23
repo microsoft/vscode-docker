@@ -156,8 +156,8 @@ const containerTooltipTemplate = `
 ---
 
 #### Ports
-{{#if (nonEmptyObj HostConfig.PortBindings)}}
-{{#each HostConfig.PortBindings}}
+{{#if (nonEmptyObj NetworkSettings.Ports)}}
+{{#each NetworkSettings.Ports}}
   - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) ➔ {{ @key }}
 {{/each}}
 {{else}}
