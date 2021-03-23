@@ -91,16 +91,16 @@ async function promptForAciCloud(context: IActionContext): Promise<string> {
             data: 'AzureCloud',
         },
         {
-            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'),
-            data: 'AzureGermanCloud',
-        },
-        {
             label: localize('vscode-docker.azureUtils.chinaCloud', 'China'),
             data: 'AzureChinaCloud',
         },
         {
             label: localize('vscode-docker.azureUtils.usGovtCloud', 'US Government'),
             data: 'AzureUSGovernment',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'), // TODO: AzureGermanCloud is closing in October 2021, remove this then
+            data: 'AzureGermanCloud',
         },
         {
             label: localize('vscode-docker.azureUtils.otherCloud', 'Other (specify)...'),
