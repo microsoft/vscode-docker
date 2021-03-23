@@ -30,7 +30,8 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'r
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.attachShellContainer.noContainers', 'No compose projects are running.')
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.composeGroup.noComposeProjects', 'No compose projects are running.')
+
         });
     }
 
