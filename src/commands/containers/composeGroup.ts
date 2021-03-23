@@ -6,6 +6,7 @@
 import * as path from 'path';
 import { IActionContext } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
@@ -25,6 +26,14 @@ export async function composeGroupDown(context: IActionContext, node: ContainerG
 }
 
 async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'restart' | 'down', node: ContainerGroupTreeItem, additionalArguments?: string): Promise<void> {
+    if (!node) {
+        await ext.containersTree.refresh(context);
+        node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {
+            ...context,
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.composeGroup.noComposeProjects', 'No Docker Compose projects are running.'),
+        });
+    }
+
     const workingDirectory = getComposeWorkingDirectory(node);
     const filesArgument = getComposeFiles(node)?.map(f => isWindows() ? `-f "${f}"` : `-f '${f}'`)?.join(' ');
     const projectName = getProjectName(node);
