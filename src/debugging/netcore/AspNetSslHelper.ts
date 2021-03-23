@@ -84,14 +84,22 @@ export function getHostSecretsFolders(): { hostCertificateFolder: string, hostUs
     };
 }
 
-export function getContainerSecretsFolders(platform: PlatformOS): { containerCertificateFolder: string, containerUserSecretsFolder: string } {
+export function getContainerSecretsFolders(platform: PlatformOS, userName: string | undefined): { containerCertificateFolder: string, containerUserSecretsFolder: string } {
+    // If username is undefined, assume 'ContainerUser' for Windows and 'root' for Linux, these are the defaults for .NET
+    userName = userName || (platform === 'Windows' ? 'ContainerUser' : 'root');
+
+    // On Windows, the user home directory is at C:\Users\<username>. On Linux, it's /root for root, otherwise /home/<username>
+    const userHome = platform === 'Windows' ?
+        path.win32.join('C:\\Users', userName) :
+        userName === 'root' ? '/root' : path.posix.join('/home', userName);
+
     return {
         containerCertificateFolder: platform === 'Windows' ?
-            'C:\\Users\\ContainerUser\\AppData\\Roaming\\ASP.NET\\Https' :
-            '/root/.aspnet/https',
+            path.win32.join(userHome, 'AppData\\Roaming\\ASP.NET\\Https') :
+            path.posix.join(userHome, '.aspnet/https'),
         containerUserSecretsFolder: platform === 'Windows' ?
-            'C:\\Users\\ContainerUser\\AppData\\Roaming\\Microsoft\\UserSecrets' :
-            '/root/.microsoft/usersecrets',
+            path.win32.join(userHome, 'AppData\\Roaming\\Microsoft\\UserSecrets') :
+            path.posix.join(userHome, '.microsoft/usersecrets'),
     };
 }
 

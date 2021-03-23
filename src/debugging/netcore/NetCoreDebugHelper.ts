@@ -191,9 +191,9 @@ export class NetCoreDebugHelper implements DebugHelper {
         const associatedTask = context.runDefinition;
 
         return {
-            configureSsl: associatedTask && associatedTask.netCore && associatedTask.netCore.configureSsl !== undefined ? associatedTask.netCore.configureSsl : await NetCoreTaskHelper.inferSsl(context.folder, debugConfiguration.netCore),
+            configureSsl: !!(associatedTask?.netCore?.configureSsl),
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
-            platformOS: associatedTask && associatedTask.dockerRun && associatedTask.dockerRun.os || 'Linux',
+            platformOS: associatedTask?.dockerRun?.os || 'Linux',
         }
     }
 
