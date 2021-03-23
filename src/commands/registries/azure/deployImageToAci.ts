@@ -84,33 +84,35 @@ async function getImagePorts(fullTag: string): Promise<number[]> {
 
 async function promptForAciCloud(context: IActionContext): Promise<string> {
     let result: string;
-    const other = 'Other';
+    const custom = 'custom';
+
+    // Obtained these names from https://github.com/microsoft/vscode-azure-account/blob/78799ce1a3b902aad52744a600b81a2f4fd06380/src/azure-account.ts
     const wellKnownClouds: IAzureQuickPickItem<string>[] = [
         {
-            label: localize('vscode-docker.azureUtils.publicCloud', 'Public'),
+            label: localize('vscode-docker.azureUtils.publicCloud', 'Azure'),
             data: 'AzureCloud',
         },
         {
-            label: localize('vscode-docker.azureUtils.chinaCloud', 'China'),
+            label: localize('vscode-docker.azureUtils.chinaCloud', 'Azure China'),
             data: 'AzureChinaCloud',
         },
         {
-            label: localize('vscode-docker.azureUtils.usGovtCloud', 'US Government'),
+            label: localize('vscode-docker.azureUtils.usGovtCloud', 'Azure US Government'),
             data: 'AzureUSGovernment',
         },
         {
-            label: localize('vscode-docker.azureUtils.germanCloud', 'Germany'), // TODO: AzureGermanCloud is closing in October 2021, remove this then
+            label: localize('vscode-docker.azureUtils.germanCloud', 'Azure Germany'), // TODO: AzureGermanCloud is closing in October 2021, remove this then
             data: 'AzureGermanCloud',
         },
         {
-            label: localize('vscode-docker.azureUtils.otherCloud', 'Other (specify)...'),
-            data: other,
+            label: localize('vscode-docker.azureUtils.customCloud', 'Azure Custom Cloud (specify)...'),
+            data: custom,
         },
     ];
 
     const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
 
-    if (choice.data === other) {
+    if (choice.data === custom) {
         // The user wants to enter a different cloud name, so prompt with an input box
         result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
     } else {
