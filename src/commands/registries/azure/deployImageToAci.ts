@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { ContextTreeItem } from '../../../tree/contexts/ContextTreeItem';
@@ -51,7 +51,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
         await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     } catch {
         // If it fails, try logging in and make one more attempt
-        await executeAsTask(context, 'docker login azure', title, options);
+        await executeAsTask(context, `docker login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
         await executeAsTask(context, command, title, options);
     }
 }
@@ -80,4 +80,45 @@ async function getImagePorts(fullTag: string): Promise<number[]> {
         const error = parseError(err);
         throw new Error(localize('vscode-docker.commands.registries.deployImageToAci.portsError', 'Unable to determine ports to expose. The error is: {0}', error.message));
     }
+}
+
+async function promptForAciCloud(context: IActionContext): Promise<string> {
+    let result: string;
+    const custom = 'custom';
+
+    // Obtained these names from https://github.com/microsoft/vscode-azure-account/blob/78799ce1a3b902aad52744a600b81a2f4fd06380/src/azure-account.ts
+    const wellKnownClouds: IAzureQuickPickItem<string>[] = [
+        {
+            label: localize('vscode-docker.azureUtils.publicCloud', 'Azure'),
+            data: 'AzureCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.chinaCloud', 'Azure China'),
+            data: 'AzureChinaCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.usGovtCloud', 'Azure US Government'),
+            data: 'AzureUSGovernment',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.germanCloud', 'Azure Germany'), // TODO: AzureGermanCloud is closing in October 2021, remove this then
+            data: 'AzureGermanCloud',
+        },
+        {
+            label: localize('vscode-docker.azureUtils.customCloud', 'Azure Custom Cloud (specify)...'),
+            data: custom,
+        },
+    ];
+
+    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
+
+    if (choice.data === custom) {
+        // The user wants to enter a different cloud name, so prompt with an input box
+        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
+    } else {
+        result = choice.data;
+    }
+
+    context.telemetry.properties.cloudChoice = result;
+    return result;
 }

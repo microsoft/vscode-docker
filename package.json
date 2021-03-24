@@ -160,7 +160,7 @@
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.logs",
-                    "when": "never"
+                    "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.restart",
