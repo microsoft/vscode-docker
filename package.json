@@ -1251,24 +1251,20 @@
                             {
                                 "required": [
                                     "file"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "module"
-                                    ]
-                                }
+                                ]
                             },
                             {
                                 "required": [
                                     "module"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "file"
-                                    ]
-                                }
+                                ]
                             }
-                        ]
+                        ],
+                        "not": {
+                            "required": [
+                                "file",
+                                "module"
+                            ]
+                        }
                     }
                 }
             },
@@ -1305,10 +1301,23 @@
                                             "type": "string"
                                         }
                                     },
+                                    "profiles": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.profiles%",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
                                     "customOptions": {
                                         "type": "string",
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.customOptions%"
                                     }
+                                },
+                                "not": {
+                                    "required": [
+                                        "services",
+                                        "profiles"
+                                    ]
                                 }
                             },
                             "down": {
@@ -1352,24 +1361,20 @@
                             {
                                 "required": [
                                     "up"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "down"
-                                    ]
-                                }
+                                ]
                             },
                             {
                                 "required": [
                                     "down"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "up"
-                                    ]
-                                }
+                                ]
                             }
                         ],
+                        "not": {
+                            "required": [
+                                "up",
+                                "down"
+                            ]
+                        },
                         "default": {
                             "up": {
                                 "detached": true,
