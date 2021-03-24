@@ -34,11 +34,11 @@ class BasicOAuthProvider implements IAuthProvider {
         let tokenResponse: HttpResponse<{ token: string }>;
         try {
             // First try with POST
-            tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), { method: 'POST', ...options });
+            tokenResponse = await httpRequest(authContext.realm.toString(), { method: 'POST', ...options });
         } catch {
             // If that fails, try falling back to GET
             // (If that fails we'll just throw)
-            tokenResponse = await httpRequest<{ token: string }>(authContext.realm.toString(), { method: 'GET', ...options });
+            tokenResponse = await httpRequest(authContext.realm.toString(), { method: 'GET', ...options });
         }
 
         request.headers.set('Authorization', bearerAuthHeader((await tokenResponse.json()).token));
