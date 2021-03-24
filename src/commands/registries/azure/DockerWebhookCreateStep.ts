@@ -18,7 +18,7 @@ import { cryptoUtils } from '../../../utils/cryptoUtils';
 import { nonNullProp } from "../../../utils/nonNull";
 
 export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
-    public priority: number = 141; // execute after DockerSiteCreate
+    public priority: number = 142; // execute after DockerAssignAcrPullRoleStep
     private _treeItem: RemoteTagTreeItem;
     public constructor(treeItem: RemoteTagTreeItem) {
         super();

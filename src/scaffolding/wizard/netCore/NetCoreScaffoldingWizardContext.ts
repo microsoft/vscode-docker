@@ -32,7 +32,7 @@ export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardConte
     ];
 
     if (wizardContext.platform === '.NET: ASP.NET Core' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
-        promptSteps.push(new ChoosePortsStep([80, 443]));
+        promptSteps.push(new ChoosePortsStep([5000]));
     }
 
     promptSteps.push(new NetCoreGatherInformationStep());
