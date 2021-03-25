@@ -2727,6 +2727,7 @@
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.15.0",
         "@typescript-eslint/parser": "^4.15.0",
+        "copy-webpack-plugin": "^8.1.0",
         "eslint": "^7.19.0",
         "mocha": "^8.2.1",
         "ts-loader": "^8.0.14",

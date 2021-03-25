@@ -121,19 +121,24 @@ module.exports = config;
 
 'use strict';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const CopyPlugin = require('copy-webpack-plugin');
 
 /** @type {import('webpack').Configuration}*/
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
     mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 
-    entry: './src/extension.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+    entry: {
+        './src/extension': './src/extension.ts',
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        './node_modules/dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
+    }, // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
         // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
         path: path.resolve(__dirname, 'dist'),
-        filename: 'extension.js',
+        filename: '[name].bundle.js',
         libraryTarget: 'commonjs2'
     },
     devtool: 'nosources-source-map',
@@ -156,6 +161,16 @@ const config = {
                 ]
             }
         ]
-    }
+    },
+    plugins: [
+        // @ts-expect-error (Type error with CopyPlugin not matching WebpackPlugin)
+        new CopyPlugin({
+            patterns: [
+                './node_modules/vscode-azureextensionui/resources/**/*.svg',
+                './node_modules/vscode-azureappservice/resources/**/*.svg',
+                './node_modules/vscode-codicons/dist/codicon.{css,ttf}',
+            ],
+        }),
+    ]
 };
 module.exports = config;
