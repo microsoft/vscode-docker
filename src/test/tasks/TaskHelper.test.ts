@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { recursiveFindTaskByType } from '../../extension.bundle';
-import { TaskDefinitionBase } from '../../extension.bundle';
-import { DebugConfigurationBase } from '../../extension.bundle';
+import { recursiveFindTaskByType } from '../../../extension.bundle';
+import { TaskDefinitionBase } from '../../../extension.bundle';
+import { DebugConfigurationBase } from '../../../extension.bundle';
 
 suite('(unit) tasks/TaskHelper/recursiveFindTaskByType', async () => {
 

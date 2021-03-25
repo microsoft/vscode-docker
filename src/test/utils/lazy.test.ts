@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { Lazy, AsyncLazy } from "../../extension.bundle";
-import { delay } from '../../extension.bundle';
+import { Lazy, AsyncLazy } from "../../../extension.bundle";
+import { delay } from '../../../extension.bundle';
 
 suite('(unit) Lazy tests', () => {
     suite('Lazy<T>', () => {

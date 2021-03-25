@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../extension.bundle";
+import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../../extension.bundle";
 
  suite('(unit) utils/nodeUtils', () => {
     suite('inferPackageName', () => {

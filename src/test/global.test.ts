@@ -8,7 +8,7 @@ import * as fse from "fs-extra";
 import * as mocha from 'mocha';
 import * as path from "path";
 import * as vscode from "vscode";
-import { ext } from "../extension.bundle";
+import { ext } from "../../extension.bundle";
 import { TestUserInput } from 'vscode-azureextensiondev';
 
 export namespace constants {
