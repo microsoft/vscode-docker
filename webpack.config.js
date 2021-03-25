@@ -122,7 +122,6 @@ module.exports = config;
 'use strict';
 
 const path = require('path');
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const CopyPlugin = require('copy-webpack-plugin');
 
 /** @type {import('webpack').Configuration}*/
@@ -152,6 +151,7 @@ const config = {
     module: {
         rules: [
             {
+                // Default TypeScript loader for .ts files
                 test: /\.ts$/,
                 exclude: /node_modules/,
                 use: [
@@ -168,7 +168,7 @@ const config = {
         ]
     },
     plugins: [
-        // @ts-expect-error: Type error with CopyPlugin not matching WebpackPlugin
+        // Copy some needed resource files from external sources
         new CopyPlugin({
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
@@ -176,6 +176,25 @@ const config = {
                 './node_modules/vscode-codicons/dist/codicon.{css,ttf}',
             ],
         }),
+    ],
+    ignoreWarnings: [
+        // Suppress some webpack warnings caused by dependencies
+        {
+            // Ignore some warnings from handlebars in code that doesn't get used anyway
+            module: /node_modules\/handlebars\/lib\/index\.js/,
+            message: /require\.extensions/,
+        },
+        {
+            // Ignore a warning from applicationinsights
+            module: /node_modules\/applicationinsights/,
+            message: /Can\'t resolve \'applicationinsights-native-metrics\'/
+        },
+        {
+            // Ignore a warning from diagnostic-channel-publishers
+            module: /node_modules\/diagnostic-channel-publishers/,
+            message: /Can\'t resolve \'@opentelemetry\/tracing\'/
+        },
+        (warning) => false, // No other warnings should be ignored
     ]
 };
 module.exports = config;
