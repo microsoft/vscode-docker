@@ -12,6 +12,9 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
             ],
+            "env": {
+                "DEBUGTELEMETRY": "1"
+            },
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ],
@@ -25,6 +28,9 @@
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
             ],
+            "env": {
+                "DEBUGTELEMETRY": "1"
+            },
             "outFiles": [
                 "${workspaceFolder}/out/test/**/*.js"
             ],

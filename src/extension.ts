@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+const perfStats: { loadStartTime: number, loadEndTime?: number } = { loadStartTime: Date.now() };
+
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
@@ -62,8 +64,11 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
 }
 
-export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<unknown | undefined> {
+export async function activate(ctx: vscode.ExtensionContext): Promise<unknown | undefined> {
     perfStats.loadEndTime = Date.now();
+
+    // TODO: load time is terrible
+    console.log(`I think it took ${perfStats.loadEndTime - perfStats.loadStartTime} ms`);
 
     initializeExtensionVariables(ctx);
 
@@ -163,7 +168,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     }
 }
 
-export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
+export async function deactivate(ctx: vscode.ExtensionContext): Promise<void> {
     await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         AzureAccountExtensionListener.dispose();
@@ -269,10 +274,11 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
         context.telemetry.properties.isActivationEvent = 'true';
         let serverModule = ext.context.asAbsolutePath(
             path.join(
-                ext.ignoreBundle ? "node_modules" : "dist",
+                "dist",
+                "node_modules",
                 "dockerfile-language-server-nodejs",
                 "lib",
-                "server.js"
+                "server.bundle.js"
             )
         );
 
