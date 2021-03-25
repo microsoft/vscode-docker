@@ -23,7 +23,7 @@ export async function help(context: IActionContext): Promise<void> {
         { label: localize('vscode-docker.commands.help.editSettings', 'Edit settings...'), handler: editSettings, telemetryID: 'editSettings' }
     ];
 
-    const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true }
+    const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true };
     let selectedItem: HelpMenuItem = await ext.ui.showQuickPick(items, options);
     context.telemetry.properties.helpItem = selectedItem.telemetryID;
     await selectedItem.handler();

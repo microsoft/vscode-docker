@@ -21,7 +21,7 @@ export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardCo
         let options: IAzureQuickPickOptions = {
             placeHolder: info.description,
             suppressPersistence: true
-        }
+        };
 
         if (Array.isArray(info.currentValue)) {
             options.isPickSelected = (p: Partial<IAzureQuickPickItem<string>>) => !!p.data && info.currentValue.includes(p.data);

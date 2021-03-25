@@ -29,7 +29,7 @@ export interface DockerBuildTask extends Task {
 }
 
 export class DockerBuildTaskProvider extends DockerTaskProvider {
-    public constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers) }
+    public constructor(helpers: { [key in DockerPlatform]: TaskHelper }) { super('docker-build', helpers); }
 
     // TODO: Skip if image is freshly built
     protected async executeTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<void> {

@@ -29,7 +29,7 @@ export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContex
             }
         };
 
-        wizardContext.ports = splitPorts(await ext.ui.showInputBox(opt))
+        wizardContext.ports = splitPorts(await ext.ui.showInputBox(opt));
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {

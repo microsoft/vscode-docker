@@ -119,7 +119,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             dockerTutorialTreeItem.iconPath = getThemedIconPath('docker');
             return [dockerTutorialTreeItem];
         }
-        return super.getTreeItemForEmptyList()
+        return super.getTreeItemForEmptyList();
     }
 
     protected areArraysEqual(array1: DockerContainerInfo[] | undefined, array2: DockerContainerInfo[] | undefined): boolean {

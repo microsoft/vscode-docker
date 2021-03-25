@@ -39,7 +39,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = {
         properties: [...sortByProperties],
         defaultProperty: 'CreatedTime',
-    }
+    };
 
     public abstract treePrefix: string;
     public abstract configureExplorerTitle: string;
@@ -78,7 +78,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
 
     protected getRefreshInterval(): number {
         const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-        return configOptions.get<number>('explorerRefreshInterval', 2000)
+        return configOptions.get<number>('explorerRefreshInterval', 2000);
     }
 
     public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
@@ -296,7 +296,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
                 description: localize('vscode-docker.tree.config.sortBy.description', 'The property used for sorting.'),
                 settingInfo: this.sortBySettingInfo
             },
-        ]
+        ];
     }
 
     public async configureExplorer(context: IActionContext): Promise<void> {

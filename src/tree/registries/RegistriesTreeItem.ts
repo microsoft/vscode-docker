@@ -84,7 +84,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 detail: rp.detail,
                 data: rp
             };
-        })
+        });
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
 
         let placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
@@ -105,7 +105,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         let cachedProvider: ICachedRegistryProvider = {
             id: provider.id,
             api: provider.api,
-        }
+        };
 
         if (provider.connectWizardOptions) {
             const existingProviders: ICachedRegistryProvider[] = this._cachedProviders.filter(rp => rp.id === provider.id);
@@ -141,17 +141,17 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 let label: string = (provider && provider.label) || crp.id;
                 let descriptions: string[] = [];
                 if (crp.username) {
-                    descriptions.push(localize('vscode-docker.tree.registries.usernameDesc', 'Username: "{0}"', crp.username))
+                    descriptions.push(localize('vscode-docker.tree.registries.usernameDesc', 'Username: "{0}"', crp.username));
                 }
                 if (crp.url) {
-                    descriptions.push(localize('vscode-docker.tree.registries.urlDesc', 'URL: "{0}"', crp.url))
+                    descriptions.push(localize('vscode-docker.tree.registries.urlDesc', 'URL: "{0}"', crp.url));
                 }
                 return {
                     label,
                     description: descriptions[0],
                     detail: descriptions[1],
                     data: crp
-                }
+                };
             });
             const placeHolder: string = localize('vscode-docker.tree.registries.selectDisconnect', 'Select the registry to disconnect');
             cachedProvider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
@@ -216,7 +216,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             }
         };
 
-        return node
+        return node;
     }
 }
 

@@ -283,7 +283,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (currentContext.Name === 'default') {
                 actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
             } else {
-                actionContext.telemetry.properties.hostSource = 'customContextSelected'
+                actionContext.telemetry.properties.hostSource = 'customContextSelected';
             }
 
             try {

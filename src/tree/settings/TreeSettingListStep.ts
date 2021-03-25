@@ -17,7 +17,7 @@ export class TreeSettingListStep extends AzureWizardPromptStep<ITreeSettingsWiza
                 description: localize('vscode-docker.tree.settings.currentValue', 'Current: "{0}"', info.currentValue?.toString()),
                 detail: info.description,
                 data: info
-            }
+            };
         });
         picks.push({
             label: localize('vscode-docker.tree.settings.resetLabel', '$(history) Reset settings'),

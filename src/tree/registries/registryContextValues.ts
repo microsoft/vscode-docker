@@ -34,7 +34,7 @@ export const registryExpectedContextValues = {
     azure: getRegistryExpectedContextValues({ id: azureRegistryProviderId }),
     dockerHub: getRegistryExpectedContextValues({ id: dockerHubRegistryProviderId }),
     dockerV2: getRegistryExpectedContextValues({ api: RegistryApi.DockerV2 }),
-}
+};
 
 function getRegistryExpectedContextValues(provider: Partial<ICachedRegistryProvider>): { registryProvider: RegExp, registry: RegExp, repository: RegExp, tag: RegExp } {
     return {
@@ -42,7 +42,7 @@ function getRegistryExpectedContextValues(provider: Partial<ICachedRegistryProvi
         registry: convertToRegExp(provider, registrySuffix),
         repository: convertToRegExp(provider, repositorySuffix),
         tag: convertToRegExp(provider, tagSuffix)
-    }
+    };
 }
 
 function convertToRegExp(provider: Partial<ICachedRegistryProvider>, suffix: string): RegExp {

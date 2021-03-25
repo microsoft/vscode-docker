@@ -194,7 +194,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask?.dockerRun?.os || 'Linux',
-        }
+        };
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
@@ -291,7 +291,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             .withQuotedArg(containerOS === 'windows' ? `IF EXIST "${debuggerPath}" (echo true) else (echo false)` : `if [ -f ${debuggerPath} ]; then echo true; fi;`)
             .build();
 
-        const { stdout } = await execAsync(command)
+        const { stdout } = await execAsync(command);
 
         return /true/ig.test(stdout);
     }

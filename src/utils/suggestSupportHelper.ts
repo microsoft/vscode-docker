@@ -26,7 +26,7 @@ export class SuggestSupportHelper {
                     detail: hub.tagsForImage(image) + stars,
                     insertText: image.name,
                     documentation: image.description,
-                }
+                };
             });
         });
     }
@@ -58,7 +58,7 @@ export class SuggestSupportHelper {
 
                 return r;
             }
-        })
+        });
     }
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in

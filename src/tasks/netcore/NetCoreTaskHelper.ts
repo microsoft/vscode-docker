@@ -218,7 +218,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 localPath: folder.uri.fsPath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
                 permissions: 'rw'
-            }
+            };
 
             const debuggerVolume: DockerContainerVolume = {
                 localPath: vsDbgInstallBasePath,

@@ -64,7 +64,7 @@ export class PythonTaskHelper implements TaskHelper {
                 env: {
                     "FLASK_APP": runOptions.file || runOptions.module
                 }
-            }
+            };
             runOptions.module = 'flask';
             runOptions.file = undefined;
         } else if (options.projectType === 'fastapi') {

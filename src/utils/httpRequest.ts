@@ -148,7 +148,7 @@ export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthConte
             realm: realmUrl,
             service: serviceMatch[1],
             scope: scopeMatch?.[1],
-        }
+        };
     }
 
     return undefined;

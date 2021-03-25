@@ -45,7 +45,7 @@ export class NodeDebugHelper implements DebugHelper {
 
         if (nodeOptions) {
             // localRoot must match the build context
-            nodeOptions.localRoot = unresolveWorkspaceFolder(path.dirname(options.package), context.folder)
+            nodeOptions.localRoot = unresolveWorkspaceFolder(path.dirname(options.package), context.folder);
         }
 
         return [

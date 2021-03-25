@@ -130,7 +130,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     throw new UnrecognizedContainerOSError();
             }
 
-            return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File])
+            return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File]);
         };
 
         return method();
@@ -216,7 +216,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     private async getContainerOS(id: string): Promise<DockerOSType | undefined> {
         const result = await this.dockerClientProvider().inspectContainer(/* context */ undefined, id);
 
-        return result.Platform
+        return result.Platform;
     }
 
     private async readFileViaCopy(dockerUri: DockerUri): Promise<Uint8Array> {

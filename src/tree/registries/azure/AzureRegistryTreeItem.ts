@@ -31,7 +31,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
             service: this.host,
             subscriptionContext: this.parent.root,
             scope: 'registry:catalog:*',
-        }
+        };
 
         this.id = this.registryId;
         this.iconPath = getIconPath('azureRegistry');

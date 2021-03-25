@@ -21,7 +21,7 @@ export class RegistryPasswordStep extends AzureWizardPromptStep<IConnectRegistry
 
 function validateInput(value: string | undefined): string | undefined {
     if (!value) {
-        return localize('vscode-docker.tree.registries.connectWizard.passwordEmpty', 'Password cannot be empty.')
+        return localize('vscode-docker.tree.registries.connectWizard.passwordEmpty', 'Password cannot be empty.');
     } else {
         return undefined;
     }

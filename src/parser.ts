@@ -31,7 +31,7 @@ export abstract class Parser {
             }
 
             if (token.endIndex === charIndex && i + 1 < len) {
-                return [i, i + 1]
+                return [i, i + 1];
             }
             return [i];
         }

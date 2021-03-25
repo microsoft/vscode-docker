@@ -16,7 +16,7 @@ export const nps2: Survey = {
     prompt: localize('vscode-docker.survey.nps.prompt', 'Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
     activationDelayMs: 60 * 1000,
     isEligible: isNPSEligible,
-}
+};
 
 async function isNPSEligible(): Promise<boolean> {
     return vscode.env.language === 'en' || vscode.env.language.startsWith('en-');

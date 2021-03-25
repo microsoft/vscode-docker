@@ -171,7 +171,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
         }
 
         const items: QuickPickItem[] = buildTasks.map(t => {
-            return { label: t.name }
+            return { label: t.name };
         });
 
         const item = await ext.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.tasks.helper.chooseBuildDefinition', 'Choose the Docker Build definition.') });

@@ -39,7 +39,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         this._nextLink = taskListResult.nextLink;
 
         if (clearCache && taskListResult.length === 0) {
-            return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')]
+            return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')];
         } else {
             let result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 taskListResult,

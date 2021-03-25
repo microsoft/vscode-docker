@@ -79,5 +79,5 @@ export function getVSCodeRemoteInfo(context?: IActionContext): IVSCodeRemoteInfo
     return {
         extensionKind,
         remoteKind
-    }
+    };
 }
