@@ -130,7 +130,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
         this._itemsFromPolling = undefined;
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ext.activityMeasurementService.recordActivity('overallnoedit');

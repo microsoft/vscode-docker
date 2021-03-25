@@ -29,6 +29,17 @@
                     "PascalCase",
                     "UPPER_CASE"
                 ]
+            },
+            { // private class properties can also have leading underscores
+                "selector": "classProperty",
+                "modifiers": [
+                    "private"
+                ],
+                "format": [
+                    "camelCase",
+                    "PascalCase"
+                ],
+                "leadingUnderscore": "allow"
             }
         ],
         "@typescript-eslint/semi": "warn",

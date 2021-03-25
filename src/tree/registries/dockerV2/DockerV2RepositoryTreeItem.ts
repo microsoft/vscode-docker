@@ -23,7 +23,7 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
         super(parent, repoName);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }

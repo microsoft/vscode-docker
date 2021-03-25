@@ -33,7 +33,7 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
 
     public abstract createRepositoryTreeItem(name: string): RemoteRepositoryTreeItemBase;
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }

@@ -24,7 +24,7 @@ export class GitLabRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
         this.id = this.repoId;
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
@@ -59,6 +59,6 @@ interface ITag {
 }
 
 interface ITagDetails {
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     created_at: string;
 }

@@ -256,6 +256,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
             // return that specified context as Current = true. This way we don't need extra logic below in parsing.
             // TODO: eventually change to `docker context ls --format json`
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
 
             try {

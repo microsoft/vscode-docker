@@ -19,7 +19,7 @@ export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
         super(parent, name);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
@@ -47,6 +47,6 @@ interface ITags {
 
 interface ITag {
     name: string;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     last_updated: string;
 }

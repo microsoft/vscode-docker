@@ -62,11 +62,11 @@ export class SuggestSupportHelper {
     }
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
-    public getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
+    public getImageNameHover(line: string, prsr: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        let originalValue = _parser.tokenValue(line, tokens[tokenIndex]);
+        let originalValue = prsr.tokenValue(line, tokens[tokenIndex]);
 
         let keyToken: string = null;
         tokenIndex--;
@@ -76,7 +76,7 @@ export class SuggestSupportHelper {
                 return;
             }
             if (type === parser.TokenType.Key) {
-                keyToken = _parser.tokenValue(line, tokens[tokenIndex]);
+                keyToken = prsr.tokenValue(line, tokens[tokenIndex]);
                 break;
             }
             tokenIndex--;
@@ -85,7 +85,7 @@ export class SuggestSupportHelper {
         if (!keyToken) {
             return;
         }
-        let keyName = _parser.keyNameFromKeyToken(keyToken);
+        let keyName = prsr.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
             let imageName: string;
 

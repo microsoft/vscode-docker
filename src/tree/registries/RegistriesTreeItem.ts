@@ -27,8 +27,8 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
     public label: string = localize('vscode-docker.tree.registries.registriesLabel', 'Registries');
     public childTypeLabel: string = 'registry provider';
     public autoSelectInTreeItemPicker: boolean = true;
-    public _connectedRegistriesTreeItem: ConnectedRegistriesTreeItem;
 
+    private _connectedRegistriesTreeItem: ConnectedRegistriesTreeItem;
     private _cachedProviders: ICachedRegistryProvider[];
 
     public constructor() {
@@ -37,7 +37,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         this._cachedProviders = ext.context.globalState.get<ICachedRegistryProvider[]>(providersKey, []);
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (this._cachedProviders.length === 0) {
             return [new GenericTreeItem(this, {
                 label: localize('vscode-docker.tree.registries.connectRegistry', 'Connect Registry...'),

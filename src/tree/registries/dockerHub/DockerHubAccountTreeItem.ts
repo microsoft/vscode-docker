@@ -46,7 +46,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return await getRegistryPassword(this.cachedProvider);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
 

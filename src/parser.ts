@@ -8,14 +8,11 @@
 import { TextLine } from 'vscode';
 
 export abstract class Parser {
-    public _tokenParseRegex: RegExp;
-
-    public constructor(parseTokenRegex: RegExp) {
-        this._tokenParseRegex = parseTokenRegex;
+    public constructor(public readonly tokenParseRegex: RegExp) {
     }
 
     public keyNameFromKeyToken(keyToken: string): string {
-        return keyToken.replace(this._tokenParseRegex, '');
+        return keyToken.replace(this.tokenParseRegex, '');
     }
 
     public tokenValue(line: string, token: IToken): string {
