@@ -129,11 +129,10 @@ const TerserPlugin = require('terser-webpack-plugin');
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
     mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-    cache: true,
+    cache: true, // Makes 'watch' builds way faster after the first full build
 
     entry: {
         './extension.bundle': './src/extension.ts',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
     }, // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
