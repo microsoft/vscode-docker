@@ -89,6 +89,7 @@ function updateExtensionKind(newKind: string): void {
     let value: unknown;
 
     // If the setting is already defined as a workspace setting - overwrite that
+    // @ts-expect-error: TS doesn't like indexing objects with a string
     if (typeof values.workspaceValue === 'object' && values.workspaceValue !== null && values.workspaceValue[extensionId]) {
         target = ConfigurationTarget.Workspace;
         value = values.workspaceValue;
@@ -101,6 +102,7 @@ function updateExtensionKind(newKind: string): void {
         }
     }
 
+    // @ts-expect-error: TS doesn't like indexing objects with a string
     value[extensionId] = newKind;
     // TODO: Should this be awaited?
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

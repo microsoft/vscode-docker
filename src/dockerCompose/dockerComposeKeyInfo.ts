@@ -9,6 +9,9 @@ import { localize } from "../localize";
 // Define the keys that are shared between all compose file versions,
 // regardless of the major/minor version (e.g. v1-v2.1+).
 // https://docs.docker.com/compose/yml/
+
+/* eslint-disable @typescript-eslint/naming-convention */
+
 const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     'build': (
         localize('vscode-docker.dockerComposeKey.build', 'Path to a directory containing a Dockerfile. When the value supplied is a relative path, it is interpreted as relative to the location of the yml file itself. This directory is also the build context that is sent to the Docker daemon.\n\nCompose will build and tag it with a generated name, and use that image thereafter.')
@@ -323,17 +326,18 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
     )
 };
 
+/* eslint-enable @typescript-eslint/naming-convention */
+
 // Helper function that merges the specified version-specific keys with the shared
 // keys, in order to create a complete schema for a specic version.
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
     return <KeyInfo>Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
 
-// tslint:disable-next-line: export-name
 export default <ComposeVersionKeys>{
     v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
     v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
     "v2.1": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO),
     "v2.2": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO),
-    All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO)
+    all: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO)
 };

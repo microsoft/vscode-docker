@@ -71,7 +71,7 @@ export function addImageTaggingTelemetry(context: IActionContext, fullImageName:
         let [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
 
         if (!!tag.match(/^[0-9.-]*(|alpha|beta|latest|edge|v|version)?[0-9.-]*$/)) {
-            properties.safeTag = tag
+            properties.safeTag = tag;
         }
         properties.hasTag = String(!!tag);
         properties.numSlashes = String(numberMatches(repository.match(/\//g)));

@@ -22,7 +22,7 @@ import { bufferToString } from "../../../../utils/spawnAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 
 const idPrecision = 6;
-const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
+const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
 export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<void> {
     // Acquire information.
@@ -69,7 +69,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             taskFilePath: fileItem.relativeFilePath,
             sourceLocation: uploadedSourceLocation,
             platform: { os: osType }
-        }
+        };
     }
 
     // Schedule the run and Clean up.
@@ -95,7 +95,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
             suggestedImageName = path.basename(rootFolder.uri.fsPath).toLowerCase().replace(/\s/g, '');
         }
 
-        suggestedImageName += ":{{.Run.ID}}"
+        suggestedImageName += ":{{.Run.ID}}";
     } else {
         suggestedImageName = prevImageName;
     }

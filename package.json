@@ -127,7 +127,7 @@
         "onView:vscode-docker.views.dockerContexts",
         "onView:vscode-docker.views.help"
     ],
-    "main": "main",
+    "main": "dist/src/extension.bundle",
     "contributes": {
         "menus": {
             "commandPalette": [
@@ -2732,6 +2732,7 @@
         "mocha": "^8.2.1",
         "ts-loader": "^8.0.14",
         "typescript": "^4.1.4",
+        "umd-compat-loader": "^2.1.2",
         "vsce": "^1.85.0",
         "vscode-codicons": "^0.0.15",
         "vscode-nls-dev": "^3.3.2",
@@ -2755,6 +2756,7 @@
         "handlebars": "^4.7.6",
         "node-fetch": "^2.6.1",
         "semver": "^7.3.4",
+        "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
         "vscode-azureappservice": "^0.74.0",

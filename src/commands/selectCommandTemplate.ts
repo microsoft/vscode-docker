@@ -55,7 +55,7 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
-            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
+            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`;
         }, portsString);
     }
 
@@ -175,7 +175,7 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
             label: template.label,
             detail: template.template,
             data: template,
-        }
+        };
     });
 
     const selection = await ext.ui.showQuickPick(items, {

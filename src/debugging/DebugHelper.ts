@@ -101,7 +101,7 @@ export function resolveDockerServerReadyAction(debugConfiguration: DockerDebugCo
         return undefined;
     } else if (numBrowserOptions === 0 && !createIfUserUndefined) {
         // No user-provided option, and not creating if nothing user-defined--return nothing
-        return undefined
+        return undefined;
     }
 
     // Otherwise create one based on user-defined and default options

@@ -25,6 +25,7 @@ export function resolveVariables<T>(target: T, folder?: WorkspaceFolder, additio
     } else {
         const result = cloneObject(target);
         for (const key of Object.keys(target)) {
+            // @ts-expect-error: TS doesn't like indexing objects with a string
             result[key] = resolveVariables(target[key], folder, additionalVariables);
         }
 

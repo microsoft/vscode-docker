@@ -159,11 +159,16 @@ const config = {
                         loader: 'ts-loader'
                     }
                 ]
+            },
+            {
+                // Unpack UMD module headers used in some modules since webpack doesn't handle them.
+                test: /dockerfile-language-service|vscode-languageserver-types/,
+                use: { loader: 'umd-compat-loader' }
             }
         ]
     },
     plugins: [
-        // @ts-expect-error (Type error with CopyPlugin not matching WebpackPlugin)
+        // @ts-expect-error: Type error with CopyPlugin not matching WebpackPlugin
         new CopyPlugin({
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',

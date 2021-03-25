@@ -48,6 +48,7 @@ function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[
         const config = vscode.workspace.getConfiguration('files').get<unknown>('associations');
         if (config) {
             for (const globPattern of Object.keys(config)) {
+                // @ts-expect-error: TS doesn't like indexing objects with a string
                 const fileType = <string | undefined>config[globPattern];
                 if (fileType && fileTypeRegEx.test(fileType)) {
                     result.push(globPattern);
@@ -140,7 +141,7 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
 function isDefaultDockerComposeFile(fileName: string): boolean {
     if (fileName) {
         const lowerCasefileName: string = fileName.toLowerCase();
-        return lowerCasefileName === 'docker-compose.yml' || lowerCasefileName === 'docker-compose.yaml'
+        return lowerCasefileName === 'docker-compose.yml' || lowerCasefileName === 'docker-compose.yaml';
     }
 
     return false;
@@ -149,7 +150,7 @@ function isDefaultDockerComposeFile(fileName: string): boolean {
 function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
     if (fileName) {
         const lowerCasefileName: string = fileName.toLowerCase();
-        return lowerCasefileName === 'docker-compose.override.yml' || lowerCasefileName === 'docker-compose.override.yaml'
+        return lowerCasefileName === 'docker-compose.override.yml' || lowerCasefileName === 'docker-compose.override.yaml';
     }
 
     return false;

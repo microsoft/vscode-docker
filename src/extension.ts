@@ -35,7 +35,7 @@ import { isLinux, isMac, isWindows } from './utils/osUtils';
 export type KeyInfo = { [keyName: string]: string };
 
 export interface ComposeVersionKeys {
-    All: KeyInfo;
+    all: KeyInfo;
     v1: KeyInfo;
     v2: KeyInfo;
 }
@@ -109,7 +109,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         };
         let yamlHoverProvider = new DockerComposeHoverProvider(
             new DockerComposeParser(),
-            composeVersionKeys.All
+            composeVersionKeys.all
         );
         ctx.subscriptions.push(
             vscode.languages.registerHoverProvider([YAML_MODE_ID, COMPOSE_MODE_ID], yamlHoverProvider)

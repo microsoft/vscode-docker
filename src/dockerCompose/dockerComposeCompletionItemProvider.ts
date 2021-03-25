@@ -65,7 +65,8 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     private suggestKeys(word: string, version: string): CompletionItem[] {
         // Attempt to grab the keys for the requested schema version,
         // otherwise, fall back to showing a composition of all possible keys.
-        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.All;
+        // @ts-expect-error: TS doesn't like indexing objects with a string
+        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.all;
 
         return Object.keys(keys).map(ruleName => {
             let completionItem = new CompletionItem(ruleName);
