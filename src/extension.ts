@@ -275,10 +275,9 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
         let serverModule = ext.context.asAbsolutePath(
             path.join(
                 "dist",
-                "node_modules",
                 "dockerfile-language-server-nodejs",
                 "lib",
-                "server.bundle.js"
+                "server.js"
             )
         );
 

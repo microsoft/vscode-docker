@@ -127,7 +127,7 @@
         "onView:vscode-docker.views.dockerContexts",
         "onView:vscode-docker.views.help"
     ],
-    "main": "dist/src/extension.bundle",
+    "main": "dist/extension.bundle",
     "contributes": {
         "menus": {
             "commandPalette": [
@@ -2701,7 +2701,7 @@
     "scripts": {
         "vscode:prepublish": "npm run package",
         "compile": "webpack",
-        "watch": "webpack --mode development --watch",
+        "watch": "webpack --watch",
         "package": "webpack --mode production --devtool hidden-source-map",
         "test-compile": "tsc -p ./",
         "test-watch": "tsc -watch -p ./",

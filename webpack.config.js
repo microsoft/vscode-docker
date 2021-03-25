@@ -123,21 +123,23 @@ module.exports = config;
 
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 /** @type {import('webpack').Configuration}*/
 const config = {
     target: 'node', // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
     mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
+    cache: true,
 
     entry: {
-        './src/extension': './src/extension.ts',
+        './extension.bundle': './src/extension.ts',
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        './node_modules/dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
+        './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
     }, // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
         // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name].bundle.js',
+        filename: '[name].js',
         libraryTarget: 'commonjs2'
     },
     devtool: 'nosources-source-map',
@@ -169,6 +171,7 @@ const config = {
     },
     plugins: [
         // Copy some needed resource files from external sources
+        // @ts-expect-error: Class incompatibility with CopyPlugin
         new CopyPlugin({
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
@@ -177,6 +180,20 @@ const config = {
             ],
         }),
     ],
+    optimization: {
+        minimizer: [
+            // @ts-expect-error: Class incompatibility with TerserPlugin
+            new TerserPlugin({
+                terserOptions: {
+                    /* eslint-disable @typescript-eslint/naming-convention */
+                    // Keep class and function names so that stacks aren't useless and things like UserCancelledError work
+                    keep_classnames: true,
+                    keep_fnames: true,
+                    /* eslint-enable @typescript-eslint/naming-convention */
+                }
+            }),
+        ]
+    },
     ignoreWarnings: [
         // Suppress some webpack warnings caused by dependencies
         {
