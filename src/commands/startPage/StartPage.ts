@@ -63,6 +63,11 @@ class StartPage {
         const webview = this.activePanel.webview;
         const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
 
+        let showWhatsNew = false;
+        try {
+            showWhatsNew = !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew'));
+        } catch { } // Best effort
+
         const startPageContext: StartPageContext = {
             cspSource: webview.cspSource,
             nonce: cryptoUtils.getRandomHexString(8),
@@ -71,7 +76,7 @@ class StartPage {
             dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker_blue.png')).toString(),
             showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
             isMac: isMac(),
-            showWhatsNew: !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew')),
+            showWhatsNew: showWhatsNew,
         };
 
         const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
