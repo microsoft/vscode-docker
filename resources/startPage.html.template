@@ -83,25 +83,6 @@
             </div>
         </div>
         <hr />
-        {{#if showWhatsNew}}
-        <div class="row">
-            <div class="icon">
-                <i class="codicon codicon-star-empty" alt=""></i>
-            </div>
-            <div>
-                <div>
-                    <h2>What's New</h2>
-                </div>
-                <div>
-                    <ul>
-                        <li>The <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> now has advanced tooltips! Hover your mouse over an item to see useful info.</li>
-                        <li>You can now open and download the files in a running container! Expand a container node to get started.</li>
-                        <li>Right-click on a Docker Compose file to try our new <a href="command:vscode-docker.compose.up.subset?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Compose Up - Select Services</a> command!</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        {{/if}}
         <div class="row">
             <div class="icon">
                 <i class="codicon codicon-new-file" alt=""></i>
@@ -181,6 +162,25 @@
                 </div>
             </div>
         </div>
+        {{#if showWhatsNew}}
+        <div class="row">
+            <div class="icon">
+                <i class="codicon codicon-star-empty" alt=""></i>
+            </div>
+            <div>
+                <div>
+                    <h2>What's New</h2>
+                </div>
+                <div>
+                    <ul>
+                        <li>The <a href="command:workbench.view.extension.dockerView">Docker Explorer</a> now has advanced tooltips! Hover your mouse over an item to see useful info.</li>
+                        <li>You can now open and download the files in a running container! Expand a container node to get started.</li>
+                        <li>Right-click on a Docker Compose file to try our new <a href="command:vscode-docker.compose.up.subset?%7B%22commandReason%22%3A%22startPage%22%7D">Docker: Compose Up - Select Services</a> command!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {{/if}}
         <div class="row footer">
             <div>
                 Visit the extension's <a href="https://github.com/microsoft/vscode-docker">GitHub repository</a>,
