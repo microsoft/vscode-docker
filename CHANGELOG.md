@@ -1,5 +1,6 @@
 ## 1.12.0 - 12 April 2021
 ### Added
+* The extension now targets Docker Compose commands to files matching the `dockercompose` language ID. This raises the minimum required VS Code version to 1.55.0. [#2761](https://github.com/microsoft/vscode-docker/issues/2761)
 * .NET apps will now scaffold using a non-root user. [#1835](https://github.com/microsoft/vscode-docker/issues/1835)
 * Deployments from Azure Container Registry to Azure App Service now no longer require the admin credentials enabled on the ACR. This will now use a system-assigned Managed Service Identity. [#1685](https://github.com/microsoft/vscode-docker/issues/1685)
 * The "Docker Containers: Compose Logs" command can now be used from the palette, as long as the grouping in the containers panel is set to the default of "Compose Project Name". [#2770](https://github.com/microsoft/vscode-docker/issues/2770)
