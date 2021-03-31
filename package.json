@@ -117,7 +117,6 @@
         "onDebugResolve:docker",
         "onFileSystem:docker",
         "onLanguage:dockerfile",
-        "onLanguage:yaml",
         "onLanguage:dockercompose",
         "onView:dockerContainers",
         "onView:dockerImages",
@@ -183,27 +182,27 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /^(?:(?!compose.*\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
+                    "when": "editorLangId == yaml && isAzureAccountInstalled",
                     "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "editorLangId == dockercompose",
                     "command": "vscode-docker.compose.down",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "editorLangId == dockercompose",
                     "command": "vscode-docker.compose.restart",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "editorLangId == dockercompose",
                     "command": "vscode-docker.compose.up",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "editorLangId == dockercompose",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
@@ -220,27 +219,27 @@
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /^(?:(?!compose.*\\.ya?ml$).)*\\.ya?ml$/i && isAzureAccountInstalled",
+                    "when": "resourceLangId == yaml && isAzureAccountInstalled",
                     "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "resourceLangId == dockercompose",
                     "command": "vscode-docker.compose.down",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "resourceLangId == dockercompose",
                     "command": "vscode-docker.compose.restart",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "resourceLangId == dockercompose",
                     "command": "vscode-docker.compose.up",
                     "group": "docker"
                 },
                 {
-                    "when": "resourceFilename =~ /compose.*\\.ya?ml$/i",
+                    "when": "resourceLangId == dockercompose",
                     "command": "vscode-docker.compose.up.subset",
                     "group": "docker"
                 },
@@ -2190,7 +2189,7 @@
             }
         },
         "configurationDefaults": {
-            "[yaml]": {
+            "[dockercompose]": {
                 "editor.quickSuggestions": {
                     "other": true,
                     "comments": false,
@@ -2696,7 +2695,7 @@
         }
     },
     "engines": {
-        "vscode": "^1.53.0"
+        "vscode": "^1.55.0"
     },
     "scripts": {
         "watch": "tsc -watch -p ./",
@@ -2729,7 +2728,7 @@
         "@types/string-replace-webpack-plugin": "^0.1.0",
         "@types/tar-stream": "^2.2.0",
         "@types/uuid": "^8.3.0",
-        "@types/vscode": "1.53.0",
+        "@types/vscode": "1.54.0",
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.15.0",
         "@typescript-eslint/eslint-plugin-tslint": "^4.15.0",
