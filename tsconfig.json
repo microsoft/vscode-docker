@@ -46,7 +46,7 @@
         "alwaysStrict": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitThis": true,
-        "noUnusedLocals": true,
+        "noUnusedLocals": false, // ESLint takes care of this for us
         "noImplicitAny": false, // TODO
         "noImplicitReturns": false, // TODO
         "noUnusedParameters": false, // TODO

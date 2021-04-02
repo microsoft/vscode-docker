@@ -42,10 +42,18 @@
                 "leadingUnderscore": "allow"
             }
         ],
-        "@typescript-eslint/semi": "warn",
         "@typescript-eslint/no-floating-promises": "warn",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            { // As a function parameter, unused parameters are allowed
+                "args": "none"
+            }
+        ],
+        "@typescript-eslint/semi": "warn",
         "curly": "warn",
         "eqeqeq": "warn",
+        "no-extra-boolean-cast": "off",
         "no-throw-literal": "warn",
         "semi": "off"
     },
