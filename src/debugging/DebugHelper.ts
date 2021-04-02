@@ -91,7 +91,7 @@ export function inferContainerName(debugConfiguration: DockerDebugConfiguration,
 }
 
 export function resolveDockerServerReadyAction(debugConfiguration: DockerDebugConfiguration, defaultDockerSRA: DockerServerReadyAction, createIfUserUndefined: boolean): DockerServerReadyAction | undefined {
-    let numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(item => item !== undefined).length;
+    const numBrowserOptions = [debugConfiguration.launchBrowser, debugConfiguration.serverReadyAction, debugConfiguration.dockerServerReadyAction].filter(item => item !== undefined).length;
 
     if (numBrowserOptions > 1) {
         // Multiple user-provided options is not valid

@@ -23,7 +23,7 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
             const volumesResult = await ext.dockerClient.pruneVolumes(context);
 
             const mbReclaimed = convertToMB(containersResult.SpaceReclaimed + imagesResult.SpaceReclaimed + volumesResult.SpaceReclaimed);
-            let message = localize('vscode-docker.commands.pruneSystem.removed', 'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.', containersResult.ObjectsDeleted, imagesResult.ObjectsDeleted, networksResult.ObjectsDeleted, volumesResult.ObjectsDeleted, mbReclaimed);
+            const message = localize('vscode-docker.commands.pruneSystem.removed', 'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.', containersResult.ObjectsDeleted, imagesResult.ObjectsDeleted, networksResult.ObjectsDeleted, volumesResult.ObjectsDeleted, mbReclaimed);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);

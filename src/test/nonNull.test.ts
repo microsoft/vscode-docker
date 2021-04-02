@@ -13,7 +13,7 @@ suite("(unit) nonNull", async function (this: Suite): Promise<void> {
         arrayOrUndefined?: number[];
         stringOrNull: string | null;
         string: string;
-    }
+    };
 
     function testNonNull<T>(testName: string, actual: T, expected: T) {
         test(testName, () => {

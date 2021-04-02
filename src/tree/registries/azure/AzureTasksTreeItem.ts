@@ -32,7 +32,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
 
         const registryTI = this.parent;
 
-        let taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
+        const taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
             await (await registryTI.getClient()).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
             await (await registryTI.getClient()).tasks.listNext(this._nextLink);
 
@@ -41,7 +41,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         if (clearCache && taskListResult.length === 0) {
             return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')];
         } else {
-            let result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
+            const result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 taskListResult,
                 'invalidAzureTask',
                 async t => new AzureTaskTreeItem(this, t),

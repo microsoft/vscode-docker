@@ -59,5 +59,5 @@ export namespace ext {
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
 
-    export let runningTests: boolean = false;
+    export const runningTests: boolean = false;
 }

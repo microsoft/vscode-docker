@@ -44,8 +44,8 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `api/v4/projects/${this.projectId}/registry/repositories?per_page=${PAGE_SIZE}`;
-        let response = await registryRequest<IRepository[]>(this, 'GET', url);
+        const url = this._nextLink || `api/v4/projects/${this.projectId}/registry/repositories?per_page=${PAGE_SIZE}`;
+        const response = await registryRequest<IRepository[]>(this, 'GET', url);
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body,

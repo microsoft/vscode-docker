@@ -84,7 +84,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
 
             // Copy the Docker environment settings in
-            let newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
+            const newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
             addDockerSettingsToEnv(newEnv, process.env);
 
             const { stdout, stderr } = await execStreamAsync(dockerCommand, { env: newEnv }, token);

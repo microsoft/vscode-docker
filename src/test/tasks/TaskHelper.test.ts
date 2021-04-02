@@ -56,7 +56,7 @@ suite('(unit) tasks/TaskHelper/recursiveFindTaskByType', async () => {
         request: 'launch',
         name: 'My debug config',
         preLaunchTask: 'other task'
-    }
+    };
 
     const missing: TaskDefinitionBase[] = [
         {

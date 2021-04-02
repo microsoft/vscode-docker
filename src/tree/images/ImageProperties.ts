@@ -130,8 +130,8 @@ function parseFullTag(rawTag: string): IParsedFullTag {
 }
 
 function truncateRegistry(registry: string): string {
-    let config = workspace.getConfiguration(configPrefix);
-    let truncateLongRegistryPaths = config.get<boolean>('truncateLongRegistryPaths');
+    const config = workspace.getConfiguration(configPrefix);
+    const truncateLongRegistryPaths = config.get<boolean>('truncateLongRegistryPaths');
     if (typeof truncateLongRegistryPaths === "boolean" && truncateLongRegistryPaths) {
         let truncateMaxLength = config.get<number>('truncateMaxLength');
         if (typeof truncateMaxLength !== 'number' || truncateMaxLength < 1) {

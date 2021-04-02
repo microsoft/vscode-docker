@@ -108,7 +108,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     return stdout;
                 };
 
-            let containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
+            const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
 
             let items: DirectoryItem[];
 

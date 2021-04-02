@@ -13,6 +13,6 @@ export function addUserAgent(options: { headers?: OutgoingHttpHeaders }): void {
         options.headers = {};
     }
 
-    let userAgent = appendExtensionUserAgent(<string>options.headers[userAgentKey]);
+    const userAgent = appendExtensionUserAgent(<string>options.headers[userAgentKey]);
     options.headers[userAgentKey] = userAgent;
 }

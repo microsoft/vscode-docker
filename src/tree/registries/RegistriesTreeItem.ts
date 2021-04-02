@@ -87,7 +87,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         });
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
 
-        let placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
+        const placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
         provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
             throw new UserCancelledError();
@@ -102,7 +102,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         context.telemetry.properties.providerId = provider.id;
         context.telemetry.properties.providerApi = provider.api;
 
-        let cachedProvider: ICachedRegistryProvider = {
+        const cachedProvider: ICachedRegistryProvider = {
             id: provider.id,
             api: provider.api,
         };
@@ -138,8 +138,8 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         if (!cachedProvider) {
             const picks = this._cachedProviders.map(crp => {
                 const provider = getRegistryProviders().find(rp => rp.id === crp.id);
-                let label: string = (provider && provider.label) || crp.id;
-                let descriptions: string[] = [];
+                const label: string = (provider && provider.label) || crp.id;
+                const descriptions: string[] = [];
                 if (crp.username) {
                     descriptions.push(localize('vscode-docker.tree.registries.usernameDesc', 'Username: "{0}"', crp.username));
                 }

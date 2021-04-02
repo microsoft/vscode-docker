@@ -24,8 +24,8 @@ export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `v2/repositories/${this.parent.namespace}/${this.repoName}/tags?page_size=${PAGE_SIZE}`;
-        let response = await registryRequest<ITags>(this, 'GET', url);
+        const url = this._nextLink || `v2/repositories/${this.parent.namespace}/${this.repoName}/tags?page_size=${PAGE_SIZE}`;
+        const response = await registryRequest<ITags>(this, 'GET', url);
         this._nextLink = response.body.next;
         return await this.createTreeItemsWithErrorHandling(
             response.body.results,

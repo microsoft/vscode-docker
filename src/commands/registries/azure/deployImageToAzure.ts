@@ -83,11 +83,11 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
 }
 
 async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagementModels.SiteConfig> {
-    let registryTI: RegistryTreeItemBase = node.parent.parent;
+    const registryTI: RegistryTreeItemBase = node.parent.parent;
 
     let username: string | undefined;
     let password: string | undefined;
-    let appSettings: WebSiteManagementModels.NameValuePair[] = [];
+    const appSettings: WebSiteManagementModels.NameValuePair[] = [];
 
     if (registryTI instanceof AzureRegistryTreeItem) {
         appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
@@ -118,7 +118,7 @@ async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagem
         appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
     }
 
-    let linuxFxVersion = `DOCKER|${registryTI.baseImagePath}/${node.repoNameAndTag}`;
+    const linuxFxVersion = `DOCKER|${registryTI.baseImagePath}/${node.repoNameAndTag}`;
 
     return {
         linuxFxVersion,

@@ -107,7 +107,7 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<unknown | 
             language: 'dockercompose',
             scheme: 'file',
         };
-        let composeHoverProvider = new DockerComposeHoverProvider(
+        const composeHoverProvider = new DockerComposeHoverProvider(
             new DockerComposeParser(),
             composeVersionKeys.all
         );
@@ -205,8 +205,8 @@ async function getDockerInstallationIDHash(): Promise<string> {
 function validateOldPublisher(activateContext: IActionContext): void {
     const extension = vscode.extensions.getExtension('PeterJausovec.vscode-docker');
     if (extension) {
-        let message: string = localize('vscode-docker.extension.pleaseReload', 'Please reload Visual Studio Code to complete updating the Docker extension.');
-        let reload: vscode.MessageItem = { title: localize('vscode-docker.extension.reloadNow', 'Reload Now') };
+        const message: string = localize('vscode-docker.extension.pleaseReload', 'Please reload Visual Studio Code to complete updating the Docker extension.');
+        const reload: vscode.MessageItem = { title: localize('vscode-docker.extension.reloadNow', 'Reload Now') };
         // Don't wait
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         ext.ui.showWarningMessage(message, reload).then(async result => {
@@ -222,8 +222,8 @@ function validateOldPublisher(activateContext: IActionContext): void {
 
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
-        let result: vscode.WorkspaceConfiguration[] = [];
-        for (let item of params.items) {
+        const result: vscode.WorkspaceConfiguration[] = [];
+        for (const item of params.items) {
             let config: vscode.WorkspaceConfiguration;
 
             if (item.scopeUri) {
@@ -267,7 +267,7 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
-        let serverModule = ext.context.asAbsolutePath(
+        const serverModule = ext.context.asAbsolutePath(
             path.join(
                 "dist",
                 "dockerfile-language-server-nodejs",
@@ -276,9 +276,9 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             )
         );
 
-        let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
+        const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
 
-        let serverOptions: ServerOptions = {
+        const serverOptions: ServerOptions = {
             run: {
                 module: serverModule,
                 transport: TransportKind.ipc,
@@ -291,13 +291,13 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             }
         };
 
-        let middleware: Middleware = {
+        const middleware: Middleware = {
             workspace: {
                 configuration: Configuration.computeConfiguration
             }
         };
 
-        let clientOptions: LanguageClientOptions = {
+        const clientOptions: LanguageClientOptions = {
             documentSelector: DOCUMENT_SELECTOR,
             synchronize: {
                 fileEvents: vscode.workspace.createFileSystemWatcher("**/.clientrc")

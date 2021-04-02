@@ -11,7 +11,7 @@ import { localize } from '../localize';
  * for the property and will give a compile error if the given name is not a property of the source.
  */
 export function nonNullProp<TSource, TKey extends keyof TSource>(source: TSource, name: TKey): NonNullable<TSource[TKey]> {
-    let value = <NonNullable<TSource[TKey]>>source[name];
+    const value = <NonNullable<TSource[TKey]>>source[name];
     return nonNullValue(value, <string>name);
 }
 

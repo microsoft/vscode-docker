@@ -18,7 +18,7 @@ export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardCo
         let picks: IAzureQuickPickItem<string>[] = info.settingInfo.properties.map(convertPropertyInfoToPick);
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
 
-        let options: IAzureQuickPickOptions = {
+        const options: IAzureQuickPickOptions = {
             placeHolder: info.description,
             suppressPersistence: true
         };

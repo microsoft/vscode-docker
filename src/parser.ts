@@ -21,7 +21,7 @@ export abstract class Parser {
 
     public tokensAtColumn(tokens: IToken[], charIndex: number): number[] {
         for (let i = 0, len = tokens.length; i < len; i++) {
-            let token = tokens[i];
+            const token = tokens[i];
 
             if (token.endIndex < charIndex) {
                 continue;

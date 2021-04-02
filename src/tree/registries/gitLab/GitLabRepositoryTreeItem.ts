@@ -29,8 +29,8 @@ export class GitLabRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `api/v4/projects/${this.parent.projectId}/registry/repositories/${this.repoId}/tags?per_page=${PAGE_SIZE}`;
-        let response = await registryRequest<ITag[]>(this, 'GET', url);
+        const url = this._nextLink || `api/v4/projects/${this.parent.projectId}/registry/repositories/${this.repoId}/tags?per_page=${PAGE_SIZE}`;
+        const response = await registryRequest<ITag[]>(this, 'GET', url);
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body,

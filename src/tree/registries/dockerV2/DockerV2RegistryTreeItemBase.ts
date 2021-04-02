@@ -38,8 +38,8 @@ export abstract class DockerV2RegistryTreeItemBase extends RegistryTreeItemBase 
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `v2/_catalog?n=${PAGE_SIZE}`;
-        let response = await registryRequest<IRepositories>(this, 'GET', url);
+        const url = this._nextLink || `v2/_catalog?n=${PAGE_SIZE}`;
+        const response = await registryRequest<IRepositories>(this, 'GET', url);
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body.repositories,

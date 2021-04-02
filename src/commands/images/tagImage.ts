@@ -28,7 +28,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
 }
 
 export async function getTagFromUserInput(fullTag: string, baseImagePath?: string): Promise<string> {
-    let opt: vscode.InputBoxOptions = {
+    const opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
     };
@@ -66,9 +66,9 @@ const KnownRegistries: { type: string, regex: RegExp }[] = [
 
 export function addImageTaggingTelemetry(context: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
     try {
-        let properties: TelemetryProperties = {};
+        const properties: TelemetryProperties = {};
 
-        let [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
+        const [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
 
         if (!!tag.match(/^[0-9.-]*(|alpha|beta|latest|edge|v|version)?[0-9.-]*$/)) {
             properties.safeTag = tag;
@@ -76,12 +76,12 @@ export function addImageTaggingTelemetry(context: IActionContext, fullImageName:
         properties.hasTag = String(!!tag);
         properties.numSlashes = String(numberMatches(repository.match(/\//g)));
 
-        let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
+        const knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
         if (knownRegistry) {
             properties.registryType = knownRegistry.type;
         }
 
-        for (let propertyName of Object.keys(properties)) {
+        for (const propertyName of Object.keys(properties)) {
             context.telemetry.properties[propertyName + propertyPostfix] = properties[propertyName];
         }
     } catch (error) {

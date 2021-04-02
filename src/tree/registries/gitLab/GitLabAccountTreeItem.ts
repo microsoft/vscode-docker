@@ -52,7 +52,7 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
 
         try {
             const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;
-            let response = await registryRequest<IProject[]>(this, 'GET', url);
+            const response = await registryRequest<IProject[]>(this, 'GET', url);
             this._nextLink = getNextLinkFromHeaders(response);
             return this.createTreeItemsWithErrorHandling(
                 response.body,

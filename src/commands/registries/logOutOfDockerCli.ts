@@ -14,6 +14,6 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
         node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
     }
 
-    let creds = await node.getDockerCliCredentials();
+    const creds = await node.getDockerCliCredentials();
     await executeAsTask(context, `docker logout ${creds.registryPath}`, 'Docker', { addDockerEnv: true });
 }

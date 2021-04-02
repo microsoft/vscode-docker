@@ -35,8 +35,8 @@ export class SuggestSupportHelper {
     public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[] | undefined> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
-                let r: vscode.MarkedString[] = [];
-                let tags = hub.tagsForImage(result);
+                const r: vscode.MarkedString[] = [];
+                const tags = hub.tagsForImage(result);
 
                 // Name, tags and stars.
                 let nameString = '';
@@ -47,7 +47,7 @@ export class SuggestSupportHelper {
                 }
 
                 if (result.star_count) {
-                    let plural = (result.star_count > 1);
+                    const plural = (result.star_count > 1);
                     nameString += '**' + String(result.star_count) + (plural ? ' stars' : ' star') + '**';
                 }
 
@@ -66,12 +66,12 @@ export class SuggestSupportHelper {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        let originalValue = prsr.tokenValue(line, tokens[tokenIndex]);
+        const originalValue = prsr.tokenValue(line, tokens[tokenIndex]);
 
         let keyToken: string = null;
         tokenIndex--;
         while (tokenIndex >= 0) {
-            let type = tokens[tokenIndex].type;
+            const type = tokens[tokenIndex].type;
             if (type === parser.TokenType.String || type === parser.TokenType.Text) {
                 return;
             }
@@ -85,7 +85,7 @@ export class SuggestSupportHelper {
         if (!keyToken) {
             return;
         }
-        let keyName = prsr.keyNameFromKeyToken(keyToken);
+        const keyName = prsr.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
             let imageName: string;
 

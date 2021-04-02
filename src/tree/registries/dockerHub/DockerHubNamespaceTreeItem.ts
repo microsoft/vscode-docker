@@ -36,8 +36,8 @@ export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `v2/repositories/${this.namespace}?page_size=${PAGE_SIZE}`;
-        let response = await registryRequest<IRepositories>(this, 'GET', url);
+        const url = this._nextLink || `v2/repositories/${this.namespace}?page_size=${PAGE_SIZE}`;
+        const response = await registryRequest<IRepositories>(this, 'GET', url);
         this._nextLink = response.body.next;
         return await this.createTreeItemsWithErrorHandling(
             response.body.results,

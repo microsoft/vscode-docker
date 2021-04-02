@@ -28,8 +28,8 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `v2/${this.repoName}/tags/list?n=${PAGE_SIZE}`;
-        let response = await registryRequest<ITags>(this, 'GET', url);
+        const url = this._nextLink || `v2/${this.repoName}/tags/list?n=${PAGE_SIZE}`;
+        const response = await registryRequest<ITags>(this, 'GET', url);
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body.tags,
@@ -57,8 +57,8 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
 
     private async getTagTime(tag: string): Promise<string> {
         const manifestUrl: string = `v2/${this.repoName}/manifests/${tag}`;
-        let manifestResponse = await registryRequest<IManifest>(this, 'GET', manifestUrl);
-        let history = <IManifestHistoryV1Compatibility>JSON.parse(manifestResponse.body.history[0].v1Compatibility);
+        const manifestResponse = await registryRequest<IManifest>(this, 'GET', manifestUrl);
+        const history = <IManifestHistoryV1Compatibility>JSON.parse(manifestResponse.body.history[0].v1Compatibility);
         return history.created;
     }
 }

@@ -9,7 +9,7 @@ import * as assert from 'assert';
 suite('(unit) trimWithElipsis', () => {
     function genTest(s: string, max: number, expected: string): void {
         test(`${String(s)}: ${max}`, () => {
-            let s2 = trimWithElipsis(s, max);
+            const s2 = trimWithElipsis(s, max);
             assert.equal(s2, expected);
         });
     }

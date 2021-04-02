@@ -16,7 +16,7 @@ import { DockerContext } from '../Contexts';
 
 export function getFullTagFromDigest(image: Dockerode.ImageInfo): string {
     let repo = '<none>';
-    let tag = '<none>';
+    const tag = '<none>';
 
     const digest = image.RepoDigests[0];
     if (digest) {
