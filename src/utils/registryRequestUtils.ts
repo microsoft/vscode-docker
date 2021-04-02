@@ -29,7 +29,7 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
     const baseUrl = node.baseUrl || (<IRepositoryAuthTreeItem>node).parent.baseUrl;
     let fullUrl: string = url;
     if (!url.startsWith(baseUrl)) {
-        let parsed = new URL(url, baseUrl);
+        const parsed = new URL(url, baseUrl);
         fullUrl = parsed.toString();
     }
 

@@ -11,7 +11,7 @@ export async function quickPickWorkspaceFolder(context: IActionContext, noWorksp
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
         return vscode.workspace.workspaceFolders[0];
     } else if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 1) {
-        let selected = await vscode.window.showWorkspaceFolderPick();
+        const selected = await vscode.window.showWorkspaceFolderPick();
         if (!selected) {
             throw new UserCancelledError();
         }
@@ -25,7 +25,7 @@ export async function quickPickWorkspaceFolder(context: IActionContext, noWorksp
                 },
                 title: localize('vscode-docker.quickPickWorkspaceFolder.openFolder', 'Open Folder'),
             }
-        ]
+        ];
         throw new Error(noWorkspacesMessage);
     }
 }

@@ -25,7 +25,7 @@ export async function confirmAllAffectedContainers(context: IActionContext, node
     });
 
     const groupsList = Array.from(groupsSet);
-    const groupsConfirm = groupsList.map(g => `\'${g}\'`).join(', ');
+    const groupsConfirm = groupsList.map(g => `'${g}'`).join(', ');
 
     const confirm = localize('vscode-docker.commands.containers.aciContainerActionWarning.confirm', 'ACI containers can only be started or stopped in a group. This action will apply to all containers in {0}. Do you want to proceed?', groupsConfirm);
 

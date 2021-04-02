@@ -45,14 +45,14 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
         return await getRegistryPassword(this.cachedProvider);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
         try {
             const url: string = this._nextLink || `api/v4/projects?per_page=${PAGE_SIZE}&simple=true&membership=true`;
-            let response = await registryRequest<IProject[]>(this, 'GET', url);
+            const response = await registryRequest<IProject[]>(this, 'GET', url);
             this._nextLink = getNextLinkFromHeaders(response);
             return this.createTreeItemsWithErrorHandling(
                 response.body,
@@ -80,6 +80,6 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
 
 interface IProject {
     id: number;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     path_with_namespace: string;
 }

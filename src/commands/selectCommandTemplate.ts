@@ -55,7 +55,7 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
-            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
+            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`;
         }, portsString);
     }
 
@@ -94,7 +94,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         composeCommand === 'up' ? 'composeUp' : 'composeDown',
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f \"${configurationFile}\"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
     );
 }
 
@@ -175,7 +175,7 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
             label: template.label,
             detail: template.template,
             data: template,
-        }
+        };
     });
 
     const selection = await ext.ui.showQuickPick(items, {

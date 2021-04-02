@@ -73,7 +73,9 @@ async function getImagePorts(fullTag: string): Promise<number[]> {
                 const portParts = portAndProtocol.split('/');
                 result.push(Number.parseInt(portParts[0], 10));
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
 
         return result;
     } catch (err) {

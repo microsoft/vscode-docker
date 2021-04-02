@@ -22,14 +22,16 @@ export abstract class AzExtParentTreeItemIntermediate extends AzExtParentTreeIte
                 // The reason is that we don't want to rev the required @types/vscode version in vscode-azureextensionui to accept
                 // MarkdownString there; but we don't actually need to since it's only passing the value through unchanged.
                 // TODO: when possible we should remove this
-                // @ts-expect-error
+                // @ts-expect-error MarkdownString is not assignable to string
                 return await callWithTelemetryAndErrorHandling('resolveTooltip', async (actionContext: IActionContext) => {
                     actionContext.errorHandling.suppressDisplay = true;
                     actionContext.errorHandling.rethrow = true;
 
                     return await this.resolveTooltipInternal(actionContext);
                 });
-            } catch { } // Do nothing, fall to the undefined below
+            } catch {
+                // Do nothing, fall to the undefined below
+            }
         }
 
         return undefined;

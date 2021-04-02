@@ -16,5 +16,5 @@ export function getValidImageNameFromPath(appPath: string, tag?: string): string
 }
 
 export function getValidImageNameWithTag(nameHint: string, tag: string): string {
-    return `${getValidImageName(nameHint)}:${tag}`
+    return `${getValidImageName(nameHint)}:${tag}`;
 }

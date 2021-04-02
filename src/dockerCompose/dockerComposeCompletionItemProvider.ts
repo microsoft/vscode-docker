@@ -17,45 +17,45 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
-        let yamlSuggestSupport = new helper.SuggestSupportHelper();
+        const yamlSuggestSupport = new helper.SuggestSupportHelper();
 
         // Determine the schema version of the current compose file,
         // based on the existence of a top-level "version" property.
-        let versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
-        let version = versionMatch ? versionMatch[2] : "1";
+        const versionMatch = document.getText().match(/^version:\s*(["'])(\d+(\.\d)?)\1/im);
+        const version = versionMatch ? versionMatch[2] : "1";
 
         // Get the line where intellisense was invoked on (e.g. 'image: u').
-        let line = document.lineAt(position.line).text;
+        const line = document.lineAt(position.line).text;
 
         if (line.length === 0) {
             // empty line
             return Promise.resolve(this.suggestKeys('', version));
         }
 
-        let range = document.getWordRangeAtPosition(position);
+        const range = document.getWordRangeAtPosition(position);
 
         // Get the text where intellisense was invoked on (e.g. 'u').
-        let word = range && document.getText(range) || '';
+        const word = range && document.getText(range) || '';
 
-        let textBefore = line.substring(0, position.character);
+        const textBefore = line.substring(0, position.character);
         if (/^\s*[\w_]*$/.test(textBefore)) {
             // on the first token
             return Promise.resolve(this.suggestKeys(word, version));
         }
 
         // Matches strings like: 'image: "ubuntu'
-        let imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
+        const imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*:\s*"([^"]*)$/);
 
         if (imageTextWithQuoteMatchYaml) {
-            let imageText = imageTextWithQuoteMatchYaml[1];
+            const imageText = imageTextWithQuoteMatchYaml[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 
         // Matches strings like: 'image: ubuntu'
-        let imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
+        const imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*:\s*([\w:/]*)/);
 
         if (imageTextWithoutQuoteMatch) {
-            let imageText = imageTextWithoutQuoteMatch[1];
+            const imageText = imageTextWithoutQuoteMatch[1];
             return yamlSuggestSupport.suggestImages(imageText);
         }
 
@@ -65,10 +65,10 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
     private suggestKeys(word: string, version: string): CompletionItem[] {
         // Attempt to grab the keys for the requested schema version,
         // otherwise, fall back to showing a composition of all possible keys.
-        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.All;
+        const keys = <KeyInfo>composeVersions[`v${version}`] || composeVersions.all;
 
         return Object.keys(keys).map(ruleName => {
-            let completionItem = new CompletionItem(ruleName);
+            const completionItem = new CompletionItem(ruleName);
             completionItem.kind = CompletionItemKind.Keyword;
             completionItem.insertText = ruleName + ': ';
             completionItem.documentation = keys[ruleName];

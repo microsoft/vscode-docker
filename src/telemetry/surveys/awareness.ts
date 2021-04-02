@@ -20,7 +20,7 @@ export const awareness: Survey = {
     ]),
     activationDelayMs: 30 * 1000,
     isEligible: isEligible,
-}
+};
 
 async function isEligible(): Promise<boolean> {
     const overallActivity = ext.activityMeasurementService.getActivityMeasurement('overall');

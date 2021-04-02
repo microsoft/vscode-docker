@@ -28,4 +28,4 @@ export const genericDockerV2RegistryProvider: IRegistryProvider = {
     treeItemFactory: (parent, cachedProvider) => new GenericDockerV2RegistryTreeItem(parent, cachedProvider, basicOAuthProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
     removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
-}
+};

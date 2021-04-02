@@ -19,13 +19,13 @@ export class DockerHubRepositoryTreeItem extends RemoteRepositoryTreeItemBase {
         super(parent, name);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `v2/repositories/${this.parent.namespace}/${this.repoName}/tags?page_size=${PAGE_SIZE}`;
-        let response = await registryRequest<ITags>(this, 'GET', url);
+        const url = this._nextLink || `v2/repositories/${this.parent.namespace}/${this.repoName}/tags?page_size=${PAGE_SIZE}`;
+        const response = await registryRequest<ITags>(this, 'GET', url);
         this._nextLink = response.body.next;
         return await this.createTreeItemsWithErrorHandling(
             response.body.results,
@@ -47,6 +47,6 @@ interface ITags {
 
 interface ITag {
     name: string;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     last_updated: string;
 }

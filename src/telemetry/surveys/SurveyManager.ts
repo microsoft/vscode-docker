@@ -78,7 +78,9 @@ export class SurveyManager {
                     }
                 });
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     private async surveyOpen(url: string): Promise<void> {
