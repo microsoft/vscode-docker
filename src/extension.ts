@@ -14,7 +14,7 @@ import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelect
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { openStartPageAfterExtensionUpdate } from './commands/startPage/openStartPage';
-import { COMPOSE_FILE_GLOB_PATTERN, extensionVersion } from './constants';
+import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
@@ -103,25 +103,20 @@ export async function activate(ctx: vscode.ExtensionContext): Promise<unknown | 
             )
         );
 
-        const YAML_MODE_ID: vscode.DocumentFilter = {
-            language: 'yaml',
-            scheme: 'file',
-            pattern: COMPOSE_FILE_GLOB_PATTERN
-        };
         const COMPOSE_MODE_ID: vscode.DocumentFilter = {
             language: 'dockercompose',
             scheme: 'file',
         };
-        let yamlHoverProvider = new DockerComposeHoverProvider(
+        let composeHoverProvider = new DockerComposeHoverProvider(
             new DockerComposeParser(),
             composeVersionKeys.all
         );
         ctx.subscriptions.push(
-            vscode.languages.registerHoverProvider([YAML_MODE_ID, COMPOSE_MODE_ID], yamlHoverProvider)
+            vscode.languages.registerHoverProvider(COMPOSE_MODE_ID, composeHoverProvider)
         );
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
-                [YAML_MODE_ID, COMPOSE_MODE_ID],
+                COMPOSE_MODE_ID,
                 new DockerComposeCompletionItemProvider(),
                 "."
             )
