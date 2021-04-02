@@ -1,0 +1,65 @@
+{
+    "root": true,
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "project": "tsconfig.json"
+    },
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            { // Names should be either camelCase or PascalCase, both are extensively used throughout this project
+                "selector": "default",
+                "format": [
+                    "camelCase",
+                    "PascalCase"
+                ]
+            },
+            { // const variables can also have UPPER_CASE
+                "selector": "variable",
+                "modifiers": [
+                    "const"
+                ],
+                "format": [
+                    "camelCase",
+                    "PascalCase",
+                    "UPPER_CASE"
+                ]
+            },
+            { // private class properties can also have leading underscores
+                "selector": "classProperty",
+                "modifiers": [
+                    "private"
+                ],
+                "format": [
+                    "camelCase",
+                    "PascalCase"
+                ],
+                "leadingUnderscore": "allow"
+            }
+        ],
+        "@typescript-eslint/no-floating-promises": "warn",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            { // As a function parameter, unused parameters are allowed
+                "args": "none"
+            }
+        ],
+        "@typescript-eslint/semi": "warn",
+        "curly": "warn",
+        "eqeqeq": "warn",
+        "no-extra-boolean-cast": "off",
+        "no-throw-literal": "warn",
+        "semi": "off"
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ]
+}
