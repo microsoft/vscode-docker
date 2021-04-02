@@ -16,7 +16,6 @@ export function copyWizardContext(wizardContext: Partial<ScaffoldingWizardContex
             continue;
         }
 
-        // @ts-expect-error: TS doesn't like indexing objects with a string
         wizardContext[prop] = priorWizardContext[prop];
     }
 }

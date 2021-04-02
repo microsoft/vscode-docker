@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-// @ts-expect-error: Don't have typing info for gradle-to-js
 import * as gradleParser from 'gradle-to-js/lib/parser';
 import * as xml2js from 'xml2js';
 import { GatherInformationStep } from '../GatherInformationStep';

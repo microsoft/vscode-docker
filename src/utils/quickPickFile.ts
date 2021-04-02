@@ -48,7 +48,6 @@ function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[
         const config = vscode.workspace.getConfiguration('files').get<unknown>('associations');
         if (config) {
             for (const globPattern of Object.keys(config)) {
-                // @ts-expect-error: TS doesn't like indexing objects with a string
                 const fileType = <string | undefined>config[globPattern];
                 if (fileType && fileTypeRegEx.test(fileType)) {
                     result.push(globPattern);

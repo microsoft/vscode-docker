@@ -43,6 +43,13 @@
         "sourceMap": true,
         "rootDir": "src",
         "strict": true, /* enable all strict type-checking options */
+        "alwaysStrict": true,
+        "noFallthroughCasesInSwitch": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "noImplicitAny": false, // TODO
+        "noImplicitReturns": false, // TODO
+        "noUnusedParameters": false, // TODO
         "strictNullChecks": false, // TODO
         /* Additional Checks */
         // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
@@ -51,7 +58,6 @@
     },
     "exclude": [
         "node_modules",
-        ".vscode-test",
-        "src/test"
+        ".vscode-test"
     ]
 }
