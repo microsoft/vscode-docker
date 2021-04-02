@@ -3,12 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+/*
 import { runWithExtensionSettings } from '../runWithExtensionSettings';
 import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates } from '../../commands/selectCommandTemplate';
 import { DockerContext, isNewContextType } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { IActionContext } from 'vscode-azureextensionui';
 import assert = require('assert');
+*/
+
 /* TODO
 suite("(unit) selectCommandTemplate", () => {
     test("One constrained from settings (match)", async () => {

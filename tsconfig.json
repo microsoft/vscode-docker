@@ -51,6 +51,7 @@
         "noImplicitReturns": false, // TODO
         "noUnusedParameters": false, // TODO
         "strictNullChecks": false, // TODO
+        "skipLibCheck": true // Ignore typing issues in libraries
         /* Additional Checks */
         // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
         // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
