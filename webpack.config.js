@@ -118,12 +118,16 @@ module.exports = config;
 */
 
 // @ts-check
+/* eslint-disable no-undef */
 
 'use strict';
 
+
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+/* eslint-enable @typescript-eslint/no-var-requires */
 
 /** @type {import('webpack').Configuration}*/
 const config = {
@@ -203,14 +207,16 @@ const config = {
         {
             // Ignore a warning from applicationinsights
             module: /node_modules\/applicationinsights/,
-            message: /Can\'t resolve \'applicationinsights-native-metrics\'/
+            message: /Can't resolve 'applicationinsights-native-metrics'/
         },
         {
             // Ignore a warning from diagnostic-channel-publishers
             module: /node_modules\/diagnostic-channel-publishers/,
-            message: /Can\'t resolve \'@opentelemetry\/tracing\'/
+            message: /Can't resolve '@opentelemetry\/tracing'/
         },
         (warning) => false, // No other warnings should be ignored
     ]
 };
 module.exports = config;
+
+/* eslint-enable no-undef */
