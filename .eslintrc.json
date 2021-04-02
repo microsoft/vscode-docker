@@ -48,5 +48,10 @@
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
         "semi": "off"
-    }
+    },
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ]
 }
