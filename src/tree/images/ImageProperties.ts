@@ -92,7 +92,6 @@ interface IParsedFullTag {
 function parseFullTag(rawTag: string): IParsedFullTag {
     let registry: string | undefined;
     let namespace: string | undefined;
-    let repositoryName: string;
     let tag: string | undefined;
 
     // Pull out registry or namespace from the beginning
@@ -118,12 +117,9 @@ function parseFullTag(rawTag: string): IParsedFullTag {
         rawTag = rawTag.substring(0, index);
     }
 
-    // Whatever's left is the repository name
-    repositoryName = rawTag;
-
     return {
         registry,
-        repositoryName,
+        repositoryName: rawTag,
         namespace,
         tag
     };

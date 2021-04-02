@@ -45,7 +45,9 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     public watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
         // As we don't actually support watching files, just return a dummy subscription object...
         return {
-            dispose: () => {}
+            dispose: () => {
+                // Noop
+            }
         };
     }
 
@@ -98,7 +100,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     }
 
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
-        const method = async (): Promise <[string, vscode.FileType][]> => {
+        const method = async (): Promise<[string, vscode.FileType][]> => {
             const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
@@ -246,13 +248,13 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         switch (containerOS) {
             case 'linux':
 
-                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"` ];
+                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"`];
 
                 break;
 
             case 'windows':
 
-                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"` ];
+                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"`];
 
                 break;
 

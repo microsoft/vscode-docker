@@ -43,11 +43,11 @@ suite('(unit) utils/nodeUtils', () => {
         }
 
         test('No package', async () => {
-            assert.rejects(() => inferCommand(undefined, 'default', 9229), 'An error should be thrown if there is no package');
+            await assert.rejects(() => inferCommand(undefined, 'default', 9229), 'An error should be thrown if there is no package');
         });
 
         test('No scripts or main', async () => {
-            assert.rejects(() => inferCommand({}, 'default', 9229), 'An error should be thrown if there is no recognized NPM script or main script');
+            await assert.rejects(() => inferCommand({}, 'default', 9229), 'An error should be thrown if there is no recognized NPM script or main script');
         });
 
         inferCommandTest(

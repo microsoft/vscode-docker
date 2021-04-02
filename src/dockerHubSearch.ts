@@ -114,8 +114,7 @@ export interface IHubSearchResponseResult {
     description: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const JSON_CACHE: { [key: string]: any } = {};
+const JSON_CACHE: { [key: string]: unknown } = {};
 
 async function fetchHttpsJson<T>(url: string, cache: boolean): Promise<T> {
     const cacheKey = url.toString();

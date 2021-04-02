@@ -78,13 +78,17 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (fse.existsSync(dockerConfigFile)) {
                 this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
 
         try {
             if (fse.existsSync(dockerContextsFolder)) {
                 this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     public dispose(): void {
@@ -340,7 +344,9 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Set the VSCode context to the result (which may expose commands, etc.)
             this.setVsCodeContext('vscode-docker:newCliPresent', result);
             return result;
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {

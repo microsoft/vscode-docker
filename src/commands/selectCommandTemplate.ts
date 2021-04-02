@@ -94,7 +94,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         composeCommand === 'up' ? 'composeUp' : 'composeDown',
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f \"${configurationFile}\"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
     );
 }
 

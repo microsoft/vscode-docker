@@ -21,7 +21,7 @@ suite("(unit) nonNull", async function (this: Suite): Promise<void> {
         });
     }
 
-    function testNonNullThrows<T>(testName: string, block: () => any) {
+    function testNonNullThrows(testName: string, block: () => unknown) {
         test(testName, () => {
             assert.throws(block, 'Expected an exception');
         });

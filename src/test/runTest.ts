@@ -27,6 +27,7 @@ async function main(): Promise<void> {
         launchArgs: [testWorkspacePath, '--install-extension', 'ms-vscode.azure-account'],
         extensionTestsEnv: {
             DEBUGTELEMETRY: '1',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             MOCHA_grep: process.env.MOCHA_grep,
         },
     };
@@ -42,4 +43,5 @@ async function main(): Promise<void> {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();

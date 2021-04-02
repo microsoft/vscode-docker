@@ -6,10 +6,10 @@
 import { ConfigurationTarget, workspace, WorkspaceConfiguration } from "vscode";
 import { configPrefix } from "../constants";
 
-export async function runWithExtensionSettings<TCallback>(newValues: { [key: string]: any }, callback: () => Promise<TCallback>): Promise<TCallback> {
+export async function runWithExtensionSettings<TCallback>(newValues: { [key: string]: unknown }, callback: () => Promise<TCallback>): Promise<TCallback> {
     const config: WorkspaceConfiguration = workspace.getConfiguration(configPrefix);
 
-    const oldValues: { [key: string]: any } = {};
+    const oldValues: { [key: string]: unknown } = {};
 
     try {
         for (const key of Object.keys(newValues)) {

@@ -66,7 +66,9 @@ class StartPage {
         let showWhatsNew = false;
         try {
             showWhatsNew = !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew'));
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
 
         const startPageContext: StartPageContext = {
             cspSource: webview.cspSource,

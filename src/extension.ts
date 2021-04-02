@@ -194,7 +194,9 @@ async function getDockerInstallationIDHash(): Promise<string> {
                 return result;
             }
         }
-    } catch { }
+    } catch {
+        // Best effort
+    }
 
     return 'unknown';
 }
@@ -220,6 +222,7 @@ function validateOldPublisher(activateContext: IActionContext): void {
     }
 }
 
+/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         const result: vscode.WorkspaceConfiguration[] = [];
@@ -261,11 +264,11 @@ namespace Configuration {
         ));
     }
 }
+/* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
 
 function activateLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
+    void callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
         const serverModule = ext.context.asAbsolutePath(
             path.join(

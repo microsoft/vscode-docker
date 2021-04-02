@@ -10,7 +10,7 @@ import { IToken, Parser, TokenType } from '../parser';
 
 export class DockerComposeParser extends Parser {
     public constructor() {
-        const parseRegex = /\:+$/g;
+        const parseRegex = /:+$/g;
         super(parseRegex);
     }
 

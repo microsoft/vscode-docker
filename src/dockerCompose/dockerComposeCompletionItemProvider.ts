@@ -44,7 +44,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         }
 
         // Matches strings like: 'image: "ubuntu'
-        const imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*\:\s*"([^"]*)$/);
+        const imageTextWithQuoteMatchYaml = textBefore.match(/^\s*image\s*:\s*"([^"]*)$/);
 
         if (imageTextWithQuoteMatchYaml) {
             const imageText = imageTextWithQuoteMatchYaml[1];
@@ -52,7 +52,7 @@ export class DockerComposeCompletionItemProvider implements CompletionItemProvid
         }
 
         // Matches strings like: 'image: ubuntu'
-        const imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*\:\s*([\w\:\/]*)/);
+        const imageTextWithoutQuoteMatch = textBefore.match(/^\s*image\s*:\s*([\w:/]*)/);
 
         if (imageTextWithoutQuoteMatch) {
             const imageText = imageTextWithoutQuoteMatch[1];

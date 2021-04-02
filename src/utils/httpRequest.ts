@@ -126,9 +126,9 @@ export interface IOAuthContext {
     scope?: string,
 }
 
-const realmRegExp = /realm=\"([^"]+)\"/i;
-const serviceRegExp = /service=\"([^"]+)\"/i;
-const scopeRegExp = /scope=\"([^"]+)\"/i;
+const realmRegExp = /realm="([^"]+)"/i;
+const serviceRegExp = /service="([^"]+)"/i;
+const scopeRegExp = /scope="([^"]+)"/i;
 
 export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthContext | undefined {
     if (error.response?.status === 401) {

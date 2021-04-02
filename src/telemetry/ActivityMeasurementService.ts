@@ -75,7 +75,9 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
             if (type !== 'overall') {
                 await this.recordActivity('overall');
             }
-        } catch { } // Best effort only
+        } catch {
+            // Best effort
+        }
     }
 
     /**

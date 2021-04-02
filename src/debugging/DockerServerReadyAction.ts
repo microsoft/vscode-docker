@@ -151,8 +151,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 vscode.env.openExternal(vscode.Uri.parse(uri));
                 break;
             case 'debugWithChrome':
-                const remoteName = 'remoteName';
-                if (vscode.env[remoteName] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
+                if (vscode.env['remoteName'] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
                     void vscode.debug.startDebugging(
                         session.workspaceFolder,
                         {
