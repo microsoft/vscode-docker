@@ -1,3 +1,18 @@
+## 1.12.0 - 12 April 2021
+### Added
+* The extension now targets Docker Compose commands to files matching the `dockercompose` language ID. This raises the minimum required VS Code version to 1.55.0. [#2761](https://github.com/microsoft/vscode-docker/issues/2761)
+* .NET apps will now scaffold using a non-root user. [#1835](https://github.com/microsoft/vscode-docker/issues/1835)
+* Deployments from Azure Container Registry to Azure App Service now no longer require the admin credentials enabled on the ACR. This will now use a system-assigned Managed Service Identity. [#1685](https://github.com/microsoft/vscode-docker/issues/1685)
+* The "Docker Containers: Compose Logs" command can now be used from the palette, as long as the grouping in the containers panel is set to the default of "Compose Project Name". [#2770](https://github.com/microsoft/vscode-docker/issues/2770)
+* The contexts panel now has a "Use" button directly in the tree item, saving a click. [#2719](https://github.com/microsoft/vscode-docker/issues/2719)
+
+### Fixed
+* ACI contexts should now work in sovereign clouds. [#2775](https://github.com/microsoft/vscode-docker/issues/2775)
+* Better information on both Python and .NET Dockerfiles about running as a non-root user. [#2724](https://github.com/microsoft/vscode-docker/issues/2724)
+* Generic registry auth will now try both `POST` and `GET` to obtain a token. [#2735](https://github.com/microsoft/vscode-docker/issues/2735)
+* Commands launched on compose groups from the containers panel now use the compose project name. [#2755](https://github.com/microsoft/vscode-docker/issues/2755)
+* Containers will now more reliably be removed after debugging when using the Restart option. [#2676](https://github.com/microsoft/vscode-docker/issues/2676)
+
 ## 1.11.0 - 15 March 2021
 ### Added
 * Scaffolding and debugging for Python FastAPI is now added. Thanks @Kludex! [#2615](https://github.com/microsoft/vscode-docker/issues/2615)

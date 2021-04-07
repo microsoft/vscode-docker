@@ -57,7 +57,9 @@ function webpackProdTask() {
 }
 
 function vscePackageTask() {
-    return vsce.createVSIX();
+    return vsce.createVSIX({
+        baseContentUrl: 'https://github.com/microsoft/vscode-docker/raw/main',
+    });
 }
 
 gulp.task('build', compileTask);
