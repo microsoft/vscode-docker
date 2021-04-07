@@ -85,7 +85,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         }
         ext.experimentationService = await createExperimentationService(ctx, targetPopulation);
 
-        // Temporarily disabled
+        // Temporarily disabled--reenable if we need to do any surveys
         // (new SurveyManager()).activate();
 
         validateOldPublisher(activateContext);
