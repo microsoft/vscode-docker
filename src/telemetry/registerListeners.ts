@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { TextDocument, workspace } from 'vscode';
+import * as vscode from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
 
 export function registerListeners(): void {
-    if (ext.telemetryOptIn) {
-        registerEvent('dockerfilesave', workspace.onDidSaveTextDocument, async (context: IActionContext, doc: TextDocument) => {
+    if (vscode.env.isTelemetryEnabled) {
+        registerEvent('dockerfilesave', vscode.workspace.onDidSaveTextDocument, async (context: IActionContext, doc: vscode.TextDocument) => {
             // If it's not a Dockerfile, skip
             if (doc.languageId !== 'dockerfile') {
                 context.telemetry.suppressAll = true;
@@ -21,7 +21,7 @@ export function registerListeners(): void {
             void ext.activityMeasurementService.recordActivity('overall');
         });
 
-        registerEvent('composefilesave', workspace.onDidSaveTextDocument, async (context: IActionContext, doc: TextDocument) => {
+        registerEvent('composefilesave', vscode.workspace.onDidSaveTextDocument, async (context: IActionContext, doc: vscode.TextDocument) => {
             // If it's not a compose file, skip
             if (doc.languageId !== 'dockercompose') {
                 context.telemetry.suppressAll = true;

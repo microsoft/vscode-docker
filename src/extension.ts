@@ -47,8 +47,6 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
-    // When running tests, DEBUGTELEMETRY=1 is used, so nothing is actually sent. Having this be `true` allows us to test `ActivityMeasurementService` and `ExperimentationTelemetry`.
-    ext.telemetryOptIn = vscode.workspace.getConfiguration('telemetry').get('enableTelemetry', false) || ext.runningTests;
 
     if (!ext.ui) {
         // This allows for standard interactions with the end user (as opposed to test input)
@@ -76,7 +74,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
 
         let targetPopulation: tas.TargetPopulation;
-        if (ext.runningTests || process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
+        if (process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
             targetPopulation = tas.TargetPopulation.Team;
         } else if (/alpha/ig.test(extensionVersion.value)) {
             targetPopulation = tas.TargetPopulation.Insiders;

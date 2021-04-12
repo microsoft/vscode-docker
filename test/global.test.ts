@@ -66,9 +66,6 @@ export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
 suiteSetup(async function (this: mocha.Context): Promise<void> {
     this.timeout(60 * 1000);
     console.log('global.test.ts: suiteSetup');
-
-    ext.runningTests = true;
-
     console.log("Refreshing tree to make sure extension is activated");
     await vscode.commands.executeCommand('vscode-docker.registries.refresh');
     console.log("Refresh done");

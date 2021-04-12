@@ -27,7 +27,7 @@ export interface Survey {
 
 export class SurveyManager {
     public activate(): void {
-        if (!ext.telemetryOptIn || ext.runningTests) {
+        if (!vscode.env.isTelemetryEnabled) {
             return;
         }
 
