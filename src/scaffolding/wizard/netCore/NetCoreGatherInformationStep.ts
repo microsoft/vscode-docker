@@ -131,16 +131,15 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     }
 
     private async getMinimumCSharpExtensionExports(): Promise<CSharpExtensionExports> {
-        const minCSharpVersion = new semver.SemVer(minCSharpVersionString);
         const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
         const cSharpExtensionVersion: semver.SemVer | undefined = cSharpExtension ? new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) : undefined;
 
         if (!cSharpExtension || !cSharpExtensionVersion) {
             throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
-        } else if (cSharpExtensionVersion < minCSharpVersion) {
+        } else if (semver.lt(cSharpExtensionVersion, minCSharpVersionString)) {
             throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version {0} or higher of the C# extension is installed.', minCSharpVersionString));
         }
 
-        return cSharpExtension.isActive ? await cSharpExtension.activate() : cSharpExtension.exports;
+        return await cSharpExtension.activate();
     }
 }
