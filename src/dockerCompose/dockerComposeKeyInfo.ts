@@ -9,15 +9,18 @@ import { localize } from "../localize";
 // Define the keys that are shared between all compose file versions,
 // regardless of the major/minor version (e.g. v1-v2.1+).
 // https://docs.docker.com/compose/yml/
+
+/* eslint-disable @typescript-eslint/naming-convention */
+
 const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
     'build': (
         localize('vscode-docker.dockerComposeKey.build', 'Path to a directory containing a Dockerfile. When the value supplied is a relative path, it is interpreted as relative to the location of the yml file itself. This directory is also the build context that is sent to the Docker daemon.\n\nCompose will build and tag it with a generated name, and use that image thereafter.')
     ),
     'cap_add': (
-        localize('vscode-docker.dockerComposeKey.cap_add', 'Add or drop container capabilities. See \`man 7 capabilities\` for a full list.')
+        localize('vscode-docker.dockerComposeKey.cap_add', 'Add or drop container capabilities. See `man 7 capabilities` for a full list.')
     ),
     'cap_drop': (
-        localize('vscode-docker.dockerComposeKey.cap_drop', 'Add or drop container capabilities. See \`man 7 capabilities\` for a full list.')
+        localize('vscode-docker.dockerComposeKey.cap_drop', 'Add or drop container capabilities. See `man 7 capabilities` for a full list.')
     ),
     'cgroup_parent': (
         localize('vscode-docker.dockerComposeKey.cgroup_parent', 'Specify an optional parent cgroup for the container.')
@@ -38,7 +41,7 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
         localize('vscode-docker.dockerComposeKey.cpuset', 'CPUs in which to allow execution.')
     ),
     'devices': (
-        localize('vscode-docker.dockerComposeKey.devices', 'List of device mappings. Uses the same format as the \`--device\` docker client create option.')
+        localize('vscode-docker.dockerComposeKey.devices', 'List of device mappings. Uses the same format as the `--device` docker client create option.')
     ),
     'dns': (
         localize('vscode-docker.dockerComposeKey.dns', 'Custom DNS servers. Can be a single value or a list.')
@@ -47,7 +50,7 @@ const DOCKER_COMPOSE_SHARED_KEY_INFO: KeyInfo = {
         localize('vscode-docker.dockerComposeKey.dns_search', 'Custom DNS search domains. Can be a single value or a list.')
     ),
     'dockerfile': (
-        localize('vscode-docker.dockerComposeKey.dockerfile', 'Alternate Dockerfile. Compose will use an alternate file to build with. Using \`dockerfile\` together with \`image\` is not allowed. Attempting to do so results in an error.')
+        localize('vscode-docker.dockerComposeKey.dockerfile', 'Alternate Dockerfile. Compose will use an alternate file to build with. Using `dockerfile` together with `image` is not allowed. Attempting to do so results in an error.')
     ),
     'domainname': (
         localize('vscode-docker.dockerComposeKey.domainname', 'Container domain name.')
@@ -323,17 +326,18 @@ const DOCKER_COMPOSE_V2_2_KEY_INFO: KeyInfo = {
     )
 };
 
+/* eslint-enable @typescript-eslint/naming-convention */
+
 // Helper function that merges the specified version-specific keys with the shared
 // keys, in order to create a complete schema for a specic version.
 function mergeWithSharedKeys(...versions: KeyInfo[]): KeyInfo {
     return <KeyInfo>Object.assign({}, DOCKER_COMPOSE_SHARED_KEY_INFO, ...versions);
 }
 
-// tslint:disable-next-line: export-name
 export default <ComposeVersionKeys>{
     v1: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO),
     v2: mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO),
     "v2.1": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO),
     "v2.2": mergeWithSharedKeys(DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO),
-    All: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO)
+    all: mergeWithSharedKeys(DOCKER_COMPOSE_V1_KEY_INFO, DOCKER_COMPOSE_V2_KEY_INFO, DOCKER_COMPOSE_V2_1_KEY_INFO, DOCKER_COMPOSE_V2_2_KEY_INFO)
 };

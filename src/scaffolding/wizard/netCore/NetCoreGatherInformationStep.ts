@@ -48,7 +48,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         if (!wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage) {
             this.targetFramework = projectInfo[1]; // Line 2 is the <TargetFramework> value, or first item from <TargetFrameworks>
 
-            const regexMatch = /net(coreapp)?([\d\.]+)/i.exec(this.targetFramework);
+            const regexMatch = /net(coreapp)?([\d.]+)/i.exec(this.targetFramework);
 
             if (!regexMatch || regexMatch.length < 3) {
                 throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noNetCoreVersion', 'Unable to determine .NET target framework version for \'{0}\'', wizardContext.artifact));

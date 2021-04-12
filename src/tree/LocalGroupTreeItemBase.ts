@@ -33,7 +33,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProper
         return Math.max(...this._items.map(i => i.CreatedTime));
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean): Promise<AzExtTreeItem[]> {
         this._childTreeItems = this.getChildTreeItems();
         return this._childTreeItems;
     }

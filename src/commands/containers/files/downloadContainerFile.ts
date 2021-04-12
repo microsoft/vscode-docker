@@ -76,7 +76,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
             location: vscode.ProgressLocation.Notification,
             title: localize('vscode-docker.commands.containers.files.downloadContainerFile.opening', 'Downloading File(s)...')
         },
-        async (_, token) => {
+        async (task, token) => {
             for (const file of files) {
                 if (token.isCancellationRequested) {
                     throw new UserCancelledError();

@@ -25,23 +25,23 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         this.iconPath = new ThemeIcon('checklist');
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
         const registryTI = this.parent;
 
-        let taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
+        const taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
             await (await registryTI.getClient()).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
             await (await registryTI.getClient()).tasks.listNext(this._nextLink);
 
         this._nextLink = taskListResult.nextLink;
 
         if (clearCache && taskListResult.length === 0) {
-            return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')]
+            return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')];
         } else {
-            let result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
+            const result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 taskListResult,
                 'invalidAzureTask',
                 async t => new AzureTaskTreeItem(this, t),

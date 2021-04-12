@@ -78,13 +78,17 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (fse.existsSync(dockerConfigFile)) {
                 this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
 
         try {
             if (fse.existsSync(dockerContextsFolder)) {
                 this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     public dispose(): void {
@@ -256,6 +260,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
             // return that specified context as Current = true. This way we don't need extra logic below in parsing.
             // TODO: eventually change to `docker context ls --format json`
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
 
             try {
@@ -283,7 +288,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             if (currentContext.Name === 'default') {
                 actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
             } else {
-                actionContext.telemetry.properties.hostSource = 'customContextSelected'
+                actionContext.telemetry.properties.hostSource = 'customContextSelected';
             }
 
             try {
@@ -339,7 +344,9 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Set the VSCode context to the result (which may expose commands, etc.)
             this.setVsCodeContext('vscode-docker:newCliPresent', result);
             return result;
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {

@@ -142,7 +142,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             !(configuration?.subProcessId)) { // Must not have subProcessId, i.e. not a subprocess debug session (which is how Python does hot reload sessions)
             try {
                 await ext.dockerClient.removeContainer(context, configuration.dockerOptions.containerName);
-            } catch { } // Best effort
+            } catch {
+                // Best effort
+            }
         }
     }
 
@@ -171,7 +173,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     ext.outputChannel.appendLine(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
                     ext.outputChannel.appendLine(portMappings.join('\n'));
                 }
-            } catch { } // Best effort
+            } catch {
+                // Best effort
+            }
         }
     }
 }

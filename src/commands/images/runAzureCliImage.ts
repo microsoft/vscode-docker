@@ -12,7 +12,7 @@ import { executeAsTask } from '../../utils/executeAsTask';
 import { getDockerOSType } from '../../utils/osUtils';
 
 export async function runAzureCliImage(context: IActionContext): Promise<void> {
-    let osType = await getDockerOSType(context);
+    const osType = await getDockerOSType(context);
     context.telemetry.properties.dockerOSType = osType;
 
     if (osType === "windows") {

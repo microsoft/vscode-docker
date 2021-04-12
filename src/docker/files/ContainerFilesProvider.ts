@@ -45,7 +45,9 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     public watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
         // As we don't actually support watching files, just return a dummy subscription object...
         return {
-            dispose: () => {}
+            dispose: () => {
+                // Noop
+            }
         };
     }
 
@@ -98,7 +100,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     }
 
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
-        const method = async (): Promise <[string, vscode.FileType][]> => {
+        const method = async (): Promise<[string, vscode.FileType][]> => {
             const dockerUri = DockerUri.parse(uri);
 
             const executor: DockerContainerExecutor =
@@ -108,7 +110,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     return stdout;
                 };
 
-            let containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
+            const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
 
             let items: DirectoryItem[];
 
@@ -130,7 +132,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     throw new UnrecognizedContainerOSError();
             }
 
-            return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File])
+            return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File]);
         };
 
         return method();
@@ -216,7 +218,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     private async getContainerOS(id: string): Promise<DockerOSType | undefined> {
         const result = await this.dockerClientProvider().inspectContainer(/* context */ undefined, id);
 
-        return result.Platform
+        return result.Platform;
     }
 
     private async readFileViaCopy(dockerUri: DockerUri): Promise<Uint8Array> {
@@ -246,13 +248,13 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         switch (containerOS) {
             case 'linux':
 
-                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"` ];
+                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"`];
 
                 break;
 
             case 'windows':
 
-                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"` ];
+                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"`];
 
                 break;
 

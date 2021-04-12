@@ -35,7 +35,7 @@ export function getCommonPropertyValue(item: DockerObject, property: CommonPrope
         case 'CreatedTime':
             return dayjs(item.CreatedTime).fromNow();
         case 'Size':
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-case-declarations
             const size: number = (item as any).Size ?? 0;
             return `${Math.round(size / (1024 * 1024))} MB`;
         default:

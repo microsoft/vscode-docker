@@ -163,6 +163,6 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             args: inferPythonArgs(wizardContext.pythonProjectType, wizardContext.ports) ?? [],
 
             bindPort: wizardContext.ports ? wizardContext.ports[0] : PythonDefaultPorts.get(wizardContext.pythonProjectType),
-        }
+        };
     }
 }

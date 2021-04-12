@@ -21,8 +21,8 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
         return new SubscriptionTreeItem(this, subContext, this.cachedProvider);
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(_clearCache, context);
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+        const treeItems: AzExtTreeItem[] = await super.loadMoreChildrenImpl(clearCache, context);
         if (treeItems.length === 1 && treeItems[0].commandId === 'extension.open') {
             const extensionInstallEventDisposable: Disposable = AzureAccountExtensionListener.onExtensionInstalled(() => {
                 extensionInstallEventDisposable.dispose();

@@ -18,7 +18,7 @@ import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
  */
-// tslint:disable-next-line: export-name
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: IAzExtOutputChannel;
@@ -59,5 +59,6 @@ export namespace ext {
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
 
+    // eslint-disable-next-line prefer-const
     export let runningTests: boolean = false;
 }

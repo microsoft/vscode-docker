@@ -31,7 +31,7 @@ export class RegistryUrlStep extends AzureWizardPromptStep<IConnectRegistryWizar
             let protocol: string | undefined;
             let host: string | undefined;
             try {
-                let uri = new URL(value);
+                const uri = new URL(value);
                 protocol = uri.protocol;
                 host = uri.host;
             } catch {

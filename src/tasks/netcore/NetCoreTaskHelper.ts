@@ -190,7 +190,7 @@ export class NetCoreTaskHelper implements TaskHelper {
     public static async isWebApp(appProject: string): Promise<boolean> {
         const projectContents = await fse.readFile(appProject);
 
-        return /Sdk\s*=\s*\"Microsoft\.NET\.Sdk\.Web\"/ig.test(projectContents.toString());
+        return /Sdk\s*=\s*"Microsoft\.NET\.Sdk\.Web"/ig.test(projectContents.toString());
     }
 
     private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
@@ -218,7 +218,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 localPath: folder.uri.fsPath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
                 permissions: 'rw'
-            }
+            };
 
             const debuggerVolume: DockerContainerVolume = {
                 localPath: vsDbgInstallBasePath,
@@ -264,7 +264,9 @@ export class NetCoreTaskHelper implements TaskHelper {
             try {
                 const imageInspection = await ext.dockerClient.inspectImage(undefined, runOptions.image);
                 userName = imageInspection?.Config?.User;
-            } catch { } // Best effort
+            } catch {
+                // Best effort
+            }
 
             const hostSecretsFolders = getHostSecretsFolders();
             const containerSecretsFolders = getContainerSecretsFolders(runOptions.os, userName);

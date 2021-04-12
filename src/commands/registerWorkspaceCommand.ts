@@ -63,8 +63,8 @@ async function verifyIsRunningInWorkspace(context: IActionContext): Promise<void
             updateExtensionKind('workspace');
 
             context.telemetry.properties.cancelStep = 'requiresReload';
-            let reloadMessage: string = localize('vscode-docker.commands.registerWorkspaceCommands.reloadRequired', 'This change to the Docker extension requires reloading VS Code to take effect.');
-            let reload: MessageItem = { title: localize('vscode-docker.commands.registerWorkspaceCommands.reload', 'Reload Now') };
+            const reloadMessage: string = localize('vscode-docker.commands.registerWorkspaceCommands.reloadRequired', 'This change to the Docker extension requires reloading VS Code to take effect.');
+            const reload: MessageItem = { title: localize('vscode-docker.commands.registerWorkspaceCommands.reload', 'Reload Now') };
             await ext.ui.showWarningMessage(reloadMessage, reload);
 
             // Add a one-off event here before reloading the window otherwise we'll lose telemetry for this code path

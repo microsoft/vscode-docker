@@ -7,7 +7,7 @@ import { Container } from '@docker/sdk/containers';
 import { DockerContainer, InspectionPort } from '../Containers';
 
 // Group 1 is container group name; group 2 is container name
-const containerGroupAndName = /(?:([a-z0-9\-]+)_)?([a-z0-9\-]+)/i;
+const containerGroupAndName = /(?:([a-z0-9-]+)_)?([a-z0-9-]+)/i;
 
 export function containerToDockerContainer(container: Container.AsObject): DockerContainer | undefined {
     if (!container) {

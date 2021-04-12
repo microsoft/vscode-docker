@@ -10,16 +10,16 @@ import { IToken, Parser, TokenType } from '../parser';
 
 export class DockerComposeParser extends Parser {
     public constructor() {
-        let parseRegex = /\:+$/g;
+        const parseRegex = /:+$/g;
         super(parseRegex);
     }
 
     public parseLine(textLine: vscode.TextLine): IToken[] {
-        let r: IToken[] = [];
+        const r: IToken[] = [];
         let lastTokenEndIndex = 0;
         let lastPushedToken: IToken | undefined;
 
-        let emit = (end: number, type: TokenType) => {
+        const emit = (end: number, type: TokenType) => {
             if (end <= lastTokenEndIndex) {
                 return;
             }
@@ -42,11 +42,11 @@ export class DockerComposeParser extends Parser {
         };
 
         let inString = false;
-        let idx = textLine.firstNonWhitespaceCharacterIndex;
-        let line = textLine.text;
+        const idx = textLine.firstNonWhitespaceCharacterIndex;
+        const line = textLine.text;
 
         for (let i = idx, len = line.length; i < len; i++) {
-            let ch = line.charAt(i);
+            const ch = line.charAt(i);
 
             if (inString) {
                 if (ch === '"' && line.charAt(i - 1) !== '\\') {

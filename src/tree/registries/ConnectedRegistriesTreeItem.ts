@@ -18,7 +18,7 @@ export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
         this.iconPath = new ThemeIcon('link');
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         return this.children;
     }
 

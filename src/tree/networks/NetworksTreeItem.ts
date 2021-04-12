@@ -43,8 +43,8 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<DockerNetwork, Netwo
     }
 
     public async getItems(context: IActionContext): Promise<DockerNetwork[]> {
-        let config = workspace.getConfiguration(configPrefix);
-        let showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
+        const config = workspace.getConfiguration(configPrefix);
+        const showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
         let networks = await ext.dockerClient.getNetworks(context) || [];
 

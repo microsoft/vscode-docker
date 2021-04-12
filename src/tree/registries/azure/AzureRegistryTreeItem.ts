@@ -23,7 +23,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
 
     private _tasksTreeItem: AzureTasksTreeItem;
 
-    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly _registry: AcrModels.Registry) {
+    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly registry: AcrModels.Registry) {
         super(parent, cachedProvider, azureOAuthProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
         this.authContext = {
@@ -31,18 +31,18 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
             service: this.host,
             subscriptionContext: this.parent.root,
             scope: 'registry:catalog:*',
-        }
+        };
 
         this.id = this.registryId;
         this.iconPath = getIconPath('azureRegistry');
     }
 
     public get registryName(): string {
-        return nonNullProp(this._registry, 'name');
+        return nonNullProp(this.registry, 'name');
     }
 
     public get registryId(): string {
-        return nonNullProp(this._registry, 'id');
+        return nonNullProp(this.registry, 'id');
     }
 
     public get resourceGroup(): string {
@@ -50,7 +50,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public get registryLocation(): string {
-        return this._registry.location;
+        return this.registry.location;
     }
 
     public async getClient(): Promise<ContainerRegistryManagementClient> {
@@ -63,11 +63,11 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public get properties(): unknown {
-        return this._registry;
+        return this.registry;
     }
 
     public get baseUrl(): string {
-        return `https://${nonNullProp(this._registry, 'loginServer')}`;
+        return `https://${nonNullProp(this.registry, 'loginServer')}`;
     }
 
     public createRepositoryTreeItem(name: string): AzureRepositoryTreeItem {
@@ -105,7 +105,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public async tryGetAdminCredentials(): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
-        if (this._registry.adminUserEnabled) {
+        if (this.registry.adminUserEnabled) {
             return await (await this.getClient()).registries.listCredentials(this.resourceGroup, this.registryName);
         } else {
             return undefined;

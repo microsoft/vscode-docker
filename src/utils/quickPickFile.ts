@@ -22,7 +22,7 @@ async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string, 
 }
 
 export function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
-    let relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.uri.fsPath.length));
+    const relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.uri.fsPath.length));
 
     return <Item>{
         description: undefined,
@@ -99,7 +99,7 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
         const message = localize('vscode-docker.utils.quickPick.chooseDockerfile', 'Choose a Dockerfile to build.');
         selectedDockerFile = await quickPickFileItem(dockerFiles, message);
         if (!selectedDockerFile) {
-            let msg = localize('vscode-docker.utils.quickPick.noDockerfile', 'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?');
+            const msg = localize('vscode-docker.utils.quickPick.noDockerfile', 'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?');
             context.telemetry.properties.cancelStep = msg;
             await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
             context.telemetry.properties.cancelStep = undefined;
@@ -126,7 +126,7 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
                 selectedComposeFile = await quickPickFileItem(composeFiles, message);
             }
         } else {
-            let msg = localize('vscode-docker.utils.quickPick.noComposefile', 'Couldn\'t find any docker-compose files in your workspace. Would you like to add Docker files to the workspace?');
+            const msg = localize('vscode-docker.utils.quickPick.noComposefile', 'Couldn\'t find any docker-compose files in your workspace. Would you like to add Docker files to the workspace?');
             context.telemetry.properties.cancelStep = msg;
             await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
             context.telemetry.properties.cancelStep = undefined;
@@ -140,7 +140,7 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
 function isDefaultDockerComposeFile(fileName: string): boolean {
     if (fileName) {
         const lowerCasefileName: string = fileName.toLowerCase();
-        return lowerCasefileName === 'docker-compose.yml' || lowerCasefileName === 'docker-compose.yaml'
+        return lowerCasefileName === 'docker-compose.yml' || lowerCasefileName === 'docker-compose.yaml';
     }
 
     return false;
@@ -149,7 +149,7 @@ function isDefaultDockerComposeFile(fileName: string): boolean {
 function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
     if (fileName) {
         const lowerCasefileName: string = fileName.toLowerCase();
-        return lowerCasefileName === 'docker-compose.override.yml' || lowerCasefileName === 'docker-compose.override.yaml'
+        return lowerCasefileName === 'docker-compose.override.yml' || lowerCasefileName === 'docker-compose.override.yaml';
     }
 
     return false;
