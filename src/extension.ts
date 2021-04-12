@@ -26,7 +26,6 @@ import { localize } from './localize';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
-import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
@@ -86,7 +85,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         }
         ext.experimentationService = await createExperimentationService(ctx, targetPopulation);
 
-        (new SurveyManager()).activate();
+        // Temporarily disabled--reenable if we need to do any surveys
+        // (new SurveyManager()).activate();
 
         validateOldPublisher(activateContext);
 
