@@ -54,7 +54,7 @@ export namespace PythonExtensionHelper {
 
         const version = new semver.SemVer(pyExt.packageJSON.version);
 
-        if (version.compare(minPyExtensionVersion) < 0) {
+        if (semver.lt(version, minPyExtensionVersion)) {
             await vscode.window.showErrorMessage(localize('vscode-docker.tasks.pythonExt.pythonExtensionNotSupported', 'The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
             return undefined;
         }
