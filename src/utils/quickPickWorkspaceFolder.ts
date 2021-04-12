@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { localize } from '../localize';
+import { isMac } from './osUtils';
 
 export async function quickPickWorkspaceFolder(context: IActionContext, noWorkspacesMessage: string): Promise<vscode.WorkspaceFolder> {
     if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length === 1) {
@@ -21,7 +22,12 @@ export async function quickPickWorkspaceFolder(context: IActionContext, noWorksp
         context.errorHandling.buttons = [
             {
                 callback: async () => {
-                    void vscode.commands.executeCommand('workbench.action.files.openFolder');
+                    if (isMac()) {
+                        // On Mac there's no separate "Open Folder" command, so need to just use the "Open" command
+                        void vscode.commands.executeCommand('workbench.action.files.openFileFolder');
+                    } else {
+                        void vscode.commands.executeCommand('workbench.action.files.openFolder');
+                    }
                 },
                 title: localize('vscode-docker.quickPickWorkspaceFolder.openFolder', 'Open Folder'),
             }
