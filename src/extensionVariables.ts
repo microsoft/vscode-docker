@@ -24,7 +24,6 @@ export namespace ext {
     export let outputChannel: IAzExtOutputChannel;
     export let ui: IAzureUserInput;
 
-    export let telemetryOptIn: boolean;
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
 
@@ -58,7 +57,4 @@ export namespace ext {
     export let contextsTree: AzExtTreeDataProvider;
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
-
-    // eslint-disable-next-line prefer-const
-    export let runningTests: boolean = false;
 }
