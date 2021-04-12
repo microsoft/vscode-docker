@@ -1,3 +1,7 @@
+## 1.12.1 - 12 April 2021
+### Fixed
+* Fixed C# extension not being recognized when adding Dockerfiles to a .NET project. [#2867](https://github.com/microsoft/vscode-docker/issues/2867)
+
 ## 1.12.0 - 12 April 2021
 ### Added
 * The extension now targets Docker Compose commands to files matching the `dockercompose` language ID. This raises the minimum required VS Code version to 1.55.0. [#2761](https://github.com/microsoft/vscode-docker/issues/2761)
