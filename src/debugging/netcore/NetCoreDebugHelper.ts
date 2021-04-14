@@ -208,6 +208,8 @@ export class NetCoreDebugHelper implements DebugHelper {
                 } else {
                     await installDebuggerIfNecessary('linux-x64', 'latest');
                     await installDebuggerIfNecessary('linux-musl-x64', 'latest');
+                    await installDebuggerIfNecessary('linux-arm64', 'latest');
+                    await installDebuggerIfNecessary('linux-musl-arm64', 'latest');
                 }
             }
         );

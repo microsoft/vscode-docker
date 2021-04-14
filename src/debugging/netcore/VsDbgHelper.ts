@@ -13,7 +13,7 @@ import { isWindows } from '../../utils/osUtils';
 import { execAsync } from '../../utils/spawnAsync';
 
 type VsDbgVersion = 'latest'; // There are other versions but we don't use them
-type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'win7-x64';
+type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'linux-arm64' | 'linux-musl-arm64' | 'win7-x64';
 
 const scriptAcquiredDateKey = 'vscode-docker.vsdbgHelper.scriptAcquiredDate';
 const scriptExecutedDateKeyPrefix = 'vscode-docker.vsdbgHelper.scriptExecutedDate';
@@ -31,7 +31,7 @@ const acquisition: { url: string, scriptPath: string, getShellCommand(runtime: V
             }
         } :
         {
-            url: 'https://aka.ms/getvsdbgsh',
+            url: '<Temporarily updated with location of new script>',
             scriptPath: path.join(vsDbgInstallBasePath, 'getvsdbg.sh'),
             getShellCommand: (runtime: VsDbgRuntime, version: VsDbgVersion) => {
                 return `chmod +x "${acquisition.scriptPath}" && "${acquisition.scriptPath}" -v ${version} -r ${runtime} -l "${getInstallDirectory(runtime, version)}"`;
