@@ -55,7 +55,7 @@ const config = {
             },
             {
                 // Unpack UMD module headers used in some modules since webpack doesn't handle them.
-                test: /dockerfile-language-service/,
+                test: /dockerfile-language-service|vscode-languageserver-types/,
                 use: { loader: 'umd-compat-loader' }
             }
         ]
