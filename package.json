@@ -2700,9 +2700,9 @@
     "scripts": {
         "watch": "tsc -watch -p ./",
         "build": "tsc -p ./",
-        "ci-build": "tsc -p ./",
+        "ci-build": "npm run test",
         "package": "vsce package",
-        "ci-package": "vsce package",
+        "ci-package": "npm run test && vsce package",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "webpack-dev": "webpack --mode development --devtool hidden-source-map",
