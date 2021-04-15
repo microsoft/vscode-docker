@@ -4,13 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions } from 'vscode-azureextensionui';
 import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
+
+export type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
 
 // Exported only for tests
 export type CommandTemplate = {
@@ -99,7 +101,14 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
 }
 
 // Exported only for tests
-export async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext: string[], folder: vscode.WorkspaceFolder | undefined, additionalVariables: { [key: string]: string }): Promise<string> {
+export async function selectCommandTemplate(
+    context: IActionContext,
+    command: TemplateCommand,
+    matchContext: string[],
+    folder: vscode.WorkspaceFolder | undefined,
+    additionalVariables: { [key: string]: string },
+    templatePicker: TemplatePicker = (i, o) => ext.ui.showQuickPick(i, o) // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
+): Promise<string> {
     // Get the current context type
     const currentContextType = await ext.dockerContextManager.getCurrentContextType();
 
@@ -148,7 +157,7 @@ export async function selectCommandTemplate(context: IActionContext, command: Te
 
         // Choose a template from the first non-empty group
         // If only one matches there will be no prompt
-        selectedTemplate = await quickPickTemplate(context, templates);
+        selectedTemplate = await quickPickTemplate(templates, templatePicker);
         break;
     }
 
@@ -164,7 +173,7 @@ export async function selectCommandTemplate(context: IActionContext, command: Te
     return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }
 
-async function quickPickTemplate(context: IActionContext, templates: CommandTemplate[]): Promise<CommandTemplate> {
+async function quickPickTemplate(templates: CommandTemplate[], templatePicker: TemplatePicker): Promise<CommandTemplate> {
     if (templates.length === 1) {
         // No need to prompt if only one remains
         return templates[0];
@@ -178,7 +187,7 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
         };
     });
 
-    const selection = await ext.ui.showQuickPick(items, {
+    const selection = await templatePicker(items, {
         placeHolder: localize('vscode-docker.commands.selectCommandTemplate.chooseTemplate', 'Choose a command template to execute')
     });
 

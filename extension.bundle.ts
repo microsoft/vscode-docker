@@ -39,7 +39,7 @@ export { DockerContainer } from './src/docker/Containers';
 export { DockerImage } from './src/docker/Images';
 export { DockerNetwork } from './src/docker/Networks';
 export { DockerVolume } from './src/docker/Volumes';
-export { CommandTemplate, selectCommandTemplate, defaultCommandTemplates } from './src/commands/selectCommandTemplate';
+export { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, TemplatePicker } from './src/commands/selectCommandTemplate';
 export { NonComposeGroupName } from './src/tree/containers/ContainersTreeItem';
 export { isHigherMinorVersion } from './src/commands/startPage/openStartPage';
 export { DockerContainerInfo } from './src/tree/containers/ContainersTreeItem';

@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// import { runWithExtensionSettings } from '../runWithExtensionSettings';
-// import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext, isNewContextType } from '../../extension.bundle';
-// import { IActionContext } from 'vscode-azureextensionui';
-// import assert = require('assert');
+import { runWithExtensionSettings } from '../runWithExtensionSettings';
+import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext, isNewContextType, TemplatePicker } from '../../extension.bundle';
+import { IActionContext, IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
+import assert = require('assert');
 
-// TODO: re-enable these tests
+const DefaultPickIndex = 0;
 
-/*
 suite("(unit) selectCommandTemplate", () => {
     test("One constrained from settings (match)", async () => {
         const result = await runWithCommandSetting(
@@ -128,7 +127,7 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                 },
             ],
-            [TestInput.UseDefaultValue],
+            [DefaultPickIndex],
             'moby',
             ['test']
         );
@@ -211,7 +210,7 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                 },
             ],
-            [TestInput.UseDefaultValue],
+            [DefaultPickIndex],
             'moby',
             ['test']
         );
@@ -342,7 +341,7 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                 },
             ],
-            [TestInput.UseDefaultValue],
+            [DefaultPickIndex],
             'moby',
             ['test']
         );
@@ -442,7 +441,7 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'test',
                 },
             ],
-            [TestInput.UseDefaultValue],
+            [DefaultPickIndex],
             'moby',
             ['test']
         );
@@ -568,7 +567,7 @@ suite("(unit) selectCommandTemplate", () => {
 async function runWithCommandSetting(
     settingsValues: CommandTemplate[] | string,
     hardcodedValues: CommandTemplate[],
-    pickInputs: TestInput[],
+    pickInputs: number[],
     contextType: string,
     matchContext: string[]): Promise<{ command: string, context: IActionContext }> {
 
@@ -607,10 +606,22 @@ async function runWithCommandSetting(
         };
 
         const cmdResult: string = await runWithExtensionSettings({ 'commands.build': settingsValues }, async () => {
-            return await testUserInput.runWithInputs(pickInputs, async () => {
-                return await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {});
-            });
+            const picker: TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
+                if (pickInputs.length === 0) {
+                    // selectCommandTemplate asked for user input, but we have none left to give it (fail)
+                    assert.fail('Received an unexpected request for input!');
+                }
+
+                return Promise.resolve(items[pickInputs.shift()]);
+            };
+
+            return await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, picker);
         });
+
+        if (pickInputs.length !== 0) {
+            // selectCommandTemplate never asked for an input we have (fail)
+            assert.fail('Unexpected leftover inputs!');
+        }
 
         return {
             command: cmdResult,
@@ -621,4 +632,3 @@ async function runWithCommandSetting(
         ext.dockerContextManager = oldContextManager;
     }
 }
-*/
