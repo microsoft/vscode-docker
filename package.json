@@ -2701,13 +2701,12 @@
         "watch": "tsc -watch -p ./",
         "build": "tsc -p ./",
         "ci-build": "npm run test",
-        "package": "vsce package",
+        "package": "npm run webpack-prod && vsce package",
         "ci-package": "npm run test && vsce package",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "webpack-dev": "webpack --mode development --devtool hidden-source-map",
         "webpack-prod": "webpack --mode production --devtool hidden-source-map",
-        "vscode:prepublish": "npm run webpack-prod",
         "pretest": "npm run build && npm run lint && npm run webpack-prod"
     },
     "extensionDependencies": [
