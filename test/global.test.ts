@@ -66,7 +66,7 @@ suiteSetup(async function (this: mocha.Context): Promise<void> {
     console.log("Refreshing tree to make sure extension is activated");
     await vscode.commands.executeCommand('vscode-docker.registries.refresh');
     console.log("Refresh done");
-    assert(!!ext.context, "Extension not activated");
+    assert(vscode.extensions.getExtension('ms-azuretools.vscode-docker').isActive, "Extension not activated");
 });
 
 // Runs after all tests
