@@ -9,6 +9,7 @@ import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azuree
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
+import { getHandlebarsWithHelpers } from '../../utils/getHandlebarsWithHelpers';
 import { isMac } from '../../utils/osUtils';
 
 type WebviewMessage = { command: string, [key: string]: string };
@@ -59,7 +60,7 @@ class StartPage {
     }
 
     private async getWebviewHtml(resourcesRoot: vscode.Uri, codiconsRoot: vscode.Uri): Promise<string> {
-        const Handlebars = await import('handlebars');
+        const Handlebars = await getHandlebarsWithHelpers();
         const webview = this.activePanel.webview;
         const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
 
