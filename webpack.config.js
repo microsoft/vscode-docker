@@ -68,10 +68,11 @@ const config = {
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
                 './node_modules/vscode-codicons/dist/codicon.{css,ttf}',
-                './node_modules/open/xdg-open*',
+                './node_modules/open/xdg-open*', // This script isn't included in the webpack but is needed by `open` on certain systems, so copy it in
             ],
         }),
         {
+            // Webpack does not preserve the execute permission on the above xdg-open script, so apply it again within the bundle
             apply: (compiler) => {
                 compiler.hooks.afterEmit.tapPromise('AzCodeCopyWorkaround', async () => {
                     await fse.chmod('./dist/node_modules/open/xdg-open', '755');
