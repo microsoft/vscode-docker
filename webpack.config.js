@@ -74,7 +74,7 @@ const config = {
         {
             apply: (compiler) => {
                 compiler.hooks.afterEmit.tapPromise('AzCodeCopyWorkaround', async () => {
-                    await fse.chmod('./dist/node_modules/open/xdg-open', 655);
+                    await fse.chmod('./dist/node_modules/open/xdg-open', '755');
                 });
             },
         },
