@@ -67,6 +67,10 @@ const config = {
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
                 './node_modules/vscode-codicons/dist/codicon.{css,ttf}',
+                {
+                    from: './node_modules/open/xdg-open',
+                    to: 'node_modules/open'
+                }
             ],
         }),
     ],
