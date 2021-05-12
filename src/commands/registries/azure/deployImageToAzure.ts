@@ -5,7 +5,7 @@
 
 import { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import { env, Uri, window } from "vscode";
-import { CustomLocationListStep, IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -48,7 +48,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new ResourceGroupListStep());
-    CustomLocationListStep.addStep(wizardContext, promptSteps);
+    vscAzureAppService.CustomLocationListStep.addStep(wizardContext, promptSteps);
     promptSteps.push(new vscAzureAppService.AppServicePlanListStep());
 
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
