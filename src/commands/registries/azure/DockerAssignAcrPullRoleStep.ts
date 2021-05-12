@@ -81,6 +81,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!(context.site) && !!(this.tagTreeItem?.parent?.parent) && this.tagTreeItem.parent.parent instanceof AzureRegistryTreeItem;
+        return !!(context.site) && !!(this.tagTreeItem?.parent?.parent) && this.tagTreeItem.parent.parent instanceof AzureRegistryTreeItem
+            && !context.customLocation;
     }
 }

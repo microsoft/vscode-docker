@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from 'vscode';
-import { AzureWizardExecuteStep, createAzureClient } from 'vscode-azureextensionui';
+import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
 import { localize } from '../../../../localize';
 import { nonNullProp } from '../../../../utils/nonNull';
@@ -22,7 +22,8 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         ext.outputChannel.appendLine(creating);
         progress.report({ message: creating });
 
-        const location = nonNullProp(context, 'location');
+        const location: AzExtLocation = await LocationListStep.getLocation(context);
+        const locationName: string = nonNullProp(location, 'name');
         const resourceGroup = nonNullProp(context, 'resourceGroup');
         context.registry = await client.registries.create(
             nonNullProp(resourceGroup, 'name'),
@@ -31,7 +32,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
                 sku: {
                     name: nonNullProp(context, 'newRegistrySku')
                 },
-                location: nonNullProp(location, 'name')
+                location: locationName
             }
         );
 

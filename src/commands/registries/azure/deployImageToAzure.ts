@@ -5,8 +5,8 @@
 
 import { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import { env, Uri, window } from "vscode";
-import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, LocationListStep, ResourceGroupListStep } from "vscode-azureextensionui";
+import { CustomLocationListStep, IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
@@ -46,17 +46,15 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         promptSteps.push(subscriptionStep);
     }
 
-    promptSteps.push(...[
-        new vscAzureAppService.SiteNameStep(),
-        new ResourceGroupListStep(),
-        new vscAzureAppService.AppServicePlanListStep()
-    ]);
-    LocationListStep.addStep(wizardContext, promptSteps);
+    promptSteps.push(new vscAzureAppService.SiteNameStep());
+    promptSteps.push(new ResourceGroupListStep());
+    CustomLocationListStep.addStep(wizardContext, promptSteps);
+    promptSteps.push(new vscAzureAppService.AppServicePlanListStep());
 
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
     const siteConfig: WebSiteManagementModels.SiteConfig = await getNewSiteConfig(node);
     const executeSteps: AzureWizardExecuteStep<IAppServiceWizardContext>[] = [
-        new DockerSiteCreateStep(siteConfig),
+        new DockerSiteCreateStep(siteConfig, node),
         new DockerAssignAcrPullRoleStep(node),
         new DockerWebhookCreateStep(node),
     ];
