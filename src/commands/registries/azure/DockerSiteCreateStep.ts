@@ -6,7 +6,7 @@
 import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import { Site } from '@azure/arm-appservice/esm/models'; // These are only dev-time imports so don't need to be lazy
 import { Progress } from "vscode";
-import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import { CustomLocation, IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -42,6 +42,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
         if (context.customLocation) {
             // deploying to Azure Arc
             siteEnvelope.kind = 'app,linux,kubernetes,container';
+            await this.addCustomLocationProperties(siteEnvelope, context.customLocation);
         }
         else {
             siteEnvelope.identity = {
@@ -76,6 +77,38 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
         else {
             return this.siteConfig;
         }
+    }
+
+    /**
+     * Has a few temporary workarounds so that the sdk allows some newer properties on the plan
+     */
+    private async addCustomLocationProperties(site: Site, customLocation: CustomLocation): Promise<void> {
+        const armAppService = await import('@azure/arm-appservice');
+
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        armAppService.WebSiteManagementMappers.Site.type.modelProperties!.extendedLocation = {
+            serializedName: 'extendedLocation',
+            type: {
+                name: "Composite",
+                modelProperties: {
+                    name: {
+                        serializedName: "name",
+                        type: {
+                            name: "String"
+                        }
+                    },
+                    type: {
+                        serializedName: "type",
+                        type: {
+                            name: "String"
+                        }
+                    }
+                }
+            }
+        };
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        (<any>site).extendedLocation = { name: customLocation.id, type: 'customLocation' };
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
