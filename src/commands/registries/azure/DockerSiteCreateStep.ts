@@ -79,11 +79,12 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
         }
     }
 
-    /**
-     * Has a few temporary workarounds so that the sdk allows some newer properties on the plan
-     */
     private async addCustomLocationProperties(site: Site, customLocation: CustomLocation): Promise<void> {
         const armAppService = await import('@azure/arm-appservice');
+
+        // The type Site coming from package azure/arm-appservice doesn't have the extendedLocation property,
+        // which is needed for custom location. Once this property is added to the type Site, the following
+        // statement that defines the extendedLocation on Site type can be removed.
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         armAppService.WebSiteManagementMappers.Site.type.modelProperties!.extendedLocation = {
