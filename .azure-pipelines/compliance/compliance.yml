@@ -15,6 +15,14 @@ steps:
   continueOnError: true
   condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
 
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-antimalware.AntiMalware@3
+  displayName: 'AntiMalware Scanner'
+  inputs:
+    FileDirPath: '$(Build.SourcesDirectory)'
+    EnableServices: true
+  continueOnError: true
+  condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
+
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
   displayName: 'Publish Security Analysis Logs'
   condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
