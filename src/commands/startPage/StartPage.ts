@@ -36,6 +36,15 @@ class StartPage {
         const codiconsRoot = vscode.Uri.joinPath(ext.context.extensionUri, ...ext.ignoreBundle ? ['node_modules'] : ['dist', 'node_modules'], 'vscode-codicons', 'dist');
 
         if (!this.activePanel) {
+            const template = await this.getTemplate(resourcesRoot);
+
+            let showWhatsNew = false;
+            try {
+                showWhatsNew = !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew'));
+            } catch {
+                // Best effort
+            }
+
             this.activePanel = vscode.window.createWebviewPanel(
                 'vscode-docker.startPage',
                 localize('vscode-docker.help.startPage.title', 'Docker - Get Started'),
@@ -53,37 +62,24 @@ class StartPage {
                 this.activePanel = undefined;
                 listener.dispose();
             });
+
+            const webview = this.activePanel.webview;
+
+            const startPageContext: StartPageContext = {
+                cspSource: webview.cspSource,
+                nonce: cryptoUtils.getRandomHexString(8),
+                codiconsFontUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.ttf')).toString(),
+                codiconsStyleUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css')).toString(),
+                dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker_blue.png')).toString(),
+                showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
+                isMac: isMac(),
+                showWhatsNew: showWhatsNew,
+            };
+
+            this.activePanel.webview.html = template(startPageContext);
         }
 
-        this.activePanel.webview.html = await this.getWebviewHtml(resourcesRoot, codiconsRoot);
         this.activePanel.reveal();
-    }
-
-    private async getWebviewHtml(resourcesRoot: vscode.Uri, codiconsRoot: vscode.Uri): Promise<string> {
-        const Handlebars = await getHandlebarsWithHelpers();
-        const webview = this.activePanel.webview;
-        const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
-
-        let showWhatsNew = false;
-        try {
-            showWhatsNew = !!(await ext.experimentationService.isLiveFlightEnabled('vscode-docker.whatsNew'));
-        } catch {
-            // Best effort
-        }
-
-        const startPageContext: StartPageContext = {
-            cspSource: webview.cspSource,
-            nonce: cryptoUtils.getRandomHexString(8),
-            codiconsFontUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.ttf')).toString(),
-            codiconsStyleUri: webview.asWebviewUri(vscode.Uri.joinPath(codiconsRoot, 'codicon.css')).toString(),
-            dockerIconUri: webview.asWebviewUri(vscode.Uri.joinPath(resourcesRoot, 'docker_blue.png')).toString(),
-            showStartPageChecked: vscode.workspace.getConfiguration('docker').get('showStartPage', false) ? 'checked' : '',
-            isMac: isMac(),
-            showWhatsNew: showWhatsNew,
-        };
-
-        const template = Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
-        return template(startPageContext);
     }
 
     private async handleMessage(message: WebviewMessage): Promise<void> {
@@ -96,6 +92,12 @@ class StartPage {
                 break;
             default:
         }
+    }
+
+    private async getTemplate(resourcesRoot: vscode.Uri): Promise<HandlebarsTemplateDelegate<unknown>> {
+        const templatePath = vscode.Uri.joinPath(resourcesRoot, 'startPage.html.template');
+        const Handlebars = await getHandlebarsWithHelpers();
+        return Handlebars.compile(await fse.readFile(templatePath.fsPath, 'utf-8'));
     }
 }
 
