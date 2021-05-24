@@ -740,6 +740,10 @@
                                         "type": "string",
                                         "description": "%vscode-docker.debug.node.localRoot%"
                                     },
+                                    "package": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.debug.node.package%"
+                                    },
                                     "remoteRoot": {
                                         "type": "string",
                                         "description": "%vscode-docker.debug.node.remoteRoot%"
