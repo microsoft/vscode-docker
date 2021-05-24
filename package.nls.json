@@ -19,6 +19,7 @@
     "vscode-docker.debug.node.timeout": "When restarting a session, give up after this number of milliseconds.",
     "vscode-docker.debug.node.stopOnEntry": "Break immediately when the program launches.",
     "vscode-docker.debug.node.localRoot": "VS Code's root directory.",
+    "vscode-docker.debug.node.package": "The path to the package.json for the application.",
     "vscode-docker.debug.node.remoteRoot": "Node's root directory within the Docker container.",
     "vscode-docker.debug.node.smartStep": "Try to automatically step over code that doesn't map to source files.",
     "vscode-docker.debug.node.skipFiles": "Automatically skip files covered by these glob patterns.",
