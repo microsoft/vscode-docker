@@ -740,6 +740,10 @@
                                         "type": "string",
                                         "description": "%vscode-docker.debug.node.localRoot%"
                                     },
+                                    "package": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.debug.node.package%"
+                                    },
                                     "remoteRoot": {
                                         "type": "string",
                                         "description": "%vscode-docker.debug.node.remoteRoot%"
@@ -2761,7 +2765,7 @@
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
         "vscode-azureappservice": "^0.80.2",
-        "vscode-azureextensionui": "^0.43.4",
+        "vscode-azureextensionui": "^0.43.6",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",
