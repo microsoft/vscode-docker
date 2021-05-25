@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.12.5-alpha",
+    "version": "1.13.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -2764,7 +2764,7 @@
         "tar": "^6.1.0",
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
-        "vscode-azureappservice": "^0.80.0",
+        "vscode-azureappservice": "^0.80.2",
         "vscode-azureextensionui": "^0.43.6",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",

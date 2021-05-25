@@ -1,3 +1,14 @@
+## 1.13.0 - 25 May 2021
+
+### Added
+* Support for deploying a container image to Azure App Service on Kubernetes with Azure Arc
+* Use fixed port for .Net in compose files. [#2725](https://github.com/microsoft/vscode-docker/issues/2725)
+* Use latest version of dockerfile language server .NET apps will now scaffold using a non-root user. [#2865](https://github.com/microsoft/vscode-docker/issues/2865)
+
+### Fixed
+* "Open Folder" button not opening the folder in Mac. [#2846](https://github.com/microsoft/vscode-docker/issues/2846)
+* Webview disposed error. [#2820](https://github.com/microsoft/vscode-docker/issues/2820)
+
 ## 1.12.1 - 12 April 2021
 ### Fixed
 * Fixed C# extension not being recognized when adding Dockerfiles to a .NET project. [#2867](https://github.com/microsoft/vscode-docker/issues/2867)
