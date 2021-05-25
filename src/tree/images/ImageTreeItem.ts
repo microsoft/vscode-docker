@@ -71,6 +71,11 @@ export class ImageTreeItem extends AzExtTreeItemIntermediate {
         if (ref.endsWith(':<none>') && this._item.RepoDigests?.length) {
             // Image is tagged <none>. Need to delete by digest.
             ref = this._item.RepoDigests[0];
+
+            if (ref.endsWith('@<none>')) {
+                // Digest is tagged <none>. Need to delete by ID.
+                ref = this._item.Id;
+            }
         }
 
         return ext.dockerClient.removeImage(context, ref);
