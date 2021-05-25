@@ -7,7 +7,7 @@ import Dockerode = require('dockerode');
 import * as nodepath from 'path';
 import * as stream from 'stream';
 import * as tarstream from 'tar-stream';
-import { CancellationToken } from 'vscode';
+import { CancellationToken, workspace } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
@@ -255,7 +255,11 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     }
 
     public async getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]> {
-        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: { "dangling": ["false"] } }), token);
+        const filters = {};
+        if (!workspace.getConfiguration('docker').get('images.showDanglingImages', false)) {
+            filters['dangling'] = ["false"];
+        }
+        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: filters }), token);
         const result: DockerImage[] = [];
 
         for (const image of images) {

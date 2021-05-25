@@ -1921,6 +1921,11 @@
                     "default": true,
                     "description": "%vscode-docker.config.docker.images.checkForOutdatedImages%"
                 },
+                "docker.images.showDanglingImages": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%vscode-docker.config.docker.images.showDanglingImages%"
+                },
                 "docker.networks.groupBy": {
                     "type": "string",
                     "default": "None",
