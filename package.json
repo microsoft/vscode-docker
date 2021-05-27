@@ -2166,6 +2166,12 @@
                     ],
                     "description": "%vscode-docker.config.docker.languageserver.diagnostics.instructionWorkdirRelative%"
                 },
+                "docker.languageserver.formatter.ignoreMultilineInstructions": {
+                    "scope": "resource",
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%vscode-docker.config.docker.languageserver.formatter.ignoreMultilineInstructions%"
+                },
                 "docker.dockerComposeBuild": {
                     "type": "boolean",
                     "default": true,
