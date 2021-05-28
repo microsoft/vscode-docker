@@ -257,7 +257,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
     public async getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]> {
         const filters = {};
-        const dangling: boolean = await ext.context.globalState.get('vscode-docker.images.showDanglingImages') || false;
+        const dangling: boolean = await ext.context.globalState.get('vscode-docker.images.showDanglingImages', false);
         if (!dangling) {
             filters['dangling'] = ["false"];
         }

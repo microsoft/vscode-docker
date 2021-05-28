@@ -2364,7 +2364,7 @@
                 "command": "vscode-docker.images.showDangling",
                 "title": "%vscode-docker.commands.images.showDangling%",
                 "category": "%vscode-docker.commands.category.dockerImages%",
-                "icon": "$(symbol-null)"
+                "icon": "$(outline-view-icon)"
             },
             {
                 "command": "vscode-docker.images.pull",
