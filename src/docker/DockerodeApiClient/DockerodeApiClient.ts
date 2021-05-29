@@ -8,7 +8,6 @@ import * as nodepath from 'path';
 import * as stream from 'stream';
 import * as tarstream from 'tar-stream';
 import { CancellationToken } from 'vscode';
-import { ext } from "../../extensionVariables";
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
@@ -255,10 +254,9 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         return this.callWithErrorHandling(context, async () => container.remove({ force: true }), token);
     }
 
-    public async getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]> {
+    public async getImages(context: IActionContext, includeDangling: boolean = false, token?: CancellationToken): Promise<DockerImage[]> {
         const filters = {};
-        const dangling: boolean = await ext.context.globalState.get('vscode-docker.images.showDanglingImages', false);
-        if (!dangling) {
+        if (!includeDangling) {
             filters['dangling'] = ["false"];
         }
         const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: filters }), token);
