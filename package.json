@@ -58,6 +58,7 @@
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
+        "onCommand:vscode-docker.images.showDangling",
         "onCommand:vscode-docker.images.prune",
         "onCommand:vscode-docker.images.pull",
         "onCommand:vscode-docker.images.push",
@@ -287,6 +288,11 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
+                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "vscode-docker.images.showDangling",
                     "when": "view == dockerImages && !vscode-docker:newSdkContext",
                     "group": "navigation@2"
                 },
@@ -2359,6 +2365,12 @@
                 "title": "%vscode-docker.commands.images.prune%",
                 "category": "%vscode-docker.commands.category.dockerImages%",
                 "icon": "$(clear-all)"
+            },
+            {
+                "command": "vscode-docker.images.showDangling",
+                "title": "%vscode-docker.commands.images.showDangling%",
+                "category": "%vscode-docker.commands.category.dockerImages%",
+                "icon": "$(outline-view-icon)"
             },
             {
                 "command": "vscode-docker.images.pull",
