@@ -1,34 +1,26 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es2018",
+        "target": "es6",
         "outDir": "out",
         "lib": [
-            "es7"
+            "es6"
         ],
         "sourceMap": true,
         "rootDir": ".",
+        "strict": true, /* enable all strict type-checking options */
         "alwaysStrict": true,
         "noFallthroughCasesInSwitch": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": false, // ESLint takes care of this for us
+        "noUnusedParameters": false, // ESLint takes care of this for us
         "noImplicitAny": false, // TODO
         "noImplicitReturns": false, // TODO
-        "noImplicitThis": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": false, // TODO
         "strictNullChecks": false, // TODO
-        "strict": true,
-        "baseUrl": "./",
-        "paths": {
-            "*": [
-                "node_modules/vscode/*",
-                "*"
-            ]
-        },
-        "skipLibCheck": true // https://github.com/Azure/ms-rest-js/issues/367
+        "skipLibCheck": true // Ignore typing issues in libraries
     },
     "exclude": [
         "node_modules",
-        ".vscode-test",
-        "gulpfile.ts"
+        ".vscode-test"
     ]
 }

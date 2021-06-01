@@ -8,8 +8,6 @@ import * as fse from "fs-extra";
 import * as mocha from 'mocha';
 import * as path from "path";
 import * as vscode from "vscode";
-import { ext } from "../extension.bundle";
-import { TestUserInput } from 'vscode-azureextensiondev';
 
 export namespace constants {
     export const testOutputName = 'testOutput';
@@ -17,8 +15,6 @@ export namespace constants {
 
 // The root workspace folder that vscode is opened against for tests
 let testRootFolder: string;
-
-export let testUserInput: TestUserInput = new TestUserInput(vscode);
 
 export function getTestRootFolder(): string {
     if (!testRootFolder) {
@@ -69,9 +65,7 @@ suiteSetup(async function (this: mocha.Context): Promise<void> {
     console.log("Refreshing tree to make sure extension is activated");
     await vscode.commands.executeCommand('vscode-docker.registries.refresh');
     console.log("Refresh done");
-    assert(!!ext.context, "Extension not activated");
-
-    ext.ui = testUserInput;
+    assert(vscode.extensions.getExtension('ms-azuretools.vscode-docker').isActive, "Extension not activated");
 });
 
 // Runs after all tests

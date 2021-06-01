@@ -139,7 +139,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     }
 
     // #region Not supported by the Docker SDK yet
-    public async getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]> {
+    public async getImages(context: IActionContext, includeDangling?: boolean, token?: CancellationToken): Promise<DockerImage[]> {
         throw new NotSupportedError(context);
     }
 
