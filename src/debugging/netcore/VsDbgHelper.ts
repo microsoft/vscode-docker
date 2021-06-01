@@ -31,7 +31,7 @@ const acquisition: { url: string, scriptPath: string, getShellCommand(runtime: V
             }
         } :
         {
-            url: '<Temporarily updated with location of new script>',
+            url: 'https://aka.ms/getvsdbgsh',
             scriptPath: path.join(vsDbgInstallBasePath, 'getvsdbg.sh'),
             getShellCommand: (runtime: VsDbgRuntime, version: VsDbgVersion) => {
                 return `chmod +x "${acquisition.scriptPath}" && "${acquisition.scriptPath}" -v ${version} -r ${runtime} -l "${getInstallDirectory(runtime, version)}"`;
