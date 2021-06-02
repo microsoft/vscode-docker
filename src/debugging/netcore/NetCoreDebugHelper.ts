@@ -14,7 +14,7 @@ import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCo
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
-import { getDockerOSType } from '../../utils/osUtils';
+import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -22,7 +22,7 @@ import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
+import { installDebuggersIfNecessary, vsDbgInstallBasePath, VsDbgType } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -206,14 +206,29 @@ export class NetCoreDebugHelper implements DebugHelper {
                 if (platformOS === 'Windows') {
                     await installDebuggersIfNecessary([{ runtime: 'win7-x64', version: 'latest' }]);
                 } else {
-                    // TODO: Only include (for now) ARM64 debuggers on M1 Macs!
-                    await installDebuggersIfNecessary(
-                        [
-                            { runtime: 'linux-x64', version: 'latest' },
-                            { runtime: 'linux-musl-x64', version: 'latest' },
+                    const debuggers: VsDbgType[] = [
+                        { runtime: 'linux-x64', version: 'latest' },
+                        { runtime: 'linux-musl-x64', version: 'latest' },
+                    ];
+
+                    //
+                    // NOTE: As OmniSharp doesn't yet support arm64 in general, we only install arm64 debuggers when
+                    //       on an arm64 Mac (e.g. M1), even though there may be other platforms that could theoretically
+                    //       run arm64 images. We are often asked to install the debugger before images are created or
+                    //       pulled, which means we don't know a-priori the architecture of the image, so we install all
+                    //       of them, just in case. Because we do not have a good way to distinguish between a Mac attached
+                    //       to its local (Linux-based) Docker host (where arm64/amd64 are valid) or a Mac attached to a
+                    //       remote (Linux-based) Docker host (where arm64 may *not* be valid), installing every debugger
+                    //       is really our only choice.
+                    //
+
+                    if (isArm64Mac()) {
+                        debuggers.push(
                             { runtime: 'linux-arm64', version: 'latest' },
-                            { runtime: 'linux-musl-arm64', version: 'latest' }
-                        ]);
+                            { runtime: 'linux-musl-arm64', version: 'latest' });
+                    }
+
+                    await installDebuggersIfNecessary(debuggers);
                 }
             }
         );
