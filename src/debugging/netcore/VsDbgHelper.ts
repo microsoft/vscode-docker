@@ -49,10 +49,7 @@ export async function installDebuggersIfNecessary(debuggers: { runtime: VsDbgRun
 
     const newScript = await getLatestAcquisitionScriptIfNecessary();
 
-    for (const d of debuggers) {
-        // TODO: Make this parallel!
-        await executeAcquisitionScriptIfNecessary(d.runtime, d.version, newScript);
-    }
+    await Promise.all(debuggers.map(d => executeAcquisitionScriptIfNecessary(d.runtime, d.version, newScript)));
 }
 
 async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
