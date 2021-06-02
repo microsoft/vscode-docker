@@ -42,13 +42,17 @@ function getInstallDirectory(runtime: VsDbgRuntime, version: VsDbgVersion): stri
     return path.join(vsDbgInstallBasePath, runtime, version);
 }
 
-export async function installDebuggerIfNecessary(runtime: VsDbgRuntime, version: VsDbgVersion): Promise<void> {
+export async function installDebuggersIfNecessary(debuggers: { runtime: VsDbgRuntime, version: VsDbgVersion }[]): Promise<void> {
     if (!(await fse.pathExists(vsDbgInstallBasePath))) {
         await fse.mkdir(vsDbgInstallBasePath);
     }
 
     const newScript = await getLatestAcquisitionScriptIfNecessary();
-    await executeAcquisitionScriptIfNecessary(runtime, version, newScript);
+
+    for (const d of debuggers) {
+        // TODO: Make this parallel!
+        await executeAcquisitionScriptIfNecessary(d.runtime, d.version, newScript);
+    }
 }
 
 async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {

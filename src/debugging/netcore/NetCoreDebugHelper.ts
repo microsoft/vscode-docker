@@ -22,7 +22,7 @@ import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { installDebuggerIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
+import { installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -204,12 +204,16 @@ export class NetCoreDebugHelper implements DebugHelper {
                 title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring .NET Debugger...'),
             }, async () => {
                 if (platformOS === 'Windows') {
-                    await installDebuggerIfNecessary('win7-x64', 'latest');
+                    await installDebuggersIfNecessary([{ runtime: 'win7-x64', version: 'latest' }]);
                 } else {
-                    await installDebuggerIfNecessary('linux-x64', 'latest');
-                    await installDebuggerIfNecessary('linux-musl-x64', 'latest');
-                    await installDebuggerIfNecessary('linux-arm64', 'latest');
-                    await installDebuggerIfNecessary('linux-musl-arm64', 'latest');
+                    // TODO: Only include (for now) ARM64 debuggers on M1 Macs!
+                    await installDebuggersIfNecessary(
+                        [
+                            { runtime: 'linux-x64', version: 'latest' },
+                            { runtime: 'linux-musl-x64', version: 'latest' },
+                            { runtime: 'linux-arm64', version: 'latest' },
+                            { runtime: 'linux-musl-arm64', version: 'latest' }
+                        ]);
                 }
             }
         );
