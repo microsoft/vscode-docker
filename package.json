@@ -2201,6 +2201,12 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.showStartPage%"
+                },
+                "docker.dockerPath": {
+                    "type": "string",
+                    "default": "docker",
+                    "description": "%vscode-docker.config.docker.dockerPath%",
+                    "scope": "machine-overridable"
                 }
             }
         },
