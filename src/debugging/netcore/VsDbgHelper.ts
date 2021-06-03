@@ -45,7 +45,7 @@ function getInstallDirectory(runtime: VsDbgRuntime, version: VsDbgVersion): stri
 export interface VsDbgType {
     runtime: VsDbgRuntime,
     version: VsDbgVersion
-};
+}
 
 export async function installDebuggersIfNecessary(debuggers: VsDbgType[]): Promise<void> {
     if (!(await fse.pathExists(vsDbgInstallBasePath))) {
