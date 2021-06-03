@@ -32,5 +32,5 @@ export async function pullImageFromRepository(context: IActionContext, node?: Re
 async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
     await logInToDockerCli(context, node);
 
-    await executeAsTask(context, `${dockerExePath()} pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
+    await executeAsTask(context, `${dockerExePath(context)} pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
 }

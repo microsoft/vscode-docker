@@ -174,7 +174,7 @@ export async function selectCommandTemplate(
     let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
 
     if (resolvedCommand.startsWith(DefaultDockerPath + ' ')) {
-        const dockerPath = dockerExePath();
+        const dockerPath = dockerExePath(context);
         if (dockerPath !== DefaultDockerPath) {
             resolvedCommand = dockerPath + resolvedCommand.substring(DefaultDockerPath.length);
         }

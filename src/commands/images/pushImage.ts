@@ -69,7 +69,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     addImageTaggingTelemetry(context, finalTag, '');
 
     // Finally push the image
-    await executeAsTask(context, `${dockerExePath()} push ${finalTag}`, finalTag, { addDockerEnv: true });
+    await executeAsTask(context, `${dockerExePath(context)} push ${finalTag}`, finalTag, { addDockerEnv: true });
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {

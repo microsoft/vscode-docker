@@ -36,13 +36,13 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
         title: localize('vscode-docker.commands.registries.deployImageToAci.gettingPorts', 'Determining ports from image...'),
     };
     const ports = await vscode.window.withProgress(progressOptions, async () => {
-        return getImagePorts(node.fullTag);
+        return getImagePorts(node.fullTag, context);
     });
     const portsArg = ports.map(port => `-p ${port}:${port}`).join(' ');
 
     addImageTaggingTelemetry(context, node.fullTag, '');
 
-    const command = `${dockerExePath()} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
+    const command = `${dockerExePath(context)} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
     const title = localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI');
     const options = {
         addDockerEnv: false,
@@ -52,20 +52,20 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
         await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     } catch {
         // If it fails, try logging in and make one more attempt
-        await executeAsTask(context, `${dockerExePath()} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
+        await executeAsTask(context, `${dockerExePath(context)} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
         await executeAsTask(context, command, title, options);
     }
 }
 
-async function getImagePorts(fullTag: string): Promise<number[]> {
+async function getImagePorts(fullTag: string, context: IActionContext): Promise<number[]> {
     try {
         const result: number[] = [];
 
         // 1. Pull the image to the default context
-        await execAsync(`${dockerExePath()} --context default pull ${fullTag}`);
+        await execAsync(`${dockerExePath(context)} --context default pull ${fullTag}`);
 
         // 2. Inspect it in the default context to find out the ports to map
-        const { stdout } = await execAsync(`${dockerExePath()} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
+        const { stdout } = await execAsync(`${dockerExePath(context)} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
 
         try {
             const portsJson = <{ [key: string]: never }>JSON.parse(stdout);

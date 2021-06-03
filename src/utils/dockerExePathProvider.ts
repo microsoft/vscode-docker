@@ -4,10 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { IActionContext } from 'vscode-azureextensionui';
 
 export const DefaultDockerPath: string = 'docker';
 
-export function dockerExePath(): string {
+export function dockerExePath(context?: IActionContext): string {
     const retval = vscode.workspace.getConfiguration('docker').get('dockerPath', DefaultDockerPath);
+    if (retval !== DefaultDockerPath && context) {
+        context.telemetry.properties.nonstandardDockerPath = 'true';
+    }
     return retval;
 }

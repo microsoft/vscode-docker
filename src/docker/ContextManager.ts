@@ -173,7 +173,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {
-        const { stdout } = await execAsync(`${dockerExePath()} context inspect ${contextName}`, { timeout: 10000 });
+        const { stdout } = await execAsync(`${dockerExePath(actionContext)} context inspect ${contextName}`, { timeout: 10000 });
 
         // The result is an array with one entry
         const result: DockerContextInspection[] = JSON.parse(stdout) as DockerContextInspection[];
@@ -181,12 +181,12 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async use(actionContext: IActionContext, contextName: string): Promise<void> {
-        const useCmd: string = `${dockerExePath()} context use ${contextName}`;
+        const useCmd: string = `${dockerExePath(actionContext)} context use ${contextName}`;
         await execAsync(useCmd, ContextCmdExecOptions);
     }
 
     public async remove(actionContext: IActionContext, contextName: string): Promise<void> {
-        const removeCmd: string = `${dockerExePath()} context rm ${contextName}`;
+        const removeCmd: string = `${dockerExePath(actionContext)} context rm ${contextName}`;
         await spawnAsync(removeCmd, ContextCmdExecOptions);
     }
 
