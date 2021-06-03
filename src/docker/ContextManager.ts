@@ -17,6 +17,7 @@ import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
 import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
+import { dockerExePath } from '../utils/dockerExePathProvider';
 import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 
 // CONSIDER
@@ -172,7 +173,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {
-        const { stdout } = await execAsync(`docker context inspect ${contextName}`, { timeout: 10000 });
+        const { stdout } = await execAsync(`${dockerExePath(actionContext)} context inspect ${contextName}`, { timeout: 10000 });
 
         // The result is an array with one entry
         const result: DockerContextInspection[] = JSON.parse(stdout) as DockerContextInspection[];
@@ -180,12 +181,12 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async use(actionContext: IActionContext, contextName: string): Promise<void> {
-        const useCmd: string = `docker context use ${contextName}`;
+        const useCmd: string = `${dockerExePath(actionContext)} context use ${contextName}`;
         await execAsync(useCmd, ContextCmdExecOptions);
     }
 
     public async remove(actionContext: IActionContext, contextName: string): Promise<void> {
-        const removeCmd: string = `docker context rm ${contextName}`;
+        const removeCmd: string = `${dockerExePath(actionContext)} context rm ${contextName}`;
         await spawnAsync(removeCmd, ContextCmdExecOptions);
     }
 
@@ -261,7 +262,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // return that specified context as Current = true. This way we don't need extra logic below in parsing.
             // TODO: eventually change to `docker context ls --format json`
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { stdout } = await execAsync('docker context ls --format="{{json .}}"', { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
+            const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
 
             try {
                 // Try parsing as-is; newer CLIs output a JSON object array
@@ -334,7 +335,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             } else {
                 // Otherwise we look at the output of `docker serve --help`
                 // TODO: this is not a very good heuristic
-                const { stdout } = await execAsync('docker serve --help');
+                const { stdout } = await execAsync(`${dockerExePath()} serve --help`);
 
                 if (/^\s*Start an api server/i.test(stdout)) {
                     result = true;

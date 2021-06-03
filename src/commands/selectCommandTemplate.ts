@@ -9,6 +9,7 @@ import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
+import { dockerExePath, DefaultDockerPath } from '../utils/dockerExePathProvider';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
@@ -170,7 +171,16 @@ export async function selectCommandTemplate(
     context.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
     context.telemetry.properties.currentContextType = currentContextType;
 
-    return resolveVariables(selectedTemplate.template, folder, additionalVariables);
+    let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
+
+    if (resolvedCommand.startsWith(DefaultDockerPath + ' ')) {
+        const dockerPath = dockerExePath(context);
+        if (dockerPath !== DefaultDockerPath) {
+            resolvedCommand = dockerPath + resolvedCommand.substring(DefaultDockerPath.length);
+        }
+    }
+
+    return resolvedCommand;
 }
 
 async function quickPickTemplate(templates: CommandTemplate[], templatePicker: TemplatePicker): Promise<CommandTemplate> {
