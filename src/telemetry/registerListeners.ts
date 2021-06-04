@@ -5,32 +5,43 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
+import { openStartPageAfterExtensionUpdate } from '../commands/startPage/openStartPage';
 import { ext } from '../extensionVariables';
+
+type docHandler = (context: IActionContext, doc: vscode.TextDocument) => void;
 
 export function registerListeners(): void {
     if (vscode.env.isTelemetryEnabled) {
-        registerEvent('dockerfilesave', vscode.workspace.onDidSaveTextDocument, async (context: IActionContext, doc: vscode.TextDocument) => {
-            // If it's not a Dockerfile, skip
-            if (doc.languageId !== 'dockerfile') {
-                context.telemetry.suppressAll = true;
-                return;
-            }
-
+        registerEvent('dockerfilesave', vscode.workspace.onDidSaveTextDocument, handleDocEvent('dockerfile', (context, doc) => {
             context.telemetry.properties.lineCount = doc.lineCount.toString();
 
             void ext.activityMeasurementService.recordActivity('overall');
-        });
+        }));
 
-        registerEvent('composefilesave', vscode.workspace.onDidSaveTextDocument, async (context: IActionContext, doc: vscode.TextDocument) => {
-            // If it's not a compose file, skip
-            if (doc.languageId !== 'dockercompose') {
-                context.telemetry.suppressAll = true;
-                return;
-            }
-
+        registerEvent('composefilesave', vscode.workspace.onDidSaveTextDocument, handleDocEvent('dockercompose', (context, doc) => {
             context.telemetry.properties.lineCount = doc.lineCount.toString();
 
             void ext.activityMeasurementService.recordActivity('overall');
-        });
+        }));
     }
+
+    registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile', () => {
+        void openStartPageAfterExtensionUpdate();
+    }));
+
+    registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose', () => {
+        void openStartPageAfterExtensionUpdate();
+    }));
+}
+
+function handleDocEvent(languageId: string, handler: docHandler): docHandler {
+    return (context: IActionContext, doc: vscode.TextDocument) => {
+        // If it is not the document of type we expect, skip
+        if (doc.languageId !== languageId) {
+            context.telemetry.suppressAll = true;
+            return;
+        }
+
+        handler(context, doc);
+    };
 }

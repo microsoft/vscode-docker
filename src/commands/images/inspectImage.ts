@@ -7,6 +7,7 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
+import { openStartPageAfterExtensionUpdate } from "../startPage/openStartPage";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     if (!node) {
@@ -18,5 +19,6 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
     }
 
     const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
+    await openStartPageAfterExtensionUpdate();
     await openReadOnlyJson(node, inspectInfo);
 }
