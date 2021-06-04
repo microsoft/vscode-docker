@@ -13,7 +13,7 @@ import { isWindows } from '../../utils/osUtils';
 import { execAsync } from '../../utils/spawnAsync';
 
 type VsDbgVersion = 'latest'; // There are other versions but we don't use them
-type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'win7-x64';
+type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'linux-arm64' | 'linux-musl-arm64' | 'win7-x64';
 
 const scriptAcquiredDateKey = 'vscode-docker.vsdbgHelper.scriptAcquiredDate';
 const scriptExecutedDateKeyPrefix = 'vscode-docker.vsdbgHelper.scriptExecutedDate';
@@ -42,13 +42,19 @@ function getInstallDirectory(runtime: VsDbgRuntime, version: VsDbgVersion): stri
     return path.join(vsDbgInstallBasePath, runtime, version);
 }
 
-export async function installDebuggerIfNecessary(runtime: VsDbgRuntime, version: VsDbgVersion): Promise<void> {
+export interface VsDbgType {
+    runtime: VsDbgRuntime,
+    version: VsDbgVersion
+}
+
+export async function installDebuggersIfNecessary(debuggers: VsDbgType[]): Promise<void> {
     if (!(await fse.pathExists(vsDbgInstallBasePath))) {
         await fse.mkdir(vsDbgInstallBasePath);
     }
 
     const newScript = await getLatestAcquisitionScriptIfNecessary();
-    await executeAcquisitionScriptIfNecessary(runtime, version, newScript);
+
+    await Promise.all(debuggers.map(d => executeAcquisitionScriptIfNecessary(d.runtime, d.version, newScript)));
 }
 
 async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
