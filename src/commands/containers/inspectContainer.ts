@@ -7,6 +7,7 @@ import { IActionContext, openReadOnlyJson } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
+import { openStartPageAfterExtensionUpdate } from "../startPage/openStartPage";
 
 export async function inspectContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
@@ -18,5 +19,6 @@ export async function inspectContainer(context: IActionContext, node?: Container
     }
 
     const inspectInfo = await ext.dockerClient.inspectContainer(context, node.containerId);
+    await openStartPageAfterExtensionUpdate();
     await openReadOnlyJson(node, inspectInfo);
 }

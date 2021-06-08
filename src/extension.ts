@@ -11,7 +11,6 @@ import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputCha
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
-import { openStartPageAfterExtensionUpdate } from './commands/startPage/openStartPage';
 import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
@@ -139,8 +138,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateLanguageClient(ctx);
 
         registerListeners();
-
-        void openStartPageAfterExtensionUpdate();
     });
 
     // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
