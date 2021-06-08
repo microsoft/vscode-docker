@@ -2725,6 +2725,9 @@
     "engines": {
         "vscode": "^1.55.0"
     },
+    "capabilities": {
+        "virtualWorkspaces": false
+    },
     "scripts": {
         "watch": "tsc -watch -p ./",
         "build": "tsc -p ./",
