@@ -12,15 +12,13 @@ export class OpenStartPageStep extends AzureWizardExecuteStep<ScaffoldingWizardC
         super();
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    public async execute(_wizardContext: ScaffoldingWizardContext, _progress: never): Promise<void> {
+    public async execute(): Promise<void> {
         // Wait for the page to be shown. This helps ensure that, if scaffolded files are to be opened,
         // they are opened last and are visible after the wizard is finished.
         await openStartPageAfterExtensionUpdate();
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    public shouldExecute(_wizardContext: ScaffoldingWizardContext): boolean {
+    public shouldExecute(): boolean {
         return true;
     }
 }
