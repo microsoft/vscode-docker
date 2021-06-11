@@ -1,3 +1,16 @@
+## 1.14.0 - 21 June 2021
+
+### Added
+
+* Enable Dockerfile formatter to skip instructions that span multiple lines [2976](https://github.com/microsoft/vscode-docker/pull/2976)
+* Add ability to see dangling images in the explorer [2967](https://github.com/microsoft/vscode-docker/pull/2967)
+* Add a setting for Docker CLI executable path [2984](https://github.com/microsoft/vscode-docker/pull/2984), providing a workaround for [issue 2894](https://github.com/microsoft/vscode-docker/issues/2894)
+* Enable debugging .NET applications in arm64 containers [2985](https://github.com/microsoft/vscode-docker/pull/2985)
+
+### Fixed
+
+* Docker start Page pops up for non-docker related activations [2953](https://github.com/microsoft/vscode-docker/issues/2953)
+
 ## 1.13.0 - 25 May 2021
 
 ### Added
