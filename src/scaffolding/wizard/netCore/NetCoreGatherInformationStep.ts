@@ -20,6 +20,7 @@ const minCSharpVersionString = '1.23.9';
 const aspNetBaseImage = 'mcr.microsoft.com/dotnet/aspnet';
 const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
 const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
+const tagSuffix = '-focal';
 
 const cSharpExtensionId = 'ms-dotnettools.csharp';
 const cSharpConfigId = 'csharp';
@@ -59,8 +60,8 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             // semver.coerce tolerates version strings like "5.0" which is typically what is present in the .NET project file
             const netCoreVersion = semver.coerce(netCoreVersionString);
 
-            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
-            wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
+            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}`;
+            wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}`;
         }
 
         if (!wizardContext.serviceName) {
