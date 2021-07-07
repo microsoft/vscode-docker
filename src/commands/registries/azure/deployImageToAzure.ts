@@ -24,6 +24,12 @@ import { nonNullProp } from "../../../utils/nonNull";
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
+import { WebSitesPortPromptStep } from './WebSitesPortPromptStep';
+
+
+export interface IAppServiceContainerWizardContext extends IAppServiceWizardContext {
+    webSitesPort?: number;
+}
 
 export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     if (!node) {
@@ -33,7 +39,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const vscAzureAppService = await import('vscode-azureappservice');
     vscAzureAppService.registerAppServiceExtensionVariables(ext);
 
-    const wizardContext: IActionContext & Partial<IAppServiceWizardContext> = {
+    const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
         newSiteOS: vscAzureAppService.WebsiteOS.linux,
         newSiteKind: vscAzureAppService.AppKind.app
@@ -49,11 +55,12 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new ResourceGroupListStep());
     vscAzureAppService.CustomLocationListStep.addStep(wizardContext, promptSteps);
+    promptSteps.push(new WebSitesPortPromptStep());
     promptSteps.push(new vscAzureAppService.AppServicePlanListStep());
 
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
     const siteConfig: WebSiteManagementModels.SiteConfig = await getNewSiteConfig(node);
-    const executeSteps: AzureWizardExecuteStep<IAppServiceWizardContext>[] = [
+    const executeSteps: AzureWizardExecuteStep<IAppServiceContainerWizardContext>[] = [
         new DockerSiteCreateStep(siteConfig, node),
         new DockerAssignAcrPullRoleStep(node),
         new DockerWebhookCreateStep(node),

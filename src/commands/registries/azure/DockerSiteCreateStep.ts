@@ -6,7 +6,7 @@
 import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import { Site } from '@azure/arm-appservice/esm/models'; // These are only dev-time imports so don't need to be lazy
 import { Progress } from "vscode";
-import { CustomLocation, IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import { CustomLocation } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -14,15 +14,16 @@ import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegis
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
+import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
-export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
+export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceContainerWizardContext> {
     public priority: number = 140;
 
     public constructor(private readonly siteConfig: WebSiteManagementModels.SiteConfig, private readonly node: RemoteTagTreeItem) {
         super();
     }
 
-    public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
+    public async execute(context: IAppServiceContainerWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
         const creatingNewApp: string = localize('vscode-docker.commands.registries.azure.deployImage.creatingWebApp', 'Creating web app "{0}"...', context.newSiteName);
         ext.outputChannel.appendLine(creatingNewApp);
         progress.report({ message: creatingNewApp });
@@ -53,7 +54,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
         context.site = await client.webApps.createOrUpdate(nonNullValueAndProp(context.resourceGroup, 'name'), nonNullProp(context, 'newSiteName'), siteEnvelope);
     }
 
-    private async getSiteConfig(context: IAppServiceWizardContext): Promise<WebSiteManagementModels.SiteConfig> {
+    private async getSiteConfig(context: IAppServiceContainerWizardContext): Promise<WebSiteManagementModels.SiteConfig> {
         // Temporary workaround until Arc adds support for managed identity, so use usename and password instead.
         // When customLocation is set, then user is deploying to Arc.
         const registryTreeItem: RegistryTreeItemBase = this.node.parent.parent;
@@ -67,6 +68,9 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
                 appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: cred.username });
                 appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: nonNullProp(cred, 'passwords')[0].value });
                 appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
+                if (context.webSitesPort) {
+                    appSettings.push({ name: "WEBSITES_PORT", value: context.webSitesPort.toString() });
+                }
                 const linuxFxVersion = `DOCKER|${registryTreeItem.baseImagePath}/${this.node.repoNameAndTag}`;
                 return {
                     linuxFxVersion,
@@ -112,7 +116,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceWiza
         (<any>site).extendedLocation = { name: customLocation.id, type: 'customLocation' };
     }
 
-    public shouldExecute(context: IAppServiceWizardContext): boolean {
+    public shouldExecute(context: IAppServiceContainerWizardContext): boolean {
         return !context.site;
     }
 }
