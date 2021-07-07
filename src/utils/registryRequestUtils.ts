@@ -5,10 +5,10 @@
 
 import { URL } from "url";
 import { ociClientId } from "../constants";
-import { httpRequest, RequestLike } from './httpRequest';
+import { ErrorHandling, httpRequest, RequestLike, ResponseLike } from './httpRequest';
 
-export function getNextLinkFromHeaders(response: IResponse<unknown>): string | undefined {
-    const linkHeader: string | undefined = response.headers.link as string;
+export function getNextLinkFromHeaders(response: IRegistryRequestResponse<unknown>): string | undefined {
+    const linkHeader: string | undefined = response.headers.get('link') as string;
     if (linkHeader) {
         const match = linkHeader.match(/<(.*)>; rel="next"/i);
         return match ? match[1] : undefined;
@@ -17,7 +17,13 @@ export function getNextLinkFromHeaders(response: IResponse<unknown>): string | u
     }
 }
 
-export async function registryRequest<T>(node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem, method: 'GET' | 'DELETE' | 'POST', url: string, customOptions?: RequestInit): Promise<IResponse<T>> {
+export async function registryRequest<T>(
+    node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem,
+    method: 'GET' | 'DELETE' | 'POST',
+    url: string,
+    customOptions?: RequestInit,
+    errorHandling: ErrorHandling = ErrorHandling.ThrowOnError
+): Promise<IRegistryRequestResponse<T>> {
     const options = {
         method: method,
         headers: {
@@ -39,17 +45,16 @@ export async function registryRequest<T>(node: IRegistryAuthTreeItem | IReposito
         } else {
             return (<IRepositoryAuthTreeItem>node).parent?.signRequest(request);
         }
-    });
+    }, errorHandling);
 
     return {
         body: method !== 'DELETE' ? await response.json() : undefined,
-        headers: response.headers,
+        ...response
     };
 }
 
-interface IResponse<T> {
-    body: T,
-    headers: { [key: string]: string | string[] },
+export interface IRegistryRequestResponse<T> extends ResponseLike {
+    body: T
 }
 
 export interface IRegistryAuthTreeItem {

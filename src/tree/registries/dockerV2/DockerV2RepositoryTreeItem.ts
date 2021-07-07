@@ -5,7 +5,7 @@
 
 import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { PAGE_SIZE } from "../../../constants";
-import { IOAuthContext, RequestLike } from "../../../utils/httpRequest";
+import { ErrorHandling, HttpErrorResponse, HttpStatusCode, IOAuthContext, RequestLike } from "../../../utils/httpRequest";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { IAuthProvider } from "../auth/IAuthProvider";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
@@ -29,7 +29,16 @@ export class DockerV2RepositoryTreeItem extends RemoteRepositoryTreeItemBase imp
         }
 
         const url = this._nextLink || `v2/${this.repoName}/tags/list?n=${PAGE_SIZE}`;
-        const response = await registryRequest<ITags>(this, 'GET', url);
+        const response = await registryRequest<ITags>(this, 'GET', url, undefined, ErrorHandling.ReturnErrorResponse);
+        if (response.status === HttpStatusCode.NotFound) {
+            // Some registries return 404 when all tags have been removed and the repository becomes effectively unavailable.
+            void this.deleteTreeItem(context);
+            return [];
+        }
+        else if (!response.ok) {
+            throw new HttpErrorResponse(response);
+        }
+
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body.tags,
