@@ -1,3 +1,12 @@
+## 1.15.0 - 19 July 2021
+
+### Fixed
+* Use correct base image for .NET Windows containers [#3018](https://github.com/microsoft/vscode-docker/issues/3018)
+* Fix installation of Docker on ARM64 Mac machines [#3024](https://github.com/microsoft/vscode-docker/issues/3024)
+* Start page icons now display correctly [#2952](https://github.com/microsoft/vscode-docker/issues/2952)
+* Eliminate spurious errors when images are deleted from Azure Container Registry [#2968](https://github.com/microsoft/vscode-docker/issues/2968)
+* Enable deployment to App Service that uses "custom location" (Kubernetes-hosted) [#2972](https://github.com/microsoft/vscode-docker/issues/2972) [#2973](https://github.com/microsoft/vscode-docker/issues/2973)
+
 ## 1.14.0 - 21 June 2021
 
 ### Added
