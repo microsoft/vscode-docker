@@ -2724,7 +2724,7 @@
     },
     "engines": {
         "vscode": "^1.55.0"
-    },  
+    },
     "extensionKind": [
         "ui",
         "workspace"
