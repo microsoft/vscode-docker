@@ -42,6 +42,7 @@ export async function httpRequest<T>(
 
 export class HttpResponse<T> implements ResponseLike {
     private bodyPromise: Promise<T> | undefined;
+    private normalizedHeaders: { [key: string]: string } | undefined;
     public readonly headers: HeadersLike;
     public readonly status: number;
     public readonly statusText: string;
@@ -50,14 +51,19 @@ export class HttpResponse<T> implements ResponseLike {
     public constructor(private readonly innerResponse: Response, public readonly url: string) {
         // Unfortunately Typescript will not consider a getter accessor when checking whether a class implements an interface.
         // So we are forced to use readonly members to implement ResponseLike interface.
-        const headerStore: { [key: string]: string } = {};
-        for (const key of this.innerResponse.headers.keys()) {
-            headerStore[key] = this.innerResponse.headers.get(key);
-        }
 
         this.headers = {
-            get: (key: string) => headerStore[key],
-            set: (key: string, value: string) => { headerStore[key] = value; }
+            get: (key: string) => {
+                if (!this.normalizedHeaders) {
+                    this.normalizedHeaders = {};
+                    for (const key of this.innerResponse.headers.keys()) {
+                        this.normalizedHeaders[key] = this.innerResponse.headers.get(key);
+                    }
+                }
+
+                return this.normalizedHeaders[key];
+            },
+            set: (key: string, value: string) => { this.innerResponse.headers.set(key, value); }
         };
 
         this.status = this.innerResponse.status;
