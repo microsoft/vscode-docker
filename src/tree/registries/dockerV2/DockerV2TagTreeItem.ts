@@ -20,7 +20,8 @@ export class DockerV2TagTreeItem extends RemoteTagTreeItem {
 
         const url = `v2/${this.parent.repoName}/manifests/${this.tag}`;
         const response = await registryRequest(this.parent, 'GET', url, digestOptions);
-        return response.headers['docker-content-digest'] as string;
+        const digest = response.headers.get('docker-content-digest') as string;
+        return digest;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
