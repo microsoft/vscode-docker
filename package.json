@@ -2758,6 +2758,7 @@
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.21.0",
         "@typescript-eslint/parser": "^4.21.0",
+        "@vscode/test-electron": "^1.6.1",
         "copy-webpack-plugin": "^8.1.1",
         "eslint": "^7.24.0",
         "mocha": "^8.2.1",
@@ -2767,7 +2768,6 @@
         "vsce": "^1.93.0",
         "vscode-codicons": "^0.0.16",
         "vscode-nls-dev": "^3.3.2",
-        "vscode-test": "^1.5.2",
         "webpack": "^5.31.2",
         "webpack-bundle-analyzer": "^4.4.1",
         "webpack-cli": "^4.6.0"
