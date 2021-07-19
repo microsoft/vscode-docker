@@ -12,7 +12,7 @@ import { convertToMB } from '../utils/convertToMB';
 export async function pruneSystem(context: IActionContext): Promise<void> {
     const confirmPrune: string = localize('vscode-docker.commands.pruneSystem.confirm', 'Are you sure you want to remove all stopped containers, dangling images, unused networks, and unused volumes? Removing volumes may result in data loss!');
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },

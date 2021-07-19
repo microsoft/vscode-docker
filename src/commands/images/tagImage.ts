@@ -20,14 +20,14 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(node.fullTag, registry?.baseImagePath);
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.dockerClient.tagImage(context, node.imageId, newTaggedName);
     return newTaggedName;
 }
 
-export async function getTagFromUserInput(fullTag: string, baseImagePath?: string): Promise<string> {
+export async function getTagFromUserInput(context: IActionContext, fullTag: string, baseImagePath?: string): Promise<string> {
     const opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
@@ -42,7 +42,7 @@ export async function getTagFromUserInput(fullTag: string, baseImagePath?: strin
 
     opt.value = fullTag;
 
-    return await ext.ui.showInputBox(opt);
+    return await context.ui.showInputBox(opt);
 }
 
 const KnownRegistries: { type: string, regex: RegExp }[] = [

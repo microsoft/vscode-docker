@@ -21,7 +21,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: DockerV2
 
     const confirmDelete = localize('vscode-docker.commands.registries.deleteRemote.confirm', 'Are you sure you want to delete image "{0}"? This will delete all images that have the same digest.', node.repoNameAndTag);
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
+    await context.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
 
     const repoTI = node.parent;
     const deleting = localize('vscode-docker.commands.registries.deleteRemote.deleting', 'Deleting image "{0}"...', node.repoNameAndTag);

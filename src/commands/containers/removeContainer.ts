@@ -27,7 +27,7 @@ export async function removeContainer(context: IActionContext, node?: ContainerT
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.containers.remove.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.containers.remove.remove', 'Remove') });
 
     const removing: string = localize('vscode-docker.commands.containers.remove.removing', 'Removing container(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {

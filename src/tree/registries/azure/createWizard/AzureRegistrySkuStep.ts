@@ -5,7 +5,6 @@
 
 import { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry';
 import { AzureWizardPromptStep, IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { ext } from '../../../../extensionVariables';
 import { localize } from '../../../../localize';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
@@ -15,7 +14,7 @@ export class AzureRegistrySkuStep extends AzureWizardPromptStep<IAzureRegistryWi
         const picks: IAzureQuickPickItem<AcrModels.SkuName>[] = skus.map(s => { return { label: s, data: s }; });
 
         const placeHolder: string = localize('vscode-docker.tree.registries.azure.createWizard.selectSku', 'Select a SKU');
-        context.newRegistrySku = (await ext.ui.showQuickPick(picks, { placeHolder })).data;
+        context.newRegistrySku = (await context.ui.showQuickPick(picks, { placeHolder })).data;
     }
 
     public shouldPrompt(context: IAzureRegistryWizardContext): boolean {

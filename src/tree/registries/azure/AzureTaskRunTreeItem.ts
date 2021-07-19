@@ -7,20 +7,18 @@ import { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-conta
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { ThemeColor, ThemeIcon } from "vscode";
+import { AzExtTreeItem } from "vscode-azureextensionui";
 import { nonNullProp } from "../../../utils/nonNull";
-import { AzExtTreeItemIntermediate } from "../../AzExtTreeItemIntermediate";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
 dayjs.extend(relativeTime);
 
-export class AzureTaskRunTreeItem extends AzExtTreeItemIntermediate {
+export class AzureTaskRunTreeItem extends AzExtTreeItem {
     public static contextValue: string = 'azureTaskRun';
     public contextValue: string = AzureTaskRunTreeItem.contextValue;
     public parent: AzureTaskTreeItem;
 
     private _run: AcrModels.Run;
-
-    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
 
     public constructor(parent: AzureTaskTreeItem, run: AcrModels.Run) {
         super(parent);

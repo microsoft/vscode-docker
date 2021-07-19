@@ -6,19 +6,16 @@
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { ThemeIcon } from 'vscode';
-import { AzExtTreeItemIntermediate } from '../AzExtTreeItemIntermediate';
+import { AzExtTreeItem } from 'vscode-azureextensionui';
 import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 
 dayjs.extend(relativeTime);
 
-export class RemoteTagTreeItem extends AzExtTreeItemIntermediate {
+export class RemoteTagTreeItem extends AzExtTreeItem {
     public parent: RemoteRepositoryTreeItemBase;
     public tag: string;
     public time: Date;
-
-    public readonly id?: string; // Unused but needs to be implemented since it is abstract in the parent
-    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
 
     public constructor(parent: RemoteRepositoryTreeItemBase, tag: string, time: string) {
         super(parent);

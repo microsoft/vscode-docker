@@ -31,7 +31,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
     rootFolder = rootFolder || await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
 
     const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
-    const task = await getOfficialBuildTaskForDockerfile(dockerFileItem.absoluteFilePath, rootFolder);
+    const task = await getOfficialBuildTaskForDockerfile(context, dockerFileItem.absoluteFilePath, rootFolder);
 
     if (task) {
         await vscode.tasks.executeTask(task);
@@ -58,7 +58,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             await delay(500);
 
             addImageTaggingTelemetry(context, suggestedImageName, '.before');
-            const imageName: string = await getTagFromUserInput(suggestedImageName);
+            const imageName: string = await getTagFromUserInput(context, suggestedImageName);
             addImageTaggingTelemetry(context, imageName, '.after');
 
             await ext.context.globalState.update(dockerFileKey, imageName);

@@ -27,7 +27,7 @@ export async function removeImage(context: IActionContext, node?: ImageTreeItem,
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: 'Remove' });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: 'Remove' });
 
     const removing: string = localize('vscode-docker.commands.images.remove.removing', 'Removing image(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {

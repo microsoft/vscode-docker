@@ -5,7 +5,6 @@
 
 import { InputBoxOptions } from 'vscode';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
@@ -18,7 +17,7 @@ export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistry
             validateInput: (value: string | undefined) => this.validateInput(context, value)
         };
 
-        context.username = await ext.ui.showInputBox(options);
+        context.username = await context.ui.showInputBox(options);
 
         if (!context.username) {
             context.includePassword = false;

@@ -113,11 +113,11 @@ async function promptForAciCloud(context: IActionContext): Promise<string> {
         },
     ];
 
-    const choice = await ext.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
+    const choice = await context.ui.showQuickPick(wellKnownClouds, { placeHolder: localize('vscode-docker.azureUtils.chooseCloud', 'Choose an Azure cloud to log in to') });
 
     if (choice.data === custom) {
         // The user wants to enter a different cloud name, so prompt with an input box
-        result = await ext.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
+        result = await context.ui.showInputBox({ prompt: localize('vscode-docker.azureUtils.inputCloudName', 'Enter an Azure cloud name') });
     } else {
         result = choice.data;
     }

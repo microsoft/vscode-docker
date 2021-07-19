@@ -17,7 +17,7 @@ export async function deleteAzureRepository(context: IActionContext, node?: Azur
 
     const confirmDelete = localize('vscode-docker.commands.registries.azure.deleteRepository.confirm', 'Are you sure you want to delete repository "{0}" and its associated images?', node.repoName);
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
+    await context.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
 
     const deleting = localize('vscode-docker.commands.registries.azure.deleteRepository.deleting', 'Deleting repository "{0}"...', node.repoName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {

@@ -27,7 +27,7 @@ export async function removeNetwork(context: IActionContext, node?: NetworkTreeI
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.networks.remove.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.networks.remove.remove', 'Remove') });
 
     const removing: string = localize('vscode-docker.commands.networks.remove.removing', 'Removing network(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {

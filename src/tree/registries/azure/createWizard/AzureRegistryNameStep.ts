@@ -5,7 +5,6 @@
 
 import { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
 import { AzureNameStep, createAzureClient, ResourceGroupListStep, resourceGroupNamingRules } from 'vscode-azureextensionui';
-import { ext } from '../../../../extensionVariables';
 import { localize } from '../../../../localize';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
@@ -17,7 +16,7 @@ export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardCon
     public async prompt(context: IAzureRegistryWizardContext): Promise<void> {
         const armContainerRegistry = await import('@azure/arm-containerregistry');
         const client = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
-        context.newRegistryName = (await ext.ui.showInputBox({
+        context.newRegistryName = (await context.ui.showInputBox({
             placeHolder: localize('vscode-docker.tree.registries.azure.createWizard.name', 'Registry name'),
             prompt: localize('vscode-docker.tree.registries.azure.createWizard.namePrompt', 'Provide a registry name'),
             /* eslint-disable-next-line @typescript-eslint/promise-function-async */

@@ -6,7 +6,6 @@
 import { commands, ConfigurationTarget, MessageItem, workspace, WorkspaceConfiguration } from 'vscode';
 import { callWithTelemetryAndErrorHandling, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { extensionId } from '../constants';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from '../utils/getVSCodeRemoteInfo';
 import { registerCommand } from './registerCommands';
@@ -57,15 +56,13 @@ async function verifyIsRunningInWorkspace(context: IActionContext): Promise<void
                     return;
             }
 
-            context.telemetry.properties.cancelStep = 'switchExtensionKind';
             const switchBtn: MessageItem = { title: switchTitle };
-            await ext.ui.showWarningMessage(message, { learnMoreLink }, switchBtn);
+            await context.ui.showWarningMessage(message, { learnMoreLink, stepName: 'switchExtensionKind' }, switchBtn);
             updateExtensionKind('workspace');
 
-            context.telemetry.properties.cancelStep = 'requiresReload';
             const reloadMessage: string = localize('vscode-docker.commands.registerWorkspaceCommands.reloadRequired', 'This change to the Docker extension requires reloading VS Code to take effect.');
             const reload: MessageItem = { title: localize('vscode-docker.commands.registerWorkspaceCommands.reload', 'Reload Now') };
-            await ext.ui.showWarningMessage(reloadMessage, reload);
+            await context.ui.showWarningMessage(reloadMessage, { stepName: 'requiresReload' }, reload);
 
             // Add a one-off event here before reloading the window otherwise we'll lose telemetry for this code path
             await callWithTelemetryAndErrorHandling('verifyIsWorkspaceExtension', (newContext: IActionContext) => {
@@ -74,9 +71,8 @@ async function verifyIsRunningInWorkspace(context: IActionContext): Promise<void
 
             await commands.executeCommand('workbench.action.reloadWindow');
 
-            context.telemetry.properties.cancelStep = 'reloading';
             // throw an exception just to make sure we don't try to continue the command before the window is fully reloaded
-            throw new UserCancelledError();
+            throw new UserCancelledError('reloading');
         }
     }
 }

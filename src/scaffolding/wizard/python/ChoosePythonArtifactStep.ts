@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IAzureQuickPickItem } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { Item, resolveFilesOfPattern } from '../../../utils/quickPickFile';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
@@ -41,14 +40,14 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
 
         pickChoices.push(enterModuleChoice);
 
-        const result = await ext.ui.showQuickPick(pickChoices, {
+        const result = await wizardContext.ui.showQuickPick(pickChoices, {
             placeHolder: this.promptText,
             suppressPersistence: true,
         });
 
         if (result === enterModuleChoice) {
             // User wants a module target
-            const module = await ext.ui.showInputBox({
+            const module = await wizardContext.ui.showInputBox({
                 prompt: localize('vscode-docker.scaffold.choosePythonArtifactStep.enterModule', 'Enter a Python module name (e.g. myapp.manage)'),
                 validateInput: (value: string): string | undefined => {
                     if (moduleRegex.test(value)) {

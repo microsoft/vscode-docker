@@ -8,7 +8,6 @@ import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
@@ -151,7 +150,7 @@ export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Prom
     return await recursiveFindTaskByType(allTasks, 'docker-build', runTaskDefinition) as DockerBuildTaskDefinition;
 }
 
-export async function getOfficialBuildTaskForDockerfile(dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
+export async function getOfficialBuildTaskForDockerfile(context: IActionContext, dockerfile: string, folder: WorkspaceFolder): Promise<Task | undefined> {
     const resolvedDockerfile = pathNormalize(resolveVariables(dockerfile, folder));
 
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
@@ -174,7 +173,7 @@ export async function getOfficialBuildTaskForDockerfile(dockerfile: string, fold
             return { label: t.name };
         });
 
-        const item = await ext.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.tasks.helper.chooseBuildDefinition', 'Choose the Docker Build definition.') });
+        const item = await context.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.tasks.helper.chooseBuildDefinition', 'Choose the Docker Build definition.') });
         return buildTasks.find(t => t.name === item.label);
     }
 

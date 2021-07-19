@@ -88,15 +88,13 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
         picks = picks.sort((p1, p2) => p1.label.localeCompare(p2.label));
 
         const placeHolder: string = localize('vscode-docker.tree.registries.selectProvider', 'Select the provider for your registry');
-        provider = provider ?? (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
+        provider = provider ?? (await context.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         if (!provider) {
             throw new UserCancelledError();
         } else if (provider.onlyOneAllowed && this._cachedProviders.find(c => c.id === provider.id)) {
             // Don't wait, no input to wait for anyway
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            ext.ui.showWarningMessage(localize('vscode-docker.tree.registries.providerConnected', 'The "{0}" registry provider is already connected.', provider.label));
-            context.telemetry.properties.cancelStep = 'registryProviderAlreadyAdded';
-            throw new UserCancelledError();
+            void context.ui.showWarningMessage(localize('vscode-docker.tree.registries.providerConnected', 'The "{0}" registry provider is already connected.', provider.label));
+            throw new UserCancelledError('registryProviderAlreadyAdded');
         }
 
         context.telemetry.properties.providerId = provider.id;
@@ -154,7 +152,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
                 };
             });
             const placeHolder: string = localize('vscode-docker.tree.registries.selectDisconnect', 'Select the registry to disconnect');
-            cachedProvider = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
+            cachedProvider = (await context.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true })).data;
         }
 
         context.telemetry.properties.providerId = cachedProvider.id;
@@ -169,8 +167,7 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             }
         } catch (err) {
             // Don't wait, no input to wait for anyway
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            ext.ui.showWarningMessage(localize('vscode-docker.tree.registries.disconnectError', 'The registry password could not be removed from the cache: {0}', parseError(err).message));
+            void context.ui.showWarningMessage(localize('vscode-docker.tree.registries.disconnectError', 'The registry password could not be removed from the cache: {0}', parseError(err).message));
         }
 
         const index = this._cachedProviders.findIndex(n => n === cachedProvider);
