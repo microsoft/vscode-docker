@@ -3,7 +3,7 @@ steps:
   displayName: 'Build and Test'
   inputs:
     command: custom
-    customCommand: run ci-build
+    customCommand: test
   env:
     SERVICE_PRINCIPAL_CLIENT_ID: $(SERVICE_PRINCIPAL_CLIENT_ID)
     SERVICE_PRINCIPAL_SECRET: $(SERVICE_PRINCIPAL_SECRET)
