@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 import { TelemetryPromptStep } from './TelemetryPromptStep';
@@ -29,7 +28,7 @@ export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContex
             }
         };
 
-        wizardContext.ports = splitPorts(await ext.ui.showInputBox(opt));
+        wizardContext.ports = splitPorts(await wizardContext.ui.showInputBox(opt));
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {

@@ -8,16 +8,11 @@ import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azure
 import { DockerOSType } from '../../../docker/Common';
 import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
 import { DockerUri } from '../../../docker/files/DockerUri';
-import { AzExtParentTreeItemIntermediate } from '../../AzExtParentTreeItemIntermediate';
 import { FileTreeItem } from "./FileTreeItem";
 
 export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;
 
-export class DirectoryTreeItem extends AzExtParentTreeItemIntermediate {
-    public description?: string = '';
-
-    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
-
+export class DirectoryTreeItem extends AzExtParentTreeItem {
     private children: AzExtTreeItem[] | undefined;
 
     public constructor(

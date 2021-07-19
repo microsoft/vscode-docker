@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, IAzureQuickPickItem, IAzureQuickPickOptions } from "vscode-azureextensionui";
-import { ext } from "../../extensionVariables";
 import { localize } from "../../localize";
 import { nonNullProp } from "../../utils/nonNull";
 import { ITreePropertyInfo } from "./ITreeSettingInfo";
@@ -25,10 +24,10 @@ export class TreeSettingStep extends AzureWizardPromptStep<ITreeSettingsWizardCo
 
         if (Array.isArray(info.currentValue)) {
             options.isPickSelected = (p: Partial<IAzureQuickPickItem<string>>) => !!p.data && info.currentValue.includes(p.data);
-            const result = await ext.ui.showQuickPick(picks, { ...options, canPickMany: true });
+            const result = await context.ui.showQuickPick(picks, { ...options, canPickMany: true });
             context.newValue = result.map(p => p.data);
         } else {
-            const result = await ext.ui.showQuickPick(picks, options);
+            const result = await context.ui.showQuickPick(picks, options);
             context.newValue = result.data;
         }
         context.telemetry.properties.newValue = context.newValue.toString();

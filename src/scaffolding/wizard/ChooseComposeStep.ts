@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 import { TelemetryPromptStep } from './TelemetryPromptStep';
@@ -15,7 +14,7 @@ export class ChooseComposeStep extends TelemetryPromptStep<ScaffoldingWizardCont
             placeHolder: localize('vscode-docker.scaffold.chooseComposeStep.includeCompose', 'Include optional Docker Compose files?')
         };
 
-        const response = await ext.ui.showQuickPick(
+        const response = await wizardContext.ui.showQuickPick(
             [
                 { label: 'No', data: false },
                 { label: 'Yes', data: true }

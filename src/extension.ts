@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureUserInput, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -21,7 +21,6 @@ import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
 import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
-import { localize } from './localize';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
@@ -46,11 +45,6 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
-
-    if (!ext.ui) {
-        // This allows for standard interactions with the end user (as opposed to test input)
-        ext.ui = new AzureUserInput(ctx.globalState);
-    }
 
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
@@ -84,8 +78,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         // Temporarily disabled--reenable if we need to do any surveys
         // (new SurveyManager()).activate();
-
-        validateOldPublisher(activateContext);
 
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
@@ -189,27 +181,6 @@ async function getDockerInstallationIDHash(): Promise<string> {
     }
 
     return 'unknown';
-}
-
-/**
- * Workaround for https://github.com/microsoft/vscode/issues/76211 (only necessary if people are on old versions of VS Code that don't have the fix)
- */
-function validateOldPublisher(activateContext: IActionContext): void {
-    const extension = vscode.extensions.getExtension('PeterJausovec.vscode-docker');
-    if (extension) {
-        const message: string = localize('vscode-docker.extension.pleaseReload', 'Please reload Visual Studio Code to complete updating the Docker extension.');
-        const reload: vscode.MessageItem = { title: localize('vscode-docker.extension.reloadNow', 'Reload Now') };
-        // Don't wait
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        ext.ui.showWarningMessage(message, reload).then(async result => {
-            if (result === reload) {
-                await vscode.commands.executeCommand('workbench.action.reloadWindow');
-            }
-        });
-
-        activateContext.telemetry.properties.cancelStep = 'oldPublisherInstalled';
-        throw new UserCancelledError();
-    }
 }
 
 /* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */

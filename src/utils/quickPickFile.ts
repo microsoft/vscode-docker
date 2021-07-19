@@ -7,7 +7,6 @@ import * as path from "path";
 import vscode = require('vscode');
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
 export interface Item extends vscode.QuickPickItem {
@@ -76,12 +75,12 @@ export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, 
     }
 }
 
-async function quickPickFileItem(items: Item[], message: string): Promise<Item | undefined> {
+async function quickPickFileItem(context: IActionContext, items: Item[], message: string): Promise<Item | undefined> {
     if (items) {
         if (items.length === 1) {
             return items[0];
         } else {
-            return await ext.ui.showQuickPick<Item>(items, { placeHolder: message });
+            return await context.ui.showQuickPick<Item>(items, { placeHolder: message });
         }
     }
 }
@@ -97,12 +96,10 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
     while (!selectedDockerFile) {
         const dockerFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
         const message = localize('vscode-docker.utils.quickPick.chooseDockerfile', 'Choose a Dockerfile to build.');
-        selectedDockerFile = await quickPickFileItem(dockerFiles, message);
+        selectedDockerFile = await quickPickFileItem(context, dockerFiles, message);
         if (!selectedDockerFile) {
             const msg = localize('vscode-docker.utils.quickPick.noDockerfile', 'Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?');
-            context.telemetry.properties.cancelStep = msg;
-            await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
-            context.telemetry.properties.cancelStep = undefined;
+            await context.ui.showWarningMessage(msg, { stepName: msg }, DialogResponses.yes, DialogResponses.cancel);
             await vscode.commands.executeCommand('vscode-docker.configure');
             // Try again
         }
@@ -123,13 +120,11 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
                 // don't ask user for a docker file and let docker-compose automatically pick these files.
                 return undefined;
             } else {
-                selectedComposeFile = await quickPickFileItem(composeFiles, message);
+                selectedComposeFile = await quickPickFileItem(context, composeFiles, message);
             }
         } else {
             const msg = localize('vscode-docker.utils.quickPick.noComposefile', 'Couldn\'t find any docker-compose files in your workspace. Would you like to add Docker files to the workspace?');
-            context.telemetry.properties.cancelStep = msg;
-            await ext.ui.showWarningMessage(msg, DialogResponses.yes, DialogResponses.cancel);
-            context.telemetry.properties.cancelStep = undefined;
+            await context.ui.showWarningMessage(msg, { stepName: msg }, DialogResponses.yes, DialogResponses.cancel);
             await vscode.commands.executeCommand('vscode-docker.configureCompose');
             // Try again
         }
@@ -155,13 +150,13 @@ function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
     return false;
 }
 
-export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noYamlFileMessage: string): Promise<Item> {
+export async function quickPickYamlFileItem(context: IActionContext, fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noYamlFileMessage: string): Promise<Item> {
     if (fileUri) {
         return createFileItem(rootFolder, fileUri);
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [YAML_GLOB_PATTERN]);
-    const fileItem: Item = await quickPickFileItem(items, localize('vscode-docker.utils.quickPick.chooseYaml', 'Choose a .yaml file to run.'));
+    const fileItem: Item = await quickPickFileItem(context, items, localize('vscode-docker.utils.quickPick.chooseYaml', 'Choose a .yaml file to run.'));
 
     if (!fileItem) {
         throw new Error(noYamlFileMessage);
@@ -169,13 +164,13 @@ export async function quickPickYamlFileItem(fileUri: vscode.Uri, rootFolder: vsc
     return fileItem;
 }
 
-export async function quickPickProjectFileItem(fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
+export async function quickPickProjectFileItem(context: IActionContext, fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
     if (fileUri) {
         return createFileItem(rootFolder, fileUri);
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
-    const fileItem: Item = await quickPickFileItem(items, localize('vscode-docker.utils.quickPick.chooseProject', 'Choose a project file.'));
+    const fileItem: Item = await quickPickFileItem(context, items, localize('vscode-docker.utils.quickPick.chooseProject', 'Choose a project file.'));
 
     if (!fileItem) {
         throw new Error(noProjectFileMessage);

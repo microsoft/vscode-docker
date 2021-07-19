@@ -9,15 +9,8 @@ import { DockerPort } from '../../docker/Containers';
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
-import { captureCancelStep } from '../../utils/captureCancelStep';
 
 type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: string, selectedPort?: number };
-
-type ConfigureBrowseCancelStep = 'node' | 'port';
-
-async function captureBrowseCancelStep<T>(cancelStep: ConfigureBrowseCancelStep, properties: BrowseTelemetryProperties, prompt: () => Promise<T>): Promise<T> {
-    return await captureCancelStep(cancelStep, properties, prompt)();
-}
 
 // NOTE: These ports are ordered in order of preference.
 const commonWebPorts = [
@@ -42,11 +35,10 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     if (!node) {
         await ext.containersTree.refresh(context);
-        node = await captureBrowseCancelStep('node', telemetryProperties, async () =>
-            ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
-                ...context,
-                noItemFoundErrorMessage: localize('vscode-docker.commands.containers.browseContainer.noContainers', 'No running containers are available to open in a browser')
-            }));
+        node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
+            ...context,
+            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.browseContainer.noContainers', 'No running containers are available to open in a browser')
+        });
     }
 
     const ports = node.ports ?? [];
@@ -57,8 +49,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.PrivatePort).toString();
 
     if (possiblePorts.length === 0) {
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        ext.ui.showWarningMessage(localize('vscode-docker.commands.containers.browseContainer.noPorts', 'No valid ports are available.'));
+        void context.ui.showWarningMessage(localize('vscode-docker.commands.containers.browseContainer.noPorts', 'No valid ports are available.'));
         return;
     }
 
@@ -80,7 +71,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         items.sort((a, b) => a.port.PrivatePort - b.port.PrivatePort);
 
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        const item = await captureBrowseCancelStep('port', telemetryProperties, () => ext.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') }));
+        const item = await context.ui.showQuickPick(items, { stepName: 'port', placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') });
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 

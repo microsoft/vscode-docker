@@ -5,7 +5,6 @@
 
 import { URL } from 'url';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
@@ -13,7 +12,7 @@ export class RegistryUrlStep extends AzureWizardPromptStep<IConnectRegistryWizar
     public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
         const prompt: string = context.urlPrompt || localize('vscode-docker.tree.registries.connectWizard.enterUrl', 'Enter the URL for the registry provider');
         const placeHolder: string = localize('vscode-docker.tree.registries.connectWizard.exampleUrl', 'Example: http://localhost:5000');
-        context.url = (await ext.ui.showInputBox({
+        context.url = (await context.ui.showInputBox({
             prompt,
             placeHolder,
             validateInput: v => this.validateUrl(context, v)

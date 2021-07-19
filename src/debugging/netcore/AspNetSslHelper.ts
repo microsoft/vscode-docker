@@ -8,8 +8,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as semver from 'semver';
 import { MessageItem } from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
+import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 import { getDotNetVersion } from '../../utils/netCoreUtils';
@@ -20,7 +19,7 @@ import { execAsync } from '../../utils/spawnAsync';
 const knownConfiguredProjects = new Set<string>();
 let alreadyTrustedOrSkipped: boolean = false;
 
-export async function trustCertificateIfNecessary(): Promise<void> {
+export async function trustCertificateIfNecessary(context: IActionContext): Promise<void> {
     if (alreadyTrustedOrSkipped) {
         return;
     }
@@ -31,7 +30,7 @@ export async function trustCertificateIfNecessary(): Promise<void> {
             const message = localize('vscode-docker.debugging.netCore.notTrusted', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`, or click "Trust" below.');
 
             // Don't wait
-            void ext.ui
+            void context.ui
                 .showWarningMessage(message, { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' }, trust)
                 .then(async selection => {
                     if (selection === trust) {
@@ -45,7 +44,7 @@ export async function trustCertificateIfNecessary(): Promise<void> {
             const message = localize('vscode-docker.debugging.netCore.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`.');
 
             // Don't wait
-            void ext.ui.showWarningMessage(
+            void context.ui.showWarningMessage(
                 message,
                 { modal: false, learnMoreLink: 'https://aka.ms/vscode-docker-dev-certs' });
         }

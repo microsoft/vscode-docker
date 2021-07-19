@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPickerContext, UserCancelledError } from "vscode-azureextensionui";
-import { ext } from "../extensionVariables";
 
 export interface MultiSelectNode {
     readonly canMultiSelect: boolean;
@@ -49,7 +48,7 @@ export async function multiSelectNodes<T extends AzExtTreeItem>(
         if (beforeLength !== nodes.length) {
             // Some things got filtered off because they were not valid choices
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            ext.ui.showWarningMessage('This action is invalid for some selected items. These items will be ignored.');
+            context.ui.showWarningMessage('This action is invalid for some selected items. These items will be ignored.');
         }
     }
 

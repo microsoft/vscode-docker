@@ -7,11 +7,11 @@ import { MarkdownString, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
-import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
+import { ToolTipTreeItem } from "../ToolTipTreeItem";
 
-export class VolumeTreeItem extends AzExtTreeItemIntermediate {
+export class VolumeTreeItem extends ToolTipTreeItem {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
     private readonly _item: DockerVolume;

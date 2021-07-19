@@ -5,9 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickOptions } from 'vscode-azureextensionui';
-
 import { extensionId } from '../constants';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
@@ -24,7 +22,7 @@ export async function help(context: IActionContext): Promise<void> {
     ];
 
     const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true };
-    const selectedItem: HelpMenuItem = await ext.ui.showQuickPick(items, options);
+    const selectedItem: HelpMenuItem = await context.ui.showQuickPick(items, options);
     context.telemetry.properties.helpItem = selectedItem.telemetryID;
     await selectedItem.handler();
 }

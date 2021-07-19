@@ -5,7 +5,6 @@
 
 import { AzureWizardPromptStep } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
-import { ext } from "../../../extensionVariables";
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
 export class WebSitesPortPromptStep extends AzureWizardPromptStep<IAppServiceContainerWizardContext> {
@@ -14,7 +13,7 @@ export class WebSitesPortPromptStep extends AzureWizardPromptStep<IAppServiceCon
         const prompt: string = localize('vscode-docker.deployAppService.WebSitesPortPromptStep.whatPort', 'What port does your app listen on?');
         const placeHolder: string = '80';
         const value: string = '80';
-        const portString: string = await ext.ui.showInputBox({ prompt, placeHolder, value, validateInput });
+        const portString: string = await context.ui.showInputBox({ prompt, placeHolder, value, validateInput });
         context.webSitesPort = parseInt(portString, 10);
     }
 

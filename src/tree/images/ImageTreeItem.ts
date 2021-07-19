@@ -7,13 +7,13 @@ import { MarkdownString, ThemeColor, ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
-import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
+import { ToolTipTreeItem } from "../ToolTipTreeItem";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
-export class ImageTreeItem extends AzExtTreeItemIntermediate {
+export class ImageTreeItem extends ToolTipTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
     private readonly _item: DatedDockerImage;

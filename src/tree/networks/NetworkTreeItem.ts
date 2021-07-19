@@ -8,11 +8,11 @@ import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
-import { AzExtTreeItemIntermediate } from "../AzExtTreeItemIntermediate";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
+import { ToolTipTreeItem } from "../ToolTipTreeItem";
 
-export class NetworkTreeItem extends AzExtTreeItemIntermediate {
+export class NetworkTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Network$/;
     public static customNetworkRegExp: RegExp = /^customNetwork$/i;
 

@@ -27,7 +27,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         if (/:<none>/i.test(n.fullTag)) {
             // Warn only once
             if (!noneTagWarningShown) {
-                void ext.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
+                void context.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
                 noneTagWarningShown = true;
             }
 

@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, IAzureQuickPickItem } from "vscode-azureextensionui";
-import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./ITreeSettingsWizardContext";
 
@@ -24,7 +23,7 @@ export class TreeSettingListStep extends AzureWizardPromptStep<ITreeSettingsWiza
             detail: localize('vscode-docker.tree.settings.resetDetail', 'Restore settings to their original defaults.'),
             data: undefined
         });
-        context.info = (await ext.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true, ignoreFocusOut: false })).data;
+        context.info = (await context.ui.showQuickPick(picks, { placeHolder, suppressPersistence: true, ignoreFocusOut: false })).data;
     }
 
     public shouldPrompt(context: ITreeSettingsWizardContext): boolean {

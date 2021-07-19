@@ -40,7 +40,7 @@ export interface NetCoreDebugScaffoldingOptions {
 export class NetCoreDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
-        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
 
         return [
             {
@@ -68,7 +68,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async resolveLaunchDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
-        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
+        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
@@ -84,7 +84,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         if (configureSsl) {
-            await this.configureSsl(debugConfiguration, appOutput);
+            await this.configureSsl(context.actionContext, debugConfiguration, appOutput);
             if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
                 // configureSsl is slow, give a chance to cancel
                 return undefined;
@@ -239,10 +239,10 @@ export class NetCoreDebugHelper implements DebugHelper {
         await fse.chmod(destPath, 0o755); // Give all read and execute permissions
     }
 
-    private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
+    private async configureSsl(context: IActionContext, debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
         const appOutputName = path.parse(appOutput).name;
         const certificateExportPath = path.join(getHostSecretsFolders().hostCertificateFolder, `${appOutputName}.pfx`);
-        await trustCertificateIfNecessary();
+        await trustCertificateIfNecessary(context);
         await exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
     }
 

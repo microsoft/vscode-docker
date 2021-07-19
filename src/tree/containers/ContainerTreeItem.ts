@@ -9,14 +9,14 @@ import { DockerOSType } from '../../docker/Common';
 import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { MultiSelectNode } from '../../utils/multiSelectNodes';
-import { AzExtParentTreeItemIntermediate } from "../AzExtParentTreeItemIntermediate";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from '../resolveTooltipMarkdown';
+import { ToolTipParentTreeItem } from '../ToolTipTreeItem';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends AzExtParentTreeItemIntermediate implements MultiSelectNode {
+export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSelectNode {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerInfo;

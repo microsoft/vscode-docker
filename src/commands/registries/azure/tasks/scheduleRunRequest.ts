@@ -35,7 +35,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         imageName = await quickPickImageName(context, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
         rootFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.registries.azure.tasks.yamlFolder', 'To run a task from a .yaml file you must first open a folder or workspace in VS Code.'));
-        fileItem = await quickPickYamlFileItem(uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
+        fileItem = await quickPickYamlFileItem(context, uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
     } else {
         throw new Error(localize('vscode-docker.commands.registries.azure.tasks.runTypeUnsupported', 'Run Request Type Currently not supported.'));
     }
@@ -43,7 +43,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrModels.OS>>{ label: item, data: item });
-    const osType: AcrModels.OS = (await ext.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
+    const osType: AcrModels.OS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
 
     const tarFilePath: string = getTempSourceArchivePath();
 
@@ -104,7 +104,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     await delay(500);
 
     addImageTaggingTelemetry(context, suggestedImageName, '.before');
-    const imageName: string = await getTagFromUserInput(suggestedImageName);
+    const imageName: string = await getTagFromUserInput(context, suggestedImageName);
     addImageTaggingTelemetry(context, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);
