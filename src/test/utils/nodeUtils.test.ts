@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../extension.bundle";
+import { inferPackageName, inferCommand, InspectMode, NodePackage } from '../../utils/nodeUtils';
 
- suite('(unit) utils/nodeUtils', () => {
+suite('(unit) utils/nodeUtils', () => {
     suite('inferPackageName', () => {
         test('No package', async () => {
             const packageName = await inferPackageName(undefined, '/Users/user/app/package.json');
@@ -43,16 +43,16 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
         }
 
         test('No package', async () => {
-            assert.rejects(() => inferCommand(undefined, 'default', 9229), 'An error should be thrown if there is no package');
+            await assert.rejects(() => inferCommand(undefined, 'default', 9229), 'An error should be thrown if there is no package');
         });
 
         test('No scripts or main', async () => {
-            assert.rejects(() => inferCommand({}, 'default', 9229), 'An error should be thrown if there is no recognized NPM script or main script');
+            await assert.rejects(() => inferCommand({}, 'default', 9229), 'An error should be thrown if there is no recognized NPM script or main script');
         });
 
         inferCommandTest(
             'With start script and main',
-            { main: './bin/www1', scripts: { start: 'node ./bin/www2'} },
+            { main: './bin/www1', scripts: { start: 'node ./bin/www2' } },
             'default',
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www2',
@@ -60,7 +60,7 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
 
         inferCommandTest(
             'With case sensitive start script',
-            { main: './bin/www1', scripts: { start: 'Node ./bin/www2'} },
+            { main: './bin/www1', scripts: { start: 'Node ./bin/www2' } },
             'default',
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www2',
@@ -68,7 +68,7 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
 
         inferCommandTest(
             'With nodejs start script',
-            { main: './bin/www1', scripts: { start: 'nodejs ./bin/www2'} },
+            { main: './bin/www1', scripts: { start: 'nodejs ./bin/www2' } },
             'default',
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www2',
@@ -76,7 +76,7 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
 
         inferCommandTest(
             'Start script with preceeding environment',
-            { main: './bin/www1', scripts: { start: 'NODE_ENV=production node ./bin/www2'} },
+            { main: './bin/www1', scripts: { start: 'NODE_ENV=production node ./bin/www2' } },
             'default',
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www2',
@@ -84,7 +84,7 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
 
         inferCommandTest(
             'With unrecognized start script and main',
-            { main: './bin/www1', scripts: { start: 'mynode ./bin/www2'} },
+            { main: './bin/www1', scripts: { start: 'mynode ./bin/www2' } },
             'default',
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www1',
@@ -113,6 +113,6 @@ import { inferPackageName, inferCommand, InspectMode, NodePackage } from "../../
             9229,
             'node --inspect=0.0.0.0:9229 ./bin/www',
             'Should default to the main script when no start script exists');
-        });
- });
+    });
+});
 
