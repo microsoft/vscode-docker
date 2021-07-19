@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { DockerObject } from "../docker/Common";
 import { LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
@@ -14,9 +13,6 @@ export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProper
     public readonly group: string;
     private _items: TItem[];
     private _childTreeItems: AzExtTreeItem[];
-
-    // Redefining this as an abstract allows inheriting classes to either do an accessor or a property
-    public abstract readonly iconPath?: ThemeIcon;
 
     public constructor(parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) {
         super(parent);
@@ -33,7 +29,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProper
         return Math.max(...this._items.map(i => i.CreatedTime));
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean): Promise<AzExtTreeItem[]> {
         this._childTreeItems = this.getChildTreeItems();
         return this._childTreeItems;
     }

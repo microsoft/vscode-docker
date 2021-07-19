@@ -17,11 +17,11 @@ export class DockerfileCompletionItemProvider implements CompletionItemProvider 
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
     public provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken): Promise<CompletionItem[]> {
-        let dockerSuggestSupport = new helper.SuggestSupportHelper();
+        const dockerSuggestSupport = new helper.SuggestSupportHelper();
 
-        let textLine = document.lineAt(position.line);
+        const textLine = document.lineAt(position.line);
 
-        let fromTextDocker = textLine.text.match(FROM_DIRECTIVE_PATTERN);
+        const fromTextDocker = textLine.text.match(FROM_DIRECTIVE_PATTERN);
 
         if (fromTextDocker) {
             return dockerSuggestSupport.suggestImages(fromTextDocker[1]);

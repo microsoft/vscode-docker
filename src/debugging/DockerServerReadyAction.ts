@@ -65,8 +65,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 // verify that format does not contain '%s'
                 if (format.indexOf('%s') >= 0) {
                     const errMsg = localize('vscode-docker.debug.serverReady.noCapture', 'Format uri (\'{0}\') uses a substitution placeholder but pattern did not capture anything.', format);
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
                 captureString = format;
@@ -76,8 +75,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 const s = format.split('%s');
                 if (s.length !== 2) {
                     const errMsg = localize('vscode-docker.debug.serverReady.oneSubstitution', 'Format uri (\'{0}\') must contain exactly one substitution placeholder.', format);
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
 
@@ -95,8 +93,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
 
                 if (containerPort === undefined) {
                     const errMsg = localize('vscode-docker.debug.serverReady.noCapturedPort', 'Captured string (\'{0}\') must contain a port number.', captureString);
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
 
@@ -118,8 +115,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                     captureString = util.format(format, containerProtocol, hostPort);
                 } else {
                     const errMsg = localize('vscode-docker.debug.serverReady.twoSubstitutions', 'Format uri (\'{0}\') must contain exactly two substitution placeholders.', format);
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
             }
@@ -131,7 +127,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
     private getContainerProtocol(containerUrl: string): string {
         const httpsRegex = /https:\/\//i; // Matches https://
 
-        return httpsRegex.test(containerUrl) ? 'https' : 'http'
+        return httpsRegex.test(containerUrl) ? 'https' : 'http';
     }
 
     private getContainerPort(containerUrl: string): number | undefined {
@@ -155,10 +151,8 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 vscode.env.openExternal(vscode.Uri.parse(uri));
                 break;
             case 'debugWithChrome':
-                const remoteName = 'remoteName';
-                if (vscode.env[remoteName] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.debug.startDebugging(
+                if (vscode.env['remoteName'] === 'wsl' || !!vscode.extensions.getExtension('msjsdiag.debugger-for-chrome')) {
+                    void vscode.debug.startDebugging(
                         session.workspaceFolder,
                         {
                             type: 'chrome',
@@ -169,8 +163,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                         });
                 } else {
                     const errMsg = localize('vscode-docker.debug.serverReady.noChrome', 'The action \'debugWithChrome\' requires the \'Debugger for Chrome\' extension.');
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    vscode.window.showErrorMessage(errMsg, { modal: true }).then(_ => undefined);
+                    void vscode.window.showErrorMessage(errMsg, { modal: true });
                 }
                 break;
             default:
@@ -258,7 +251,7 @@ class DockerDebugAdapterTracker extends vscode.Disposable implements vscode.Debu
 class MultiOutputDockerServerReadyManager extends vscode.Disposable implements DockerServerReadyDetector {
     private readonly detector: ServerReadyDetector;
     private readonly logsTracker: DockerLogsTracker;
-    private readonly _tracker: DockerDebugAdapterTracker;
+    public readonly tracker: DockerDebugAdapterTracker;
 
     public constructor(session: vscode.DebugSession) {
         super(
@@ -267,7 +260,7 @@ class MultiOutputDockerServerReadyManager extends vscode.Disposable implements D
                     this.logsTracker.dispose();
                 }
 
-                this._tracker.dispose();
+                this.tracker.dispose();
             });
 
         this.detector = new ServerReadyDetector(session);
@@ -278,17 +271,13 @@ class MultiOutputDockerServerReadyManager extends vscode.Disposable implements D
             this.logsTracker = new DockerLogsTracker(configuration.dockerOptions.dockerServerReadyAction.containerName, this);
         }
 
-        this._tracker = new DockerDebugAdapterTracker(this);
+        this.tracker = new DockerDebugAdapterTracker(this);
     }
 
     public detectPattern(output: string): void {
         if (this.detector.detectPattern(output)) {
             this.dispose();
         }
-    }
-
-    public get tracker(): DockerDebugAdapterTracker {
-        return this._tracker;
     }
 }
 

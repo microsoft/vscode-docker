@@ -4,15 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem } from 'vscode-azureextensionui';
+import { AzExtParentTreeItem, AzExtTreeItem } from 'vscode-azureextensionui';
 import { DockerUri } from '../../../docker/files/DockerUri';
-import { AzExtTreeItemIntermediate } from '../../AzExtTreeItemIntermediate';
 
-export class FileTreeItem extends AzExtTreeItemIntermediate {
-    public description?: string = '';
-
-    public resolveTooltipInternal: never; // Unused but needs to be implemented since it is abstract in the parent
-
+export class FileTreeItem extends AzExtTreeItem {
     public constructor(
         parent: AzExtParentTreeItem,
         private readonly name: string,

@@ -5,9 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, IAzureQuickPickOptions } from 'vscode-azureextensionui';
-
 import { extensionId } from '../constants';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
@@ -16,15 +14,15 @@ interface HelpMenuItem extends vscode.QuickPickItem {
 }
 
 export async function help(context: IActionContext): Promise<void> {
-    let items: HelpMenuItem[] = [
+    const items: HelpMenuItem[] = [
         { label: localize('vscode-docker.commands.help.getStarted', 'Get started with Docker...'), handler: getStarted, telemetryID: 'getStarted' },
         { label: localize('vscode-docker.commands.help.review', 'Review Docker extension issues...'), handler: reviewIssues, telemetryID: 'reviewIssues' },
         { label: localize('vscode-docker.commands.help.report', 'Report Docker extension issue...'), handler: reportIssue, telemetryID: 'reportIssue' },
         { label: localize('vscode-docker.commands.help.editSettings', 'Edit settings...'), handler: editSettings, telemetryID: 'editSettings' }
     ];
 
-    const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true }
-    let selectedItem: HelpMenuItem = await ext.ui.showQuickPick(items, options);
+    const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true };
+    const selectedItem: HelpMenuItem = await context.ui.showQuickPick(items, options);
     context.telemetry.properties.helpItem = selectedItem.telemetryID;
     await selectedItem.handler();
 }

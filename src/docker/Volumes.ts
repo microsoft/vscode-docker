@@ -14,15 +14,17 @@ export interface DockerVolume extends DockerObject {
     readonly Description?: string;
 }
 
+export interface VolumeInspectionContainers {
+    [containerId: string]: {
+        readonly Name: string;
+        readonly Destination: string;
+    }
+}
+
 export interface DockerVolumeInspection extends DockerObject {
     readonly Driver?: VolumeDriverType;
 
     readonly Id: undefined; // Not defined for volumes
     readonly Description?: string;
-    readonly Containers?: { // Not a real part of volume inspection, but we add it because it's desperately needed
-        [containerId: string]: {
-            readonly Name: string;
-            readonly Destination: string;
-        }
-    };
+    readonly Containers?: VolumeInspectionContainers; // Not a real part of volume inspection, but we add it because it's desperately needed
 }

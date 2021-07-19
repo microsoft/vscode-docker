@@ -12,7 +12,7 @@ import { convertToMB } from '../../utils/convertToMB';
 export async function pruneVolumes(context: IActionContext): Promise<void> {
     const confirmPrune: string = localize('vscode-docker.commands.volumes.prune.confirm', 'Are you sure you want to remove all unused volumes? Removing volumes may result in data loss!');
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.volumes.prune.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.volumes.prune.remove', 'Remove') });
 
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.volumes.pruning', 'Pruning volumes...') },
@@ -20,7 +20,7 @@ export async function pruneVolumes(context: IActionContext): Promise<void> {
             const result = await ext.dockerClient.pruneVolumes(context);
 
             const mbReclaimed = convertToMB(result.SpaceReclaimed);
-            let message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} volume(s) and reclaimed {1} MB of space.', result.ObjectsDeleted, mbReclaimed);
+            const message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} volume(s) and reclaimed {1} MB of space.', result.ObjectsDeleted, mbReclaimed);
             // don't wait
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window.showInformationMessage(message);

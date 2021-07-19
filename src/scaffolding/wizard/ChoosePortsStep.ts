@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 import { TelemetryPromptStep } from './TelemetryPromptStep';
@@ -29,7 +28,7 @@ export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContex
             }
         };
 
-        wizardContext.ports = splitPorts(await ext.ui.showInputBox(opt))
+        wizardContext.ports = splitPorts(await wizardContext.ui.showInputBox(opt));
     }
 
     public shouldPrompt(wizardContext: ScaffoldingWizardContext): boolean {
@@ -49,14 +48,14 @@ function splitPorts(value: string): number[] | undefined {
         return [];
     }
 
-    let elements = value.split(',').map(p => p.trim());
-    let matches = elements.filter(p => p.match(/^-*\d+$/));
+    const elements = value.split(',').map(p => p.trim());
+    const matches = elements.filter(p => p.match(/^-*\d+$/));
 
     if (matches.length < elements.length) {
         return undefined;
     }
 
-    let ports = matches.map(Number);
+    const ports = matches.map(Number);
 
     // If anything is non-integral or less than 1 or greater than 65535, it's not valid
     if (ports.some(p => !Number.isInteger(p) || p < 1 || p > 65535)) {

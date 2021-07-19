@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ExtensionContext, TreeView } from "vscode";
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IAzureUserInput, IExperimentationServiceAdapter } from "vscode-azureextensionui";
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from "vscode-azureextensionui";
 import { ContextManager } from './docker/ContextManager';
 import { DockerApiClient } from './docker/DockerApiClient';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
@@ -18,13 +18,11 @@ import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
  */
-// tslint:disable-next-line: export-name
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ext {
     export let context: ExtensionContext;
     export let outputChannel: IAzExtOutputChannel;
-    export let ui: IAzureUserInput;
 
-    export let telemetryOptIn: boolean;
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
 
@@ -58,6 +56,4 @@ export namespace ext {
     export let contextsTree: AzExtTreeDataProvider;
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
-
-    export let runningTests: boolean = false;
 }

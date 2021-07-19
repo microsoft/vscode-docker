@@ -48,7 +48,7 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
     }));
 
     const subsetChoices =
-        await ext.ui.showQuickPick(
+        await context.ui.showQuickPick(
             pickChoices,
             {
                 canPickMany: true,

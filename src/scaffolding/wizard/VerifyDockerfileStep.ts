@@ -21,7 +21,7 @@ export class VerifyDockerfileStep<TWizardContext extends ScaffoldingWizardContex
                     },
                     title: localize('vscode-docker.scaffold.verifyDockerfileStep.addDockerfiles', 'Add Docker Files'),
                 }
-            ]
+            ];
 
             throw new Error(localize('vscode-docker.scaffold.verifyDockerfileStep.noDockerfile', 'No Dockerfile is present in the workspace. Please add Docker files before adding Compose files.'));
         }

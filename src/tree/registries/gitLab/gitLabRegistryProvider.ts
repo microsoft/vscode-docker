@@ -22,4 +22,4 @@ export const gitLabRegistryProvider: IRegistryProvider = {
     treeItemFactory: (parent, cachedProvider) => new GitLabAccountTreeItem(parent, cachedProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
     removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
-}
+};

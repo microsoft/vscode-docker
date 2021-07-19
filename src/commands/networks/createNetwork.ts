@@ -11,7 +11,7 @@ import { getDockerOSType } from '../../utils/osUtils';
 
 export async function createNetwork(context: IActionContext): Promise<void> {
 
-    const name = await ext.ui.showInputBox({
+    const name = await context.ui.showInputBox({
         value: '',
         prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
     });
@@ -29,7 +29,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
             { label: 'macvlan' }
         ];
 
-    const driverSelection = await ext.ui.showQuickPick(
+    const driverSelection = await context.ui.showQuickPick(
         drivers,
         {
             canPickMany: false,

@@ -24,4 +24,4 @@ tsconfig.json
 typings/**
 webpack.config*
 .eslintignore
-.eslintrc.js
+.eslintrc.json

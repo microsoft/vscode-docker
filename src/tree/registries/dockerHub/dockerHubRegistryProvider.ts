@@ -26,4 +26,4 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
     treeItemFactory: (parent, cachedProvider) => new DockerHubAccountTreeItem(parent, cachedProvider),
     persistAuth: async (cachedProvider, secret) => await setRegistryPassword(cachedProvider, secret),
     removeAuth: async (cachedProvider) => await deleteRegistryPassword(cachedProvider),
-}
+};

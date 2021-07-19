@@ -9,13 +9,10 @@ import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function selectContainer(context: IActionContext): Promise<string> {
-
-    let node: ContainerTreeItem;
-
     // Expecting running containers to change often as this is a debugging scenario.
     await ext.containersTree.refresh(context);
 
-    node = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
+    const node: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
         ...context,
         noItemFoundErrorMessage: localize('vscode-docker.commands.containers.select.noContainers', 'No running containers are available')
     });

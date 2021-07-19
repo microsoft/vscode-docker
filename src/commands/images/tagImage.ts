@@ -20,15 +20,15 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(node.fullTag, registry?.baseImagePath);
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.dockerClient.tagImage(context, node.imageId, newTaggedName);
     return newTaggedName;
 }
 
-export async function getTagFromUserInput(fullTag: string, baseImagePath?: string): Promise<string> {
-    let opt: vscode.InputBoxOptions = {
+export async function getTagFromUserInput(context: IActionContext, fullTag: string, baseImagePath?: string): Promise<string> {
+    const opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
         prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
     };
@@ -42,7 +42,7 @@ export async function getTagFromUserInput(fullTag: string, baseImagePath?: strin
 
     opt.value = fullTag;
 
-    return await ext.ui.showInputBox(opt);
+    return await context.ui.showInputBox(opt);
 }
 
 const KnownRegistries: { type: string, regex: RegExp }[] = [
@@ -66,22 +66,22 @@ const KnownRegistries: { type: string, regex: RegExp }[] = [
 
 export function addImageTaggingTelemetry(context: IActionContext, fullImageName: string, propertyPostfix: '.before' | '.after' | ''): void {
     try {
-        let properties: TelemetryProperties = {};
+        const properties: TelemetryProperties = {};
 
-        let [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
+        const [, repository, tag] = /^(.*):(.*)$/.exec(fullImageName) ?? [undefined, fullImageName, ''];
 
         if (!!tag.match(/^[0-9.-]*(|alpha|beta|latest|edge|v|version)?[0-9.-]*$/)) {
-            properties.safeTag = tag
+            properties.safeTag = tag;
         }
         properties.hasTag = String(!!tag);
         properties.numSlashes = String(numberMatches(repository.match(/\//g)));
 
-        let knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
+        const knownRegistry = KnownRegistries.find(kr => !!repository.match(kr.regex));
         if (knownRegistry) {
             properties.registryType = knownRegistry.type;
         }
 
-        for (let propertyName of Object.keys(properties)) {
+        for (const propertyName of Object.keys(properties)) {
             context.telemetry.properties[propertyName + propertyPostfix] = properties[propertyName];
         }
     } catch (error) {

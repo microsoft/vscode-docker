@@ -5,8 +5,7 @@
 
 import Dockerode = require('dockerode');
 import { Socket } from 'net';
-import { CancellationTokenSource, workspace } from 'vscode';
-import { ext } from '../../extensionVariables';
+import { CancellationTokenSource, env, MessageItem, Uri, window, workspace } from 'vscode';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
 import { cloneObject } from '../../utils/cloneObject';
@@ -16,7 +15,7 @@ import { DockerContext } from '../Contexts';
 
 export function getFullTagFromDigest(image: Dockerode.ImageInfo): string {
     let repo = '<none>';
-    let tag = '<none>';
+    const tag = '<none>';
 
     const digest = image.RepoDigests[0];
     if (digest) {
@@ -73,8 +72,17 @@ export function refreshDockerode(currentContext: DockerContext): Dockerode {
         // Don't wait
         void validateSshAuthSock(newEnv.SSH_AUTH_SOCK).then((result) => {
             if (!result) {
+                // Normally we'd prefer IActionContext.ui.showWarningMessage but this occurs outside of any action, so no context.ui is available.
+                const learnMore: MessageItem = {
+                    title: localize('vscode-docker.utils.dockerode.sshAgentLearnMore', 'Learn More'),
+                };
+
                 // Don't wait
-                void ext.ui.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), { learnMoreLink: 'https://aka.ms/AA7assy' });
+                void window.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), learnMore).then((result) => {
+                    if (result === learnMore) {
+                        void env.openExternal(Uri.parse('https://aka.ms/AA7assy'));
+                    }
+                });
             }
         });
     }

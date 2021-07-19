@@ -7,7 +7,7 @@ import * as path from 'path';
 import { Progress } from 'vscode';
 import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
-import { dockerDebugScaffoldingProvider, NetCoreScaffoldingOptions, NodeScaffoldingOptions, PythonScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
+import { dockerDebugScaffoldingProvider } from '../../debugging/DockerDebugScaffoldingProvider';
 import { localize } from '../../localize';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
@@ -30,20 +30,24 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
         switch (wizardContext.platform) {
             case 'Node.js':
                 scaffoldContext.platform = 'node';
-                const nodeOptions: NodeScaffoldingOptions = {
-                    package: wizardContext.artifact,
-                };
-                await dockerDebugScaffoldingProvider.initializeNodeForDebugging(scaffoldContext, nodeOptions);
+                await dockerDebugScaffoldingProvider.initializeNodeForDebugging(
+                    scaffoldContext,
+                    {
+                        package: wizardContext.artifact,
+                    }
+                );
                 break;
 
             case '.NET: ASP.NET Core':
             case '.NET: Core Console':
                 scaffoldContext.platform = 'netCore';
-                const netCoreOptions: NetCoreScaffoldingOptions = {
-                    appProject: unresolveWorkspaceFolder(wizardContext.artifact, wizardContext.workspaceFolder),
-                    platformOS: (wizardContext as NetCoreScaffoldingWizardContext).netCorePlatformOS,
-                };
-                await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(scaffoldContext, netCoreOptions);
+                await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(
+                    scaffoldContext,
+                    {
+                        appProject: unresolveWorkspaceFolder(wizardContext.artifact, wizardContext.workspaceFolder),
+                        platformOS: (wizardContext as NetCoreScaffoldingWizardContext).netCorePlatformOS,
+                    }
+                );
                 break;
 
             case 'Python: Django':
@@ -51,11 +55,13 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
             case 'Python: Flask':
             case 'Python: General':
                 scaffoldContext.platform = 'python';
-                const pythonOptions: PythonScaffoldingOptions = {
-                    projectType: (wizardContext as PythonScaffoldingWizardContext).pythonProjectType,
-                    target: (wizardContext as PythonScaffoldingWizardContext).pythonArtifact,
-                };
-                await dockerDebugScaffoldingProvider.initializePythonForDebugging(scaffoldContext, pythonOptions);
+                await dockerDebugScaffoldingProvider.initializePythonForDebugging(
+                    scaffoldContext,
+                    {
+                        projectType: (wizardContext as PythonScaffoldingWizardContext).pythonProjectType,
+                        target: (wizardContext as PythonScaffoldingWizardContext).pythonArtifact,
+                    }
+                );
                 break;
 
             default:

@@ -23,7 +23,7 @@ export function getResourceGroupFromId(id: string): string {
     return parseResourceId(id)[2];
 }
 
-/* eslint-disable camelcase */
+/* eslint-disable @typescript-eslint/naming-convention */
 export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
     const options: RequestOptionsLike = {
         form: {
@@ -69,4 +69,4 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
 
     return (await response.json()).refresh_token;
 }
-/* eslint-enable camelcase */
+/* eslint-enable @typescript-eslint/naming-convention */

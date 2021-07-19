@@ -87,7 +87,7 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
                 description: localize('vscode-docker.tree.contextConfig.description.description', 'Any secondary properties to display.'),
                 settingInfo: this.descriptionSettingInfo
             }
-        ]
+        ];
     }
 
     public async createChildImpl(actionContext: ICreateChildImplContext): Promise<ContextTreeItem> {

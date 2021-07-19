@@ -4,13 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions } from 'vscode-azureextensionui';
 import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
+import { dockerExePath, DefaultDockerPath } from '../utils/dockerExePathProvider';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
+
+export type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
 
 // Exported only for tests
 export type CommandTemplate = {
@@ -55,7 +58,7 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
-            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`
+            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`;
         }, portsString);
     }
 
@@ -94,12 +97,19 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         composeCommand === 'up' ? 'composeUp' : 'composeDown',
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f \"${configurationFile}\"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
     );
 }
 
 // Exported only for tests
-export async function selectCommandTemplate(context: IActionContext, command: TemplateCommand, matchContext: string[], folder: vscode.WorkspaceFolder | undefined, additionalVariables: { [key: string]: string }): Promise<string> {
+export async function selectCommandTemplate(
+    actionContext: IActionContext,
+    command: TemplateCommand,
+    matchContext: string[],
+    folder: vscode.WorkspaceFolder | undefined,
+    additionalVariables: { [key: string]: string },
+    templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o) // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
+): Promise<string> {
     // Get the current context type
     const currentContextType = await ext.dockerContextManager.getCurrentContextType();
 
@@ -127,13 +137,13 @@ export async function selectCommandTemplate(context: IActionContext, command: Te
     const templateMatrix: CommandTemplate[][] = [];
 
     // 0. Settings-defined templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(settingsTemplates, matchContext, currentContextType));
+    templateMatrix.push(getConstrainedTemplates(actionContext, settingsTemplates, matchContext, currentContextType));
 
     // 1. Settings-defined templates with neither `match` nor `contextTypes`
     templateMatrix.push(getUnconstrainedTemplates(settingsTemplates));
 
     // 2. Hardcoded templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(hardcodedTemplates, matchContext, currentContextType));
+    templateMatrix.push(getConstrainedTemplates(actionContext, hardcodedTemplates, matchContext, currentContextType));
 
     // 3. Hardcoded templates with neither `match` nor `contextTypes`
     templateMatrix.push(getUnconstrainedTemplates(hardcodedTemplates));
@@ -148,7 +158,7 @@ export async function selectCommandTemplate(context: IActionContext, command: Te
 
         // Choose a template from the first non-empty group
         // If only one matches there will be no prompt
-        selectedTemplate = await quickPickTemplate(context, templates);
+        selectedTemplate = await quickPickTemplate(templates, templatePicker);
         break;
     }
 
@@ -156,15 +166,24 @@ export async function selectCommandTemplate(context: IActionContext, command: Te
         throw new Error(localize('vscode-docker.commands.selectCommandTemplate.noTemplate', 'No command template was found for command \'{0}\'', command));
     }
 
-    context.telemetry.properties.isDefaultCommand = hardcodedTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
-    context.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
-    context.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
-    context.telemetry.properties.currentContextType = currentContextType;
+    actionContext.telemetry.properties.isDefaultCommand = hardcodedTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
+    actionContext.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
+    actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
+    actionContext.telemetry.properties.currentContextType = currentContextType;
 
-    return resolveVariables(selectedTemplate.template, folder, additionalVariables);
+    let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
+
+    if (resolvedCommand.startsWith(DefaultDockerPath + ' ')) {
+        const dockerPath = dockerExePath(actionContext);
+        if (dockerPath !== DefaultDockerPath) {
+            resolvedCommand = dockerPath + resolvedCommand.substring(DefaultDockerPath.length);
+        }
+    }
+
+    return resolvedCommand;
 }
 
-async function quickPickTemplate(context: IActionContext, templates: CommandTemplate[]): Promise<CommandTemplate> {
+async function quickPickTemplate(templates: CommandTemplate[], templatePicker: TemplatePicker): Promise<CommandTemplate> {
     if (templates.length === 1) {
         // No need to prompt if only one remains
         return templates[0];
@@ -175,17 +194,17 @@ async function quickPickTemplate(context: IActionContext, templates: CommandTemp
             label: template.label,
             detail: template.template,
             data: template,
-        }
+        };
     });
 
-    const selection = await ext.ui.showQuickPick(items, {
+    const selection = await templatePicker(items, {
         placeHolder: localize('vscode-docker.commands.selectCommandTemplate.chooseTemplate', 'Choose a command template to execute')
     });
 
     return selection.data;
 }
 
-function getConstrainedTemplates(templates: CommandTemplate[], matchContext: string[], currentContextType: ContextType): CommandTemplate[] {
+function getConstrainedTemplates(actionContext: IActionContext, templates: CommandTemplate[], matchContext: string[], currentContextType: ContextType): CommandTemplate[] {
     return templates.filter(template => {
         if (!template.contextTypes && !template.match) {
             // If neither contextTypes nor match is defined, this is an unconstrained template
@@ -193,7 +212,7 @@ function getConstrainedTemplates(templates: CommandTemplate[], matchContext: str
         }
 
         return isContextTypeConstraintSatisfied(currentContextType, template.contextTypes) &&
-            isMatchConstraintSatisfied(matchContext, template.match);
+            isMatchConstraintSatisfied(actionContext, matchContext, template.match);
     });
 }
 
@@ -213,7 +232,7 @@ function isContextTypeConstraintSatisfied(currentContextType: ContextType, templ
     return templateContextTypes.some(tc => tc === currentContextType);
 }
 
-function isMatchConstraintSatisfied(matchContext: string[], match: string | undefined): boolean {
+function isMatchConstraintSatisfied(actionContext: IActionContext, matchContext: string[], match: string | undefined): boolean {
     if (!match) {
         // If match is undefined or empty, it is automatically satisfied
         return true;
@@ -224,7 +243,7 @@ function isMatchConstraintSatisfied(matchContext: string[], match: string | unde
         return matchContext.some(m => matcher.test(m));
     } catch {
         // Don't wait
-        void ext.ui.showWarningMessage(localize('vscode-docker.commands.selectCommandTemplate.invalidMatch', 'Invalid match expression \'{0}\'. This template will be skipped.', match));
+        void actionContext.ui.showWarningMessage(localize('vscode-docker.commands.selectCommandTemplate.invalidMatch', 'Invalid match expression \'{0}\'. This template will be skipped.', match));
     }
 
     return false;

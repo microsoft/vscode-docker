@@ -11,7 +11,7 @@ import { localize } from "./localize";
 import { httpRequest } from "./utils/httpRequest";
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
-    let tags: string[] = [];
+    const tags: string[] = [];
     if (image.is_automated) {
         tags.push('Automated');
     } else if (image.is_trusted) {
@@ -35,7 +35,8 @@ export function searchImageInRegistryHub(imageName: string, cache: boolean): Pro
     });
 }
 
-let popular = [
+/* eslint-disable @typescript-eslint/naming-convention */
+const popular = [
     { "is_automated": false, "name": "redis", "is_trusted": false, "is_official": true, "star_count": 1300, "description": localize('vscode-docker.dockerHubSearch.redis', 'Redis is an open source key-value store that functions as a data structure server.') },
     { "is_automated": false, "name": "ubuntu", "is_trusted": false, "is_official": true, "star_count": 2600, "description": localize('vscode-docker.dockerHubSearch.ubuntu', 'Ubuntu is a Debian-based Linux operating system based on free software.') },
     { "is_automated": false, "name": "wordpress", "is_trusted": false, "is_official": true, "star_count": 582, "description": localize('vscode-docker.dockerHubSearch.wordPress', 'The WordPress rich content management system can utilize plugins, widgets, and themes.') },
@@ -47,6 +48,7 @@ let popular = [
     { "is_automated": false, "name": "postgres", "is_trusted": false, "is_official": true, "star_count": 1200, "description": localize('vscode-docker.dockerHubSearch.postgres', 'The PostgreSQL object-relational database system provides reliability and data integrity.') },
     { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": localize('vscode-docker.dockerHubSearch.aspNet', 'ASP.NET is an open source server-side Web application framework') }
 ];
+/* eslint-enable @typescript-eslint/naming-convention */
 
 /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
 export function searchImagesInRegistryHub(prefix: string, cache: boolean): Promise<IHubSearchResponseResult[]> {
@@ -89,34 +91,33 @@ function invokeHubSearch(imageName: string, count: number, cache: boolean): Prom
     return fetchHttpsJson<IHubSearchResponse>(url.toString(), cache);
 }
 export interface IHubSearchResponse {
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     num_pages: number;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     num_results: number;
     results: [IHubSearchResponseResult];
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     page_size: number;
     query: string;
     page: number;
 }
 export interface IHubSearchResponseResult {
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     is_automated: boolean;
     name: string;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     is_trusted: boolean;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     is_official: boolean;
-    /* eslint-disable-next-line camelcase */
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     star_count: number;
     description: string;
 }
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-let JSON_CACHE: { [key: string]: any } = {};
+const JSON_CACHE: { [key: string]: unknown } = {};
 
 async function fetchHttpsJson<T>(url: string, cache: boolean): Promise<T> {
-    let cacheKey = url.toString();
+    const cacheKey = url.toString();
 
     if (!cache || !JSON_CACHE[cacheKey]) {
         JSON_CACHE[cacheKey] = await doFetchHttpsJson(url);
@@ -131,7 +132,7 @@ async function doFetchHttpsJson<T>(url: string): Promise<T> {
             Accept: 'application/json',
             'X-Meta-Source-Client': ociClientId,
         }
-    }
+    };
 
     const response = await httpRequest<T>(url.toString(), options);
     return response.json();

@@ -68,6 +68,7 @@ export class NodeTaskHelper implements TaskHelper {
                 dockerRun: {
                     env: {
                         "DEBUG": "*",
+                        // eslint-disable-next-line @typescript-eslint/naming-convention
                         "NODE_ENV": "development"
                     }
                 },

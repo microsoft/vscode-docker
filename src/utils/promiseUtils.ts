@@ -55,7 +55,7 @@ export class CancellationPromiseSource extends vscode.CancellationTokenSource {
 export class TimeoutPromiseSource implements vscode.Disposable {
     private timeoutTimer: NodeJS.Timeout | undefined;
     private readonly cps: CancellationPromiseSource;
-    private readonly emitter: vscode.EventEmitter<void>
+    private readonly emitter: vscode.EventEmitter<void>;
 
     public constructor(private readonly timeoutMs: number) {
         this.cps = new CancellationPromiseSource(Error, localize('vscode-docker.utils.promiseUtils.timeout', 'Request timed out.'));

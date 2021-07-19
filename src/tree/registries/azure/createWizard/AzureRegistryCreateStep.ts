@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from 'vscode';
-import { AzureWizardExecuteStep, createAzureClient } from 'vscode-azureextensionui';
+import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
 import { localize } from '../../../../localize';
 import { nonNullProp } from '../../../../utils/nonNull';
@@ -22,18 +22,29 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         ext.outputChannel.appendLine(creating);
         progress.report({ message: creating });
 
-        const location = nonNullProp(context, 'location');
+        const location: AzExtLocation = await LocationListStep.getLocation(context);
+        const locationName: string = nonNullProp(location, 'name');
         const resourceGroup = nonNullProp(context, 'resourceGroup');
-        context.registry = await client.registries.create(
-            nonNullProp(resourceGroup, 'name'),
-            newRegistryName,
-            {
-                sku: {
-                    name: nonNullProp(context, 'newRegistrySku')
-                },
-                location: nonNullProp(location, 'name')
+        try {
+            context.registry = await client.registries.create(
+                nonNullProp(resourceGroup, 'name'),
+                newRegistryName,
+                {
+                    sku: {
+                        name: nonNullProp(context, 'newRegistrySku')
+                    },
+                    location: locationName
+                }
+            );
+        }
+        catch (err) {
+            const parsedError = parseError(err);
+            if (parsedError.errorType === 'MissingSubscriptionRegistration') {
+                context.errorHandling.suppressReportIssue = true;
             }
-        );
+
+            throw err;
+        }
 
         const created = localize('vscode-docker.tree.registries.azure.createWizard.created', 'Successfully created registry "{0}".', newRegistryName);
         ext.outputChannel.appendLine(created);

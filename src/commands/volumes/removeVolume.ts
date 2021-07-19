@@ -27,9 +27,9 @@ export async function removeVolume(context: IActionContext, node?: VolumeTreeIte
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.volumes.remove.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.volumes.remove.remove', 'Remove') });
 
-    let removing: string = localize('vscode-docker.commands.volumes.remove.removing', 'Removing volume(s)...');
+    const removing: string = localize('vscode-docker.commands.volumes.remove.removing', 'Removing volume(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {
         await Promise.all(nodes.map(async n => await n.deleteTreeItem(context)));
     });

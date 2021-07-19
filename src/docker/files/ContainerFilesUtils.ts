@@ -324,7 +324,7 @@ async function statWindowsContainerDirectory(executor: DockerContainerExecutor, 
             mtime: Date.now(),
             size: 0,
             type: 'directory'
-        }
+        };
     }
 
     return undefined;
@@ -361,7 +361,7 @@ async function statWindowsContainerFile(executor: DockerContainerExecutor, itemP
             mtime: Date.now(),
             size: 0,
             type: 'file'
-        }
+        };
     }
 
     return undefined;

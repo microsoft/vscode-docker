@@ -26,7 +26,7 @@ export class SuggestSupportHelper {
                     detail: hub.tagsForImage(image) + stars,
                     insertText: image.name,
                     documentation: image.description,
-                }
+                };
             });
         });
     }
@@ -35,8 +35,8 @@ export class SuggestSupportHelper {
     public searchImageInRegistryHub(imageName: string): Promise<vscode.MarkedString[] | undefined> {
         return hub.searchImageInRegistryHub(imageName, true).then((result) => {
             if (result) {
-                let r: vscode.MarkedString[] = [];
-                let tags = hub.tagsForImage(result);
+                const r: vscode.MarkedString[] = [];
+                const tags = hub.tagsForImage(result);
 
                 // Name, tags and stars.
                 let nameString = '';
@@ -47,7 +47,7 @@ export class SuggestSupportHelper {
                 }
 
                 if (result.star_count) {
-                    let plural = (result.star_count > 1);
+                    const plural = (result.star_count > 1);
                     nameString += '**' + String(result.star_count) + (plural ? ' stars' : ' star') + '**';
                 }
 
@@ -58,25 +58,25 @@ export class SuggestSupportHelper {
 
                 return r;
             }
-        })
+        });
     }
 
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
-    public getImageNameHover(line: string, _parser: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
+    public getImageNameHover(line: string, prsr: parser.Parser, tokens: parser.IToken[], tokenIndex: number): Promise<vscode.MarkedString[]> {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        let originalValue = _parser.tokenValue(line, tokens[tokenIndex]);
+        const originalValue = prsr.tokenValue(line, tokens[tokenIndex]);
 
         let keyToken: string = null;
         tokenIndex--;
         while (tokenIndex >= 0) {
-            let type = tokens[tokenIndex].type;
+            const type = tokens[tokenIndex].type;
             if (type === parser.TokenType.String || type === parser.TokenType.Text) {
                 return;
             }
             if (type === parser.TokenType.Key) {
-                keyToken = _parser.tokenValue(line, tokens[tokenIndex]);
+                keyToken = prsr.tokenValue(line, tokens[tokenIndex]);
                 break;
             }
             tokenIndex--;
@@ -85,7 +85,7 @@ export class SuggestSupportHelper {
         if (!keyToken) {
             return;
         }
-        let keyName = _parser.keyNameFromKeyToken(keyToken);
+        const keyName = prsr.keyNameFromKeyToken(keyToken);
         if (keyName === 'image' || keyName === 'FROM') {
             let imageName: string;
 

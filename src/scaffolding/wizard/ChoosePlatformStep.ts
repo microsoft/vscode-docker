@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { IAzureQuickPickItem, IWizardOptions } from 'vscode-azureextensionui';
-import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
 import { ChoosePortsStep } from './ChoosePortsStep';
@@ -35,7 +34,7 @@ export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardCon
             return { label: p, data: p };
         });
 
-        const response = await ext.ui.showQuickPick(items, opt);
+        const response = await wizardContext.ui.showQuickPick(items, opt);
         wizardContext.platform = response.data;
     }
 

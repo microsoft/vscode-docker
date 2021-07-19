@@ -7,8 +7,8 @@ import * as path from 'path';
 import { window, workspace, WorkspaceFolder } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 
-const variableMatcher: RegExp = /\$\{[a-z\.\-_:]+\}/ig;
-const configVariableMatcher: RegExp = /\$\{config:([a-z\.\-_]+)\}/i;
+const variableMatcher: RegExp = /\$\{[a-z.\-_:]+\}/ig;
+const configVariableMatcher: RegExp = /\$\{config:([a-z.\-_]+)\}/i;
 
 export function resolveVariables<T>(target: T, folder?: WorkspaceFolder, additionalVariables?: { [key: string]: string }): T {
     if (!target) {
@@ -48,7 +48,7 @@ function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, addit
     }
 
     // Replace additional variables
-    const variableNameOnly = variable.replace(/[\$\{\}]/ig, '');
+    const variableNameOnly = variable.replace(/[${}]/ig, '');
     const replacement = additionalVariables?.[variable] ?? additionalVariables?.[variableNameOnly];
     if (replacement !== undefined) {
         return replacement;

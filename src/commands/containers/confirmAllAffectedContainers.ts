@@ -25,12 +25,12 @@ export async function confirmAllAffectedContainers(context: IActionContext, node
     });
 
     const groupsList = Array.from(groupsSet);
-    const groupsConfirm = groupsList.map(g => `\'${g}\'`).join(', ');
+    const groupsConfirm = groupsList.map(g => `'${g}'`).join(', ');
 
     const confirm = localize('vscode-docker.commands.containers.aciContainerActionWarning.confirm', 'ACI containers can only be started or stopped in a group. This action will apply to all containers in {0}. Do you want to proceed?', groupsConfirm);
 
     // No need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirm, { modal: true }, DialogResponses.yes);
+    await context.ui.showWarningMessage(confirm, { modal: true }, DialogResponses.yes);
 
     return groupsList;
 }

@@ -49,17 +49,17 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     }
 
     public static async hasRunsWithoutTask(registryTI: AzureRegistryTreeItem): Promise<boolean> {
-        let runListResult = await AzureTaskTreeItem.getTaskRuns(registryTI, AzureTaskTreeItem._noTaskFilter, undefined);
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(registryTI, AzureTaskTreeItem._noTaskFilter, undefined);
         return runListResult.length > 0;
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
-        let filter = this._task ? `TaskName eq '${this.taskName}'` : AzureTaskTreeItem._noTaskFilter;
-        let runListResult = await AzureTaskTreeItem.getTaskRuns(this.parent.parent, filter, this._nextLink);
+        const filter = this._task ? `TaskName eq '${this.taskName}'` : AzureTaskTreeItem._noTaskFilter;
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(this.parent.parent, filter, this._nextLink);
 
         this._nextLink = runListResult.nextLink;
 

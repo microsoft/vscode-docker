@@ -8,6 +8,7 @@ import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { execAsync } from '../../utils/spawnAsync';
 import { selectAttachCommand } from '../selectCommandTemplate';
@@ -46,7 +47,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
             // If so use it, otherwise use sh
             try {
                 // If this succeeds, bash is present (exit code 0)
-                await execAsync(`docker exec -i ${node.containerId} sh -c "which bash"`);
+                await execAsync(`${dockerExePath(context)} exec -i ${node.containerId} sh -c "which bash"`);
                 shellCommand = 'bash';
             } catch {
                 shellCommand = 'sh';

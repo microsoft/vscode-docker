@@ -17,7 +17,7 @@ export async function deleteAzureRegistry(context: IActionContext, node?: AzureR
 
     const confirmDelete: string = localize('vscode-docker.commands.registries.azure.deleteRegistry.confirm', 'Are you sure you want to delete registry "{0}" and its associated images?', node.registryName);
     // no need to check result - cancel will throw a UserCancelledError
-    await ext.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
+    await context.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
 
     const deleting = localize('vscode-docker.commands.registries.azure.deleteRegistry.deleting', 'Deleting registry "{0}"...', node.registryName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {

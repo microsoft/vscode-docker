@@ -11,7 +11,6 @@ export async function configureDockerContextsExplorer(context: IActionContext): 
     await ext.contextsRoot.configureExplorer(context);
 }
 
-export async function dockerContextsHelp(_context: IActionContext): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/helpicon_dockercontext'));
+export async function dockerContextsHelp(context: IActionContext): Promise<void> {
+    void vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/helpicon_dockercontext'));
 }

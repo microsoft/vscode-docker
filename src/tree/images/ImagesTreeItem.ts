@@ -58,7 +58,8 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     }
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
-        const result = await ext.dockerClient.getImages(context);
+        const includeDangling = ext.context.globalState.get('vscode-docker.images.showDanglingImages', false);
+        const result = await ext.dockerClient.getImages(context, includeDangling);
         this.outdatedImageChecker.markOutdatedImages(result);
         return result;
     }

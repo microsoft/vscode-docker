@@ -5,20 +5,19 @@
 
 import { InputBoxOptions } from 'vscode';
 import { AzureWizardPromptStep } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
 export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
     public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
-        let prompt: string = context.usernamePrompt || (context.isUsernameOptional ? localize('vscode-docker.tree.registries.connectWizard.enterUsernameOptional', 'Enter your username, or press \'Enter\' for none') : localize('vscode-docker.tree.registries.connectWizard.enterUsernameRequired', 'Enter your username'));
+        const prompt: string = context.usernamePrompt || (context.isUsernameOptional ? localize('vscode-docker.tree.registries.connectWizard.enterUsernameOptional', 'Enter your username, or press \'Enter\' for none') : localize('vscode-docker.tree.registries.connectWizard.enterUsernameRequired', 'Enter your username'));
         const options: InputBoxOptions = {
             prompt,
             placeHolder: context.usernamePlaceholder,
             validateInput: (value: string | undefined) => this.validateInput(context, value)
         };
 
-        context.username = await ext.ui.showInputBox(options);
+        context.username = await context.ui.showInputBox(options);
 
         if (!context.username) {
             context.includePassword = false;

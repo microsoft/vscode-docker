@@ -23,14 +23,17 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
     } else if (!/^en(-us)?$/i.test(vscode.env.language)) {
         // Don't show: this page is English only
         return;
-    } else if (!isHigherMinorVersion(extensionVersion.value, ext.context.globalState.get(lastVersionKey, '0.0.1'))) {
-        // Don't show: already showed during this major/minor
-        return;
+    } else {
+        const lastVersionShown = ext.context.globalState.get(lastVersionKey, '0.0.1');
+        if (!isHigherMinorVersion(extensionVersion.value, lastVersionShown)) {
+            // Don't show: already showed during this major/minor
+            return;
+        }
     }
 
     // Let's show!
     await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
-    void vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
+    await vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
 }
 
 // Exported just for unit tests

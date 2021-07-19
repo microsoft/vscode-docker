@@ -34,7 +34,7 @@ export interface DockerApiClient extends Disposable {
     stopContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void>;
     removeContainer(context: IActionContext, ref: string, token?: CancellationToken): Promise<void>;
 
-    getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]>;
+    getImages(context: IActionContext, includeDangling: boolean, token?: CancellationToken): Promise<DockerImage[]>;
     inspectImage(context: IActionContext, ref: string, token?: CancellationToken): Promise<DockerImageInspection>;
     pruneImages(context: IActionContext, token?: CancellationToken): Promise<PruneResult | undefined>;
     tagImage(context: IActionContext, ref: string, tag: string, token?: CancellationToken): Promise<void>;

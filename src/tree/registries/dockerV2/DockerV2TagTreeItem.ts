@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
-import { ext } from '../../../extensionVariables';
 import { registryRequest } from '../../../utils/registryRequestUtils';
 import { RemoteTagTreeItem } from '../RemoteTagTreeItem';
 
@@ -20,7 +19,8 @@ export class DockerV2TagTreeItem extends RemoteTagTreeItem {
 
         const url = `v2/${this.parent.repoName}/manifests/${this.tag}`;
         const response = await registryRequest(this.parent, 'GET', url, digestOptions);
-        return response.headers['docker-content-digest'] as string;
+        const digest = response.headers.get('docker-content-digest') as string;
+        return digest;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
@@ -34,7 +34,7 @@ export class DockerV2TagTreeItem extends RemoteTagTreeItem {
             if (errorType === '405' || errorType === 'unsupported') {
                 // Don't wait
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                ext.ui.showWarningMessage('Deleting remote images is not supported on this registry. It may need to be enabled.', { learnMoreLink: 'https://aka.ms/AA7jsql' });
+                context.ui.showWarningMessage('Deleting remote images is not supported on this registry. It may need to be enabled.', { learnMoreLink: 'https://aka.ms/AA7jsql' });
                 throw new UserCancelledError();
             } else {
                 throw error;

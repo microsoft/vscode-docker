@@ -19,10 +19,10 @@ import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
 import { DockerContext } from '../Contexts';
 import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
-import { DockerImage, DockerImageInspection } from '../Images';
+import { DockerImage, DockerImageInspection, ImageInspectionContainers } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
 import { DockerVersion } from '../Version';
-import { DockerVolume, DockerVolumeInspection } from '../Volumes';
+import { DockerVolume, DockerVolumeInspection, VolumeInspectionContainers } from '../Volumes';
 import { getContainerName, getFullTagFromDigest, refreshDockerode } from './DockerodeUtils';
 
 // 20 s timeout for all calls (enough time for any call, but short enough to be UX-reasonable)
@@ -53,7 +53,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                 Name: getContainerName(ci),
                 CreatedTime: ci.Created * 1000,
                 State: ci.State,
-            }
+            };
         });
     }
 
@@ -84,7 +84,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
             dockerCommand += `"${ref}" ${commandProvider('windows').join(' ')}`;
 
             // Copy the Docker environment settings in
-            let newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
+            const newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
             addDockerSettingsToEnv(newEnv, process.env);
 
             const { stdout, stderr } = await execStreamAsync(dockerCommand, { env: newEnv }, token);
@@ -105,8 +105,8 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             return new Promise<{ stdout: string, stderr: string }>(
                 (resolve, reject) => {
-                    const stdoutChunks = [];
-                    const stderrChunks = [];
+                    const stdoutChunks: Buffer[] = [];
+                    const stderrChunks: Buffer[] = [];
 
                     const stdout = new stream.PassThrough();
                     const stderr = new stream.PassThrough();
@@ -169,7 +169,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                         // This is the first entry, so extract its content...
                         //
 
-                        const chunks = [];
+                        const chunks: Buffer[] = [];
 
                         entryStream.on('data', chunk => {
                             chunks.push(chunk);
@@ -254,8 +254,12 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         return this.callWithErrorHandling(context, async () => container.remove({ force: true }), token);
     }
 
-    public async getImages(context: IActionContext, token?: CancellationToken): Promise<DockerImage[]> {
-        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: { "dangling": ["false"] } }), token);
+    public async getImages(context: IActionContext, includeDangling: boolean = false, token?: CancellationToken): Promise<DockerImage[]> {
+        const filters = {};
+        if (!includeDangling) {
+            filters['dangling'] = ["false"];
+        }
+        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: filters }), token);
         const result: DockerImage[] = [];
 
         for (const image of images) {
@@ -288,7 +292,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         // Sorely missing in the inspect result for an image is the containers using it, so we will add that in, in the same-ish shape as networks' inspect result
         const containersUsingImage = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'ancestor': [result.Id] }, all: true }));
 
-        const containersObject = {};
+        const containersObject: ImageInspectionContainers = {};
         for (const container of containersUsingImage) {
             containersObject[container.Id] = { Name: getContainerName(container) };
         }
@@ -329,7 +333,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                 ...ni,
                 Driver: ni.Driver as DriverType,
                 CreatedTime: new Date(ni.Created).valueOf(),
-            }
+            };
         });
     }
 
@@ -369,7 +373,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 CreatedTime: new Date((vi as any).CreatedAt).valueOf(),
                 Id: undefined, // Not defined for volumes
-            }
+            };
         });
     }
 
@@ -380,7 +384,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         // Sorely missing in the inspect result for a volume is the containers using it, so we will add that in, in the same-ish shape as networks' inspect result
         const containersUsingVolume = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listContainers({ filters: { 'volume': [ref] } }));
 
-        const containersObject = {};
+        const containersObject: VolumeInspectionContainers = {};
         for (const container of containersUsingVolume) {
             const destination = container.Mounts?.find(m => m.Name === volume.name)?.Destination;
             containersObject[container.Id] = { Name: getContainerName(container), Destination: destination || localize('vscode-docker.utils.dockerode.unknownDestination', '<Unknown>') };

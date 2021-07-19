@@ -18,8 +18,8 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
         node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
     }
 
-    let creds = await node.getDockerCliCredentials();
-    let auth: { username?: string, password?: string, token?: string } = creds.auth || {};
+    const creds = await node.getDockerCliCredentials();
+    const auth: { username?: string, password?: string, token?: string } = creds.auth || {};
     let username: string | undefined;
     let password: string | undefined;
     if (auth.token) {

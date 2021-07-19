@@ -13,7 +13,7 @@ services:
 {{#if ports}}
     ports:
 {{#each ports}}
-      - {{ . }}
+      - {{ . }}:{{ . }}
 {{/each}}
 {{/if}}
 {{#if ports}}

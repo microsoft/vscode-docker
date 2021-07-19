@@ -5,6 +5,7 @@
 
 import * as crypto from 'crypto';
 
+/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */
 export namespace cryptoUtils {
     export function getRandomHexString(length: number = 10): string {
         const buffer: Buffer = crypto.randomBytes(Math.ceil(length / 2));
@@ -15,3 +16,4 @@ export namespace cryptoUtils {
         return crypto.createHash('sha256').update(input, 'utf8').digest('hex');
     }
 }
+/* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */

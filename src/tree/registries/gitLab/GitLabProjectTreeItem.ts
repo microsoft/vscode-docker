@@ -39,13 +39,13 @@ export class GitLabProjectTreeItem extends RegistryTreeItemBase {
         return gitLabRegistryUrl + '/' + this.pathWithNamespace;
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
-        let url = this._nextLink || `api/v4/projects/${this.projectId}/registry/repositories?per_page=${PAGE_SIZE}`;
-        let response = await registryRequest<IRepository[]>(this, 'GET', url);
+        const url = this._nextLink || `api/v4/projects/${this.projectId}/registry/repositories?per_page=${PAGE_SIZE}`;
+        const response = await registryRequest<IRepository[]>(this, 'GET', url);
         this._nextLink = getNextLinkFromHeaders(response);
         return await this.createTreeItemsWithErrorHandling(
             response.body,

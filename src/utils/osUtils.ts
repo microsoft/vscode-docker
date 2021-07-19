@@ -35,6 +35,10 @@ export function isMac(): boolean {
     return os.platform() === 'darwin';
 }
 
+export function isArm64Mac(): boolean {
+    return isMac() && os.arch() === 'arm64';
+}
+
 export function isLinux(): boolean {
     return os.platform() !== 'win32' && os.platform() !== 'darwin';
 }

@@ -74,7 +74,7 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 
     const outputContents = (new xml2js.Builder()).buildObject(manifest);
 
-    await fse.writeFile(outputManifest, outputContents)
+    await fse.writeFile(outputManifest, outputContents);
 }
 
 function containerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {

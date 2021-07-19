@@ -27,7 +27,7 @@ export interface Survey {
 
 export class SurveyManager {
     public activate(): void {
-        if (!ext.telemetryOptIn || ext.runningTests) {
+        if (!vscode.env.isTelemetryEnabled) {
             return;
         }
 
@@ -78,7 +78,9 @@ export class SurveyManager {
                     }
                 });
             }
-        } catch { } // Best effort
+        } catch {
+            // Best effort
+        }
     }
 
     private async surveyOpen(url: string): Promise<void> {

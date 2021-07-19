@@ -11,32 +11,25 @@ import parser = require('../parser');
 import suggestHelper = require('../utils/suggestSupportHelper');
 
 export class DockerComposeHoverProvider implements HoverProvider {
-    public _parser: parser.Parser;
-    public _keyInfo: KeyInfo;
-
     // Provide the parser you want to use as well as keyinfo dictionary.
-    public constructor(wordParser: parser.Parser, keyInfo: KeyInfo) {
-        this._parser = wordParser;
-        this._keyInfo = keyInfo;
+    public constructor(public readonly parser: parser.Parser, public readonly keyInfo: KeyInfo) {
     }
 
     public provideHover(document: TextDocument, position: Position, token: CancellationToken): Thenable<Hover> {
-        let line = document.lineAt(position.line);
+        const line = document.lineAt(position.line);
 
         if (line.text.length === 0) {
             return Promise.resolve(null);
         }
 
-        let tokens = this._parser.parseLine(line);
-        return this._computeInfoForLineWithTokens(line.text, tokens, position);
+        const tokens = this.parser.parseLine(line);
+        return this.computeInfoForLineWithTokens(line.text, tokens, position);
     }
 
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
-    private _computeInfoForLineWithTokens(line: string, tokens: parser.IToken[], position: Position): Promise<Hover> {
-        let possibleTokens = this._parser.tokensAtColumn(tokens, position.character);
+    private computeInfoForLineWithTokens(line: string, tokens: parser.IToken[], position: Position): Promise<Hover> {
+        const possibleTokens = this.parser.tokensAtColumn(tokens, position.character);
 
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
-        return Promise.all(possibleTokens.map(tokenIndex => this._computeInfoForToken(line, tokens, tokenIndex))).then((results) => {
+        return Promise.all(possibleTokens.map(tokenIndex => this.computeInfoForToken(line, tokens, tokenIndex))).then((results) => {
             return possibleTokens.map((tokenIndex, arrayIndex) => {
                 return {
                     startIndex: tokens[tokenIndex].startIndex,
@@ -45,27 +38,26 @@ export class DockerComposeHoverProvider implements HoverProvider {
                 };
             });
         }).then((results) => {
-            let filteredResults = results.filter(r => !!r.result);
+            const filteredResults = results.filter(r => !!r.result);
             if (filteredResults.length === 0) {
                 return;
             }
 
-            let range = new Range(position.line, filteredResults[0].startIndex, position.line, filteredResults[0].endIndex);
+            const range = new Range(position.line, filteredResults[0].startIndex, position.line, filteredResults[0].endIndex);
 
-            let hover = new Hover(filteredResults[0].result, range);
+            const hover = new Hover(filteredResults[0].result, range);
 
             return hover;
 
         });
     }
 
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises, @typescript-eslint/promise-function-async */ // Grandfathered in
-    private _computeInfoForToken(line: string, tokens: parser.IToken[], tokenIndex: number): Promise<MarkedString[]> {
+    private computeInfoForToken(line: string, tokens: parser.IToken[], tokenIndex: number): Promise<MarkedString[]> {
         // -------------
         // Detect hovering on a key
         if (tokens[tokenIndex].type === parser.TokenType.Key) {
-            let keyName = this._parser.keyNameFromKeyToken(this._parser.tokenValue(line, tokens[tokenIndex])).trim();
-            let r = this._keyInfo[keyName];
+            const keyName = this.parser.keyNameFromKeyToken(this.parser.tokenValue(line, tokens[tokenIndex])).trim();
+            const r = this.keyInfo[keyName];
             if (r) {
                 return Promise.resolve([r]);
             }
@@ -74,8 +66,8 @@ export class DockerComposeHoverProvider implements HoverProvider {
         // -------------
         // Detect <<image: [["something"]]>>
         // Detect <<image: [[something]]>>
-        let helper = new suggestHelper.SuggestSupportHelper();
-        let r2 = helper.getImageNameHover(line, this._parser, tokens, tokenIndex);
+        const helper = new suggestHelper.SuggestSupportHelper();
+        const r2 = helper.getImageNameHover(line, this.parser, tokens, tokenIndex);
         if (r2) {
             return r2;
         }

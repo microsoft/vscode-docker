@@ -22,7 +22,7 @@ import { bufferToString } from "../../../../utils/spawnAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 
 const idPrecision = 6;
-const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn']
+const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
 export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<void> {
     // Acquire information.
@@ -35,7 +35,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         imageName = await quickPickImageName(context, rootFolder, fileItem);
     } else if (requestType === 'FileTaskRunRequest') {
         rootFolder = await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.registries.azure.tasks.yamlFolder', 'To run a task from a .yaml file you must first open a folder or workspace in VS Code.'));
-        fileItem = await quickPickYamlFileItem(uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
+        fileItem = await quickPickYamlFileItem(context, uri, rootFolder, localize('vscode-docker.commands.registries.azure.tasks.yamlYaml', 'To run a task from a .yaml file you must have yaml file in your VS Code workspace.'));
     } else {
         throw new Error(localize('vscode-docker.commands.registries.azure.tasks.runTypeUnsupported', 'Run Request Type Currently not supported.'));
     }
@@ -43,7 +43,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrModels.OS>>{ label: item, data: item });
-    const osType: AcrModels.OS = (await ext.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
+    const osType: AcrModels.OS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
 
     const tarFilePath: string = getTempSourceArchivePath();
 
@@ -69,7 +69,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             taskFilePath: fileItem.relativeFilePath,
             sourceLocation: uploadedSourceLocation,
             platform: { os: osType }
-        }
+        };
     }
 
     // Schedule the run and Clean up.
@@ -83,9 +83,9 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 }
 
 async function quickPickImageName(context: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
-    let absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
-    let dockerFileKey = `ACR_buildTag_${absFilePath}`;
-    let prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
+    const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
+    const dockerFileKey = `ACR_buildTag_${absFilePath}`;
+    const prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
     let suggestedImageName: string;
 
     if (!prevImageName) {
@@ -95,7 +95,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
             suggestedImageName = path.basename(rootFolder.uri.fsPath).toLowerCase().replace(/\s/g, '');
         }
 
-        suggestedImageName += ":{{.Run.ID}}"
+        suggestedImageName += ":{{.Run.ID}}";
     } else {
         suggestedImageName = prevImageName;
     }
@@ -104,7 +104,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     await delay(500);
 
     addImageTaggingTelemetry(context, suggestedImageName, '.before');
-    const imageName: string = await getTagFromUserInput(suggestedImageName);
+    const imageName: string = await getTagFromUserInput(context, suggestedImageName);
     addImageTaggingTelemetry(context, imageName, '.after');
 
     await ext.context.globalState.update(dockerFileKey, imageName);
@@ -113,16 +113,16 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
-    let source: string = rootFolder.uri.fsPath;
+    const source: string = rootFolder.uri.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any
     tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.gettingBuildSourceUploadUrl', '   Getting build source upload URL'));
-    let sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
-    let uploadUrl: string = sourceUploadLocation.uploadUrl;
-    let relativePath: string = sourceUploadLocation.relativePath;
+    const sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
+    const uploadUrl: string = sourceUploadLocation.uploadUrl;
+    const relativePath: string = sourceUploadLocation.relativePath;
 
     const storageBlob = await import('@azure/storage-blob');
     const blobClient = new storageBlob.BlockBlobClient(uploadUrl);

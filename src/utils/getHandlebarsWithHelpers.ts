@@ -88,7 +88,9 @@ export async function getHandlebarsWithHelpers(): Promise<typeof import('handleb
                     const clickableUri = `command:revealFileInOS?${encodeURIComponent(JSON.stringify(uri.toJSON()))}`;
                     return `[${hostPath}](${clickableUri})`;
                 }
-            } catch { }
+            } catch {
+                // Best effort
+            }
 
             // If we can't work out a clickable URI just return the path as-is
             return hostPath;

@@ -11,7 +11,7 @@ import { localize } from '../localize';
 import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
 import { executeAsTask } from '../utils/executeAsTask';
 import { streamToFile } from '../utils/httpRequest';
-import { getTempFileName, isLinux } from '../utils/osUtils';
+import { getTempFileName, isLinux, isArm64Mac } from '../utils/osUtils';
 import { execAsync } from '../utils/spawnAsync';
 
 export abstract class DockerInstallerBase {
@@ -57,7 +57,7 @@ export abstract class DockerInstallerBase {
         let proceedInstall = true;
         if (await dockerInstallStatusProvider.isDockerInstalledRealTimeCheck()) {
             const reinstallMessage = localize('vscode-docker.commands.DockerInstallerBase.reInstall', 'Docker Desktop is already installed. Would you like to reinstall?');
-            const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall')
+            const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall');
             const response = await vscode.window.showInformationMessage(reinstallMessage, ...[install]);
             proceedInstall = response !== undefined;
         }
@@ -102,7 +102,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
 }
 
 export class MacDockerInstaller extends DockerInstallerBase {
-    protected downloadUrl: string = 'https://aka.ms/download-docker-mac-vscode';
+    protected downloadUrl: string = isArm64Mac() ? 'https://aka.ms/download-docker-arm-mac-vscode' : 'https://aka.ms/download-docker-mac-vscode';
     protected fileExtension: string = 'dmg';
     protected getInstallCommand(fileName: string): string {
         return `chmod +x '${fileName}' && open '${fileName}'`;

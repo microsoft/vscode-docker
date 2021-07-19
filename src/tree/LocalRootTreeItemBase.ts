@@ -6,6 +6,7 @@
 import { ConfigurationChangeEvent, ConfigurationTarget, ThemeColor, ThemeIcon, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IParsedError, parseError, registerEvent } from "vscode-azureextensionui";
 import { showDockerInstallNotification } from "../commands/dockerInstaller";
+import { openStartPageAfterExtensionUpdate } from "../commands/startPage/openStartPage";
 import { configPrefix } from "../constants";
 import { DockerObject } from "../docker/Common";
 import { NotSupportedError } from "../docker/NotSupportedError";
@@ -39,7 +40,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
     public sortBySettingInfo: ITreeSettingInfo<CommonSortBy> = {
         properties: [...sortByProperties],
         defaultProperty: 'CreatedTime',
-    }
+    };
 
     public abstract treePrefix: string;
     public abstract configureExplorerTitle: string;
@@ -78,7 +79,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
 
     protected getRefreshInterval(): number {
         const configOptions: WorkspaceConfiguration = workspace.getConfiguration('docker');
-        return configOptions.get<number>('explorerRefreshInterval', 2000)
+        return configOptions.get<number>('explorerRefreshInterval', 2000);
     }
 
     public registerRefreshEvents(treeView: TreeView<AzExtTreeItem>): void {
@@ -89,7 +90,6 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
             context.telemetry.properties.isActivationEvent = 'true';
 
             if (e.visible) {
-
                 const refreshInterval: number = this.getRefreshInterval();
                 intervalId = setInterval(
                     async () => {
@@ -102,6 +102,8 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
                         }
                     },
                     refreshInterval);
+
+                void openStartPageAfterExtensionUpdate();
             } else {
                 clearInterval(intervalId);
             }
@@ -130,7 +132,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
         this._itemsFromPolling = undefined;
     }
 
-    public async loadMoreChildrenImpl(_clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         try {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             ext.activityMeasurementService.recordActivity('overallnoedit');
@@ -296,7 +298,7 @@ export abstract class LocalRootTreeItemBase<TItem extends DockerObject, TPropert
                 description: localize('vscode-docker.tree.config.sortBy.description', 'The property used for sorting.'),
                 settingInfo: this.sortBySettingInfo
             },
-        ]
+        ];
     }
 
     public async configureExplorer(context: IActionContext): Promise<void> {

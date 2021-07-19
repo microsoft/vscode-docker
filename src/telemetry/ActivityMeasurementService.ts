@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ext } from '../extensionVariables';
 import { AsyncLazy } from '../utils/lazy';
 
 export type ActivityType = 'overall' | 'overallnoedit';
@@ -39,7 +38,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
-        if (!ext.telemetryOptIn) {
+        if (!vscode.env.isTelemetryEnabled) {
             return;
         }
 
@@ -75,7 +74,9 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
             if (type !== 'overall') {
                 await this.recordActivity('overall');
             }
-        } catch { } // Best effort only
+        } catch {
+            // Best effort
+        }
     }
 
     /**
@@ -84,7 +85,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to get measurements for
      */
     public getActivityMeasurement(type: ActivityType): ActivityMeasurement {
-        if (!ext.telemetryOptIn) {
+        if (!vscode.env.isTelemetryEnabled) {
             return defaultMeasurement;
         }
 

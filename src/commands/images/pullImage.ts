@@ -7,6 +7,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
@@ -26,13 +27,13 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         if (/:<none>/i.test(n.fullTag)) {
             // Warn only once
             if (!noneTagWarningShown) {
-                void ext.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
+                void context.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
                 noneTagWarningShown = true;
             }
 
             continue;
         }
 
-        await executeAsTask(context, `docker pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
+        await executeAsTask(context, `${dockerExePath(context)} pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }

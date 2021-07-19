@@ -40,7 +40,7 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
             return [
                 '--host', '0.0.0.0',
                 '--port', `${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
-            ]
+            ];
         case 'flask':
             return [
                 'run',
@@ -48,7 +48,7 @@ export function inferPythonArgs(projectType: PythonProjectType, ports: number[])
                 '--no-reload',
                 '--host', '0.0.0.0',
                 '--port', `${ports !== undefined ? ports[0] : PythonDefaultPorts.get(projectType)}`,
-            ]
+            ];
         default:
             return undefined;
     }

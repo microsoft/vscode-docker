@@ -22,6 +22,7 @@ class BasicOAuthProvider implements IAuthProvider {
 
         const options: RequestInit = {
             form: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'grant_type': 'password',
                 'service': authContext.service,
                 'scope': authContext.scope

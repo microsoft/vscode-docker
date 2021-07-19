@@ -68,7 +68,7 @@ export async function spawnAsync(
 
                 error.code = code;
                 error.signal = signal;
-                error.stdErrHandled = onStderr != null;
+                error.stdErrHandled = onStderr !== null;
 
                 return reject(error);
             }
@@ -136,7 +136,7 @@ export async function spawnStreamAsync(
 
         const process = cp.spawn(command, options);
 
-        const errorChunks = [];
+        const errorChunks: Buffer[] = [];
 
         process.on('error', (err) => {
             if (cancellationListener) {
@@ -179,7 +179,7 @@ export async function spawnStreamAsync(
         }
 
         if (onStdout) {
-            process.stdout.on('data', (chunk: Buffer | string) => {
+            process.stdout.on('data', (chunk: Buffer) => {
                 if (onStdout) {
                     onStdout(chunk);
                 }
@@ -187,7 +187,7 @@ export async function spawnStreamAsync(
         }
 
         if (onStderr) {
-            process.stderr.on('data', (chunk: Buffer | string) => {
+            process.stderr.on('data', (chunk: Buffer) => {
                 errorChunks.push(chunk);
 
                 if (onStderr) {
@@ -213,7 +213,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
     return {
         stdout: bufferToString(stdoutBuffer),
         stderr: bufferToString(stderrBuffer),
-    }
+    };
 }
 
 /**
@@ -223,20 +223,20 @@ export async function execStreamAsync(
     command: string,
     options?: cp.ExecOptions & { stdin?: string },
     token?: CancellationToken): Promise<{ stdout: string, stderr: string }> {
-    const stdoutChunks = [];
-    const stderrChunks = [];
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
 
     await spawnStreamAsync(
         command,
         options as cp.CommonOptions,
-        chunk => stdoutChunks.push(chunk),
-        chunk => stderrChunks.push(chunk),
+        chunk => stdoutChunks.push(chunk as Buffer),
+        chunk => stderrChunks.push(chunk as Buffer),
         token);
 
     return {
         stdout: bufferToString(Buffer.concat(stdoutChunks)),
         stderr: bufferToString(Buffer.concat(stderrChunks)),
-    }
+    };
 }
 
 export function bufferToString(buffer: Buffer): string {

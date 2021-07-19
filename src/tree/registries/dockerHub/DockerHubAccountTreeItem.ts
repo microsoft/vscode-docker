@@ -46,7 +46,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         return await getRegistryPassword(this.cachedProvider);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
 
@@ -59,7 +59,7 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         }
 
         const url: string = this._nextLink ? this._nextLink : `v2/repositories/namespaces?page_size=${PAGE_SIZE}`;
-        let response = await registryRequest<INamespaces>(this, 'GET', url);
+        const response = await registryRequest<INamespaces>(this, 'GET', url);
         this._nextLink = response.body.next;
         return this.createTreeItemsWithErrorHandling(
             response.body.namespaces,

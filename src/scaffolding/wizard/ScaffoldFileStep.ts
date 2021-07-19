@@ -144,7 +144,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
             title: localize('vscode-docker.scaffold.scaffoldFileStep.overwriteAll', 'Overwrite All')
         };
 
-        const response = await ext.ui.showWarningMessage(prompt, overwriteAll, overwrite, DialogResponses.cancel);
+        const response = await wizardContext.ui.showWarningMessage(prompt, overwriteAll, overwrite, DialogResponses.cancel);
 
         // Throw if the response is Cancel (Escape / X will throw above)
         if (response === DialogResponses.cancel) {

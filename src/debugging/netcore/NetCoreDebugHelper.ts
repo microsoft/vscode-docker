@@ -14,7 +14,7 @@ import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCo
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
-import { getDockerOSType } from '../../utils/osUtils';
+import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -22,7 +22,7 @@ import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { installDebuggerIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
+import { installDebuggersIfNecessary, vsDbgInstallBasePath, VsDbgType } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -40,7 +40,7 @@ export interface NetCoreDebugScaffoldingOptions {
 export class NetCoreDebugHelper implements DebugHelper {
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
-        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context.folder); // This method internally checks the user-defined input first
+        options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
 
         return [
             {
@@ -68,7 +68,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async resolveLaunchDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
         debugConfiguration.netCore = debugConfiguration.netCore || {};
-        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context.folder, debugConfiguration.netCore); // This method internally checks the user-defined input first
+        debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
         const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
@@ -84,7 +84,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         if (configureSsl) {
-            await this.configureSsl(debugConfiguration, appOutput);
+            await this.configureSsl(context.actionContext, debugConfiguration, appOutput);
             if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
                 // configureSsl is slow, give a chance to cancel
                 return undefined;
@@ -194,7 +194,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask?.dockerRun?.os || 'Linux',
-        }
+        };
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
@@ -204,10 +204,31 @@ export class NetCoreDebugHelper implements DebugHelper {
                 title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring .NET Debugger...'),
             }, async () => {
                 if (platformOS === 'Windows') {
-                    await installDebuggerIfNecessary('win7-x64', 'latest');
+                    await installDebuggersIfNecessary([{ runtime: 'win7-x64', version: 'latest' }]);
                 } else {
-                    await installDebuggerIfNecessary('linux-x64', 'latest');
-                    await installDebuggerIfNecessary('linux-musl-x64', 'latest');
+                    const debuggers: VsDbgType[] = [
+                        { runtime: 'linux-x64', version: 'latest' },
+                        { runtime: 'linux-musl-x64', version: 'latest' },
+                    ];
+
+                    //
+                    // NOTE: As OmniSharp doesn't yet support arm64 in general, we only install arm64 debuggers when
+                    //       on an arm64 Mac (e.g. M1), even though there may be other platforms that could theoretically
+                    //       run arm64 images. We are often asked to install the debugger before images are created or
+                    //       pulled, which means we don't know a-priori the architecture of the image, so we install all
+                    //       of them, just in case. Because we do not have a good way to distinguish between a Mac attached
+                    //       to its local (Linux-based) Docker host (where arm64/amd64 are valid) or a Mac attached to a
+                    //       remote (Linux-based) Docker host (where arm64 may *not* be valid), installing every debugger
+                    //       is really our only choice.
+                    //
+
+                    if (isArm64Mac()) {
+                        debuggers.push(
+                            { runtime: 'linux-arm64', version: 'latest' },
+                            { runtime: 'linux-musl-arm64', version: 'latest' });
+                    }
+
+                    await installDebuggersIfNecessary(debuggers);
                 }
             }
         );
@@ -218,10 +239,10 @@ export class NetCoreDebugHelper implements DebugHelper {
         await fse.chmod(destPath, 0o755); // Give all read and execute permissions
     }
 
-    private async configureSsl(debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
+    private async configureSsl(context: IActionContext, debugConfiguration: DockerDebugConfiguration, appOutput: string): Promise<void> {
         const appOutputName = path.parse(appOutput).name;
         const certificateExportPath = path.join(getHostSecretsFolders().hostCertificateFolder, `${appOutputName}.pfx`);
-        await trustCertificateIfNecessary();
+        await trustCertificateIfNecessary(context);
         await exportCertificateIfNecessary(debugConfiguration.netCore.appProject, certificateExportPath);
     }
 
@@ -291,7 +312,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             .withQuotedArg(containerOS === 'windows' ? `IF EXIST "${debuggerPath}" (echo true) else (echo false)` : `if [ -f ${debuggerPath} ]; then echo true; fi;`)
             .build();
 
-        const { stdout } = await execAsync(command)
+        const { stdout } = await execAsync(command);
 
         return /true/ig.test(stdout);
     }

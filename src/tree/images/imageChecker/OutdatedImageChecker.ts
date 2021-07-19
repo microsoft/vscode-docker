@@ -116,6 +116,6 @@ export class OutdatedImageChecker {
             return request;
         });
 
-        return manifestResponse.headers['docker-content-digest'];
+        return manifestResponse.headers.get('docker-content-digest') as string;
     }
 }

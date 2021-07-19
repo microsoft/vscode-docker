@@ -20,6 +20,7 @@ const minCSharpVersionString = '1.23.9';
 const aspNetBaseImage = 'mcr.microsoft.com/dotnet/aspnet';
 const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
 const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
+const linuxTagSuffix = '-focal';
 
 const cSharpExtensionId = 'ms-dotnettools.csharp';
 const cSharpConfigId = 'csharp';
@@ -48,7 +49,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         if (!wizardContext.netCoreRuntimeBaseImage || !wizardContext.netCoreSdkBaseImage) {
             this.targetFramework = projectInfo[1]; // Line 2 is the <TargetFramework> value, or first item from <TargetFrameworks>
 
-            const regexMatch = /net(coreapp)?([\d\.]+)/i.exec(this.targetFramework);
+            const regexMatch = /net(coreapp)?([\d.]+)/i.exec(this.targetFramework);
 
             if (!regexMatch || regexMatch.length < 3) {
                 throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noNetCoreVersion', 'Unable to determine .NET target framework version for \'{0}\'', wizardContext.artifact));
@@ -58,9 +59,9 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
 
             // semver.coerce tolerates version strings like "5.0" which is typically what is present in the .NET project file
             const netCoreVersion = semver.coerce(netCoreVersionString);
-
-            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
-            wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
+            const tagSuffix = wizardContext.netCorePlatformOS === "Linux" ? linuxTagSuffix : '';
+            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}`;
+            wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}${tagSuffix}`;
         }
 
         if (!wizardContext.serviceName) {
@@ -131,16 +132,15 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
     }
 
     private async getMinimumCSharpExtensionExports(): Promise<CSharpExtensionExports> {
-        const minCSharpVersion = new semver.SemVer(minCSharpVersionString);
         const cSharpExtension: vscode.Extension<CSharpExtensionExports> | undefined = vscode.extensions.getExtension(cSharpExtensionId);
         const cSharpExtensionVersion: semver.SemVer | undefined = cSharpExtension ? new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) : undefined;
 
         if (!cSharpExtension || !cSharpExtensionVersion) {
             throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
-        } else if (cSharpExtensionVersion < minCSharpVersion) {
+        } else if (semver.lt(cSharpExtensionVersion, minCSharpVersionString)) {
             throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version {0} or higher of the C# extension is installed.', minCSharpVersionString));
         }
 
-        return cSharpExtension.isActive ? await cSharpExtension.activate() : cSharpExtension.exports;
+        return await cSharpExtension.activate();
     }
 }

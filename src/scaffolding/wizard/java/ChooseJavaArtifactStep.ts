@@ -20,6 +20,8 @@ export class ChooseJavaArtifactStep extends ChooseArtifactStep<ScaffoldingWizard
         // Java's behavior is to look for a POM or Gradle file, but if none is present no error is thrown
         try {
             await super.prompt(wizardContext);
-        } catch { } // Not a problem
+        } catch {
+            // Not a problem
+        }
     }
 }

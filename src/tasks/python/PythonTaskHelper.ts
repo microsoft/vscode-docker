@@ -62,9 +62,10 @@ export class PythonTaskHelper implements TaskHelper {
         if (options.projectType === 'flask') {
             dockerRunOptions = {
                 env: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
                     "FLASK_APP": runOptions.file || runOptions.module
                 }
-            }
+            };
             runOptions.module = 'flask';
             runOptions.file = undefined;
         } else if (options.projectType === 'fastapi') {

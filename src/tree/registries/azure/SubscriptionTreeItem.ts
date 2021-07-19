@@ -27,14 +27,14 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         super(parent, root);
     }
 
-    public async loadMoreChildrenImpl(clearCache: boolean, _context: IActionContext): Promise<AzExtTreeItem[]> {
+    public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this._nextLink = undefined;
         }
 
         const armContainerRegistry = await import('@azure/arm-containerregistry');
         const client: ContainerRegistryManagementClient = createAzureClient(this.root, armContainerRegistry.ContainerRegistryManagementClient);
-        let registryListResult: AcrModels.RegistryListResult = this._nextLink === undefined ?
+        const registryListResult: AcrModels.RegistryListResult = this._nextLink === undefined ?
             await client.registries.list() :
             await client.registries.listNext(this._nextLink);
 

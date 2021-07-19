@@ -8,7 +8,17 @@ import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
 
-export async function httpRequest<T>(url: string, options?: RequestOptionsLike, signRequest?: (request: RequestLike) => Promise<RequestLike>): Promise<HttpResponse<T>> {
+export const enum ErrorHandling {
+    ThrowOnError,
+    ReturnErrorResponse
+}
+
+export async function httpRequest<T>(
+    url: string,
+    options?: RequestOptionsLike,
+    signRequest?: (request: RequestLike) => Promise<RequestLike>,
+    errorHandling: ErrorHandling = ErrorHandling.ThrowOnError
+): Promise<HttpResponse<T>> {
     const requestOptions: RequestInit = options;
     if (options.form) {
         // URLSearchParams is a silly way to say "it's form data"
@@ -23,18 +33,43 @@ export async function httpRequest<T>(url: string, options?: RequestOptionsLike, 
 
     const response = await fetch(request);
 
-    if (response.status >= 200 && response.status < 300) {
-        return new HttpResponse(response);
+    if (errorHandling === ErrorHandling.ReturnErrorResponse || response.ok) {
+        return new HttpResponse(response, url);
     } else {
         throw new HttpErrorResponse(response);
     }
 }
 
-export class HttpResponse<T> {
+export class HttpResponse<T> implements ResponseLike {
     private bodyPromise: Promise<T> | undefined;
     private normalizedHeaders: { [key: string]: string } | undefined;
+    public readonly headers: HeadersLike;
+    public readonly status: number;
+    public readonly statusText: string;
+    public readonly ok: boolean;
 
-    public constructor(private readonly innerResponse: Response) { }
+    public constructor(private readonly innerResponse: Response, public readonly url: string) {
+        // Unfortunately Typescript will not consider a getter accessor when checking whether a class implements an interface.
+        // So we are forced to use readonly members to implement ResponseLike interface.
+
+        this.headers = {
+            get: (key: string) => {
+                if (!this.normalizedHeaders) {
+                    this.normalizedHeaders = {};
+                    for (const key of this.innerResponse.headers.keys()) {
+                        this.normalizedHeaders[key] = this.innerResponse.headers.get(key);
+                    }
+                }
+
+                return this.normalizedHeaders[key];
+            },
+            set: (key: string, value: string) => { this.innerResponse.headers.set(key, value); }
+        };
+
+        this.status = this.innerResponse.status;
+        this.statusText = this.innerResponse.statusText;
+        this.ok = this.innerResponse.ok;
+    }
 
     public async json(): Promise<T> {
         if (!this.bodyPromise) {
@@ -43,17 +78,6 @@ export class HttpResponse<T> {
         }
 
         return this.bodyPromise;
-    }
-
-    public get headers(): { [key: string]: string } {
-        if (!this.normalizedHeaders) {
-            this.normalizedHeaders = {};
-            for (const key of this.innerResponse.headers.keys()) {
-                this.normalizedHeaders[key] = this.innerResponse.headers.get(key);
-            }
-        }
-
-        return this.normalizedHeaders;
     }
 }
 
@@ -69,6 +93,12 @@ export class HttpErrorResponse extends Error {
 }
 
 type RequestMethod = 'HEAD' | 'GET' | 'POST' | 'DELETE' | 'PUT' | 'PATCH';
+
+// Contains only status codes that we handle explicitly in the extension code
+export const enum HttpStatusCode {
+    Unauthorized = 401,
+    NotFound = 404
+}
 
 export interface RequestOptionsLike {
     headers?: { [key: string]: string };
@@ -92,6 +122,7 @@ export interface ResponseLike {
     url: string;
     status: number;
     statusText: string;
+    ok: boolean;
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
@@ -126,12 +157,12 @@ export interface IOAuthContext {
     scope?: string,
 }
 
-const realmRegExp = /realm=\"([^"]+)\"/i;
-const serviceRegExp = /service=\"([^"]+)\"/i;
-const scopeRegExp = /scope=\"([^"]+)\"/i;
+const realmRegExp = /realm="([^"]+)"/i;
+const serviceRegExp = /service="([^"]+)"/i;
+const scopeRegExp = /scope="([^"]+)"/i;
 
 export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthContext | undefined {
-    if (error.response?.status === 401) {
+    if (error.response?.status === HttpStatusCode.Unauthorized) {
         const wwwAuthHeader: string | undefined = error.response?.headers?.get('www-authenticate') as string;
 
         const realmMatch = wwwAuthHeader?.match(realmRegExp);
@@ -148,7 +179,7 @@ export function getWwwAuthenticateContext(error: HttpErrorResponse): IOAuthConte
             realm: realmUrl,
             service: serviceMatch[1],
             scope: scopeMatch?.[1],
-        }
+        };
     }
 
     return undefined;
