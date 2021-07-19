@@ -72,13 +72,12 @@ export function refreshDockerode(currentContext: DockerContext): Dockerode {
         // Don't wait
         void validateSshAuthSock(newEnv.SSH_AUTH_SOCK).then((result) => {
             if (!result) {
-                // Don't wait
                 // Normally we'd prefer IActionContext.ui.showWarningMessage but this occurs outside of any action, so no context.ui is available.
-
                 const learnMore: MessageItem = {
                     title: localize('vscode-docker.utils.dockerode.sshAgentLearnMore', 'Learn More'),
                 };
 
+                // Don't wait
                 void window.showWarningMessage(localize('vscode-docker.utils.dockerode.sshAgent', 'In order to use an SSH DOCKER_HOST, you must configure an ssh-agent.'), learnMore).then((result) => {
                     if (result === learnMore) {
                         void env.openExternal(Uri.parse('https://aka.ms/AA7assy'));
