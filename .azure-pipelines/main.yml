@@ -14,7 +14,6 @@ jobs:
   steps:
   - template: common/setup.yml
   - template: common/governance.yml   # Force governance before test to avoid false-positives.
-  - template: common/build.yml
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
 
 - job: macOS

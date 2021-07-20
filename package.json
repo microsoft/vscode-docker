@@ -2729,15 +2729,15 @@
         "virtualWorkspaces": false
     },
     "scripts": {
-        "vscode:prepublish": "npm run package",
-        "compile": "webpack",
         "watch": "webpack --watch",
-        "package": "webpack --mode production --devtool hidden-source-map",
-        "test-compile": "tsc -p ./",
-        "test-watch": "tsc -watch -p ./",
-        "pretest": "npm run test-compile && npm run lint",
+        "build": "webpack --mode production --devtool hidden-source-map",
+        "ci-build": "npm test",
+        "package": "npm run build && vsce package",
+        "ci-package": "npm test && vsce package",
         "lint": "eslint src --ext ts",
-        "test": "node ./out/test/runTest.js"
+        "test": "node ./out/test/runTest.js",
+        "pretest": "tsc -p ./ && npm run lint && npm run build",
+        "test-watch": "tsc -watch -p ./"
     },
     "extensionDependencies": [
         "vscode.docker",
