@@ -19,7 +19,7 @@ async function main(): Promise<void> {
     const extensionTestsPath = path.resolve(__dirname, './index');
 
     // The workspace
-    const testWorkspacePath = path.resolve(__dirname, '../../test/test.code-workspace');
+    const testWorkspacePath = path.resolve(__dirname, '../../src/test/test.code-workspace');
 
     const options: TestOptions = {
         extensionDevelopmentPath,
@@ -27,6 +27,7 @@ async function main(): Promise<void> {
         launchArgs: [testWorkspacePath, '--install-extension', 'ms-vscode.azure-account'],
         extensionTestsEnv: {
             DEBUGTELEMETRY: '1',
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             MOCHA_grep: process.env.MOCHA_grep,
         },
     };
@@ -42,4 +43,5 @@ async function main(): Promise<void> {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
 main();

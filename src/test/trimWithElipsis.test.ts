@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { trimWithElipsis } from "../extension.bundle";
+import { trimWithElipsis } from '../utils/trimWithElipsis';
 import * as assert from 'assert';
 
 suite('(unit) trimWithElipsis', () => {
     function genTest(s: string, max: number, expected: string): void {
         test(`${String(s)}: ${max}`, () => {
-            let s2 = trimWithElipsis(s, max);
+            const s2 = trimWithElipsis(s, max);
             assert.equal(s2, expected);
         });
     }
