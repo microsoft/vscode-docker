@@ -21,6 +21,7 @@
             "preLaunchTask": "${defaultBuildTask}"
         },
         {
+            // TODO: Running this requires running the webpack build manually first (background tasks can't be used as dependsOn at this time, https://github.com/microsoft/vscode/issues/70283)
             "name": "Extension Tests",
             "type": "extensionHost",
             "request": "launch",
