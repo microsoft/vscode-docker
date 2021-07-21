@@ -25,8 +25,8 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
-        new ScaffoldFileStep('.dockerignore', 100),
-        new ScaffoldFileStep('Dockerfile', 200),
+        new ScaffoldFileStep('.dockerignore', 'ask', 100),
+        new ScaffoldFileStep('Dockerfile', 'ask', 200),
         new OpenStartPageStep(1000),
         new OpenDockerfileStep(),
     ];
@@ -40,8 +40,8 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     await wizard.prompt();
 
     if (wizardContext.scaffoldCompose) {
-        executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 300));
-        executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 400));
+        executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 'ask', 300));
+        executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 'ask', 400));
     }
 
     await wizard.execute();

@@ -25,8 +25,8 @@ export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardCo
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
-        new ScaffoldFileStep('docker-compose.yml', 300),
-        new ScaffoldFileStep('docker-compose.debug.yml', 400),
+        new ScaffoldFileStep('docker-compose.yml', 'ask', 300),
+        new ScaffoldFileStep('docker-compose.debug.yml', 'ask', 400),
         new OpenStartPageStep(1000)
     ];
 
