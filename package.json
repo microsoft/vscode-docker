@@ -2769,7 +2769,24 @@
         "virtualWorkspaces": false,
         "untrustedWorkspaces": {
             "supported": "limited",
-            "description": "%vscode-docker.workspaceTrust.description%"
+            "description": "%vscode-docker.workspaceTrust.description%",
+            "restrictedConfigurations": [
+                "docker.commands.build",
+                "docker.commands.run",
+                "docker.commands.runInteractive",
+                "docker.commands.attach",
+                "docker.commands.logs",
+                "docker.commands.composeUp",
+                "docker.commands.composeDown",
+                "docker.dockerodeOptions",
+                "docker.host",
+                "docker.context",
+                "docker.certPath",
+                "docker.tlsVerify",
+                "docker.machineName",
+                "docker.scaffolding.templatePath",
+                "docker.dockerPath"
+            ]
         }
     },
     "scripts": {
