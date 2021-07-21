@@ -2723,10 +2723,14 @@
         }
     },
     "engines": {
-        "vscode": "^1.55.0"
+        "vscode": "^1.56.0"
     },
     "capabilities": {
-        "virtualWorkspaces": false
+        "virtualWorkspaces": false,
+        "untrustedWorkspaces": {
+            "supported": "limited",
+            "description": "%vscode-docker.workspaceTrust.description%"
+        }
     },
     "scripts": {
         "watch": "webpack --watch",
@@ -2753,7 +2757,7 @@
         "@types/semver": "^7.3.4",
         "@types/tar-stream": "^2.2.0",
         "@types/uuid": "^8.3.0",
-        "@types/vscode": "1.55.0",
+        "@types/vscode": "1.56.0",
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.28.4",
         "@typescript-eslint/parser": "^4.28.4",
