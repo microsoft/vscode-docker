@@ -65,6 +65,7 @@
     "vscode-docker.tasks.docker-run.dockerRun.env": "Environment variables applied to the Docker container used for debugging.",
     "vscode-docker.tasks.docker-run.dockerRun.envFiles": "Files of environment variables read in and applied to the Docker container used for debugging.",
     "vscode-docker.tasks.docker-run.dockerRun.image": "The image to run.",
+    "vscode-docker.tasks.docker-run.dockerRun.interactive": "Whether to run the image interactively.",
     "vscode-docker.tasks.docker-run.dockerRun.labels.description": "Labels applied to the Docker container used for debugging.",
     "vscode-docker.tasks.docker-run.dockerRun.labels.includeDefaults": "Whether to include the default set of labels defined by the Docker extension",
     "vscode-docker.tasks.docker-run.dockerRun.network": "The network to which the container will be connected.",

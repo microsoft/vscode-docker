@@ -1049,6 +1049,10 @@
                                 "type": "string",
                                 "description": "%vscode-docker.tasks.docker-run.dockerRun.image%"
                             },
+                            "interactive": {
+                                "type": "boolean",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.interactive%"
+                            },
                             "labels": {
                                 "type": "object",
                                 "description": "%vscode-docker.tasks.docker-run.dockerRun.labels.description%",

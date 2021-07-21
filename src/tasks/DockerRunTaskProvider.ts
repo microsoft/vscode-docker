@@ -82,7 +82,9 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
-            .create('docker', 'run', '-dt')
+            .create('docker', 'run')
+            .withFlagArg('-dt', !runOptions.interactive)
+            .withFlagArg('-it', runOptions.interactive)
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)
             .withNamedArg('--network', runOptions.network)
