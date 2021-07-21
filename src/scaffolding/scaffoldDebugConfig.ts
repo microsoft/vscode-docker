@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, AzureWizardPromptStep } from 'vscode-azureextensionui';
+import * as vscode from 'vscode';
+import { AzureWizard, AzureWizardPromptStep, UserCancelledError } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { copyWizardContext } from './copyWizardContext';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
@@ -11,6 +12,10 @@ import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
 export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserCancelledError('enforceTrust');
+    }
+
     copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'debugging';
 
