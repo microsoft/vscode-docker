@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from 'vscode-azureextensionui';
 import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -105,6 +105,11 @@ export async function selectCommandTemplate(
     const commandSettings = getCommandSettings();
     const userTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.workspaceFolderValue ?? commandSettings.workspaceValue ?? commandSettings.globalValue);
     const defaultTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.defaultValue);
+
+    // Defense-in-depth: Reject if the workspace is untrusted but user templates from a workspace or workspace folder showed up somehow
+    if (!vscode.workspace.isTrusted && (commandSettings.workspaceFolderValue || commandSettings.workspaceValue)) {
+        throw new UserCancelledError('enforceTrust');
+    }
 
     // Build the template selection matrix. Settings-defined values are preferred over default, and constrained over unconstrained.
     // Constrained templates have either `match` or `contextTypes`, and must match the constraints.
