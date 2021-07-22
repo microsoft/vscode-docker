@@ -13,6 +13,8 @@ import { dockerExePath, DefaultDockerPath } from '../utils/dockerExePathProvider
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
+type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
+
 interface CommandSettings {
     defaultValue?: CommandTemplate[] | string,
     globalValue?: CommandTemplate[] | string,
@@ -21,13 +23,12 @@ interface CommandSettings {
 }
 
 // Exported only for tests
-export type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
-export type CommandTemplate = {
+export interface CommandTemplate {
     template: string,
     label: string,
     match?: string,
     contextTypes?: ContextType[],
-};
+}
 
 export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
     return await selectCommandTemplate(

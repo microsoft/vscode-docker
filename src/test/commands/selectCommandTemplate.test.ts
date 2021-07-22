@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandTemplate, selectCommandTemplate, TemplatePicker } from '../../commands/selectCommandTemplate';
+import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
 import { ContextType, DockerContext, isNewContextType } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
@@ -566,8 +566,8 @@ suite("(unit) selectCommandTemplate", () => {
 });
 
 async function runWithCommandSetting(
-    settingsValues: CommandTemplate[] | string,
-    overriddenDefaults: CommandTemplate[],
+    userTemplates: CommandTemplate[] | string,
+    overriddenDefaultTemplates: CommandTemplate[],
     pickInputs: number[],
     contextType: string,
     matchContext: string[]): Promise<{ command: string, context: IActionContext }> {
@@ -603,7 +603,7 @@ async function runWithCommandSetting(
             valuesToMask: undefined,
         };
 
-        const picker: TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
+        const picker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
             if (pickInputs.length === 0) {
                 // selectCommandTemplate asked for user input, but we have none left to give it (fail)
                 assert.fail('Received an unexpected request for input!');
@@ -612,7 +612,11 @@ async function runWithCommandSetting(
             return Promise.resolve(items[pickInputs.shift()]);
         };
 
-        const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, () => { return { globalValue: settingsValues, defaultValue: overriddenDefaults }; }, picker);
+        const settingsGetter = () => {
+            return { globalValue: userTemplates, defaultValue: overriddenDefaultTemplates };
+        };
+
+        const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, settingsGetter, picker);
 
         if (pickInputs.length !== 0) {
             // selectCommandTemplate never asked for an input we have (fail)
