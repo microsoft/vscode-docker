@@ -3,13 +3,16 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient, Volumes as VolumesClient } from '@docker/sdk';
-import * as Containers from '@docker/sdk/containers';
-import * as Volumes from '@docker/sdk/volumes';
+import { Containers as ContainersClient, Volumes as VolumesClient, Contexts as ContextsClient } from '@docker/sdk';
+import * as Containers from '@docker/sdk/containers.d';
+import * as Contexts from '@docker/sdk/contexts.d';
+import * as Volumes from '@docker/sdk/volumes.d';
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
+import { dockerExePath } from '../../utils/dockerExePathProvider';
+import { execAsync } from '../../utils/spawnAsync';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
@@ -28,6 +31,7 @@ const dockerServeCallTimeout = 20 * 1000;
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
     private readonly volumesClient: VolumesClient;
+    private readonly contextsClient: ContextsClient;
     private readonly callMetadata: Metadata;
 
     public constructor(currentContext: DockerContext) {
@@ -35,6 +39,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
         this.containersClient = new ContainersClient();
         this.volumesClient = new VolumesClient();
+        this.contextsClient = new ContextsClient();
 
         this.callMetadata = new Metadata();
         this.callMetadata.add('context_key', currentContext.Name);
@@ -210,6 +215,14 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             .setId(ref);
 
         await this.promisify(context, this.volumesClient, this.volumesClient.volumesDelete, request, token);
+    }
+
+    public async getContexts(context: IActionContext, token?: CancellationToken): Promise<unknown[]> {
+        /*const response: Contexts.ListResponse = await this.promisify(context, this.contextsClient, this.contextsClient.list, new Contexts.ListRequest(), token);
+
+        return response.getContextsList().map(c => c.toObject());*/
+        const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { env: { ...process.env } });
+        return [stdout];
     }
 
     private async promisify<TRequest, TResponse>(
