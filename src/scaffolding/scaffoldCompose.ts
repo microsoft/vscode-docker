@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
+import * as vscode from 'vscode';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { copyWizardContext } from './copyWizardContext';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
@@ -14,6 +15,10 @@ import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 import { VerifyDockerfileStep } from './wizard/VerifyDockerfileStep';
 
 export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserCancelledError('enforceTrust');
+    }
+
     copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'compose';
     wizardContext.scaffoldCompose = true;

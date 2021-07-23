@@ -3,10 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri } from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
+import * as vscode from 'vscode';
+import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { scheduleRunRequest } from './scheduleRunRequest';
 
-export async function runFileAsAzureTask(context: IActionContext, uri?: Uri): Promise<void> {
+export async function runFileAsAzureTask(context: IActionContext, uri?: vscode.Uri): Promise<void> {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserCancelledError('enforceTrust');
+    }
+
     await scheduleRunRequest(context, "FileTaskRunRequest", uri);
 }
