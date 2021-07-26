@@ -208,9 +208,9 @@ export class DockerContextManager implements ContextManager, Disposable {
 
             // First, we'll try shortcutting by getting a fixed context from extension settings, then from environment, then from filesystem clues
             const fixedContext =
-                (await this.tryGetContextFromSettings(actionContext)) ||
-                (await this.tryGetContextFromEnvironment(actionContext)) ||
-                (await this.tryGetContextFromFilesystemClues(actionContext));
+                this.tryGetContextFromSettings(actionContext) ||
+                this.tryGetContextFromEnvironment(actionContext) ||
+                this.tryGetContextFromFilesystemClues(actionContext);
 
             // A result from any of these three implies that there is only one context, or it is fixed by `docker.host` / `DOCKER_HOST`, or `docker.context` / `DOCKER_CONTEXT`
             // As such, we will lock to the current context
@@ -225,7 +225,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // If the result is a string, that means `docker.context` or `DOCKER_CONTEXT` are set, so we will also need to do a context listing
             if (typeof (fixedContext) === 'undefined' || typeof (fixedContext) === 'string') {
                 contextList =
-                    (await this.tryGetContextsFromGrpc(actionContext, fixedContext)) ||
+                    (await this.tryGetContextsFromApi(actionContext, fixedContext)) ||
                     (await this.tryGetContextsFromCli(actionContext, fixedContext));
             } else {
                 contextList = [fixedContext];
@@ -248,7 +248,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         });
     }
 
-    private async tryGetContextFromSettings(actionContext: IActionContext): Promise<DockerContext | undefined | string> {
+    private tryGetContextFromSettings(actionContext: IActionContext): DockerContext | undefined | string {
         const config = workspace.getConfiguration('docker');
         let dockerHost: string | undefined;
         let dockerContext: string | undefined;
@@ -270,7 +270,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         return undefined;
     }
 
-    private async tryGetContextFromEnvironment(actionContext: IActionContext): Promise<DockerContext | undefined | string> {
+    private tryGetContextFromEnvironment(actionContext: IActionContext): DockerContext | undefined | string {
         let dockerHost: string | undefined;
         let dockerContext: string | undefined;
 
@@ -291,7 +291,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         return undefined;
     }
 
-    private async tryGetContextFromFilesystemClues(actionContext: IActionContext): Promise<DockerContext | undefined> {
+    private tryGetContextFromFilesystemClues(actionContext: IActionContext): DockerContext | undefined {
         // If there's nothing inside ~/.docker/contexts/meta (or it doesn't exist), then there's only the default, unmodifiable DOCKER_HOST-based context
         // It is unnecessary to call `docker context inspect`
         if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance, this is on the activation code path
@@ -307,7 +307,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         return undefined;
     }
 
-    private async tryGetContextsFromGrpc(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<DockerContext[] | undefined> {
+    private async tryGetContextsFromApi(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<Promise<DockerContext[] | undefined>> {
         try {
             const dsc = await import('./DockerServeClient/DockerServeClient');
             const client = new dsc.DockerServeClient({ Name: maybeFixedContextName } as DockerContext); // Context name is the only thing used by DockerServeClient's constructor
