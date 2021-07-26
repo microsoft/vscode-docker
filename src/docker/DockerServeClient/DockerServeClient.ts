@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient, Volumes as VolumesClient, Contexts as ContextsClient } from '@docker/sdk';
-import * as Containers from '@docker/sdk/containers.d';
-import * as Contexts from '@docker/sdk/contexts.d';
-import * as Volumes from '@docker/sdk/volumes.d';
+import { Containers as ContainersClient, Contexts as ContextsClient, Volumes as VolumesClient } from '@docker/sdk';
+import * as Containers from '@docker/sdk/containers.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
+import * as Contexts from '@docker/sdk/contexts.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
+import * as Volumes from '@docker/sdk/volumes.d'; // Imports from the volumes.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';

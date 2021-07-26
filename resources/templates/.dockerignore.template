@@ -14,7 +14,6 @@
 **/*.*proj.user
 **/*.dbmdl
 **/*.jfm
-**/azds.yaml
 {{#unless (eq platform 'Node.js')}}
 **/bin
 {{/unless}}

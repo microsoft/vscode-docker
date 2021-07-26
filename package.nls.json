@@ -292,5 +292,6 @@
     "vscode-docker.views.dockerNetworks": "Networks",
     "vscode-docker.views.dockerVolumes": "Volumes",
     "vscode-docker.views.dockerContexts": "Contexts",
-    "vscode-docker.views.help": "Help and Feedback"
+    "vscode-docker.views.help": "Help and Feedback",
+    "vscode-docker.workspaceTrust.description": "Workspace must be trusted in order to perform relevant Docker actions."
 }
