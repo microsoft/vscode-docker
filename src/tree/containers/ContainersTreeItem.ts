@@ -87,7 +87,9 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             case 'State':
                 return item.State;
             case 'Status':
-                return item.Status;
+                // The rapidly-refreshing status during a container's first minute causes a lot of problems with excessive refreshing
+                // This normalizes things like "10 seconds" to "Less than a minute", meaning the refreshes don't happen constantly
+                return item.Status?.replace(/\d+ seconds?/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
             case 'Compose Project Name':
                 return getComposeProjectName(item);
             default:
