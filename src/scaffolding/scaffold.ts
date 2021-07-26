@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep } from 'vscode-azureextensionui';
+import * as vscode from 'vscode';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { copyWizardContext } from './copyWizardContext';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
@@ -15,6 +16,10 @@ import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
 export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>, apiInput?: ScaffoldingWizardContext): Promise<void> {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserCancelledError('enforceTrust');
+    }
+
     copyWizardContext(wizardContext, apiInput);
     wizardContext.scaffoldType = 'all';
 
@@ -25,8 +30,8 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     ];
 
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
-        new ScaffoldFileStep('.dockerignore', 100),
-        new ScaffoldFileStep('Dockerfile', 200),
+        new ScaffoldFileStep('.dockerignore', 'ask', 100),
+        new ScaffoldFileStep('Dockerfile', 'ask', 200),
         new OpenStartPageStep(1000),
         new OpenDockerfileStep(),
     ];
@@ -40,8 +45,8 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     await wizard.prompt();
 
     if (wizardContext.scaffoldCompose) {
-        executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 300));
-        executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 400));
+        executeSteps.push(new ScaffoldFileStep('docker-compose.yml', 'ask', 300));
+        executeSteps.push(new ScaffoldFileStep('docker-compose.debug.yml', 'ask', 400));
     }
 
     await wizard.execute();

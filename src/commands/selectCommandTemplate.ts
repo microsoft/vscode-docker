@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from 'vscode-azureextensionui';
 import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -13,36 +13,22 @@ import { dockerExePath, DefaultDockerPath } from '../utils/dockerExePathProvider
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
 
-export type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
+type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
+
+interface CommandSettings {
+    defaultValue?: CommandTemplate[] | string,
+    globalValue?: CommandTemplate[] | string,
+    workspaceValue?: CommandTemplate[] | string,
+    workspaceFolderValue?: CommandTemplate[] | string,
+}
 
 // Exported only for tests
-export type CommandTemplate = {
+export interface CommandTemplate {
     template: string,
     label: string,
     match?: string,
     contextTypes?: ContextType[],
-};
-
-// NOTE: the default templates are duplicated in package.json, since VSCode offers no way of looking up extension-level default settings
-// So, when modifying them here, be sure to modify them there as well!
-// Exported only for tests
-export const defaultCommandTemplates: { [key in TemplateCommand]: CommandTemplate[] } = {
-    /* eslint-disable no-template-curly-in-string */
-    'build': [{ label: 'Docker Build', template: 'docker build --pull --rm -f "${dockerfile}" -t ${tag} "${context}"' }],
-    'run': [{ label: 'Docker Run', template: 'docker run --rm -d ${exposedPorts} ${tag}' }],
-    'runInteractive': [{ label: 'Docker Run (Interactive)', template: 'docker run --rm -it ${exposedPorts} ${tag}' }],
-    'attach': [{ label: 'Docker Attach', template: 'docker exec -it ${containerId} ${shellCommand}' }],
-    'logs': [{ label: 'Docker Logs', template: 'docker logs --tail 1000 -f ${containerId}' }],
-    'composeUp': [
-        { label: 'Compose Up', template: 'docker-compose ${configurationFile} up ${detached} ${build}', contextTypes: ['moby'] },
-        { label: 'Compose Up', template: 'docker compose ${configurationFile} up ${detached}' },
-    ],
-    'composeDown': [
-        { label: 'Compose Down', template: 'docker-compose ${configurationFile} down', contextTypes: ['moby'] },
-        { label: 'Compose Down', template: 'docker compose ${configurationFile} down' },
-    ],
-    /* eslint-enable no-template-curly-in-string */
-};
+}
 
 export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
     return await selectCommandTemplate(
@@ -108,45 +94,39 @@ export async function selectCommandTemplate(
     matchContext: string[],
     folder: vscode.WorkspaceFolder | undefined,
     additionalVariables: { [key: string]: string },
+    // The following two are overridable for test purposes, but have default values that cover actual usage
+    getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`),
     templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o) // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
 ): Promise<string> {
     // Get the current context type
     const currentContextType = await ext.dockerContextManager.getCurrentContextType();
 
     // Get the configured settings values
-    const config = vscode.workspace.getConfiguration('docker');
-    const templateSetting: CommandTemplate[] | string = config.get(`commands.${command}`);
-    let settingsTemplates: CommandTemplate[];
+    const commandSettings = getCommandSettings();
+    const userTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.workspaceFolderValue ?? commandSettings.workspaceValue ?? commandSettings.globalValue);
+    const defaultTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.defaultValue);
 
-    // Get a template array from settings
-    if (typeof (templateSetting) === 'string') {
-        settingsTemplates = [{ template: templateSetting }] as CommandTemplate[];
-    } else if (!templateSetting) {
-        // If templateSetting is some falsy value, make this an empty array so the hardcoded default above gets used
-        settingsTemplates = [];
-    } else {
-        settingsTemplates = templateSetting;
+    // Defense-in-depth: Reject if the workspace is untrusted but user templates from a workspace or workspace folder showed up somehow
+    if (!vscode.workspace.isTrusted && (commandSettings.workspaceFolderValue || commandSettings.workspaceValue)) {
+        throw new UserCancelledError('enforceTrust');
     }
 
-    // Get a template array from hardcoded defaults
-    const hardcodedTemplates = defaultCommandTemplates[command];
-
-    // Build the template selection matrix. Settings-defined values are preferred over hardcoded, and constrained over unconstrained.
+    // Build the template selection matrix. Settings-defined values are preferred over default, and constrained over unconstrained.
     // Constrained templates have either `match` or `contextTypes`, and must match the constraints.
     // Unconstrained templates have neither `match` nor `contextTypes`.
     const templateMatrix: CommandTemplate[][] = [];
 
-    // 0. Settings-defined templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(actionContext, settingsTemplates, matchContext, currentContextType));
+    // 0. Workspace- or user-defined templates with either `match` or `contextTypes`, that satisfy the constraints
+    templateMatrix.push(getConstrainedTemplates(actionContext, userTemplates, matchContext, currentContextType));
 
-    // 1. Settings-defined templates with neither `match` nor `contextTypes`
-    templateMatrix.push(getUnconstrainedTemplates(settingsTemplates));
+    // 1. Workspace- or user-defined templates with neither `match` nor `contextTypes`
+    templateMatrix.push(getUnconstrainedTemplates(userTemplates));
 
-    // 2. Hardcoded templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(actionContext, hardcodedTemplates, matchContext, currentContextType));
+    // 2. Default templates with either `match` or `contextTypes`, that satisfy the constraints
+    templateMatrix.push(getConstrainedTemplates(actionContext, defaultTemplates, matchContext, currentContextType));
 
-    // 3. Hardcoded templates with neither `match` nor `contextTypes`
-    templateMatrix.push(getUnconstrainedTemplates(hardcodedTemplates));
+    // 3. Default templates with neither `match` nor `contextTypes`
+    templateMatrix.push(getUnconstrainedTemplates(defaultTemplates));
 
     // Select the template to use
     let selectedTemplate: CommandTemplate;
@@ -166,7 +146,7 @@ export async function selectCommandTemplate(
         throw new Error(localize('vscode-docker.commands.selectCommandTemplate.noTemplate', 'No command template was found for command \'{0}\'', command));
     }
 
-    actionContext.telemetry.properties.isDefaultCommand = hardcodedTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
+    actionContext.telemetry.properties.isDefaultCommand = defaultTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
     actionContext.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
     actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
     actionContext.telemetry.properties.currentContextType = currentContextType;
@@ -247,4 +227,15 @@ function isMatchConstraintSatisfied(actionContext: IActionContext, matchContext:
     }
 
     return false;
+}
+
+function toCommandTemplateArray(maybeTemplateArray: CommandTemplate[] | string | undefined): CommandTemplate[] {
+    if (typeof (maybeTemplateArray) === 'string') {
+        return [{ template: maybeTemplateArray }] as CommandTemplate[];
+    } else if (!maybeTemplateArray) {
+        // If templateSetting is some falsy value, make this an empty array so the default gets used
+        return [];
+    }
+
+    return maybeTemplateArray;
 }

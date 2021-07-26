@@ -3,7 +3,7 @@
  *--------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { CommandLineBuilder } from '../../extension.bundle';
+import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { ShellQuoting } from 'vscode';
 
 suite('(unit) utils/CommandLineBuilder', () => {

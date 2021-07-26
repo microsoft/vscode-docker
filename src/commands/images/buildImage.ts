@@ -5,7 +5,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
+import { IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
@@ -20,6 +20,10 @@ import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
 const tagRegex: RegExp = /\$\{tag\}/i;
 
 export async function buildImage(context: IActionContext, dockerFileUri: vscode.Uri | undefined): Promise<void> {
+    if (!vscode.workspace.isTrusted) {
+        throw new UserCancelledError('enforceTrust');
+    }
+
     const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
     const defaultContextPath = configOptions.get('imageBuildContextPath', '');
 

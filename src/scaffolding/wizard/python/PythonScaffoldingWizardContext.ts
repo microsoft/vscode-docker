@@ -40,7 +40,7 @@ export function getPythonSubWizardOptions(wizardContext: ScaffoldingWizardContex
     return {
         promptSteps: promptSteps,
         executeSteps: [
-            new ScaffoldFileStep('requirements.txt', 0),
+            new ScaffoldFileStep('requirements.txt', 'skip', 0),
             new ScaffoldDebuggingStep(),
         ],
     };

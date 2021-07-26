@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isHigherMinorVersion } from '../../extension.bundle';
+import { isHigherMinorVersion } from '../../commands/startPage/openStartPage';
 import assert = require('assert');
 
 suite("(unit) isHigherMinorVersion", () => {

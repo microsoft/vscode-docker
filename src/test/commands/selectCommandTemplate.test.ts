@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { runWithExtensionSettings } from '../runWithExtensionSettings';
-import { CommandTemplate, selectCommandTemplate, defaultCommandTemplates, ext, DockerContext, isNewContextType, TemplatePicker } from '../../extension.bundle';
-import { IActionContext, IAzureQuickPickItem, IAzureUserInput } from 'vscode-azureextensionui';
+import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
+import { ContextType, DockerContext, isNewContextType } from '../../docker/Contexts';
+import { ext } from '../../extensionVariables';
+import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import assert = require('assert');
 
 const DefaultPickIndex = 0;
@@ -34,12 +35,12 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
                 {
-                    // Unconstrained hardcoded (value is test to assert isDefaultCommand == true)
+                    // Unconstrained default (value is test to assert isDefaultCommand == true)
                     // (If we try to choose here it will fail due to prompting unexpectedly)
                     label: 'fail4',
                     template: 'test',
@@ -82,7 +83,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -122,7 +123,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail2',
                     template: 'fail',
                 },
@@ -160,7 +161,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -205,7 +206,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -222,7 +223,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
-    test("One constrained from hardcoded (match)", async () => {
+    test("One constrained from defaults (match)", async () => {
         const result = await runWithCommandSetting(
             [
                 {
@@ -240,13 +241,13 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // *Satisfied constraint (match) hardcoded
+                    // *Satisfied constraint (match) default
                     label: 'test',
                     template: 'test',
                     match: 'test',
                 },
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -263,7 +264,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
-    test("One constrained from hardcoded (contextTypes)", async () => {
+    test("One constrained from defaults (contextTypes)", async () => {
         const result = await runWithCommandSetting(
             [
                 {
@@ -281,14 +282,14 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // *Satisfied constraint (contextTypes + match) hardcoded
+                    // *Satisfied constraint (contextTypes + match) default
                     label: 'test',
                     template: 'test',
                     match: 'test',
                     contextTypes: ['moby'],
                 },
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -305,7 +306,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
-    test("Two constrained from hardcoded", async () => {
+    test("Two constrained from defaults", async () => {
         const result = await runWithCommandSetting(
             [
                 {
@@ -323,20 +324,20 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // *Satisfied constraint (contextTypes + match) hardcoded
+                    // *Satisfied constraint (contextTypes + match) default
                     label: 'test',
                     template: 'test',
                     match: 'test',
                     contextTypes: ['moby'],
                 },
                 {
-                    // *Satisfied constraint (match) hardcoded
+                    // *Satisfied constraint (match) default
                     label: 'test2',
                     template: 'test',
                     match: 'test',
                 },
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail3',
                     template: 'fail',
                 },
@@ -352,7 +353,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
-    test("One unconstrained from hardcoded", async () => {
+    test("One unconstrained from defaults", async () => {
         const result = await runWithCommandSetting(
             [
                 {
@@ -370,20 +371,20 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unsatisfied constraint (match) hardcoded
+                    // Unsatisfied constraint (match) default
                     label: 'fail3',
                     template: 'fail',
                     match: 'fail',
                     contextTypes: ['moby'],
                 },
                 {
-                    // Unsatisfied constraint (contextTypes) hardcoded
+                    // Unsatisfied constraint (contextTypes) default
                     label: 'fail4',
                     template: 'fail',
                     contextTypes: ['aci']
                 },
                 {
-                    // *Unconstrained hardcoded
+                    // *Unconstrained default
                     label: 'test',
                     template: 'test',
                 },
@@ -400,7 +401,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
-    test("Two unconstrained from hardcoded", async () => {
+    test("Two unconstrained from defaults", async () => {
         const result = await runWithCommandSetting(
             [
                 {
@@ -418,25 +419,25 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unsatisfied constraint (match) hardcoded
+                    // Unsatisfied constraint (match) default
                     label: 'fail3',
                     template: 'fail',
                     match: 'fail',
                     contextTypes: ['moby'],
                 },
                 {
-                    // Unsatisfied constraint (contextTypes) hardcoded
+                    // Unsatisfied constraint (contextTypes) default
                     label: 'fail4',
                     template: 'fail',
                     contextTypes: ['aci']
                 },
                 {
-                    // *Unconstrained hardcoded
+                    // *Unconstrained default
                     label: 'test',
                     template: 'test',
                 },
                 {
-                    // *Unconstrained hardcoded
+                    // *Unconstrained default
                     label: 'test2',
                     template: 'test',
                 },
@@ -459,7 +460,7 @@ suite("(unit) selectCommandTemplate", () => {
             'test',
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail',
                     template: 'fail',
                 },
@@ -481,7 +482,7 @@ suite("(unit) selectCommandTemplate", () => {
             [], // Falsy setting
             [
                 {
-                    // *Unconstrained hardcoded
+                    // *Unconstrained default
                     label: 'test',
                     template: 'test',
                 },
@@ -515,7 +516,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail2',
                     template: 'fail',
                 },
@@ -543,7 +544,7 @@ suite("(unit) selectCommandTemplate", () => {
             ],
             [
                 {
-                    // Unconstrained hardcoded
+                    // Unconstrained default
                     label: 'fail',
                     template: 'fail',
                 },
@@ -556,7 +557,7 @@ suite("(unit) selectCommandTemplate", () => {
         assert.equal(result.command, 'test', 'Incorrect command selected');
 
         // Quick aside: validate that the context manager thinks an unknown context is new
-        assert.equal(isNewContextType('abc' as any), true, 'Incorrect context type identification');
+        assert.equal(isNewContextType('abc' as ContextType), true, 'Incorrect context type identification');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
         assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
@@ -565,14 +566,11 @@ suite("(unit) selectCommandTemplate", () => {
 });
 
 async function runWithCommandSetting(
-    settingsValues: CommandTemplate[] | string,
-    hardcodedValues: CommandTemplate[],
+    userTemplates: CommandTemplate[] | string,
+    overriddenDefaultTemplates: CommandTemplate[],
     pickInputs: number[],
     contextType: string,
     matchContext: string[]): Promise<{ command: string, context: IActionContext }> {
-
-    const oldDefaultTemplates = defaultCommandTemplates['build'];
-    defaultCommandTemplates['build'] = hardcodedValues;
 
     const oldContextManager = ext.dockerContextManager;
     ext.dockerContextManager = {
@@ -593,7 +591,7 @@ async function runWithCommandSetting(
         },
 
         getCurrentContextType: async () => {
-            return Promise.resolve(<any>contextType);
+            return Promise.resolve(contextType as ContextType);
         }
     };
 
@@ -605,18 +603,20 @@ async function runWithCommandSetting(
             valuesToMask: undefined,
         };
 
-        const cmdResult: string = await runWithExtensionSettings({ 'commands.build': settingsValues }, async () => {
-            const picker: TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
-                if (pickInputs.length === 0) {
-                    // selectCommandTemplate asked for user input, but we have none left to give it (fail)
-                    assert.fail('Received an unexpected request for input!');
-                }
+        const picker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
+            if (pickInputs.length === 0) {
+                // selectCommandTemplate asked for user input, but we have none left to give it (fail)
+                assert.fail('Received an unexpected request for input!');
+            }
 
-                return Promise.resolve(items[pickInputs.shift()]);
-            };
+            return Promise.resolve(items[pickInputs.shift()]);
+        };
 
-            return await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, picker);
-        });
+        const settingsGetter = () => {
+            return { globalValue: userTemplates, defaultValue: overriddenDefaultTemplates };
+        };
+
+        const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, settingsGetter, picker);
 
         if (pickInputs.length !== 0) {
             // selectCommandTemplate never asked for an input we have (fail)
@@ -628,7 +628,6 @@ async function runWithCommandSetting(
             context: tempContext,
         };
     } finally {
-        defaultCommandTemplates['build'] = oldDefaultTemplates;
         ext.dockerContextManager = oldContextManager;
     }
 }

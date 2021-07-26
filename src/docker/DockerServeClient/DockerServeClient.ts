@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Containers as ContainersClient, Volumes as VolumesClient } from '@docker/sdk';
-import * as Containers from '@docker/sdk/containers';
-import * as Volumes from '@docker/sdk/volumes';
+import * as Containers from '@docker/sdk/containers.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
+import * as Volumes from '@docker/sdk/volumes.d'; // Imports from the volumes.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';

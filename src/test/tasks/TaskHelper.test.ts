@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { recursiveFindTaskByType } from '../../extension.bundle';
-import { TaskDefinitionBase } from '../../extension.bundle';
-import { DebugConfigurationBase } from '../../extension.bundle';
+import { recursiveFindTaskByType } from '../../tasks/TaskHelper';
+import { TaskDefinitionBase } from '../../tasks/TaskDefinitionBase';
+import { DebugConfigurationBase } from '../../debugging/DockerDebugConfigurationBase';
 
 suite('(unit) tasks/TaskHelper/recursiveFindTaskByType', async () => {
 
@@ -56,7 +56,7 @@ suite('(unit) tasks/TaskHelper/recursiveFindTaskByType', async () => {
         request: 'launch',
         name: 'My debug config',
         preLaunchTask: 'other task'
-    }
+    };
 
     const missing: TaskDefinitionBase[] = [
         {

@@ -1,29 +1,17 @@
 // Place your settings in this file to overwrite default and user settings.
 {
-	"files.exclude": {
-		"out": false // set this to true to hide the "out" folder with the compiled JS files
-	},
-	"search.exclude": {
-		"out": true,
-		".git/**": true,
-		"dist/**": true
-	},
-	"files.trimTrailingWhitespace": true,
-	"files.insertFinalNewline": true,
-	"editor.formatOnSave": true,
-	"editor.codeActionsOnSave": {
-		"source.fixAll": true
-	},
-	"eslint.validate": [
-		"javascript",
-		"javascriptreact",
-		"typescript"
-	],
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.preferences.importModuleSpecifier": "relative",
-	"files.associations": {
-		"*.template": "plaintext",
-		"*.html.template": "html"
-	},
-	"html.format.wrapLineLength": 0
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": true
+    },
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "files.associations": {
+        "*.template": "plaintext",
+        "*.html.template": "html"
+    },
+    "html.format.wrapLineLength": 0,
+    // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+    "typescript.tsc.autoDetect": "off"
 }

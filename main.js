@@ -5,21 +5,21 @@
 
 "use strict";
 
-// This is the extension entrypoint, which imports extension.js, the actual extension code.
-//
-// This is in a separate file so we can properly measure extension.js load time.
+/* eslint-disable no-undef */ // Ignore the fact that the engine (which is VSCode) is unknown by the linter
 
-let perfStats = {
+// This is the extension entrypoint, which imports extension.bundle.js, the actual extension code.
+//
+// This is in a separate file so we can properly measure extension.bundle.js load time.
+
+const perfStats = {
     loadStartTime: Date.now(),
     loadEndTime: undefined
 };
 
 Object.defineProperty(exports, "__esModule", { value: true });
 
-const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
-const extensionPath = ignoreBundle ? "./out/src/extension" : "./dist/extension.bundle";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const extension = require(extensionPath);
+const extension = require("./dist/extension.bundle");
 
 async function activate(ctx) {
     return await extension.activateInternal(ctx, perfStats);
@@ -33,3 +33,5 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 
 perfStats.loadEndTime = Date.now();
+
+/* eslint-enable no-undef */

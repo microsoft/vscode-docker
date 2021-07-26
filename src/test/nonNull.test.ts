@@ -5,7 +5,7 @@
 
 import * as assert from 'assert';
 import { Suite } from 'mocha';
-import { nonNullProp } from '../extension.bundle';
+import { nonNullProp } from '../utils/nonNull';
 
 suite("(unit) nonNull", async function (this: Suite): Promise<void> {
     type TestSubscription = {
@@ -13,7 +13,7 @@ suite("(unit) nonNull", async function (this: Suite): Promise<void> {
         arrayOrUndefined?: number[];
         stringOrNull: string | null;
         string: string;
-    }
+    };
 
     function testNonNull<T>(testName: string, actual: T, expected: T) {
         test(testName, () => {
@@ -21,7 +21,7 @@ suite("(unit) nonNull", async function (this: Suite): Promise<void> {
         });
     }
 
-    function testNonNullThrows<T>(testName: string, block: () => any) {
+    function testNonNullThrows(testName: string, block: () => unknown) {
         test(testName, () => {
             assert.throws(block, 'Expected an exception');
         });

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { ActivityMeasurementService } from '../../extension.bundle';
+import { ActivityMeasurementService } from '../../telemetry/ActivityMeasurementService';
 import { TestMemento } from '../TestMemento';
 
 function assertSameDate(a: number, b: number): void {

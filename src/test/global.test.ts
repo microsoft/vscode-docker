@@ -9,9 +9,7 @@ import * as mocha from 'mocha';
 import * as path from "path";
 import * as vscode from "vscode";
 
-export namespace constants {
-    export const testOutputName = 'testOutput';
-}
+const testOutputName = 'testOutput';
 
 // The root workspace folder that vscode is opened against for tests
 let testRootFolder: string;
@@ -20,7 +18,7 @@ export function getTestRootFolder(): string {
     if (!testRootFolder) {
         // We're expecting to be opened against the test/test.code-workspace
         // workspace.
-        let workspaceFolders = vscode.workspace.workspaceFolders;
+        const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             console.error("No workspace is open.");
             process.exit(1);
@@ -32,7 +30,7 @@ export function getTestRootFolder(): string {
 
             testRootFolder = workspaceFolders[0].uri.fsPath;
             console.log(`testRootFolder: ${testRootFolder}`);
-            if (path.basename(testRootFolder) !== constants.testOutputName) {
+            if (path.basename(testRootFolder) !== testOutputName) {
                 console.error("vscode is opened against the wrong folder for tests");
                 process.exit(1);
             }
@@ -52,7 +50,7 @@ export function getTestRootFolder(): string {
 export function testInEmptyFolder(name: string, func?: mocha.AsyncFunc): void {
     test(name, !func ? undefined : async function (this: mocha.Context) {
         // Delete everything in the root testing folder
-        assert(path.basename(testRootFolder) === constants.testOutputName, "Trying to delete wrong folder");;
+        assert(path.basename(testRootFolder) === testOutputName, "Trying to delete wrong folder");
         await fse.emptyDir(testRootFolder);
         await func.apply(this);
     });
@@ -72,7 +70,7 @@ suiteSetup(async function (this: mocha.Context): Promise<void> {
 suiteTeardown(async function (this: mocha.Context): Promise<void> {
     console.log('global.test.ts: suiteTeardown');
 
-    if (testRootFolder && path.basename(testRootFolder) === constants.testOutputName) {
-        fse.emptyDir(testRootFolder);
+    if (testRootFolder && path.basename(testRootFolder) === testOutputName) {
+        void fse.emptyDir(testRootFolder);
     }
 });
