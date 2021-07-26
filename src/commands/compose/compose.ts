@@ -5,8 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
-import { DockerContext, rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
-import { DockerServeClient } from '../../docker/DockerServeClient/DockerServeClient';
+import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
 import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
@@ -81,19 +80,7 @@ export async function composeUp(context: IActionContext, dockerComposeFileUri?: 
 }
 
 export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    /*return await compose(context, ['upSubset'], localize('vscode-docker.commands.compose.chooseUpSubset', 'Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);*/
-    const dockerServeClient = new DockerServeClient({ Name: 'default' } as DockerContext);
-
-    const startTime = process.hrtime.bigint();
-
-    for (let i = 0; i < 100; i++) {
-        console.log(await dockerServeClient.getContexts(context));
-    }
-
-    const endTime = process.hrtime.bigint();
-
-    const elapsed = endTime - startTime;
-    console.log(`Elapsed ${elapsed / BigInt(1000)} us on 100 runs, for average of ${elapsed / BigInt(100000)} us each.`);
+    return await compose(context, ['upSubset'], localize('vscode-docker.commands.compose.chooseUpSubset', 'Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
