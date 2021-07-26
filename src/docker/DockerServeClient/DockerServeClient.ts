@@ -11,12 +11,10 @@ import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
-import { dockerExePath } from '../../utils/dockerExePathProvider';
-import { execAsync } from '../../utils/spawnAsync';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
-import { DockerContext } from '../Contexts';
+import { ContextType, DockerContext } from '../Contexts';
 import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -34,15 +32,17 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     private readonly contextsClient: ContextsClient;
     private readonly callMetadata: Metadata;
 
-    public constructor(currentContext: DockerContext) {
+    public constructor(currentContext?: DockerContext) {
         super();
 
         this.containersClient = new ContainersClient();
         this.volumesClient = new VolumesClient();
         this.contextsClient = new ContextsClient();
 
-        this.callMetadata = new Metadata();
-        this.callMetadata.add('context_key', currentContext.Name);
+        if (currentContext?.Name) {
+            this.callMetadata = new Metadata();
+            this.callMetadata.add('context_key', currentContext.Name);
+        }
     }
 
     public dispose(): void {
@@ -217,12 +217,20 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         await this.promisify(context, this.volumesClient, this.volumesClient.volumesDelete, request, token);
     }
 
-    public async getContexts(context: IActionContext, token?: CancellationToken): Promise<unknown[]> {
-        /*const response: Contexts.ListResponse = await this.promisify(context, this.contextsClient, this.contextsClient.list, new Contexts.ListRequest(), token);
+    public async getContexts(context: IActionContext, token?: CancellationToken): Promise<DockerContext[]> {
+        const response: Contexts.ListResponse = await this.promisify(context, this.contextsClient, this.contextsClient.list, new Contexts.ListRequest(), token);
 
-        return response.getContextsList().map(c => c.toObject());*/
-        const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { env: { ...process.env } });
-        return [stdout];
+        return response.getContextsList().map(ctx => ctx.toObject()).map(ctx => {
+            return {
+                Id: ctx.name,
+                Name: ctx.name,
+                ContextType: ctx.contexttype as ContextType,
+                Current: ctx.current,
+                DockerEndpoint: ctx.dockerEndpoint.host,
+                Description: ctx.description,
+                CreatedTime: undefined,
+            };
+        });
     }
 
     private async promisify<TRequest, TResponse>(

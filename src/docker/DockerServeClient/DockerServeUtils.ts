@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Container } from '@docker/sdk/containers';
+import { Container } from '@docker/sdk/containers.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import { DockerContainer, InspectionPort } from '../Containers';
 
 // Group 1 is container group name; group 2 is container name

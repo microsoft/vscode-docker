@@ -41,6 +41,8 @@ const defaultContext: Partial<DockerContext> = {
     ContextType: 'moby',
 };
 
+const defaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
+
 // These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
 type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent' | 'vscode-docker:contextLocked';
 
@@ -111,6 +113,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         try {
             this.refreshing = true;
+            ext.treeInitError = undefined;
 
             this.contextsCache.clear();
 
@@ -195,133 +198,200 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     private async loadContexts(): Promise<DockerContext[]> {
-        let loadResult = await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
+        return await callWithTelemetryAndErrorHandling(ext.dockerClient ? 'docker-context.change' : 'docker-context.initialize', async (actionContext: IActionContext) => {
             // docker-context.initialize and docker-context.change should be treated as "activation events", in that they aren't real user action
             actionContext.telemetry.properties.isActivationEvent = 'true';
             actionContext.errorHandling.rethrow = true; // Errors are handled outside of this scope
             actionContext.errorHandling.suppressDisplay = true;
 
-            ext.treeInitError = undefined;
+            let contextList: DockerContext[] | undefined;
 
-            let dockerHostEnv: string | undefined;
-            let dockerContextEnv: string | undefined;
-            const config = workspace.getConfiguration('docker');
-            if ((dockerHostEnv = config.get('host'))) { // Assignment + check is intentional
-                actionContext.telemetry.properties.hostSource = 'docker.host';
-            } else if ((dockerHostEnv = process.env.DOCKER_HOST)) { // Assignment + check is intentional
-                actionContext.telemetry.properties.hostSource = 'env';
-            } else if ((dockerContextEnv = config.get('context'))) { // Assignment + check is intentional
-                actionContext.telemetry.properties.hostSource = 'docker.context';
-            } else if ((dockerContextEnv = process.env.DOCKER_CONTEXT)) { // Assignment + check is intentional
-                actionContext.telemetry.properties.hostSource = 'envContext';
-            } else if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance, this is on the activation code path
-                // If there's nothing inside ~/.docker/contexts/meta, then there's only the default, unmodifiable DOCKER_HOST-based context
-                // It is unnecessary to call `docker context inspect`
-                actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
-                dockerHostEnv = isWindows() ? WindowsLocalPipe : UnixLocalPipe;
-            } else {
-                dockerHostEnv = undefined;
-            }
+            // First, we'll try shortcutting by getting a fixed context from extension settings, then from environment, then from filesystem clues
+            const fixedContext =
+                (await this.tryGetContextFromSettings(actionContext)) ||
+                (await this.tryGetContextFromEnvironment(actionContext)) ||
+                (await this.tryGetContextFromFilesystemClues(actionContext));
 
-            if (dockerHostEnv !== undefined) {
-                try {
-                    // This will try to parse the URL, using the same logic docker-modem does
-                    actionContext.telemetry.properties.hostProtocol = new URL(dockerHostEnv).protocol;
-                } catch (err) {
-                    // If URL parsing fails, let's catch it and give a better error message
-                    const message = actionContext.telemetry.properties.hostSource === 'docker.host' ?
-                        localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.') :
-                        localize('vscode-docker.docker.contextManager.invalidHostEnv', 'The value provided for the environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.');
-                    const button = localize('vscode-docker.docker.contextManager.openSettings', 'Open Settings');
-
-                    void window.showErrorMessage(message, button)
-                        .then((result: string) => {
-                            if (result === button) {
-                                void commands.executeCommand('workbench.action.openSettings', 'docker.host');
-                            }
-                        });
-
-                    // Rethrow and suppress display since we already showed an error message
-                    actionContext.errorHandling.suppressDisplay = true;
-                    throw err;
-                }
-
-                this.setVsCodeContext('vscode-docker:contextLocked', true);
-
-                return [{
-                    ...defaultContext,
-                    Current: true,
-                    DockerEndpoint: dockerHostEnv,
-                } as DockerContext];
-            }
-
-            // No value for DOCKER_HOST, and multiple contexts exist, so check them
-            const result: DockerContext[] = [];
-
-            // Setting the DOCKER_CONTEXT environment variable to whatever is passed along means the CLI will always
-            // return that specified context as Current = true. This way we don't need extra logic below in parsing.
-            // TODO: eventually change to `docker context ls --format json`
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: dockerContextEnv } });
-
-            try {
-                // Try parsing as-is; newer CLIs output a JSON object array
-                const contexts = JSON.parse(stdout) as DockerContext[];
-
-                result.push(...contexts.map(toDockerContext));
-            } catch {
-                // Otherwise split by line, older CLIs output one JSON object per line
-                const lines = stdout.split(/\r?\n/im);
-
-                for (const line of lines) {
-                    // Blank lines should be skipped
-                    if (!line) {
-                        continue;
-                    }
-
-                    const context = JSON.parse(line) as DockerContext;
-                    result.push(toDockerContext(context));
-                }
-            }
-
-            const currentContext = result.find(c => c.Current);
-
-            if (currentContext.Name === 'default') {
-                actionContext.telemetry.properties.hostSource = 'defaultContextSelected';
-            } else {
-                actionContext.telemetry.properties.hostSource = 'customContextSelected';
-            }
-
-            try {
-                if (isNewContextType(currentContext.ContextType)) {
-                    actionContext.telemetry.properties.hostProtocol = currentContext.ContextType;
-                } else {
-                    actionContext.telemetry.properties.hostProtocol = new URL(currentContext.DockerEndpoint).protocol;
-                }
-            } catch {
-                actionContext.telemetry.properties.hostProtocol = 'unknown';
-            }
-
-            if (dockerContextEnv) {
+            // A result from any of these three implies that there is only one context, or it is fixed by `docker.host` / `DOCKER_HOST`, or `docker.context` / `DOCKER_CONTEXT`
+            // As such, we will lock to the current context
+            // Otherwise, unlock in case we were previously locked
+            if (fixedContext) {
                 this.setVsCodeContext('vscode-docker:contextLocked', true);
             } else {
                 this.setVsCodeContext('vscode-docker:contextLocked', false);
             }
 
-            return result;
-        });
+            // If the result is undefined, there are (probably) multiple contexts and none is chosen by `docker.context` or `DOCKER_CONTEXT`, so we will need to do a context listing
+            // If the result is a string, that means `docker.context` or `DOCKER_CONTEXT` are set, so we will also need to do a context listing
+            if (typeof (fixedContext) === 'undefined' || typeof (fixedContext) === 'string') {
+                contextList =
+                    (await this.tryGetContextsFromGrpc(actionContext, fixedContext)) ||
+                    (await this.tryGetContextsFromCli(actionContext, fixedContext));
+            } else {
+                contextList = [fixedContext];
+            }
 
-        // If the load failed or is otherwise empty, return the default
-        // That way a returned value is ensured by this method
-        if (!loadResult) {
-            loadResult = [{
+            if (!contextList) {
+                // If the load is empty, return the default
+                // That way a returned value is ensured by this method
+                // And `setHostProtocolFromContextList` will always have a non-empty input
+                contextList = [{
+                    ...defaultContext,
+                    Current: true,
+                    DockerEndpoint: isWindows() ? WindowsLocalPipe : UnixLocalPipe,
+                } as DockerContext];
+            }
+
+            this.setHostProtocolFromContextList(actionContext, contextList);
+
+            return contextList;
+        });
+    }
+
+    private async tryGetContextFromSettings(actionContext: IActionContext): Promise<DockerContext | undefined | string> {
+        const config = workspace.getConfiguration('docker');
+        let dockerHost: string | undefined;
+        let dockerContext: string | undefined;
+
+        if ((dockerHost = config.get('host'))) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'docker.host';
+
+            return {
+                ...defaultContext,
+                Current: true,
+                DockerEndpoint: dockerHost,
+            } as DockerContext;
+        } else if ((dockerContext = config.get('context'))) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'docker.context';
+
+            return dockerContext;
+        }
+
+        return undefined;
+    }
+
+    private async tryGetContextFromEnvironment(actionContext: IActionContext): Promise<DockerContext | undefined | string> {
+        let dockerHost: string | undefined;
+        let dockerContext: string | undefined;
+
+        if ((dockerHost = process.env.DOCKER_HOST)) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'env';
+
+            return {
+                ...defaultContext,
+                Current: true,
+                DockerEndpoint: dockerHost,
+            } as DockerContext;
+        } else if ((dockerContext = process.env.DOCKER_CONTEXT)) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'envContext';
+
+            return dockerContext;
+        }
+
+        return undefined;
+    }
+
+    private async tryGetContextFromFilesystemClues(actionContext: IActionContext): Promise<DockerContext | undefined> {
+        // If there's nothing inside ~/.docker/contexts/meta (or it doesn't exist), then there's only the default, unmodifiable DOCKER_HOST-based context
+        // It is unnecessary to call `docker context inspect`
+        if (!fse.pathExistsSync(dockerContextsFolder) || fse.readdirSync(dockerContextsFolder).length === 0) { // Sync is intentionally used for performance, this is on the activation code path
+            actionContext.telemetry.properties.hostSource = 'defaultContextOnly';
+
+            return {
                 ...defaultContext,
                 Current: true,
                 DockerEndpoint: isWindows() ? WindowsLocalPipe : UnixLocalPipe,
-            } as DockerContext];
+            } as DockerContext;
         }
 
-        return loadResult;
+        return undefined;
+    }
+
+    private async tryGetContextsFromGrpc(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<DockerContext[] | undefined> {
+        try {
+            const dsc = await import('./DockerServeClient/DockerServeClient');
+            const client = new dsc.DockerServeClient({ Name: maybeFixedContextName } as DockerContext); // Context name is the only thing used by DockerServeClient's constructor
+            const result = await client.getContexts(actionContext);
+            this.setHostSourceFromContextList(actionContext, result);
+            return result;
+        } catch {
+            // Best effort
+        }
+
+        return undefined;
+    }
+
+    private async tryGetContextsFromCli(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<DockerContext[] | undefined> {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: maybeFixedContextName } });
+
+        const result: DockerContext[] = [];
+
+        try {
+            // Try parsing as-is; newer CLIs output a JSON object array
+            const contexts = JSON.parse(stdout) as DockerContext[];
+            result.push(...contexts.map(toDockerContext));
+        } catch {
+            // Otherwise split by line, older CLIs output one JSON object per line
+            const lines = stdout.split(/\r?\n/im);
+
+            for (const line of lines) {
+                // Blank lines should be skipped
+                if (!line) {
+                    continue;
+                }
+
+                const context = JSON.parse(line) as DockerContext;
+                result.push(toDockerContext(context));
+            }
+        }
+
+        this.setHostSourceFromContextList(actionContext, result);
+        return result;
+    }
+
+    private setHostSourceFromContextList(actionContext: IActionContext, contexts: DockerContext[]) {
+        const currentContext = contexts.find(c => c.Current);
+
+        if (!currentContext) {
+            actionContext.telemetry.properties.hostSource = 'unknown';
+            return;
+        }
+
+        // This won't overwrite the value if it's already set, because above it may have been set by `docker.context` / `DOCKER_CONTEXT` already
+        if (defaultContextNames.indexOf(currentContext.Name) >= 0) {
+            actionContext.telemetry.properties.hostSource = actionContext.telemetry.properties.hostSource || 'defaultContextSelected';
+        } else {
+            actionContext.telemetry.properties.hostSource = actionContext.telemetry.properties.hostSource || 'customContextSelected';
+        }
+    }
+
+    private setHostProtocolFromContextList(actionContext: IActionContext, contexts: DockerContext[]) {
+        const currentContext = contexts.find(c => c.Current);
+
+        if (isNewContextType(currentContext.ContextType)) {
+            actionContext.telemetry.properties.hostProtocol = currentContext.ContextType;
+        } else {
+            try {
+                actionContext.telemetry.properties.hostProtocol = new URL(currentContext.DockerEndpoint).protocol;
+            } catch (err) {
+                // If URL parsing fails, let's catch it and give a better error message to help users from a common mistake
+                actionContext.telemetry.properties.hostProtocol = 'unknown';
+                const message =
+                    localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` or environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.');
+                const button = localize('vscode-docker.docker.contextManager.openSettings', 'Open Settings');
+
+                void window.showErrorMessage(message, button)
+                    .then((result: string) => {
+                        if (result === button) {
+                            void commands.executeCommand('workbench.action.openSettings', 'docker.host');
+                        }
+                    });
+
+                // Rethrow
+                throw err;
+            }
+        }
     }
 
     private async getCliVersion(): Promise<boolean> {
