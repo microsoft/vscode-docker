@@ -99,7 +99,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             debugConfiguration,
             {
                 containerName: containerName,
-                pattern: '^\\s*Now listening on:\\s+(https?://\\S+)',
+                pattern: '\\bNow listening on:\\s+(https?://\\S+)',
                 action: 'openExternally',
                 uriFormat: '%s://localhost:%s',
             },
