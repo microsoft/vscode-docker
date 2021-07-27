@@ -41,7 +41,7 @@ const defaultContext: Partial<DockerContext> = {
     ContextType: 'moby',
 };
 
-const defaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
+export const defaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
 
 // These contexts are used by external consumers (e.g. the "Remote - Containers" extension), and should NOT be changed
 type VSCodeContext = 'vscode-docker:aciContext' | 'vscode-docker:newSdkContext' | 'vscode-docker:newCliPresent' | 'vscode-docker:contextLocked';
