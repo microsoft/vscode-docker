@@ -236,7 +236,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
 
         // Workaround for <INSERT BUG LINK>: if no context is marked as Current=true, that means the environment has a fixed context or otherwise the default context is selected, so overwrite that property
         if (contextsList.every(ctx => !ctx.Current)) {
-            contextsList.find(ctx => ctx.Name === this.fixedContextName ?? 'default').Current = true;
+            contextsList.find(ctx => ctx.Name === (this.fixedContextName ?? 'default')).Current = true;
         }
 
         return contextsList;
