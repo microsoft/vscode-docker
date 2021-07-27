@@ -10,7 +10,7 @@ import { extensionVersion } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { startPage } from './StartPage';
 
-const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
+export const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
 
 export async function openStartPage(context: IActionContext): Promise<void> {
     await startPage.createOrShow(context);
