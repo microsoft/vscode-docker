@@ -32,6 +32,8 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     private readonly contextsClient: ContextsClient;
     private readonly callMetadata: Metadata;
 
+    private readonly fixedContextName: string;
+
     public constructor(currentContext?: DockerContext) {
         super();
 
@@ -41,7 +43,7 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         this.callMetadata = new Metadata();
 
         if (currentContext?.Name) {
-            this.callMetadata.add('context_key', currentContext.Name);
+            this.callMetadata.add('context_key', (this.fixedContextName = currentContext.Name)); // Assignment is intentional
         }
     }
 
@@ -232,9 +234,9 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             };
         });
 
-        // Workaround for <INSERT BUG LINK>: if no context is marked as Current=true, that means the default context is selected, so overwrite that property
+        // Workaround for <INSERT BUG LINK>: if no context is marked as Current=true, that means the environment has a fixed context or otherwise the default context is selected, so overwrite that property
         if (contextsList.every(ctx => !ctx.Current)) {
-            contextsList.find(ctx => ctx.Name === 'default').Current = true;
+            contextsList.find(ctx => ctx.Name === this.fixedContextName ?? 'default').Current = true;
         }
 
         return contextsList;
