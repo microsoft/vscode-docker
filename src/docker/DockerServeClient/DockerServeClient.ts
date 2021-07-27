@@ -38,9 +38,9 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
         this.containersClient = new ContainersClient();
         this.volumesClient = new VolumesClient();
         this.contextsClient = new ContextsClient();
+        this.callMetadata = new Metadata();
 
         if (currentContext?.Name) {
-            this.callMetadata = new Metadata();
             this.callMetadata.add('context_key', currentContext.Name);
         }
     }
@@ -220,17 +220,24 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
     public async getContexts(context: IActionContext, token?: CancellationToken): Promise<DockerContext[]> {
         const response: Contexts.ListResponse = await this.promisify(context, this.contextsClient, this.contextsClient.list, new Contexts.ListRequest(), token);
 
-        return response.getContextsList().map(ctx => ctx.toObject()).map(ctx => {
+        const contextsList = response.getContextsList().map(ctx => ctx.toObject()).map(ctx => {
             return {
                 Id: ctx.name,
                 Name: ctx.name,
                 ContextType: ctx.contexttype as ContextType,
                 Current: ctx.current,
-                DockerEndpoint: ctx.dockerEndpoint.host,
+                DockerEndpoint: ctx.dockerEndpoint?.host,
                 Description: ctx.description,
                 CreatedTime: undefined,
             };
         });
+
+        // Workaround for <INSERT BUG LINK>: if no context is marked as Current=true, that means the default context is selected, so overwrite that property
+        if (contextsList.every(ctx => !ctx.Current)) {
+            contextsList.find(ctx => ctx.Name === 'default').Current = true;
+        }
+
+        return contextsList;
     }
 
     private async promisify<TRequest, TResponse>(
