@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Containers as ContainersClient, Volumes as VolumesClient } from '@docker/sdk';
+import { Containers as ContainersClient, Contexts as ContextsClient, Volumes as VolumesClient } from '@docker/sdk';
 import * as Containers from '@docker/sdk/containers.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
+import * as Contexts from '@docker/sdk/contexts.d'; // Imports from the containers.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import * as Volumes from '@docker/sdk/volumes.d'; // Imports from the volumes.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
@@ -13,7 +14,7 @@ import { localize } from '../../localize';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
 import { ContextChangeCancelClient } from '../ContextChangeCancelClient';
-import { DockerContext } from '../Contexts';
+import { ContextType, DockerContext } from '../Contexts';
 import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -28,16 +29,22 @@ const dockerServeCallTimeout = 20 * 1000;
 export class DockerServeClient extends ContextChangeCancelClient implements DockerApiClient {
     private readonly containersClient: ContainersClient;
     private readonly volumesClient: VolumesClient;
+    private readonly contextsClient: ContextsClient;
     private readonly callMetadata: Metadata;
 
-    public constructor(currentContext: DockerContext) {
+    private readonly fixedContextName: string | undefined;
+
+    public constructor(currentContext?: DockerContext) {
         super();
 
         this.containersClient = new ContainersClient();
         this.volumesClient = new VolumesClient();
-
+        this.contextsClient = new ContextsClient();
         this.callMetadata = new Metadata();
-        this.callMetadata.add('context_key', currentContext.Name);
+
+        if (currentContext?.Name) {
+            this.callMetadata.add('context_key', (this.fixedContextName = currentContext.Name)); // Assignment is intentional
+        }
     }
 
     public dispose(): void {
@@ -210,6 +217,29 @@ export class DockerServeClient extends ContextChangeCancelClient implements Dock
             .setId(ref);
 
         await this.promisify(context, this.volumesClient, this.volumesClient.volumesDelete, request, token);
+    }
+
+    public async getContexts(context: IActionContext, token?: CancellationToken): Promise<DockerContext[]> {
+        const response: Contexts.ListResponse = await this.promisify(context, this.contextsClient, this.contextsClient.list, new Contexts.ListRequest(), token);
+
+        const contextsList = response.getContextsList().map(ctx => ctx.toObject()).map(ctx => {
+            return {
+                Id: ctx.name,
+                Name: ctx.name,
+                ContextType: ctx.contexttype as ContextType,
+                Current: ctx.current,
+                DockerEndpoint: ctx.dockerEndpoint?.host,
+                Description: ctx.description,
+                CreatedTime: undefined,
+            };
+        });
+
+        // Workaround for https://github.com/docker/compose-cli/issues/1960: if no context is marked as Current=true, that means the environment has a fixed context or otherwise the default context is selected, so overwrite that property
+        if (contextsList.every(ctx => !ctx.Current)) {
+            contextsList.find(ctx => ctx.Name === (this.fixedContextName || 'default')).Current = true;
+        }
+
+        return contextsList;
     }
 
     private async promisify<TRequest, TResponse>(
