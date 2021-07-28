@@ -10,7 +10,7 @@ import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 
-type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: string, selectedPort?: number };
+type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: string, selectedPort?: string };
 
 // NOTE: These ports are ordered in order of preference.
 const commonWebPorts = [
@@ -78,7 +78,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         selectedPort = item.port;
     }
 
-    telemetryProperties.selectedPort = selectedPort.PrivatePort;
+    telemetryProperties.selectedPort = selectedPort.PrivatePort.toString();
 
     const protocol = commonSslPorts.some(commonPort => commonPort === selectedPort.PrivatePort) ? 'https' : 'http';
     const host = selectedPort.IP === '0.0.0.0' ? 'localhost' : selectedPort.IP;
