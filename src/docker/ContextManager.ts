@@ -231,7 +231,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 contextList = [fixedContext];
             }
 
-            if (!contextList) {
+            if (!contextList || contextList.length === 0) {
                 // If the load is empty, return the default
                 // That way a returned value is ensured by this method
                 // And `setHostProtocolFromContextList` will always have a non-empty input
