@@ -1742,6 +1742,61 @@
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
                 },
+                "docker.commands.composeUpSubset": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.template%"
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.label%"
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.match%"
+                                    },
+                                    "contextTypes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "moby",
+                                                "aci"
+                                            ]
+                                        },
+                                        "description": "%vscode-docker.config.template.contextTypes.description%"
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": [
+                        {
+                            "label": "Compose Up",
+                            "template": "docker-compose ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
+                            "contextTypes": [
+                                "moby"
+                            ]
+                        },
+                        {
+                            "label": "Compose Up",
+                            "template": "docker compose ${profileList} ${configurationFile} up ${detached} ${serviceList}"
+                        }
+                    ],
+                    "description": "%vscode-docker.config.template.composeUpSubset.description%"
+                },
                 "docker.commands.composeDown": {
                     "oneOf": [
                         {
