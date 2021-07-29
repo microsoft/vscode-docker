@@ -23,16 +23,16 @@ export async function getComposeProfilesOrServices(context: IActionContext, work
     if (profiles?.length) {
         const profilesOrServices: IAzureQuickPickItem<SubsetType>[] = [
             {
-                label: localize('vscode-docker.getComposeServiceList.services', 'Services'),
+                label: localize('vscode-docker.getComposeSubsetList.services', 'Services'),
                 data: 'services'
             },
             {
-                label: localize('vscode-docker.getComposeServiceList.profiles', 'Profiles'),
+                label: localize('vscode-docker.getComposeSubsetList.profiles', 'Profiles'),
                 data: 'profiles'
             }
         ];
 
-        useProfiles = 'profiles' === (await context.ui.showQuickPick(profilesOrServices, { placeHolder: localize('vscode-docker.getComposeServiceList.servicesOrProfiles', 'Do you want to start services or profiles?') })).data;
+        useProfiles = 'profiles' === (await context.ui.showQuickPick(profilesOrServices, { placeHolder: localize('vscode-docker.getComposeSubsetList.servicesOrProfiles', 'Do you want to start services or profiles?') })).data;
     }
 
     return {
@@ -63,6 +63,11 @@ export async function getComposeProfileList(context: IActionContext, workspaceFo
 export async function getComposeServiceList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string): Promise<string> {
     const services = await getServiceSubsets(workspaceFolder, composeCommand, 'services');
 
+    if (!services?.length) {
+        context.errorHandling.suppressReportIssue = true;
+        throw new Error(localize('vscode-docker.getComposeSubsetList.noServices', 'No services were found in the compose document(s). Did you mean to use profiles instead?'));
+    }
+
     // Fetch the previously chosen services list. By default, all will be selected.
     const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
     const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, services);
@@ -76,8 +81,8 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
 
 async function pickSubsets(context: IActionContext, type: SubsetType, allChoices: string[], previousChoices: string[]): Promise<string[]> {
     const label = type === 'profiles' ?
-        localize('vscode-docker.getComposeServiceList.chooseProfiles', 'Choose profiles to start') :
-        localize('vscode-docker.getComposeServiceList.choose', 'Choose services to start');
+        localize('vscode-docker.getComposeSubsetList.chooseProfiles', 'Choose profiles to start') :
+        localize('vscode-docker.getComposeSubsetList.choose', 'Choose services to start');
 
     const pickChoices: IAzureQuickPickItem<string>[] = allChoices.map(s => ({
         label: s,
@@ -85,28 +90,11 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
         picked: previousChoices.some(p => p === s),
     }));
 
-    const qp = vscode.window.createQuickPick();
-    qp.items = pickChoices;
-    qp.placeholder = label;
-    qp.canSelectMany = true;
-    qp.onDidChangeSelection((e) => {
-        console.log(e);
-    });
-
-    qp.show();
-
-    await new Promise<void>((resolve) => {
-        qp.onDidAccept(() => resolve());
-    });
-
-    const chosenSubsets = await vscode.window.showQuickPick(
+    const chosenSubsets = await context.ui.showQuickPick(
         pickChoices,
         {
             canPickMany: true,
             placeHolder: label,
-            onDidSelectItem: (item) => {
-                console.log(item);
-            }
         }
     );
 
