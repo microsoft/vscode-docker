@@ -1307,13 +1307,7 @@
                                     "module"
                                 ]
                             }
-                        ],
-                        "not": {
-                            "required": [
-                                "file",
-                                "module"
-                            ]
-                        }
+                        ]
                     }
                 }
             },
@@ -1418,12 +1412,6 @@
                                 ]
                             }
                         ],
-                        "not": {
-                            "required": [
-                                "up",
-                                "down"
-                            ]
-                        },
                         "default": {
                             "up": {
                                 "detached": true,
