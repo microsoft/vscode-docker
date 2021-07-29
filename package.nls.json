@@ -293,5 +293,15 @@
     "vscode-docker.views.dockerVolumes": "Volumes",
     "vscode-docker.views.dockerContexts": "Contexts",
     "vscode-docker.views.help": "Help and Feedback",
-    "vscode-docker.workspaceTrust.description": "Workspace must be trusted in order to perform relevant Docker actions."
+    "vscode-docker.workspaceTrust.description": "Workspace must be trusted in order to perform relevant Docker actions.",
+    "vscode-docker.walkthrough.start.title": "Getting Started with Docker",
+    "vscode-docker.walkthrough.start.description": "Learn about Docker and the Docker extension for VS Code",
+    "vscode-docker.walkthrough.start.scaffold.title": "Add Docker files to a workspace",
+    "vscode-docker.walkthrough.start.scaffold.description": "Add Docker files to containerize your workspace.\n[Add Docker files](command:vscode-docker.configure)",
+    "vscode-docker.walkthrough.start.explorer.title": "Explore Docker Resources",
+    "vscode-docker.walkthrough.start.explorer.description": "Use the Docker Explorer to manage containers, images, and more.\n[Open Docker Explorer](command:workbench.view.extension.dockerView)",
+    "vscode-docker.walkthrough.start.debug.title": "Debug in a Container",
+    "vscode-docker.walkthrough.start.debug.description": "Debug your apps within a container",
+    "vscode-docker.walkthrough.start.aci.title": "Use Azure Container Instances",
+    "vscode-docker.walkthrough.start.aci.description": "Rapidly start containers in Azure with Azure Container Instances"
 }

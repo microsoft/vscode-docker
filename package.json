@@ -2760,7 +2760,62 @@
                     "title": "%vscode-docker.views.activityBar%"
                 }
             ]
-        }
+        },
+        "walkthroughs": [
+            {
+                "id": "dockerStart",
+                "title": "%vscode-docker.walkthrough.start.title%",
+                "description": "%vscode-docker.walkthrough.start.description%",
+                "steps": [
+                    {
+                        "id": "scaffold",
+                        "title": "%vscode-docker.walkthrough.start.scaffold.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.configure",
+                            "onCommand:vscode-docker.configureCompose"
+                        ],
+                        "when": "workspaceFolderCount > 0",
+                        "description": "%vscode-docker.walkthrough.start.scaffold.description%",
+                        "media": {
+                            "markdown": "foo"
+                        }
+                    },
+                    {
+                        "id": "explorer",
+                        "title": "%vscode-docker.walkthrough.start.explorer.title%",
+                        "completionEvents": [
+                            "onView:dockerContainers",
+                            "onCommand:workbench.view.extension.dockerView"
+                        ],
+                        "description": "%vscode-docker.walkthrough.start.explorer.description%",
+                        "media": {
+                            "markdown": "foo"
+                        }
+                    },
+                    {
+                        "id": "debug",
+                        "title": "%vscode-docker.walkthrough.start.debug.title%",
+                        "description": "%vscode-docker.walkthrough.start.debug.description%",
+                        "media": {
+                            "image": "foo",
+                            "altText": "bar"
+                        }
+                    },
+                    {
+                        "id": "aci",
+                        "title": "%vscode-docker.walkthrough.start.aci.title%",
+                        "completionEvents": [
+                            "onContext:vscode-docker:aciContext"
+                        ],
+                        "description": "%vscode-docker.walkthrough.start.aci.description%",
+                        "media": {
+                            "altText": "bar",
+                            "image": "foo"
+                        }
+                    }
+                ]
+            }
+        ]
     },
     "engines": {
         "vscode": "^1.56.0"
