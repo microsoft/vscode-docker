@@ -49,6 +49,8 @@
         "onCommand:vscode-docker.containers.stop",
         "onCommand:vscode-docker.containers.viewLogs",
         "onCommand:vscode-docker.containers.composeGroup.logs",
+        "onCommand:vscode-docker.containers.composeGroup.start",
+        "onCommand:vscode-docker.containers.composeGroup.stop",
         "onCommand:vscode-docker.containers.composeGroup.restart",
         "onCommand:vscode-docker.containers.composeGroup.down",
         "onCommand:vscode-docker.debugging.initializeForDebugging",
@@ -162,6 +164,14 @@
                 {
                     "command": "vscode-docker.containers.composeGroup.logs",
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.start",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.stop",
+                    "when": "never"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.restart",
@@ -457,6 +467,16 @@
                     "command": "vscode-docker.containers.composeGroup.logs",
                     "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
                     "group": "composeGroup_1_general@1"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.start",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "group": "composeGroup_1_general@2"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.stop",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "group": "composeGroup_1_general@3"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.restart",
@@ -2373,6 +2393,16 @@
             {
                 "command": "vscode-docker.containers.composeGroup.logs",
                 "title": "%vscode-docker.commands.containers.composeGroup.logs%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.composeGroup.start",
+                "title": "%vscode-docker.commands.containers.composeGroup.start%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.composeGroup.stop",
+                "title": "%vscode-docker.commands.containers.composeGroup.stop%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
