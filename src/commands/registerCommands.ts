@@ -12,7 +12,7 @@ import { scaffoldDebugConfig } from "../scaffolding/scaffoldDebugConfig";
 import { composeDown, composeRestart, composeUp, composeUpSubset } from "./compose/compose";
 import { attachShellContainer } from "./containers/attachShellContainer";
 import { browseContainer } from "./containers/browseContainer";
-import { composeGroupDown, composeGroupLogs, composeGroupRestart } from "./containers/composeGroup";
+import { composeGroupDown, composeGroupLogs, composeGroupRestart, composeGroupStart, composeGroupStop } from "./containers/composeGroup";
 import { configureContainersExplorer } from "./containers/configureContainersExplorer";
 import { downloadContainerFile } from "./containers/files/downloadContainerFile";
 import { openContainerFile } from "./containers/files/openContainerFile";
@@ -136,6 +136,8 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.stop', stopContainer);
     registerWorkspaceCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.logs', composeGroupLogs);
+    registerWorkspaceCommand('vscode-docker.containers.composeGroup.start', composeGroupStart);
+    registerWorkspaceCommand('vscode-docker.containers.composeGroup.stop', composeGroupStop);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.restart', composeGroupRestart);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.down', composeGroupDown);
 
