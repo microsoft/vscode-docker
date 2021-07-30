@@ -224,9 +224,12 @@ export class DockerContextManager implements ContextManager, Disposable {
             // If the result is undefined, there are (probably) multiple contexts and none is chosen by `docker.context` or `DOCKER_CONTEXT`, so we will need to do a context listing
             // If the result is a string, that means `docker.context` or `DOCKER_CONTEXT` are set, so we will also need to do a context listing
             if (typeof (fixedContext) === 'undefined' || typeof (fixedContext) === 'string') {
-                contextList =
-                    (await this.tryGetContextsFromApi(actionContext, fixedContext)) ||
-                    (await this.tryGetContextsFromCli(actionContext, fixedContext));
+                if (await ext.experimentationService.getCachedTreatmentVariable<boolean>('vscode-docker.contextLookup.api')) {
+                    // Experiment: try lookup via the API first, falling back if needed to the CLI
+                    contextList = await this.tryGetContextsFromApi(actionContext, fixedContext);
+                }
+
+                contextList = contextList || (await this.tryGetContextsFromCli(actionContext, fixedContext));
             } else {
                 contextList = [fixedContext];
             }
@@ -312,7 +315,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             const dsc = await import('./DockerServeClient/DockerServeClient');
             const client = new dsc.DockerServeClient({ Name: maybeFixedContextName } as DockerContext); // Context name is the only thing used by DockerServeClient's constructor
             const result = await client.getContexts(actionContext);
-            this.setHostSourceFromContextList(actionContext, result);
+            this.setHostSourceFromContextList(actionContext, result, 'api');
             return result;
         } catch {
             // Best effort
@@ -346,17 +349,19 @@ export class DockerContextManager implements ContextManager, Disposable {
             }
         }
 
-        this.setHostSourceFromContextList(actionContext, result);
+        this.setHostSourceFromContextList(actionContext, result, 'cli');
         return result;
     }
 
-    private setHostSourceFromContextList(actionContext: IActionContext, contexts: DockerContext[]) {
+    private setHostSourceFromContextList(actionContext: IActionContext, contexts: DockerContext[], contextSource: 'api' | 'cli') {
         const currentContext = contexts.find(c => c.Current);
 
         if (!currentContext) {
             actionContext.telemetry.properties.hostSource = 'unknown';
             return;
         }
+
+        actionContext.telemetry.properties.contextSource = contextSource;
 
         // This won't overwrite the value if it's already set, because above it may have been set by `docker.context` / `DOCKER_CONTEXT` already
         if (defaultContextNames.indexOf(currentContext.Name) >= 0) {
