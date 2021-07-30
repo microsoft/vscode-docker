@@ -17,6 +17,14 @@ export async function composeGroupLogs(context: IActionContext, node: ContainerG
     return composeGroup(context, 'logs', node, '-f --tail 1000');
 }
 
+export async function composeGroupStart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
+    return composeGroup(context, 'start', node);
+}
+
+export async function composeGroupStop(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
+    return composeGroup(context, 'stop', node);
+}
+
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
     return composeGroup(context, 'restart', node);
 }
@@ -25,7 +33,7 @@ export async function composeGroupDown(context: IActionContext, node: ContainerG
     return composeGroup(context, 'down', node);
 }
 
-async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'restart' | 'down', node: ContainerGroupTreeItem, additionalArguments?: string): Promise<void> {
+async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'start' | 'stop' | 'restart' | 'down', node: ContainerGroupTreeItem, additionalArguments?: string): Promise<void> {
     if (!node) {
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {

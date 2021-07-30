@@ -11,7 +11,7 @@ import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { dockerExePath, DefaultDockerPath } from '../utils/dockerExePathProvider';
 
-type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown';
+type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown' | 'composeUpSubset';
 
 type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
 
@@ -77,10 +77,25 @@ export async function selectLogsCommand(context: IActionContext, containerName: 
     );
 }
 
-export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down', configurationFile?: string, detached?: boolean, build?: boolean): Promise<string> {
+export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down' | 'upSubset', configurationFile?: string, detached?: boolean, build?: boolean): Promise<string> {
+    let template: TemplateCommand;
+
+    switch (composeCommand) {
+        case 'up':
+            template = 'composeUp';
+            break;
+        case 'down':
+            template = 'composeDown';
+            break;
+        case 'upSubset':
+        default:
+            template = 'composeUpSubset';
+            break;
+    }
+
     return await selectCommandTemplate(
         context,
-        composeCommand === 'up' ? 'composeUp' : 'composeDown',
+        template,
         [folder.name, configurationFile],
         folder,
         { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
