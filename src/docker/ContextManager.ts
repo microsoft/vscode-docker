@@ -224,9 +224,12 @@ export class DockerContextManager implements ContextManager, Disposable {
             // If the result is undefined, there are (probably) multiple contexts and none is chosen by `docker.context` or `DOCKER_CONTEXT`, so we will need to do a context listing
             // If the result is a string, that means `docker.context` or `DOCKER_CONTEXT` are set, so we will also need to do a context listing
             if (typeof (fixedContext) === 'undefined' || typeof (fixedContext) === 'string') {
-                contextList =
-                    (await this.tryGetContextsFromApi(actionContext, fixedContext)) ||
-                    (await this.tryGetContextsFromCli(actionContext, fixedContext));
+                if (await ext.experimentationService.getCachedTreatmentVariable<boolean>('vscode-docker.contextLookup.api')) {
+                    // Experiment: try lookup via the API first, falling back if needed to the CLI
+                    contextList = await this.tryGetContextsFromApi(actionContext, fixedContext);
+                }
+
+                contextList = contextList || (await this.tryGetContextsFromCli(actionContext, fixedContext));
             } else {
                 contextList = [fixedContext];
             }
