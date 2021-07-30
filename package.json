@@ -1780,7 +1780,7 @@
                         },
                         {
                             "label": "Compose Up",
-                            "template": "docker compose ${profileList} ${configurationFile} up ${detached} ${serviceList}"
+                            "template": "docker compose ${configurationFile} ${profileList} up ${detached} ${serviceList}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUpSubset.description%"
