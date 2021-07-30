@@ -107,6 +107,7 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
 
 async function getServiceSubsets(workspaceFolder: vscode.WorkspaceFolder, composeCommand: string, type: SubsetType): Promise<string[] | undefined> {
     // TODO: if there are any profiles, then only services with no profiles show up when you query `config --services`. This makes for a lousy UX.
+    // Bug for that is https://github.com/docker/compose-cli/issues/1964
 
     try {
         // Start by getting a new command with the exact same files list (replaces the "up ..." or "down ..." with "config --services" or "config --profiles")
