@@ -2765,6 +2765,7 @@
             {
                 "id": "dockerStart",
                 "title": "%vscode-docker.walkthrough.start.title%",
+                "when": "never",
                 "description": "%vscode-docker.walkthrough.start.description%",
                 "steps": [
                     {

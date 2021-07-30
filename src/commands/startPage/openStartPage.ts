@@ -31,6 +31,11 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
         }
     }
 
+    if (await ext.experimentationService.getLiveTreatmentVariable<string>('gettingStarted.overrideCategory.ms-azuretools.vscode-docker.dockerStart.when') === 'true') {
+        // Don't show, the experiment for the other startup walkthrough is enabled
+        return;
+    }
+
     // Let's show!
     await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
     await vscode.commands.executeCommand('vscode-docker.help.openStartPage', { commandReason: 'install' });
