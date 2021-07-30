@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry';
+import { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardPromptStep, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { localize } from '../../../../localize';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
