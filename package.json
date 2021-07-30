@@ -1320,22 +1320,12 @@
                             {
                                 "required": [
                                     "file"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "module"
-                                    ]
-                                }
+                                ]
                             },
                             {
                                 "required": [
                                     "module"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "file"
-                                    ]
-                                }
+                                ]
                             }
                         ]
                     }
@@ -1374,10 +1364,23 @@
                                             "type": "string"
                                         }
                                     },
+                                    "profiles": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.profiles%",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
                                     "customOptions": {
                                         "type": "string",
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.customOptions%"
                                     }
+                                },
+                                "not": {
+                                    "required": [
+                                        "services",
+                                        "profiles"
+                                    ]
                                 }
                             },
                             "down": {
@@ -1421,22 +1424,12 @@
                             {
                                 "required": [
                                     "up"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "down"
-                                    ]
-                                }
+                                ]
                             },
                             {
                                 "required": [
                                     "down"
-                                ],
-                                "not": {
-                                    "enum": [
-                                        "up"
-                                    ]
-                                }
+                                ]
                             }
                         ],
                         "default": {
@@ -1756,6 +1749,61 @@
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
+                },
+                "docker.commands.composeUpSubset": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.template%"
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.label%"
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeUpSubset.match%"
+                                    },
+                                    "contextTypes": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "enum": [
+                                                "moby",
+                                                "aci"
+                                            ]
+                                        },
+                                        "description": "%vscode-docker.config.template.contextTypes.description%"
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": [
+                        {
+                            "label": "Compose Up",
+                            "template": "docker-compose ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
+                            "contextTypes": [
+                                "moby"
+                            ]
+                        },
+                        {
+                            "label": "Compose Up",
+                            "template": "docker compose ${configurationFile} ${profileList} up ${detached} ${serviceList}"
+                        }
+                    ],
+                    "description": "%vscode-docker.config.template.composeUpSubset.description%"
                 },
                 "docker.commands.composeDown": {
                     "oneOf": [

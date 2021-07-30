@@ -56,6 +56,10 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             throw new Error(localize('vscode-docker.tasks.composeProvider.noUpOrDown', 'Neither "up" nor "down" properties are present in the docker-compose task.'));
         }
 
+        if (dockerCompose.up?.services && dockerCompose.up?.profiles) {
+            throw new Error(localize('vscode-docker.tasks.composeProvider.bothServicesAndProfiles', 'Both "services" and "profiles" are present in the docker-compose task\'s "up" property.'));
+        }
+
         for (const file of dockerCompose.files) {
             if (!(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(file, context.folder))))) {
                 throw new Error(localize('vscode-docker.tasks.composeProvider.invalidFile', 'One or more docker-compose files does not exist or could not be accessed.'));
@@ -84,6 +88,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
                 .withArrayArgs('--env-file', options.envFiles)
+                .withArrayArgs('--profile', options.up.profiles)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
                 .withFlagArg('--build', !!options.up.build)

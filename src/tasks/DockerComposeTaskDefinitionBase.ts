@@ -11,6 +11,7 @@ export interface DockerComposeUpOptions {
         build?: boolean;
         scale?: { [service: string]: number };
         services?: string[];
+        profiles?: string[];
         customOptions?: string;
     };
     down?: never;
