@@ -14,7 +14,6 @@ import { registerCommands } from './commands/registerCommands';
 import { lastVersionKey } from './commands/startPage/openStartPage';
 import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
-import { ContextLoadingClient } from './docker/ContextLoadingClient/ContextLoadingClient';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
 import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
@@ -111,9 +110,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         );
 
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
-        ext.dockerClient = new ContextLoadingClient();
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
-        // No need to wait
+        // No need to wait thanks to ContextLoadingClient
         void ext.dockerContextManager.refresh();
 
         ctx.subscriptions.push(
