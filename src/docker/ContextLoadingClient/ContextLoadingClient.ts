@@ -71,10 +71,7 @@ export class ContextLoadingClient implements DockerApiClient {
     }
 
     public async pruneContainers(context: IActionContext, token?: CancellationToken): Promise<PruneResult> {
-        console.log('prune containers');
         await this.contextLoadingPromise;
-        console.log(`prune containers via`);
-        console.log(ext.dockerClient);
         return ext.dockerClient.pruneContainers(context, token);
     }
 
