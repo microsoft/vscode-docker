@@ -14,6 +14,10 @@ import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks'
 import { DockerVersion } from '../Version';
 import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 
+/**
+ * This client does not actually do anything, but instead, allows callers to transparently await a call on
+ * ext.dockerClient without needing to worry about the initial load time
+ */
 export class ContextLoadingClient implements DockerApiClient {
     private readonly contextLoadingPromise: Promise<void>;
 
