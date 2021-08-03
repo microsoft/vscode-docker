@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
+import { ContextManager } from '../ContextManager';
 import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -21,9 +22,9 @@ import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 export class ContextLoadingClient implements DockerApiClient {
     private readonly contextLoadingPromise: Promise<void>;
 
-    public constructor() {
+    public constructor(ctxMgr: ContextManager) {
         this.contextLoadingPromise = new Promise((resolve) => {
-            const disposable = ext.dockerContextManager.onContextChanged(() => {
+            const disposable = ctxMgr.onContextChanged(() => {
                 disposable.dispose();
                 resolve();
             });

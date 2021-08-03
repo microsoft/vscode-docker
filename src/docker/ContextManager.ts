@@ -95,7 +95,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         }
 
         // Set the initial DockerApiClient to be the context loading client
-        ext.dockerClient = new ContextLoadingClient();
+        ext.dockerClient = new ContextLoadingClient(this);
     }
 
     public dispose(): void {
