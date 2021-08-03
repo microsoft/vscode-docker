@@ -2856,7 +2856,7 @@
                         "when": "workspaceFolderCount > 0",
                         "description": "%vscode-docker.walkthrough.start.scaffold.description%",
                         "media": {
-                            "markdown": "foo"
+                            "markdown": "resources/placeholder.md"
                         }
                     },
                     {
@@ -2868,7 +2868,7 @@
                         ],
                         "description": "%vscode-docker.walkthrough.start.explorer.description%",
                         "media": {
-                            "markdown": "foo"
+                            "markdown": "resources/placeholder.md"
                         }
                     },
                     {
