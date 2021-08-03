@@ -111,7 +111,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
-        await ext.dockerContextManager.refresh();
+        // No need to wait thanks to ContextLoadingClient
+        void ext.dockerContextManager.refresh();
 
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(

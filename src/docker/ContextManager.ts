@@ -19,6 +19,7 @@ import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
 import { dockerExePath } from '../utils/dockerExePathProvider';
 import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
+import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClient';
 
 // CONSIDER
 // Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
@@ -92,6 +93,9 @@ export class DockerContextManager implements ContextManager, Disposable {
         } catch {
             // Best effort
         }
+
+        // Set the initial DockerApiClient to be the context loading client
+        ext.dockerClient = new ContextLoadingClient();
     }
 
     public dispose(): void {
