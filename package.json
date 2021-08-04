@@ -2856,7 +2856,7 @@
                         "when": "workspaceFolderCount > 0",
                         "description": "%vscode-docker.walkthrough.start.scaffold.description%",
                         "media": {
-                            "markdown": "resources/placeholder.md"
+                            "markdown": "resources/walkthroughs/placeholder.md"
                         }
                     },
                     {
@@ -2868,7 +2868,7 @@
                         ],
                         "description": "%vscode-docker.walkthrough.start.explorer.description%",
                         "media": {
-                            "markdown": "resources/placeholder.md"
+                            "markdown": "resources/walkthroughs/placeholder.md"
                         }
                     },
                     {
@@ -2876,7 +2876,17 @@
                         "title": "%vscode-docker.walkthrough.start.debug.title%",
                         "description": "%vscode-docker.walkthrough.start.debug.description%",
                         "media": {
-                            "image": "foo",
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png",
+                            "altText": "bar"
+                        }
+                    },
+                    {
+                        "id": "buildimg",
+                        "title": "Build an image",
+                        "description": "%vscode-docker.walkthrough.start.debug.description%",
+                        "when": "workspaceContains:*.foobar",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png",
                             "altText": "bar"
                         }
                     },
@@ -2889,7 +2899,7 @@
                         "description": "%vscode-docker.walkthrough.start.aci.description%",
                         "media": {
                             "altText": "bar",
-                            "image": "foo"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
                         }
                     }
                 ]
