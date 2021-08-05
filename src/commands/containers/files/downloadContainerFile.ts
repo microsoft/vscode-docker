@@ -74,7 +74,8 @@ export async function downloadContainerFile(context: IActionContext, node?: File
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
-            title: localize('vscode-docker.commands.containers.files.downloadContainerFile.opening', 'Downloading File(s)...')
+            title: localize('vscode-docker.commands.containers.files.downloadContainerFile.opening', 'Downloading File(s)...'),
+            cancellable: true
         },
         async (task, token) => {
             for (const file of files) {
