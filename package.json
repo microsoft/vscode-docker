@@ -2873,7 +2873,7 @@
         "ci-build": "npm test",
         "package": "npm run build && vsce package",
         "ci-package": "npm test && vsce package",
-        "lint": "eslint src --ext ts",
+        "lint": "eslint --max-warnings 0 src --ext ts",
         "test": "node ./out/test/runTest.js",
         "pretest": "tsc -p ./ && npm run lint && npm run build",
         "test-watch": "tsc -watch -p ./"
