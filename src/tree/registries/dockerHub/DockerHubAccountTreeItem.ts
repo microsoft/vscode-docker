@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
+import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
-import { RequestLike } from "../../../utils/httpRequest";
+import { bearerAuthHeader, RequestLike } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath } from "../../getThemedIconPath";
@@ -24,7 +24,6 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
     public cachedProvider: ICachedRegistryProvider;
 
     private _token?: string;
-    private _nextLink?: string;
 
     public constructor(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) {
         super(parent);
@@ -48,8 +47,6 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
-            this._nextLink = undefined;
-
             try {
                 await this.refreshToken();
             } catch (err) {
@@ -58,11 +55,18 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
             }
         }
 
-        const url: string = this._nextLink ? this._nextLink : `v2/repositories/namespaces?page_size=${PAGE_SIZE}`;
-        const response = await registryRequest<INamespaces>(this, 'GET', url);
-        this._nextLink = response.body.next;
+        const orgsAndNamespaces = new Set<string>();
+
+        for (const orgs of await this.getOrganizations()) {
+            orgsAndNamespaces.add(orgs);
+        }
+
+        for (const namespaces of await this.getNamespaces()) {
+            orgsAndNamespaces.add(namespaces);
+        }
+
         return this.createTreeItemsWithErrorHandling(
-            response.body.namespaces,
+            Array.from(orgsAndNamespaces),
             'invalidDockerHubNamespace',
             n => new DockerHubNamespaceTreeItem(this, n.toLowerCase()),
             n => n
@@ -70,12 +74,12 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return !!this._nextLink;
+        return false;
     }
 
     public async signRequest(request: RequestLike): Promise<RequestLike> {
         if (this._token) {
-            request.headers.set('Authorization', 'JWT ' + this._token);
+            request.headers.set('Authorization', bearerAuthHeader(this._token));
         }
 
         return request;
@@ -88,6 +92,18 @@ export class DockerHubAccountTreeItem extends AzExtParentTreeItem implements IRe
         const response = await registryRequest<IToken>(this, 'POST', url, { body: JSON.stringify(body), headers: { 'Content-Type': 'application/json' } });
         this._token = response.body.token;
     }
+
+    private async getNamespaces(): Promise<string[]> {
+        const url: string = `v2/repositories/namespaces`;
+        const response = await registryRequest<INamespaces>(this, 'GET', url);
+        return response.body.namespaces;
+    }
+
+    private async getOrganizations(): Promise<string[]> {
+        const url: string = `v2/user/orgs`;
+        const response = await registryRequest<IOrganizations>(this, 'GET', url);
+        return response.body.results?.map(o => o.orgname) ?? [];
+    }
 }
 
 interface IToken {
@@ -96,5 +112,14 @@ interface IToken {
 
 interface INamespaces {
     namespaces: string[];
+    next?: string;
+}
+
+interface IOrganizations {
+    results: [
+        {
+            orgname: string
+        }
+    ],
     next?: string;
 }
