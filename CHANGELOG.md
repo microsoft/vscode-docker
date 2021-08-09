@@ -1,29 +1,35 @@
-## 1.15.0 - 19 July 2021
+## 1.16.0 - 16 August 2021
+### Added
+* VSCode's [Workspace Trust](https://code.visualstudio.com/updates/v1_57#_workspace-trust) feature is now supported. [#2829](https://github.com/microsoft/vscode-docker/issues/2829)
+* The Dockerfile scaffolding for Node.js applications now will use the low-rights `node` user by default. [#1834](https://github.com/microsoft/vscode-docker/issues/1834)
+* Profiles are now supported for starting applications with "Compose Up - Select Services" and in `docker-compose` tasks. [#2777](https://github.com/microsoft/vscode-docker/issues/2777)
+* In compose project groupings in the Containers view, Start and Stop are now available. [#2895](https://github.com/microsoft/vscode-docker/issues/2895)
 
+### Fixed
+* Organizations should now show up in the Registries view for Docker Hub accounts. [#2954](https://github.com/microsoft/vscode-docker/issues/2954)
+* Improvements have been made to extension activation time on Windows and Mac. [#3054](https://github.com/microsoft/vscode-docker/issues/3054)
+
+## 1.15.0 - 19 July 2021
 ### Fixed
 * Use correct base image for .NET Windows containers [#3018](https://github.com/microsoft/vscode-docker/issues/3018)
 * Fix installation of Docker on ARM64 Mac machines [#3024](https://github.com/microsoft/vscode-docker/issues/3024)
 * Start page icons now display correctly [#2952](https://github.com/microsoft/vscode-docker/issues/2952)
 * Eliminate spurious errors when images are deleted from Azure Container Registry [#2968](https://github.com/microsoft/vscode-docker/issues/2968)
-* Enable deployment to App Service that uses "custom location" (Kubernetes-hosted) [#2972](https://github.com/microsoft/vscode-docker/issues/2972) [#2973](https://github.com/microsoft/vscode-docker/issues/2973)
+* Enable deployment to App Service that uses "custom location" (Kubernetes-hosted) [#2972](https://github.com/microsoft/vscode-docker/issues/2972), [#2973](https://github.com/microsoft/vscode-docker/issues/2973)
 
 ## 1.14.0 - 21 June 2021
-
 ### Added
-
-* Enable Dockerfile formatter to skip instructions that span multiple lines [#992](https://github.com/microsoft/vscode-docker/issues/992) [#2004](https://github.com/microsoft/vscode-docker/issues/2004)
+* Enable Dockerfile formatter to skip instructions that span multiple lines [#992](https://github.com/microsoft/vscode-docker/issues/992), [#2004](https://github.com/microsoft/vscode-docker/issues/2004)
 * Add ability to see dangling images in the explorer [#2547](https://github.com/microsoft/vscode-docker/issues/2547)
 * Add a setting for Docker CLI executable path, providing a workaround for [#2894](https://github.com/microsoft/vscode-docker/issues/2894)
 * Enable debugging .NET applications in arm64 containers [#2884](https://github.com/microsoft/vscode-docker/issues/2884)
 
 ### Fixed
-
 * Docker start Page pops up for non-docker related activations [#2953](https://github.com/microsoft/vscode-docker/issues/2953)
 
 ## 1.13.0 - 25 May 2021
-
 ### Added
-* Support for deploying a container image to Azure App Service on Kubernetes with Azure Arc
+* Support for deploying a container image to Azure App Service on Kubernetes with Azure Arc. [#2924](https://github.com/microsoft/vscode-docker/pull/2924)
 * Use fixed port for .Net in compose files. [#2725](https://github.com/microsoft/vscode-docker/issues/2725)
 * Use latest version of dockerfile language server .NET apps will now scaffold using a non-root user. [#2865](https://github.com/microsoft/vscode-docker/issues/2865)
 
