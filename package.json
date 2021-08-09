@@ -2848,55 +2848,86 @@
                 "steps": [
                     {
                         "id": "scaffold",
-                        "title": "%vscode-docker.walkthrough.start.scaffold.title%",
+                        "title": "Add Docker Files to Workspace",
                         "completionEvents": [
                             "onCommand:vscode-docker.configure",
                             "onCommand:vscode-docker.configureCompose"
                         ],
                         "when": "workspaceFolderCount > 0",
-                        "description": "%vscode-docker.walkthrough.start.scaffold.description%",
+                        "description": "Add Dockerfiles and get started editing them!\n[Add Docker files](command:vscode-docker.configure)",
+                        "media": {
+                            "markdown": "resources/walkthroughs/placeholder.md"
+                        }
+                    },
+                    {
+                        "id": "buildImg",
+                        "title": "Build an Image",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.images.build"
+                        ],
+                        "description": "Build an image\n[Build Image](command:vscode-docker.images.build)",
+                        "media": {
+                            "markdown": "resources/walkthroughs/placeholder.md"
+                        }
+                    },
+                    {
+                        "id": "runContainers",
+                        "title": "Run Containers",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.images.run",
+                            "onCommand:vscode-docker.compose.up",
+                            "onContext:vscode-docker:containerHasRun"
+                        ],
+                        "description": "Run containers directly or with Docker Compose",
                         "media": {
                             "markdown": "resources/walkthroughs/placeholder.md"
                         }
                     },
                     {
                         "id": "explorer",
-                        "title": "%vscode-docker.walkthrough.start.explorer.title%",
+                        "title": "Use the Docker Explorer",
                         "completionEvents": [
                             "onView:dockerContainers",
                             "onCommand:workbench.view.extension.dockerView"
                         ],
-                        "description": "%vscode-docker.walkthrough.start.explorer.description%",
+                        "description": "The Docker Explorer allows you to view and manage Docker resources like images, containers, etc.\n[Open Docker Explorer](command:workbench.view.extension.dockerView)",
                         "media": {
                             "markdown": "resources/walkthroughs/placeholder.md"
                         }
                     },
                     {
-                        "id": "debug",
-                        "title": "%vscode-docker.walkthrough.start.debug.title%",
-                        "description": "%vscode-docker.walkthrough.start.debug.description%",
-                        "media": {
-                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png",
-                            "altText": "bar"
-                        }
-                    },
-                    {
-                        "id": "buildimg",
-                        "title": "Build an image",
-                        "description": "%vscode-docker.walkthrough.start.debug.description%",
-                        "when": "workspaceContains:*.foobar",
-                        "media": {
-                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png",
-                            "altText": "bar"
-                        }
-                    },
-                    {
-                        "id": "aci",
-                        "title": "%vscode-docker.walkthrough.start.aci.title%",
+                        "id": "publish",
+                        "title": "Publish to the Cloud",
                         "completionEvents": [
-                            "onContext:vscode-docker:aciContext"
+                            "onCommand:vscode-docker.images.push"
                         ],
-                        "description": "%vscode-docker.walkthrough.start.aci.description%",
+                        "description": "[Push an Image](command:vscode-docker.images.push)",
+                        "media": {
+                            "altText": "bar",
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
+                        }
+                    },
+                    {
+                        "id": "azDeploy",
+                        "title": "Deploy to Azure App Service",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.registries.deployImageToAzure",
+                            "onCommand:vscode-docker.registries.deployImageToACI"
+                        ],
+                        "description": "[Deploy](command:vscode-docker.registries.deployImageToAzure)",
+                        "when": "isAzureAccountInstalled",
+                        "media": {
+                            "altText": "bar",
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
+                        }
+                    },
+                    {
+                        "id": "learn",
+                        "title": "Learn More",
+                        "description": "[Further Reading](command:vscode-docker.views.help.focus)",
+                        "completionEvents": [
+                            "onStepSelected"
+                        ],
                         "media": {
                             "altText": "bar",
                             "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
