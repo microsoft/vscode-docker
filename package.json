@@ -2860,7 +2860,7 @@
                         }
                     },
                     {
-                        "id": "buildImg",
+                        "id": "buildImage",
                         "title": "Build an Image",
                         "completionEvents": [
                             "onCommand:vscode-docker.images.build"
@@ -2871,7 +2871,7 @@
                         }
                     },
                     {
-                        "id": "runContainers",
+                        "id": "runContainer",
                         "title": "Run Containers",
                         "completionEvents": [
                             "onCommand:vscode-docker.images.run",
@@ -2884,9 +2884,10 @@
                         }
                     },
                     {
-                        "id": "explorer",
+                        "id": "dockerExplorer",
                         "title": "Use the Docker Explorer",
                         "completionEvents": [
+                            "onStepSelected",
                             "onView:dockerContainers",
                             "onCommand:workbench.view.extension.dockerView"
                         ],
@@ -2896,7 +2897,7 @@
                         }
                     },
                     {
-                        "id": "publish",
+                        "id": "publishImage",
                         "title": "Publish to the Cloud",
                         "completionEvents": [
                             "onCommand:vscode-docker.images.push"
