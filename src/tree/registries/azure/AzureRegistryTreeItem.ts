@@ -29,7 +29,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         this.authContext = {
             realm: new URL(`${this.baseUrl}/oauth2/token`),
             service: this.host,
-            subscriptionContext: this.parent.root,
+            subscriptionContext: this.parent.subscription,
             scope: 'registry:catalog:*',
         };
 
@@ -53,9 +53,9 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         return this.registry.location;
     }
 
-    public async getClient(): Promise<ContainerRegistryManagementClient> {
+    public async getClient(context: IActionContext): Promise<ContainerRegistryManagementClient> {
         const armContainerRegistry = await import('@azure/arm-containerregistry');
-        return createAzureClient(this.parent.root, armContainerRegistry.ContainerRegistryManagementClient);
+        return createAzureClient({ ...context, ...this.subscription }, armContainerRegistry.ContainerRegistryManagementClient);
     }
 
     public get label(): string {
@@ -100,13 +100,13 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
         }
     }
 
-    public async deleteTreeItemImpl(): Promise<void> {
-        await (await this.getClient()).registries.deleteMethod(this.resourceGroup, this.registryName);
+    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
+        await (await this.getClient(context)).registries.deleteMethod(this.resourceGroup, this.registryName);
     }
 
-    public async tryGetAdminCredentials(): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
+    public async tryGetAdminCredentials(context: IActionContext): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
         if (this.registry.adminUserEnabled) {
-            return await (await this.getClient()).registries.listCredentials(this.resourceGroup, this.registryName);
+            return await (await this.getClient(context)).registries.listCredentials(this.resourceGroup, this.registryName);
         } else {
             return undefined;
         }

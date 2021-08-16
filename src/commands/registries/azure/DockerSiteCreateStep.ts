@@ -60,7 +60,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         const registryTreeItem: RegistryTreeItemBase = this.node.parent.parent;
         if (registryTreeItem instanceof AzureRegistryTreeItem && context.customLocation) {
             const appSettings: WebSiteManagementModels.NameValuePair[] = [];
-            const cred = await registryTreeItem.tryGetAdminCredentials();
+            const cred = await registryTreeItem.tryGetAdminCredentials(context);
             if (!cred) {
                 throw new Error(localize('vscode-docker.commands.registries.azure.dockersitecreatestep.notAdminEnabled', 'Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));
             } else {

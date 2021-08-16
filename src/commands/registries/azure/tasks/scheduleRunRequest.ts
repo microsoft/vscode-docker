@@ -50,7 +50,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     // Prepare to run.
     ext.outputChannel.show();
 
-    const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
+    const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
 
     let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
@@ -75,10 +75,10 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     // Schedule the run and Clean up.
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
-    const run = await (await node.getClient()).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
+    const run = await (await node.getClient(context)).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
-    void streamLogs(node, run);
+    void streamLogs(context, node, run);
     await fse.unlink(tarFilePath);
 }
 
@@ -134,8 +134,8 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
-async function streamLogs(node: AzureRegistryTreeItem, run: AcrModels.Run): Promise<void> {
-    const result = await (await node.getClient()).runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
+async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrModels.Run): Promise<void> {
+    const result = await (await node.getClient(context)).runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
 
     const storageBlob = await import('@azure/storage-blob');
     const blobClient = new storageBlob.BlobClient(nonNullProp(result, 'logLink'));
