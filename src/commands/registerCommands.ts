@@ -73,7 +73,6 @@ import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
-import { reportIssue } from "./reportIssue";
 import { openStartPage } from "./startPage/openStartPage";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
@@ -203,6 +202,5 @@ export function registerCommands(): void {
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
-    registerCommand('vscode-docker.help.reportIssue', reportIssue);
     registerCommand('vscode-docker.help.openStartPage', openStartPage);
 }

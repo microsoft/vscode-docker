@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerUIExtensionVariables } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerReportIssueCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -81,6 +81,11 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         // Temporarily disabled--reenable if we need to do any surveys
         // (new SurveyManager()).activate();
+
+        // Remove the "Report Issue" button from all error messages in favor of the command
+        // TODO: use built-in issue reporter if/when support is added to include arbitrary info in addition to repro steps (which we would leave blank to force the user to type *something*)
+        registerErrorHandler(ctx => ctx.errorHandling.suppressReportIssue = true);
+        registerReportIssueCommand('vscode-docker.help.reportIssue');
 
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
