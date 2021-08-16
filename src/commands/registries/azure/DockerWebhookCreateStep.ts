@@ -32,13 +32,14 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const vscAzureAppService = await import('vscode-azureappservice');
         vscAzureAppService.registerAppServiceExtensionVariables(ext);
         const site: WebSiteManagementModels.Site = nonNullProp(context, 'site');
-        const siteClient = new vscAzureAppService.SiteClient(site, context);
+        const parsedSite = new vscAzureAppService.ParsedSite(site, context);
+        const siteClient = await parsedSite.createClient(context);
         const appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
         if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
             const creatingNewWebhook: string = localize('vscode-docker.commands.registries.azure.dockerWebhook.creatingWebhook', 'Creating webhook for web app "{0}"...', context.newSiteName);
             ext.outputChannel.appendLine(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
-            const webhook = await this.createWebhookForApp(this._treeItem, context.site, appUri);
+            const webhook = await this.createWebhookForApp(context, this._treeItem, context.site, appUri);
             ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.dockerWebhook.createdWebhook', 'Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
@@ -67,7 +68,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         return !!context.site && (this._treeItem.parent instanceof AzureRepositoryTreeItem || this._treeItem.parent instanceof DockerHubRepositoryTreeItem);
     }
 
-    private async createWebhookForApp(node: RemoteTagTreeItem, site: WebSiteManagementModels.Site, appUri: string): Promise<AcrModels.Webhook | undefined> {
+    private async createWebhookForApp(context: IAppServiceWizardContext, node: RemoteTagTreeItem, site: WebSiteManagementModels.Site, appUri: string): Promise<AcrModels.Webhook | undefined> {
         const maxLength: number = 50;
         const numRandomChars: number = 6;
 
@@ -82,7 +83,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         // variables derived from the container registry
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
         const armContainerRegistry = await import('@azure/arm-containerregistry');
-        const crmClient = createAzureClient(registryTreeItem.parent.root, armContainerRegistry.ContainerRegistryManagementClient);
+        const crmClient = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         const webhookCreateParameters: AcrModels.WebhookCreateParameters = {
             location: registryTreeItem.registryLocation,
             serviceUri: appUri,

@@ -16,10 +16,10 @@ export async function openInAzurePortal(context: IActionContext, node?: Subscrip
     }
 
     if (node instanceof SubscriptionTreeItem) {
-        await openInPortal(node.root, node.root.subscriptionId);
+        await openInPortal(node.subscription, node.subscription.subscriptionId);
     } else if (node instanceof AzureRegistryTreeItem) {
-        await openInPortal(node.parent.root, node.registryId);
+        await openInPortal(node.parent.subscription, node.registryId);
     } else {
-        await openInPortal(node.parent.parent.root, `${node.parent.registryId}/repository`);
+        await openInPortal(node.parent.parent.subscription, `${node.parent.registryId}/repository`);
     }
 }

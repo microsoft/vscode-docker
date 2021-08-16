@@ -48,8 +48,8 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         return nonNullValue(this._task, '_task');
     }
 
-    public static async hasRunsWithoutTask(registryTI: AzureRegistryTreeItem): Promise<boolean> {
-        const runListResult = await AzureTaskTreeItem.getTaskRuns(registryTI, AzureTaskTreeItem._noTaskFilter, undefined);
+    public static async hasRunsWithoutTask(context: IActionContext, registryTI: AzureRegistryTreeItem): Promise<boolean> {
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, registryTI, AzureTaskTreeItem._noTaskFilter, undefined);
         return runListResult.length > 0;
     }
 
@@ -59,7 +59,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         }
 
         const filter = this._task ? `TaskName eq '${this.taskName}'` : AzureTaskTreeItem._noTaskFilter;
-        const runListResult = await AzureTaskTreeItem.getTaskRuns(this.parent.parent, filter, this._nextLink);
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, this.parent.parent, filter, this._nextLink);
 
         this._nextLink = runListResult.nextLink;
 
@@ -89,9 +89,9 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         }
     }
 
-    private static async getTaskRuns(registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<AcrModels.RunListResult> {
+    private static async getTaskRuns(context: IActionContext, registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<AcrModels.RunListResult> {
         return nextLink === undefined ?
-            await (await registryTI.getClient()).runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
-            await (await registryTI.getClient()).runs.listNext(nextLink);
+            await (await registryTI.getClient(context)).runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
+            await (await registryTI.getClient(context)).runs.listNext(nextLink);
     }
 }
