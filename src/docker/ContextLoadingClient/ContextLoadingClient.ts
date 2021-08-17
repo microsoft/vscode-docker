@@ -27,7 +27,7 @@ export class ContextLoadingClient implements DockerApiClient {
                 disposable.dispose();
 
                 if (result) {
-                    reject(result);
+                    return reject(result);
                 }
 
                 resolve();
