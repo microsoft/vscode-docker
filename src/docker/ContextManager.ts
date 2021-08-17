@@ -64,7 +64,8 @@ export interface ContextManager {
 // TODO: consider a periodic refresh as a catch-all; but make sure it compares old data to new before firing a change event
 // TODO: so that non-changes don't result in everything getting refreshed
 export class DockerContextManager implements ContextManager, Disposable {
-    private readonly emitter: EventEmitter<DockerContext> = new EventEmitter<DockerContext>();
+    private readonly contextChangedEmitter = new EventEmitter<DockerContext>();
+    private readonly loadingFinishedEmitter = new EventEmitter<unknown | undefined>();
     private readonly contextsCache: AsyncLazy<DockerContext[]>;
     private readonly newCli: AsyncLazy<boolean>;
     private readonly configFileWatcher: fs.FSWatcher;
@@ -95,7 +96,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         }
 
         // Set the initial DockerApiClient to be the context loading client
-        ext.dockerClient = new ContextLoadingClient(this);
+        ext.dockerClient = new ContextLoadingClient(this.loadingFinishedEmitter.event);
     }
 
     public dispose(): void {
@@ -107,7 +108,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public get onContextChanged(): Event<DockerContext> {
-        return this.emitter.event;
+        return this.contextChangedEmitter.event;
     }
 
     public async refresh(): Promise<void> {
@@ -154,10 +155,16 @@ export class DockerContextManager implements ContextManager, Disposable {
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
             }
 
+            // This will allow the ContextLoadingClient to proceed
+            this.loadingFinishedEmitter.fire(undefined);
+
             // This will refresh the tree
-            this.emitter.fire(currentContext);
+            this.contextChangedEmitter.fire(currentContext);
         } catch (err) {
             ext.treeInitError = err;
+
+            // This will allow the ContextLoadingClient to return an error
+            this.loadingFinishedEmitter.fire(err);
         } finally {
             this.refreshing = false;
         }
