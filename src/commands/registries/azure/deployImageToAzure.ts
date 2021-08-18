@@ -12,13 +12,7 @@ import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
 import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
-import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
-import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
-import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
-import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/dockerV2/GenericDockerV2RegistryTreeItem';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
-import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
-import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { nonNullProp } from "../../../utils/nonNull";
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
@@ -59,9 +53,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     promptSteps.push(new vscAzureAppService.AppServicePlanListStep());
 
     // Get site config before running the wizard so that any problems with the tag tree item are shown at the beginning of the process
-    const siteConfig: WebSiteManagementModels.SiteConfig = await getNewSiteConfig(node);
     const executeSteps: AzureWizardExecuteStep<IAppServiceContainerWizardContext>[] = [
-        new DockerSiteCreateStep(siteConfig, node),
+        new DockerSiteCreateStep(node),
         new DockerAssignAcrPullRoleStep(node),
         new DockerWebhookCreateStep(node),
     ];
@@ -85,48 +78,4 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
             env.openExternal(Uri.parse(siteUri));
         }
     });
-}
-
-async function getNewSiteConfig(node: RemoteTagTreeItem): Promise<WebSiteManagementModels.SiteConfig> {
-    const registryTI: RegistryTreeItemBase = node.parent.parent;
-
-    let username: string | undefined;
-    let password: string | undefined;
-    const appSettings: WebSiteManagementModels.NameValuePair[] = [];
-
-    if (registryTI instanceof AzureRegistryTreeItem) {
-        appSettings.push({ name: "DOCKER_ENABLE_CI", value: 'true' });
-
-        // Don't need an image, username, or password--just create an empty web app to assign permissions and then configure with an image
-        return {
-            acrUseManagedIdentityCreds: true,
-            appSettings
-        };
-    } else if (registryTI instanceof DockerHubNamespaceTreeItem) {
-        username = registryTI.parent.username;
-        password = await registryTI.parent.getPassword();
-    } else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
-        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_URL", value: registryTI.baseUrl });
-
-        if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
-            username = registryTI.cachedProvider.username;
-            password = await getRegistryPassword(registryTI.cachedProvider);
-        } else {
-            throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeA', 'Unrecognized node type "{0}"', registryTI.constructor.name));
-        }
-    } else {
-        throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeB', 'Unrecognized node type "{0}"', registryTI.constructor.name));
-    }
-
-    if (username && password) {
-        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
-        appSettings.push({ name: "DOCKER_REGISTRY_SERVER_PASSWORD", value: password });
-    }
-
-    const linuxFxVersion = `DOCKER|${registryTI.baseImagePath}/${node.repoNameAndTag}`;
-
-    return {
-        linuxFxVersion,
-        appSettings
-    };
 }
