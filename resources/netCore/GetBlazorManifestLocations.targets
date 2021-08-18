@@ -1,7 +1,11 @@
 <Project>
-    <!-- All the relevant info is in root-level PropertyGroups, so there are no dependent targets to make this work -->
-    <Target Name="GetBlazorManifestLocations">
+    <Target Name="GetBlazorManifestLocations" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
         <PropertyGroup>
+            <BlazorManifestInputLocation>$(StaticWebAssetDevelopmentManifestPath)</BlazorManifestInputLocation>
+            <BlazorManifestOutputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutputPath), $(TargetName).staticwebassets.runtime.json))</BlazorManifestOutputLocation>
+        </PropertyGroup>
+
+        <PropertyGroup Condition="'$(_GeneratedStaticWebAssetsDevelopmentManifest)' != ''">
             <BlazorManifestInputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(_GeneratedStaticWebAssetsDevelopmentManifest)))</BlazorManifestInputLocation>
             <BlazorManifestOutputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutputPath), $(TargetName).StaticWebAssets.xml))</BlazorManifestOutputLocation>
         </PropertyGroup>

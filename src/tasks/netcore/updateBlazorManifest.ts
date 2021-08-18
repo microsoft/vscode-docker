@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
+import * as path from 'path';
 import * as xml2js from 'xml2js';
 import { localize } from '../../localize';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -26,8 +27,12 @@ interface StaticWebAssets {
     ContentRoot: ContentRoot[];
 }
 
-interface Manifest {
+interface XmlManifest {
     StaticWebAssets: StaticWebAssets;
+}
+
+interface JsonManifest {
+    ContentRoots: string[];
 }
 
 export async function updateBlazorManifest(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
@@ -55,10 +60,34 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 
     context.terminal.writeOutputLine(localize('vscode-docker.tasks.netCore.attemptingBlazorContainerize', 'Attempting to containerize Blazor static web assets manifest...'));
 
-    const contents = (await fse.readFile(inputManifest)).toString();
-    const manifest: Manifest = <Manifest>await xml2js.parseStringPromise(contents);
+    if (path.extname(inputManifest) === '.json') {
+        await transformJsonBlazorManifest(inputManifest, outputManifest, volumes, os);
+    } else {
+        await transformXmlBlazorManifest(inputManifest, outputManifest, volumes, os);
+    }
+}
 
-    if (!manifest || !manifest.StaticWebAssets) {
+async function transformJsonBlazorManifest(inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {
+    const manifest = <JsonManifest>await fse.readJson(inputManifest);
+
+    if (!manifest?.ContentRoots) {
+        throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifestJson', 'Failed to parse Blazor static web assets manifest.'));
+    }
+
+    if (!Array.isArray(manifest.ContentRoots)) {
+        return;
+    }
+
+    manifest.ContentRoots = manifest.ContentRoots.map(cr => tryContainerizePath(cr, volumes, os));
+
+    await fse.writeJson(outputManifest, manifest, { spaces: 2 });
+}
+
+async function transformXmlBlazorManifest(inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {
+    const contents = (await fse.readFile(inputManifest)).toString();
+    const manifest = <XmlManifest>await xml2js.parseStringPromise(contents);
+
+    if (!manifest?.StaticWebAssets) {
         throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifest', 'Failed to parse Blazor static web assets manifest.'));
     }
 
@@ -68,7 +97,7 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 
     for (const contentRoot of manifest.StaticWebAssets.ContentRoot) {
         if (contentRoot && contentRoot.$) {
-            contentRoot.$.Path = containerizePath(contentRoot.$.Path, volumes, os);
+            contentRoot.$.Path = tryContainerizePath(contentRoot.$.Path, volumes, os);
         }
     }
 
@@ -77,7 +106,7 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
     await fse.writeFile(outputManifest, outputContents);
 }
 
-function containerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {
+function tryContainerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {
     const matchingVolume: DockerContainerVolume = volumes.find(v => oldPath.toLowerCase().startsWith(v.localPath.toLowerCase()));
 
     return matchingVolume ?
