@@ -80,7 +80,11 @@ async function transformJsonBlazorManifest(inputManifest: string, outputManifest
 
     manifest.ContentRoots = manifest.ContentRoots.map(cr => tryContainerizePath(cr, volumes, os));
 
+    // Write out a new manifest
     await fse.writeJson(outputManifest, manifest, { spaces: 2 });
+
+    // Set the mtime to 1970 so that next time .NET builds, it will overwrite the output file
+    await fse.utimes(outputManifest, 0, 0);
 }
 
 async function transformXmlBlazorManifest(inputManifest: string, outputManifest: string, volumes: DockerContainerVolume[], os: PlatformOS): Promise<void> {
@@ -103,7 +107,11 @@ async function transformXmlBlazorManifest(inputManifest: string, outputManifest:
 
     const outputContents = (new xml2js.Builder()).buildObject(manifest);
 
+    // Write out a new manifest
     await fse.writeFile(outputManifest, outputContents);
+
+    // Set the mtime to 1970 so that next time .NET builds, it will overwrite the output file
+    await fse.utimes(outputManifest, 0, 0);
 }
 
 function tryContainerizePath(oldPath: string, volumes: DockerContainerVolume[], os: PlatformOS): string {
