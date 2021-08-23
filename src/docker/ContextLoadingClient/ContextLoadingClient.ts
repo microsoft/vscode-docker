@@ -23,11 +23,11 @@ export class ContextLoadingClient implements DockerApiClient {
 
     public constructor(onFinishedLoading: Event<unknown | undefined>) {
         this.contextLoadingPromise = new Promise((resolve, reject) => {
-            const disposable = onFinishedLoading((result) => {
+            const disposable = onFinishedLoading((error?: unknown) => {
                 disposable.dispose();
 
-                if (result) {
-                    return reject(result);
+                if (error) {
+                    return reject(error);
                 }
 
                 resolve();
