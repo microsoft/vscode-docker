@@ -16,10 +16,6 @@ import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
-import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
-import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
-import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
-import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
 import { registerTaskProviders } from './tasks/TaskHelper';
@@ -92,25 +88,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
                 DOCUMENT_SELECTOR,
                 new DockerfileCompletionItemProvider(),
                 '.'
-            )
-        );
-
-        const COMPOSE_MODE_ID: vscode.DocumentFilter = {
-            language: 'dockercompose',
-            scheme: 'file',
-        };
-        const composeHoverProvider = new DockerComposeHoverProvider(
-            new DockerComposeParser(),
-            composeVersionKeys.all
-        );
-        ctx.subscriptions.push(
-            vscode.languages.registerHoverProvider(COMPOSE_MODE_ID, composeHoverProvider)
-        );
-        ctx.subscriptions.push(
-            vscode.languages.registerCompletionItemProvider(
-                COMPOSE_MODE_ID,
-                new DockerComposeCompletionItemProvider(),
-                "."
             )
         );
 
