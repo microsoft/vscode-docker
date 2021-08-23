@@ -2922,6 +2922,7 @@
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.2.12",
+        "@microsoft/compose-language-service": "file:../compose-language-service/microsoft-compose-language-service-0.0.1-alpha.tgz",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.5.0",
         "dockerode": "^3.2.1",
