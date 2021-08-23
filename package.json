@@ -2315,6 +2315,11 @@
                     "default": "docker",
                     "description": "%vscode-docker.config.docker.dockerPath%",
                     "scope": "machine-overridable"
+                },
+                "docker.enableDockerComposeLanguageService": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "%vscode-docker.config.docker.enableDockerComposeLanguageService%"
                 }
             }
         },

@@ -194,6 +194,7 @@
     "vscode-docker.config.docker.scaffolding.templatePath": "The path to use for scaffolding templates.",
     "vscode-docker.config.docker.showStartPage": "Show the Docker extension Start Page when a new update is released.",
     "vscode-docker.config.docker.dockerPath": "Absolute path to Docker client executable ('docker' command). If the path contains whitespace, it needs to be quoted appropriately.",
+    "vscode-docker.config.docker.enableDockerComposeLanguageService": "Whether or not to enable the preview Docker Compose Language Service. Changing requires restart to take effect.",
     "vscode-docker.config.deprecated": "This setting has been deprecated and will be removed in a future release.",
     "vscode-docker.commands.compose.down": "Compose Down",
     "vscode-docker.commands.compose.restart": "Compose Restart",
