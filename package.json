@@ -2323,15 +2323,6 @@
                 }
             }
         },
-        "configurationDefaults": {
-            "[dockercompose]": {
-                "editor.quickSuggestions": {
-                    "other": true,
-                    "comments": false,
-                    "strings": true
-                }
-            }
-        },
         "commands": [
             {
                 "command": "vscode-docker.compose.down",
