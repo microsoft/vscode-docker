@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken } from 'vscode';
+import { CancellationToken, Event } from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { DockerInfo, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';
-import { ContextManager } from '../ContextManager';
 import { DockerApiClient, DockerExecCommandProvider, DockerExecOptions } from '../DockerApiClient';
 import { DockerImage, DockerImageInspection } from '../Images';
 import { DockerNetwork, DockerNetworkInspection, DriverType } from '../Networks';
@@ -22,10 +21,15 @@ import { DockerVolume, DockerVolumeInspection } from '../Volumes';
 export class ContextLoadingClient implements DockerApiClient {
     private readonly contextLoadingPromise: Promise<void>;
 
-    public constructor(ctxMgr: ContextManager) {
-        this.contextLoadingPromise = new Promise((resolve) => {
-            const disposable = ctxMgr.onContextChanged(() => {
+    public constructor(onFinishedLoading: Event<unknown | undefined>) {
+        this.contextLoadingPromise = new Promise((resolve, reject) => {
+            const disposable = onFinishedLoading((error?: unknown) => {
                 disposable.dispose();
+
+                if (error) {
+                    return reject(error);
+                }
+
                 resolve();
             });
         });
