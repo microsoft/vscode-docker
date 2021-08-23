@@ -76,7 +76,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
             );
         }
 
-        config.linuxFxVersion = `DOCKER|${registryTreeItem.baseImagePath}/${this.tagTreeItem.repoNameAndTag}`;
+        config.linuxFxVersion = `DOCKER|${this.tagTreeItem.fullTag}`;
         await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }
 
