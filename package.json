@@ -295,7 +295,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
+                    "when": "isWorkspaceTrusted && resourceLangId == dockerfile",
                     "command": "vscode-docker.images.build",
                     "group": "docker"
                 }
