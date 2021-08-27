@@ -101,13 +101,8 @@ const config = {
         },
         {
             // Ignore a warning from applicationinsights
-            module: /node_modules\/applicationinsights/,
+            module: /node_modules\/vscode-extension-telemetry/,
             message: /Can't resolve 'applicationinsights-native-metrics'/
-        },
-        {
-            // Ignore a warning from diagnostic-channel-publishers
-            module: /node_modules\/diagnostic-channel-publishers/,
-            message: /Can't resolve '@opentelemetry\/tracing'/
         },
         (warning) => false, // No other warnings should be ignored
     ]
