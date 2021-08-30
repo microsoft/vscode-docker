@@ -1,6 +1,6 @@
 ## Add dockerfiles to workspace
-A Dockerfile is a text document that contains all the commands a user would sequentially call on the command line to assemble an image. Running your app in a container allows you to create a near-production, reproducible runtime environment so you can code and deploy with greater confidence.
+A Dockerfile contains the instructions to assemble an image containing your app and its dependencies. Using this image to run your app in a container creates a production-like, reproducible runtime environment.
 
-Open the command pallete (Ctrl + Shift + P) and choose **Docker: Add Dockerfiles to Workspace** to complete this step.
+We provide IntelliSense support for authoring your Dockerfile.
 
 ![Add Dockerfile to Workspace GIF](1g-addDockerFiles.gif)

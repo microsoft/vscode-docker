@@ -1,4 +1,4 @@
 ## Run a container
-A container is a runnable instance of an image. To complete this step, navigate to the Docker Explorer (Whale Icon), right-click on your image, and select **Run Container**.
+Now that you've built your image, it's time to run your app in a container!
 
 ![Run Container GIF](3g-runContainers.gif =50%x)
