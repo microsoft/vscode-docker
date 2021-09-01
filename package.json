@@ -2842,9 +2842,14 @@
         "walkthroughs": [
             {
                 "id": "dockerStart",
-                "title": "%vscode-docker.walkthrough.start.title%",
+                "title": "Getting Started with Docker",
                 "when": "never",
-                "description": "%vscode-docker.walkthrough.start.description%",
+                "featuredFor": [
+                    "Dockerfile",
+                    "docker-compose.yml",
+                    "docker-compose.yaml"
+                ],
+                "description": "Learn about Docker and the Docker extension for Visual Studio Code",
                 "steps": [
                     {
                         "id": "scaffold",
@@ -2854,9 +2859,10 @@
                             "onCommand:vscode-docker.configureCompose"
                         ],
                         "when": "workspaceFolderCount > 0",
-                        "description": "Add Dockerfiles and get started editing them!\n[Add Docker files](command:vscode-docker.configure)",
+                        "description": "A Dockerfile contains the instructions to assemble an image containing your app and its dependencies. Using this image to run your app in a container creates a production-like, reproducible runtime environment.\n\nWe provide IntelliSense support for authoring your Dockerfile.\n[Add Docker files](command:vscode-docker.configure)",
                         "media": {
-                            "markdown": "resources/walkthroughs/placeholder.md"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/1g-addDockerFiles.gif",
+                            "altText": "Modifying Dockerfiles"
                         }
                     },
                     {
@@ -2865,47 +2871,50 @@
                         "completionEvents": [
                             "onCommand:vscode-docker.images.build"
                         ],
-                        "description": "Build an image\n[Build Image](command:vscode-docker.images.build)",
+                        "when": "workspaceFolderCount > 0",
+                        "description": "The Docker extension makes it simple to build your image.\n[Build Image](command:vscode-docker.images.build)",
                         "media": {
-                            "markdown": "resources/walkthroughs/placeholder.md"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/2g-buildImage.gif",
+                            "altText": "Building a Docker image"
                         }
                     },
                     {
                         "id": "runContainer",
-                        "title": "Run Containers",
+                        "title": "Run a Container",
                         "completionEvents": [
                             "onCommand:vscode-docker.images.run",
                             "onCommand:vscode-docker.compose.up",
                             "onContext:vscode-docker:containerHasRun"
                         ],
-                        "description": "Run containers directly or with Docker Compose",
+                        "description": "Now that you've built your image, it's time to run your app in a container!\n[Run Image](command:vscode-docker.images.run)",
                         "media": {
-                            "markdown": "resources/walkthroughs/placeholder.md"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/3g-runContainers.gif",
+                            "altText": "Running a Docker container"
                         }
                     },
                     {
                         "id": "dockerExplorer",
                         "title": "Use the Docker Explorer",
                         "completionEvents": [
-                            "onStepSelected",
                             "onView:dockerContainers",
                             "onCommand:workbench.view.extension.dockerView"
                         ],
-                        "description": "The Docker Explorer allows you to view and manage Docker resources like images, containers, etc.\n[Open Docker Explorer](command:workbench.view.extension.dockerView)",
+                        "description": "The Docker Explorer makes it easy to manage, troubleshoot, and deploy containerized applications. The Docker Explorer shows a number of Docker resources such as containers, images, volumes, networks, and container registries. Also, if the [Azure Account extension](command:extension.open?%22ms-vscode.azure-account%22) is installed, you'll be able to browse your Azure Container Registries.\n\nThe right-click menu provides access to commonly used commands for each resource type.\n[Open Docker Explorer](command:workbench.view.extension.dockerView)",
                         "media": {
-                            "markdown": "resources/walkthroughs/placeholder.md"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/4g-useExplorer.gif",
+                            "altText": "Using the Docker explorer"
                         }
                     },
                     {
-                        "id": "publishImage",
-                        "title": "Publish to the Cloud",
+                        "id": "pushImage",
+                        "title": "Push an Image to a Container Registry",
                         "completionEvents": [
                             "onCommand:vscode-docker.images.push"
                         ],
-                        "description": "[Push an Image](command:vscode-docker.images.push)",
+                        "description": "The Docker Extension allows you to push your Docker image to Docker Hub, Azure Container Registries and other third party providers.\n[Push an Image](command:vscode-docker.images.push)",
                         "media": {
-                            "altText": "bar",
-                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/5g-pushImage.gif",
+                            "altText": "Pushing an image to a container registry"
                         }
                     },
                     {
@@ -2915,23 +2924,22 @@
                             "onCommand:vscode-docker.registries.deployImageToAzure",
                             "onCommand:vscode-docker.registries.deployImageToACI"
                         ],
-                        "description": "[Deploy](command:vscode-docker.registries.deployImageToAzure)",
+                        "description": "The Docker extension helps you deploy your containerized applications and take advantage of a fully-managed platform using Azure App Service. Prior to deployment, the image must be uploaded to either Azure Container Registry or Docker Hub.\n\nAfter a successful deployment, select **Open Site** in the notification. Your container is running in Azure!\n[Deploy](command:vscode-docker.registries.deployImageToAzure)",
                         "when": "isAzureAccountInstalled",
                         "media": {
-                            "altText": "bar",
-                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
+                            "image": "https://github.com/microsoft/vscode-docker/raw/bmw/gifs/resources/walkthroughs/6g-deployToAppSvc.gif",
+                            "altText": "Deploying to Azure App Service"
                         }
                     },
                     {
                         "id": "learn",
                         "title": "Learn More",
-                        "description": "[Further Reading](command:vscode-docker.views.help.focus)",
+                        "description": "Great Job! You've now completed Getting Started with Docker. But don't stop here! There are plenty of ways to become more proficient building containerized applications using the Docker extension.\n\nFor example, you can [debug a container](https://code.visualstudio.com/docs/containers/debug-common), or [run multiple containers](https://code.visualstudio.com/docs/containers/docker-compose) at once using Docker Compose.\n\nCheck out our [documentation](https://code.visualstudio.com/docs/containers/overview) to make the most of the Docker Extension for VS Code!",
                         "completionEvents": [
                             "onStepSelected"
                         ],
                         "media": {
-                            "altText": "bar",
-                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/readme/command-palette.png"
+                            "markdown": "resources/walkthroughs/empty.md"
                         }
                     }
                 ]
