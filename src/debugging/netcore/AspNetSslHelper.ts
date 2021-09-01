@@ -6,12 +6,10 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import * as semver from 'semver';
 import { MessageItem } from 'vscode';
 import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
-import { getDotNetVersion } from '../../utils/netCoreUtils';
 import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 import { execAsync } from '../../utils/spawnAsync';
@@ -129,27 +127,9 @@ async function addUserSecretsIfNecessary(projectFile: string): Promise<void> {
         return;
     }
 
-    const dotNetVer = await getDotNetVersion();
-    if (semver.gte(dotNetVer, '3.0.0')) {
-        // The dotnet 3.0 CLI has `dotnet user-secrets init`, let's use that if possible
-        const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${cryptoUtils.getRandomHexString(32)}`;
-        await execAsync(userSecretsInitCommand);
-    } else {
-        // Otherwise try to manually edit the project file by adding a property group immediately after the <Project> tag
-        // Allowing for leading and trailing whitespace, as well as XML attributes, this regex matches the <Project> tag as long as it is alone on its line
-        const projectTagRegex = /^[ \t]*<Project.*>[ \t]*$/im;
-
-        const matches = contents.match(projectTagRegex);
-        if (matches && matches[0]) {
-            // If found, add the new property group immediately after
-            const propertyGroup = `
-<PropertyGroup>
-  <UserSecretsId>${cryptoUtils.getRandomHexString(32)}</UserSecretsId>
-</PropertyGroup>`;
-            const newContents = contents.replace(matches[0], matches[0] + propertyGroup);
-            await fse.writeFile(projectFile, newContents);
-        }
-    }
+    // Initialize user secrets for the project
+    const userSecretsInitCommand = `dotnet user-secrets init --project "${projectFile}" --id ${cryptoUtils.getRandomHexString(32)}`;
+    await execAsync(userSecretsInitCommand);
 }
 
 async function exportCertificateAndSetPassword(projectFile: string, certificateExportPath: string): Promise<void> {

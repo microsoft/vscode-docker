@@ -93,6 +93,12 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         } catch (err) {
             // Suppress report issue and rethrow
             wizardContext.errorHandling.suppressReportIssue = true;
+            wizardContext.errorHandling.buttons = [
+                {
+                    title: localize('vscode-docker.scaffold.netCoreGatherInformationStep.openCSharpExt', 'Open Extension'),
+                    callback: async () => vscode.commands.executeCommand('extension.open', cSharpExtensionId),
+                }
+            ];
             throw err;
         }
 

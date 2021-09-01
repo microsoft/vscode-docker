@@ -33,7 +33,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
         }
 
         const armContainerRegistry = await import('@azure/arm-containerregistry');
-        const client: ContainerRegistryManagementClient = createAzureClient(this.root, armContainerRegistry.ContainerRegistryManagementClient);
+        const client: ContainerRegistryManagementClient = createAzureClient({ ...context, ...this.subscription }, armContainerRegistry.ContainerRegistryManagementClient);
         const registryListResult: AcrModels.RegistryListResult = this._nextLink === undefined ?
             await client.registries.list() :
             await client.registries.listNext(this._nextLink);
@@ -53,7 +53,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
     }
 
     public async createChildImpl(context: ICreateChildImplContext): Promise<AzExtTreeItem> {
-        const wizardContext: IAzureRegistryWizardContext = { ...context, ...this.root };
+        const wizardContext: IAzureRegistryWizardContext = { ...context, ...this.subscription };
 
         const promptSteps = [
             new AzureRegistryNameStep(),

@@ -33,8 +33,8 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         const registryTI = this.parent;
 
         const taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
-            await (await registryTI.getClient()).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
-            await (await registryTI.getClient()).tasks.listNext(this._nextLink);
+            await (await registryTI.getClient(context)).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
+            await (await registryTI.getClient(context)).tasks.listNext(this._nextLink);
 
         this._nextLink = taskListResult.nextLink;
 
@@ -50,7 +50,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
 
             if (clearCache) {
                 // If there are any runs _not_ associated with a task (e.g. the user ran a task from a local Dockerfile) add a tree item to display those runs
-                if (await AzureTaskTreeItem.hasRunsWithoutTask(this.parent)) {
+                if (await AzureTaskTreeItem.hasRunsWithoutTask(context, this.parent)) {
                     result.push(new AzureTaskTreeItem(this, undefined));
                 }
             }

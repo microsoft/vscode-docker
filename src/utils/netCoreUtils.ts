@@ -5,7 +5,6 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { SemVer } from 'semver';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getTempFileName } from './osUtils';
@@ -34,14 +33,4 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
             await fse.unlink(outputFile);
         }
     }
-}
-
-let dotNetVersion: SemVer | undefined;
-export async function getDotNetVersion(): Promise<SemVer> {
-    if (!dotNetVersion) {
-        const { stdout } = await execAsync('dotnet --version');
-        dotNetVersion = new SemVer(stdout);
-    }
-
-    return dotNetVersion;
 }
