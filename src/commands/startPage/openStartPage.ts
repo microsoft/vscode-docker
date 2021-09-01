@@ -13,6 +13,7 @@ import { startPage } from './StartPage';
 export const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
 
 export async function openStartPage(context: IActionContext): Promise<void> {
+    context.errorHandling.suppressDisplay = true;
     await startPage.createOrShow(context);
 }
 
