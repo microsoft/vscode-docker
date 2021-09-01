@@ -826,15 +826,8 @@
                                         }
                                     },
                                     "trace": {
-                                        "type": [
-                                            "boolean",
-                                            "string"
-                                        ],
-                                        "description": "%vscode-docker.debug.node.trace%",
-                                        "enum": [
-                                            "verbose",
-                                            true
-                                        ]
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.debug.node.trace%"
                                     }
                                 }
                             },
@@ -2926,7 +2919,7 @@
         "handlebars": "^4.7.6",
         "node-fetch": "^2.6.1",
         "semver": "^7.3.5",
-        "tar": "^6.1.2",
+        "tar": "^6.1.11",
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
         "vscode-azureappservice": "^0.86.3",

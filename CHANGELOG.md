@@ -1,3 +1,7 @@
+## 1.16.1 - 1 September 2021
+### Fixed
+* Node debugging does not work in VS Code 1.60.0 due to removal of `node2` debug type. [#3177](https://github.com/microsoft/vscode-docker/issues/3177)
+
 ## 1.16.0 - 16 August 2021
 ### Added
 * VSCode's [Workspace Trust](https://code.visualstudio.com/updates/v1_57#_workspace-trust) feature is now supported. [#2829](https://github.com/microsoft/vscode-docker/issues/2829)
