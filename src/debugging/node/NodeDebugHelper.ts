@@ -24,7 +24,7 @@ export interface NodeDebugOptions {
     sourceMaps?: boolean;
     stopOnEntry?: boolean;
     timeout?: number;
-    trace?: boolean | 'verbose';
+    trace?: boolean;
 }
 
 export interface NodeDockerDebugOptions extends NodeDebugOptions {
@@ -89,7 +89,7 @@ export class NodeDebugHelper implements DebugHelper {
             ...options,
             dockerOptions,
             request: 'attach',
-            type: 'node2'
+            type: 'pwa-node'
         };
 
         if (resolvedConfiguration.localRoot === undefined) {
