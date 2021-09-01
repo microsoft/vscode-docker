@@ -826,15 +826,8 @@
                                         }
                                     },
                                     "trace": {
-                                        "type": [
-                                            "boolean",
-                                            "string"
-                                        ],
-                                        "description": "%vscode-docker.debug.node.trace%",
-                                        "enum": [
-                                            "verbose",
-                                            true
-                                        ]
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.debug.node.trace%"
                                     }
                                 }
                             },
