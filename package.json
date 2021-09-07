@@ -295,7 +295,7 @@
                     "group": "docker"
                 },
                 {
-                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
+                    "when": "isWorkspaceTrusted && resourceLangId == dockerfile",
                     "command": "vscode-docker.images.build",
                     "group": "docker"
                 }
@@ -826,15 +826,8 @@
                                         }
                                     },
                                     "trace": {
-                                        "type": [
-                                            "boolean",
-                                            "string"
-                                        ],
-                                        "description": "%vscode-docker.debug.node.trace%",
-                                        "enum": [
-                                            "verbose",
-                                            true
-                                        ]
+                                        "type": "boolean",
+                                        "description": "%vscode-docker.debug.node.trace%"
                                     }
                                 }
                             },
@@ -2915,7 +2908,7 @@
         "@grpc/grpc-js": "^1.2.12",
         "@microsoft/compose-language-service": "file:../compose-language-service/microsoft-compose-language-service-0.0.1-alpha.tgz",
         "dayjs": "^1.10.4",
-        "dockerfile-language-server-nodejs": "^0.5.0",
+        "dockerfile-language-server-nodejs": "^0.6.0",
         "dockerode": "^3.2.1",
         "fs-extra": "^10.0.0",
         "glob": "^7.1.6",
@@ -2923,11 +2916,11 @@
         "handlebars": "^4.7.6",
         "node-fetch": "^2.6.1",
         "semver": "^7.3.5",
-        "tar": "^6.1.2",
+        "tar": "^6.1.11",
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
-        "vscode-azureappservice": "^0.86.0",
-        "vscode-azureextensionui": "^0.48.0",
+        "vscode-azureappservice": "^0.86.3",
+        "vscode-azureextensionui": "^0.48.4",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",
