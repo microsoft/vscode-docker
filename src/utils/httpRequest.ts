@@ -41,7 +41,7 @@ export async function httpRequest<T>(
 }
 
 export class HttpResponse<T> implements ResponseLike {
-    private bodyPromise: Promise<T> | undefined;
+    private bodyText: string | undefined;
     private normalizedHeaders: { [key: string]: string } | undefined;
     public readonly headers: HeadersLike;
     public readonly status: number;
@@ -72,14 +72,16 @@ export class HttpResponse<T> implements ResponseLike {
     }
 
     public async json(): Promise<T> {
-        if (Number(this.headers.get('content-length')) === 0) {
-            return Promise.resolve(undefined);
-        } else if (!this.bodyPromise) {
+        if (this.bodyText === undefined) {
             // This allows multiple calls to `json()` without eating up the stream
-            this.bodyPromise = this.innerResponse.json();
+            this.bodyText = (await this.innerResponse.text()) ?? '';
         }
 
-        return this.bodyPromise;
+        if (this.bodyText.length === 0) {
+            return undefined;
+        } else {
+            return JSON.parse(this.bodyText) as T;
+        }
     }
 }
 
