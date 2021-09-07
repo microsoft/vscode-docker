@@ -72,7 +72,9 @@ export class HttpResponse<T> implements ResponseLike {
     }
 
     public async json(): Promise<T> {
-        if (!this.bodyPromise) {
+        if (Number(this.headers.get('content-length')) === 0) {
+            return Promise.resolve(undefined);
+        } else if (!this.bodyPromise) {
             // This allows multiple calls to `json()` without eating up the stream
             this.bodyPromise = this.innerResponse.json();
         }
