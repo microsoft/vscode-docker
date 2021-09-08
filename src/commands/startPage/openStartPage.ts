@@ -33,6 +33,9 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
     }
 
     if (await ext.experimentationService.getLiveTreatmentVariable<string>('gettingStarted.overrideCategory.ms-azuretools.vscode-docker.dockerStart.when') === 'true') {
+        // Update the last version shown to short-circuit this TAS check in the future
+        await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
+
         // Don't show, the experiment for the other startup walkthrough is enabled
         return;
     }
