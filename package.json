@@ -2877,7 +2877,7 @@
                         "completionEvents": [
                             "onCommand:vscode-docker.images.run",
                             "onCommand:vscode-docker.compose.up",
-                            "onContext:vscode-docker:containerHasRun"
+                            "onCommand:vscode-docker.compose.up.subset"
                         ],
                         "description": "%vscode-docker.walkthrough.dockerStart.runContainer.description%",
                         "media": {
