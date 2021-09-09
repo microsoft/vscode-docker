@@ -2831,7 +2831,113 @@
                     "title": "%vscode-docker.views.activityBar%"
                 }
             ]
-        }
+        },
+        "walkthroughs": [
+            {
+                "id": "dockerStart",
+                "title": "%vscode-docker.walkthrough.dockerStart.title%",
+                "when": "never",
+                "featuredFor": [
+                    "Dockerfile",
+                    "docker-compose.yml",
+                    "docker-compose.yaml"
+                ],
+                "description": "%vscode-docker.walkthrough.dockerStart.description%",
+                "steps": [
+                    {
+                        "id": "scaffold",
+                        "title": "%vscode-docker.walkthrough.dockerStart.scaffold.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.configure",
+                            "onCommand:vscode-docker.configureCompose"
+                        ],
+                        "when": "workspaceFolderCount > 0",
+                        "description": "%vscode-docker.walkthrough.dockerStart.scaffold.description%",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/1g-addDockerFiles.gif",
+                            "altText": "Modifying Dockerfiles"
+                        }
+                    },
+                    {
+                        "id": "buildImage",
+                        "title": "%vscode-docker.walkthrough.dockerStart.buildImage.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.images.build"
+                        ],
+                        "when": "workspaceFolderCount > 0",
+                        "description": "%vscode-docker.walkthrough.dockerStart.buildImage.description%",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/2g-buildImage.gif",
+                            "altText": "Building a Docker image"
+                        }
+                    },
+                    {
+                        "id": "runContainer",
+                        "title": "%vscode-docker.walkthrough.dockerStart.runContainer.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.images.run",
+                            "onCommand:vscode-docker.compose.up",
+                            "onCommand:vscode-docker.compose.up.subset"
+                        ],
+                        "description": "%vscode-docker.walkthrough.dockerStart.runContainer.description%",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/3g-runContainers.gif",
+                            "altText": "Running a Docker container"
+                        }
+                    },
+                    {
+                        "id": "dockerExplorer",
+                        "title": "%vscode-docker.walkthrough.dockerStart.dockerExplorer.title%",
+                        "completionEvents": [
+                            "onView:dockerContainers",
+                            "onCommand:workbench.view.extension.dockerView"
+                        ],
+                        "description": "%vscode-docker.walkthrough.dockerStart.dockerExplorer.description%",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/4g-useExplorer.gif",
+                            "altText": "Using the Docker explorer"
+                        }
+                    },
+                    {
+                        "id": "pushImage",
+                        "title": "%vscode-docker.walkthrough.dockerStart.pushImage.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.images.push"
+                        ],
+                        "description": "%vscode-docker.walkthrough.dockerStart.pushImage.description%",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/5g-pushImage.gif",
+                            "altText": "Pushing an image to a container registry"
+                        }
+                    },
+                    {
+                        "id": "azDeploy",
+                        "title": "%vscode-docker.walkthrough.dockerStart.azDeploy.title%",
+                        "completionEvents": [
+                            "onCommand:vscode-docker.registries.deployImageToAzure",
+                            "onCommand:vscode-docker.registries.deployImageToACI"
+                        ],
+                        "description": "%vscode-docker.walkthrough.dockerStart.azDeploy.description%",
+                        "when": "isAzureAccountInstalled",
+                        "media": {
+                            "image": "https://github.com/microsoft/vscode-docker/raw/main/resources/walkthroughs/6g-deployToAppSvc.gif",
+                            "altText": "Deploying to Azure App Service"
+                        }
+                    },
+                    {
+                        "id": "learn",
+                        "title": "%vscode-docker.walkthrough.dockerStart.learn.title%",
+                        "description": "%vscode-docker.walkthrough.dockerStart.learn.description%",
+                        "completionEvents": [
+                            "onStepSelected"
+                        ],
+                        "media": {
+                            "markdown": "resources/walkthroughs/empty.md"
+                        }
+                    }
+                ]
+            }
+        ]
     },
     "engines": {
         "vscode": "^1.57.0"
