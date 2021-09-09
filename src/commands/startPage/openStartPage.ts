@@ -13,6 +13,7 @@ import { startPage } from './StartPage';
 export const lastVersionKey = 'vscode-docker.startPage.lastVersionShown';
 
 export async function openStartPage(context: IActionContext): Promise<void> {
+    context.errorHandling.suppressDisplay = true;
     await startPage.createOrShow(context);
 }
 
@@ -29,6 +30,14 @@ export async function openStartPageAfterExtensionUpdate(): Promise<void> {
             // Don't show: already showed during this major/minor
             return;
         }
+    }
+
+    if (await ext.experimentationService.getLiveTreatmentVariable<string>('gettingStarted.overrideCategory.ms-azuretools.vscode-docker.dockerStart.when') === 'true') {
+        // Update the last version shown to short-circuit this TAS check in the future
+        await ext.context.globalState.update(lastVersionKey, extensionVersion.value);
+
+        // Don't show, the experiment for the other startup walkthrough is enabled
+        return;
     }
 
     // Let's show!
