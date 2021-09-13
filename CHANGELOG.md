@@ -1,3 +1,19 @@
+## 1.17.0 - 20 September 2021
+### Added
+* A language service for Docker Compose documents has been added! [#2539](https://github.com/microsoft/vscode-docker/issues/2539)
+* Docker Context lookup at the time of extension activation will now always try using the gRPC API first, due to superior performance. Previously this was an experiment. [#3157](https://github.com/microsoft/vscode-docker/pull/3157)
+
+### Fixed
+* "Invalid JSON response body" on certain registry connections. [#3185](https://github.com/microsoft/vscode-docker/issues/3185)
+* Explorer view would appear to load forever if Docker was not installed. [#3132](https://github.com/microsoft/vscode-docker/issues/3132)
+
+### Removed
+* The "Report Issue" button has been removed from error toasts. Instead, you can use the command "Docker: Report Issue". [#3127](https://github.com/microsoft/vscode-docker/issues/3127)
+* Since it is now end-of-life, code specific to .NET Core 2.1 has been removed. [#3093](https://github.com/microsoft/vscode-docker/issues/3093)
+
+### Experiments (may not be visible to all users)
+* A walkthrough has been added using the new [VSCode walkthrough experience](https://code.visualstudio.com/updates/v1_57#_new-getting-started-experience), replacing the Docker start page. [#3055](https://github.com/microsoft/vscode-docker/issues/3055)
+
 ## 1.16.1 - 1 September 2021
 ### Fixed
 * Node debugging does not work in VS Code 1.60.0 due to removal of `node2` debug type. [#3177](https://github.com/microsoft/vscode-docker/issues/3177)
