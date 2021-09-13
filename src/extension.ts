@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerReportIssueCommand, registerUIExtensionVariables } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -16,10 +16,6 @@ import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
-import { DockerComposeCompletionItemProvider } from './dockerCompose/dockerComposeCompletionItemProvider';
-import { DockerComposeHoverProvider } from './dockerCompose/dockerComposeHoverProvider';
-import composeVersionKeys from './dockerCompose/dockerComposeKeyInfo';
-import { DockerComposeParser } from './dockerCompose/dockerComposeParser';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
 import { registerTaskProviders } from './tasks/TaskHelper';
@@ -95,25 +91,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        const COMPOSE_MODE_ID: vscode.DocumentFilter = {
-            language: 'dockercompose',
-            scheme: 'file',
-        };
-        const composeHoverProvider = new DockerComposeHoverProvider(
-            new DockerComposeParser(),
-            composeVersionKeys.all
-        );
-        ctx.subscriptions.push(
-            vscode.languages.registerHoverProvider(COMPOSE_MODE_ID, composeHoverProvider)
-        );
-        ctx.subscriptions.push(
-            vscode.languages.registerCompletionItemProvider(
-                COMPOSE_MODE_ID,
-                new DockerComposeCompletionItemProvider(),
-                "."
-            )
-        );
-
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
         // No need to wait thanks to ContextLoadingClient
@@ -136,7 +113,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
 
-        activateLanguageClient(ctx);
+        activateDockerfileLanguageClient(ctx);
+        activateComposeLanguageClient(ctx);
 
         registerListeners();
     });
@@ -236,11 +214,11 @@ namespace Configuration {
 }
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
 
-function activateLanguageClient(ctx: vscode.ExtensionContext): void {
+function activateDockerfileLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
     void callWithTelemetryAndErrorHandling('docker.languageclient.activate', async (context: IActionContext) => {
         context.telemetry.properties.isActivationEvent = 'true';
-        const serverModule = ext.context.asAbsolutePath(
+        const serverModule = ctx.asAbsolutePath(
             path.join(
                 "dist",
                 "dockerfile-language-server-nodejs",
@@ -285,12 +263,60 @@ function activateLanguageClient(ctx: vscode.ExtensionContext): void {
             clientOptions
         );
         client.registerProposedFeatures();
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        client.onReady().then(() => {
+        void client.onReady().then(() => {
             // attach the VS Code settings listener
             Configuration.initialize(ctx);
         });
 
+        ctx.subscriptions.push(client.start());
+    });
+}
+
+function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
+    // Don't wait
+    void callWithTelemetryAndErrorHandling('docker.composelanguageclient.activate', async (context: IActionContext) => {
+        context.telemetry.properties.isActivationEvent = 'true';
+
+        const config = vscode.workspace.getConfiguration('docker');
+        if (!config.get('enableDockerComposeLanguageService', true)) {
+            throw new UserCancelledError('languageServiceDisabled');
+        }
+
+        const serverModule = ctx.asAbsolutePath(
+            path.join(
+                "dist",
+                "compose-language-service",
+                "lib",
+                "server.js"
+            )
+        );
+
+        const debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
+
+        const serverOptions: ServerOptions = {
+            run: {
+                module: serverModule,
+                transport: TransportKind.ipc,
+                args: ["--node-ipc"]
+            },
+            debug: {
+                module: serverModule,
+                transport: TransportKind.ipc,
+                options: debugOptions
+            }
+        };
+
+        const clientOptions: LanguageClientOptions = {
+            documentSelector: [{ language: 'dockercompose' }]
+        };
+
+        client = new LanguageClient(
+            "compose-language-service",
+            "Docker Compose Language Server",
+            serverOptions,
+            clientOptions
+        );
+        client.registerProposedFeatures();
         ctx.subscriptions.push(client.start());
     });
 }

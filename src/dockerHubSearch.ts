@@ -25,16 +25,6 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
     return '';
 }
 
-/* eslint-disable-next-line @typescript-eslint/promise-function-async */ // Grandfathered in
-export function searchImageInRegistryHub(imageName: string, cache: boolean): Promise<IHubSearchResponseResult | undefined> {
-    return invokeHubSearch(imageName, 1, cache).then((data) => {
-        if ((<IHubSearchResponseResult[]>data.results).length === 0) {
-            return undefined;
-        }
-        return data.results[0];
-    });
-}
-
 /* eslint-disable @typescript-eslint/naming-convention */
 const popular = [
     { "is_automated": false, "name": "redis", "is_trusted": false, "is_official": true, "star_count": 1300, "description": localize('vscode-docker.dockerHubSearch.redis', 'Redis is an open source key-value store that functions as a data structure server.') },
