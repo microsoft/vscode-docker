@@ -2311,7 +2311,7 @@
                 },
                 "docker.enableDockerComposeLanguageService": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "%vscode-docker.config.docker.enableDockerComposeLanguageService%"
                 }
             }

@@ -1,6 +1,5 @@
 ## 1.17.0 - 20 September 2021
 ### Added
-* A language service for Docker Compose documents has been added! [#2539](https://github.com/microsoft/vscode-docker/issues/2539)
 * Docker Context lookup at the time of extension activation will now always try using the gRPC API first, due to superior performance. Previously this was an experiment. [#3157](https://github.com/microsoft/vscode-docker/pull/3157)
 
 ### Fixed
