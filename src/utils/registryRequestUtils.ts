@@ -5,7 +5,7 @@
 
 import { URL } from "url";
 import { ociClientId } from "../constants";
-import { ErrorHandling, httpRequest, RequestLike, ResponseLike } from './httpRequest';
+import { ErrorHandling, httpRequest, RequestLike, RequestOptionsLike, ResponseLike } from './httpRequest';
 
 export function getNextLinkFromHeaders(response: IRegistryRequestResponse<unknown>): string | undefined {
     const linkHeader: string | undefined = response.headers.get('link') as string;
@@ -21,7 +21,7 @@ export async function registryRequest<T>(
     node: IRegistryAuthTreeItem | IRepositoryAuthTreeItem,
     method: 'GET' | 'DELETE' | 'POST',
     url: string,
-    customOptions?: RequestInit,
+    customOptions?: RequestOptionsLike,
     errorHandling: ErrorHandling = ErrorHandling.ThrowOnError
 ): Promise<IRegistryRequestResponse<T>> {
     const options = {

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { basicAuthHeader, bearerAuthHeader, httpRequest, HttpResponse, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
+import { basicAuthHeader, bearerAuthHeader, httpRequest, HttpResponse, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
@@ -20,7 +20,7 @@ class BasicOAuthProvider implements IAuthProvider {
             return request;
         }
 
-        const options: RequestInit = {
+        const options: RequestOptionsLike = {
             form: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 'grant_type': 'password',
