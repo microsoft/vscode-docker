@@ -5,6 +5,9 @@ steps:
     versionSpec: 14.x
 
 - task: Npm@1
+  inputs:
+    command: custom
+    customCommand: ci --no-optional
   displayName: 'Install Dependencies'
 
 - script: |
