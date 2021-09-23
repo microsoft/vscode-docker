@@ -22,6 +22,7 @@ import { removeContainer } from "./containers/removeContainer";
 import { restartContainer } from "./containers/restartContainer";
 import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
+import { stats } from "./containers/stats";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
 import { createAciContext } from "./context/aci/createAciContext";
@@ -133,6 +134,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.select', selectContainer);
     registerCommand('vscode-docker.containers.start', startContainer);
     registerCommand('vscode-docker.containers.stop', stopContainer);
+    registerWorkspaceCommand('vscode-docker.containers.stats', stats);
     registerWorkspaceCommand('vscode-docker.containers.viewLogs', viewContainerLogs);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.logs', composeGroupLogs);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.start', composeGroupStart);
