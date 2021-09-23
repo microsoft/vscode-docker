@@ -2841,6 +2841,30 @@
                 "description": "%vscode-docker.walkthrough.dockerStart.description%",
                 "steps": [
                     {
+                        "id": "openFolder",
+                        "title": "%vscode-docker.walkthrough.dockerStart.openFolder.title%",
+                        "completionEvents": [
+                            "onCommand:workbench.action.files.openFolder"
+                        ],
+                        "when": "workspaceFolderCount == 0 && !isMac",
+                        "description": "%vscode-docker.walkthrough.dockerStart.openFolder.description%",
+                        "media": {
+                            "markdown": "resources/walkthroughs/empty.md"
+                        }
+                    },
+                    {
+                        "id": "openFolderMac",
+                        "title": "%vscode-docker.walkthrough.dockerStart.openFolder.title%",
+                        "completionEvents": [
+                            "onCommand:workbench.action.files.openFileFolder"
+                        ],
+                        "when": "workspaceFolderCount == 0 && isMac",
+                        "description": "%vscode-docker.walkthrough.dockerStart.openFolderMac.description%",
+                        "media": {
+                            "markdown": "resources/walkthroughs/empty.md"
+                        }
+                    },
+                    {
                         "id": "scaffold",
                         "title": "%vscode-docker.walkthrough.dockerStart.scaffold.title%",
                         "completionEvents": [
