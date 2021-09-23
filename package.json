@@ -47,6 +47,7 @@
         "onCommand:vscode-docker.containers.select",
         "onCommand:vscode-docker.containers.start",
         "onCommand:vscode-docker.containers.stop",
+        "onCommand:vscode-docker.containers.stats",
         "onCommand:vscode-docker.containers.viewLogs",
         "onCommand:vscode-docker.containers.composeGroup.logs",
         "onCommand:vscode-docker.containers.composeGroup.start",
@@ -2421,6 +2422,11 @@
                 "command": "vscode-docker.containers.stop",
                 "title": "%vscode-docker.commands.containers.stop%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.stats",
+                "title": "%vscode-docker.commands.containers.stats%",
+                "category": "%vscode-docker.commands.category.docker%"
             },
             {
                 "command": "vscode-docker.containers.viewLogs",

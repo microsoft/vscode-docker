@@ -215,6 +215,7 @@
     "vscode-docker.commands.containers.select": "Select container",
     "vscode-docker.commands.containers.start": "Start",
     "vscode-docker.commands.containers.stop": "Stop",
+    "vscode-docker.commands.containers.stats": "Stats",
     "vscode-docker.commands.containers.viewLogs": "View Logs",
     "vscode-docker.commands.containers.composeGroup.logs": "Compose Logs",
     "vscode-docker.commands.containers.composeGroup.start": "Compose Start",
