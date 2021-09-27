@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { IActionContext } from 'vscode-azureextensionui';
 import { isMac, isWindows } from '../utils/osUtils';
 import { MacDockerInstaller, WindowsDockerInstaller } from './dockerInstaller';
-import { openStartPageAfterExtensionUpdate } from './startPage/openStartPage';
 
 export async function installDocker(context: IActionContext): Promise<void> {
     if (isWindows()) {
@@ -17,6 +16,4 @@ export async function installDocker(context: IActionContext): Promise<void> {
     } else {
         await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/download-docker-linux-vscode'));
     }
-
-    void openStartPageAfterExtensionUpdate();
 }

@@ -11,7 +11,6 @@ import { ChooseComposeStep } from './wizard/ChooseComposeStep';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
 import { OpenDockerfileStep } from './wizard/OpenDockerfileStep';
-import { OpenStartPageStep } from './wizard/OpenStartPageStep';
 import { ScaffoldFileStep } from './wizard/ScaffoldFileStep';
 import { ScaffoldingWizardContext } from './wizard/ScaffoldingWizardContext';
 
@@ -32,7 +31,6 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     const executeSteps: AzureWizardExecuteStep<ScaffoldingWizardContext>[] = [
         new ScaffoldFileStep('.dockerignore', 'ask', 100),
         new ScaffoldFileStep('Dockerfile', 'ask', 200),
-        new OpenStartPageStep(1000),
         new OpenDockerfileStep(),
     ];
 

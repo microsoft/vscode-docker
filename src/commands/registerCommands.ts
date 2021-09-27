@@ -74,14 +74,13 @@ import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
-import { openStartPage } from "./startPage/openStartPage";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
 import { removeVolume } from "./volumes/removeVolume";
 
 interface CommandReasonArgument {
-    commandReason: 'tree' | 'palette' | 'startPage' | 'install';
+    commandReason: 'tree' | 'palette' | 'install';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -204,5 +203,4 @@ export function registerCommands(): void {
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
-    registerCommand('vscode-docker.help.openStartPage', openStartPage);
 }

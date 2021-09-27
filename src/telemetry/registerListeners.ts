@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
-import { openStartPageAfterExtensionUpdate } from '../commands/startPage/openStartPage';
 import { ext } from '../extensionVariables';
 
 type docHandler = (context: IActionContext, doc: vscode.TextDocument) => void;
@@ -26,11 +25,11 @@ export function registerListeners(): void {
     }
 
     registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile', () => {
-        void openStartPageAfterExtensionUpdate();
+        // Do nothing
     }));
 
     registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose', () => {
-        void openStartPageAfterExtensionUpdate();
+        // Do nothing
     }));
 }
 
