@@ -224,6 +224,7 @@
     "vscode-docker.commands.debugging.initializeForDebugging": "Initialize for Docker debugging",
     "vscode-docker.commands.help": "Docker Help",
     "vscode-docker.commands.help.reportIssue": "Report Issue",
+    "vscode-docker.commands.help.openWalkthrough": "Open Docker Extension Walkthrough",
     "vscode-docker.commands.images.build": "Build Image...",
     "vscode-docker.commands.images.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.images.inspect": "Inspect",

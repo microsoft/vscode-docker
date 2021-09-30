@@ -203,4 +203,5 @@ export function registerCommands(): void {
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
+    registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));
 }

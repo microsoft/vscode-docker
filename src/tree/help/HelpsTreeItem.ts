@@ -19,6 +19,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this.readDocumentationTreeItem,
             this.watchVideosTreeItem,
             this.getStartedTreeItem,
+            this.openWalkthroughTreeItem,
             this.reviewIssuesTreeItem,
             this.reportIssuesTreeItem,
             this.installDockerTreeItem,
@@ -67,6 +68,22 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             new ThemeIcon('star-empty')
         );
         node.id = '20';
+
+        return node;
+    }
+
+    private get openWalkthroughTreeItem(): AzExtTreeItem {
+        const node = new GenericTreeItem(
+            this,
+            {
+                label: localize('views.help.openWalkthrough', 'Open Docker Extension Walkthrough'),
+                contextValue: 'OpenWalkthrough',
+                commandId: 'vscode-docker.help.openWalkthrough',
+                iconPath: new ThemeIcon('extensions'),
+                includeInTreeItemPicker: true,
+            }
+        );
+        node.id = '30';
 
         return node;
     }
