@@ -24,16 +24,12 @@ export function registerListeners(): void {
         }));
     }
 
-    registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile', () => {
-        // Do nothing
-    }));
+    registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile'));
 
-    registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose', () => {
-        // Do nothing
-    }));
+    registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose'));
 }
 
-function handleDocEvent(languageId: string, handler: docHandler): docHandler {
+function handleDocEvent(languageId: string, additionalHandler?: docHandler): docHandler {
     return (context: IActionContext, doc: vscode.TextDocument) => {
         // If it is not the document of type we expect, skip
         if (doc.languageId !== languageId) {
@@ -41,6 +37,8 @@ function handleDocEvent(languageId: string, handler: docHandler): docHandler {
             return;
         }
 
-        handler(context, doc);
+        if (additionalHandler) {
+            additionalHandler(context, doc);
+        }
     };
 }
