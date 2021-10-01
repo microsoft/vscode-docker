@@ -64,6 +64,8 @@ export class GitLabAccountTreeItem extends AzExtParentTreeItem implements IRegis
             const errorType: string = parseError(err).errorType.toLowerCase();
             if (errorType === '401' || errorType === 'unauthorized') {
                 return [new RegistryConnectErrorTreeItem(this, err, this.cachedProvider)];
+            } else {
+                throw err;
             }
         }
     }
