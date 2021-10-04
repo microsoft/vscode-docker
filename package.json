@@ -57,7 +57,7 @@
         "onCommand:vscode-docker.debugging.initializeForDebugging",
         "onCommand:vscode-docker.help",
         "onCommand:vscode-docker.help.reportIssue",
-        "onCommand:vscode-docker.help.openStartPage",
+        "onCommand:vscode-docker.help.openWalkthrough",
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
@@ -225,6 +225,10 @@
                 {
                     "command": "vscode-docker.registries.azure.runFileAsTask",
                     "when": "isWorkspaceTrusted"
+                },
+                {
+                    "command": "vscode-docker.help.openWalkthrough",
+                    "when": "never"
                 }
             ],
             "editor/context": [
@@ -2299,11 +2303,6 @@
                     "type": "string",
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
                 },
-                "docker.showStartPage": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "%vscode-docker.config.docker.showStartPage%"
-                },
                 "docker.dockerPath": {
                     "type": "string",
                     "default": "docker",
@@ -2745,8 +2744,8 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.help.openStartPage",
-                "title": "%vscode-docker.commands.help.openStartPage%",
+                "command": "vscode-docker.help.openWalkthrough",
+                "title": "%vscode-docker.commands.help.openWalkthrough%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
@@ -2838,7 +2837,6 @@
             {
                 "id": "dockerStart",
                 "title": "%vscode-docker.walkthrough.dockerStart.title%",
-                "when": "never",
                 "featuredFor": [
                     "Dockerfile",
                     "docker-compose.yml",
@@ -2997,7 +2995,6 @@
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^4.28.4",
         "@typescript-eslint/parser": "^4.28.4",
-        "@vscode/codicons": "^0.0.22",
         "@vscode/test-electron": "^1.6.1",
         "copy-webpack-plugin": "^9.0.1",
         "eslint": "^7.24.0",

@@ -11,7 +11,6 @@ import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExpe
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
-import { lastVersionKey } from './commands/startPage/openStartPage';
 import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
@@ -51,8 +50,6 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
 
 export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<unknown | undefined> {
     perfStats.loadEndTime = Date.now();
-
-    ctx.globalState.setKeysForSync([lastVersionKey]);
 
     initializeExtensionVariables(ctx);
 
