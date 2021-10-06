@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -314,6 +314,11 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
             clientOptions
         );
         client.registerProposedFeatures();
+
+        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: any) => {
+            // noop
+        });
+
         ctx.subscriptions.push(client.start());
     });
 }
