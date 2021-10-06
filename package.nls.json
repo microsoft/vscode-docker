@@ -312,7 +312,7 @@
     "vscode-docker.walkthrough.dockerStart.buildImage.title": "Build an Image",
     "vscode-docker.walkthrough.dockerStart.buildImage.description": "The Docker extension makes it simple to build your image.\n[Build Image](command:vscode-docker.images.build)",
     "vscode-docker.walkthrough.dockerStart.runContainer.title": "Run a Container",
-    "vscode-docker.walkthrough.dockerStart.runContainer.description": "Now that you've built your image, it's time to run your app in a container!\n[Run Image](command:vscode-docker.images.run)",
+    "vscode-docker.walkthrough.dockerStart.runContainer.description": "You can run any image on your system including those you've built with a Dockerfile.\n[Run Image](command:vscode-docker.images.run)",
     "vscode-docker.walkthrough.dockerStart.dockerExplorer.title": "Use the Docker Explorer",
     "vscode-docker.walkthrough.dockerStart.dockerExplorer.description": "The Docker Explorer makes it easy to manage, troubleshoot, and deploy containerized applications. The Docker Explorer shows a number of Docker resources such as containers, images, volumes, networks, and container registries. Also, if the [Azure Account extension](command:extension.open?%22ms-vscode.azure-account%22) is installed, you'll be able to browse your Azure Container Registries.\n\nThe right-click menu provides access to commonly used commands for each resource type.\n[Open Docker Explorer](command:workbench.view.extension.dockerView)",
     "vscode-docker.walkthrough.dockerStart.pushImage.title": "Push an Image to a Container Registry",
