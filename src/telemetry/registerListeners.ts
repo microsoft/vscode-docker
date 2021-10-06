@@ -5,7 +5,6 @@
 
 import * as vscode from 'vscode';
 import { IActionContext, registerEvent } from 'vscode-azureextensionui';
-import { openStartPageAfterExtensionUpdate } from '../commands/startPage/openStartPage';
 import { ext } from '../extensionVariables';
 
 type docHandler = (context: IActionContext, doc: vscode.TextDocument) => void;
@@ -25,16 +24,12 @@ export function registerListeners(): void {
         }));
     }
 
-    registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile', () => {
-        void openStartPageAfterExtensionUpdate();
-    }));
+    registerEvent('dockerfileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockerfile'));
 
-    registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose', () => {
-        void openStartPageAfterExtensionUpdate();
-    }));
+    registerEvent('composefileopen', vscode.workspace.onDidOpenTextDocument, handleDocEvent('dockercompose'));
 }
 
-function handleDocEvent(languageId: string, handler: docHandler): docHandler {
+function handleDocEvent(languageId: string, additionalHandler?: docHandler): docHandler {
     return (context: IActionContext, doc: vscode.TextDocument) => {
         // If it is not the document of type we expect, skip
         if (doc.languageId !== languageId) {
@@ -42,6 +37,8 @@ function handleDocEvent(languageId: string, handler: docHandler): docHandler {
             return;
         }
 
-        handler(context, doc);
+        if (additionalHandler) {
+            additionalHandler(context, doc);
+        }
     };
 }

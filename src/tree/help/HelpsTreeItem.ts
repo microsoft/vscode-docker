@@ -19,7 +19,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this.readDocumentationTreeItem,
             this.watchVideosTreeItem,
             this.getStartedTreeItem,
-            this.openStartPageTreeItem,
+            this.openWalkthroughTreeItem,
             this.reviewIssuesTreeItem,
             this.reportIssuesTreeItem,
             this.installDockerTreeItem,
@@ -72,13 +72,13 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         return node;
     }
 
-    private get openStartPageTreeItem(): AzExtTreeItem {
+    private get openWalkthroughTreeItem(): AzExtTreeItem {
         const node = new GenericTreeItem(
             this,
             {
-                label: localize('views.help.openStartPage', 'Open Extension Start Page'),
-                contextValue: 'OpenStartPage',
-                commandId: 'vscode-docker.help.openStartPage',
+                label: localize('views.help.openWalkthrough', 'Open Docker Extension Walkthrough'),
+                contextValue: 'OpenWalkthrough',
+                commandId: 'vscode-docker.help.openWalkthrough',
                 iconPath: new ThemeIcon('extensions'),
                 includeInTreeItemPicker: true,
             }
