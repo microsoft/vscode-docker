@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, ITelemetryContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -315,8 +315,8 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
         );
         client.registerProposedFeatures();
 
-        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: any) => {
-            // noop
+        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: ITelemetryContext) => {
+            context.telemetry = { ...context.telemetry, ...evtArgs };
         });
 
         ctx.subscriptions.push(client.start());
