@@ -28,6 +28,12 @@ export class DockerUri {
 
         const query = <DockerUriQuery>querystring.decode(uri.query);
 
+        const config = vscode.workspace.getConfiguration('docker');
+        const containerOSunknownTryOs: DockerOSType = config.get('containerOSunknownTry');
+        if (containerOSunknownTryOs.toString() != "" && query.containerOS != 'linux' && query.containerOS != "windows") {
+            query.containerOS = containerOSunknownTryOs;
+        }
+
         return DockerUri.create(containerId, path, query);
     }
 

@@ -2155,6 +2155,15 @@
                     "description": "%vscode-docker.config.docker.host%",
                     "scope": "machine-overridable"
                 },
+                "docker.containerOSunknownTry": {
+                    "type": "string",
+                    "default": "",
+                    "description": "%vscode-docker.config.docker.containerOSunknownTry%",
+                    "enum": [
+                        "linux",
+                        "windows"
+                    ]
+                },
                 "docker.context": {
                     "type": "string",
                     "default": "",
