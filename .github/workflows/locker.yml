@@ -19,5 +19,6 @@ jobs:
       - name: Run Locker
         uses: ./azuretools/triage-actions/locker
         with:
+          token: ${{secrets.AZCODE_BOT_PAT}}
           daysSinceClose: 45
           daysSinceUpdate: 7
