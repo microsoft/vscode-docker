@@ -220,7 +220,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
         const config = vscode.workspace.getConfiguration('docker');
         const containerOSunknownTryOs: DockerOSType = config.get('containerOSunknownTry');
-        if (containerOSunknownTryOs.toString() != "" && result.Platform != 'linux' && result.Platform != "windows") {
+        if (containerOSunknownTryOs.toString() !== "" && result.Platform !== 'linux' && result.Platform !== "windows") {
             return containerOSunknownTryOs;
         }
 
