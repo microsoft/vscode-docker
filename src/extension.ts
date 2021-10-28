@@ -23,6 +23,7 @@ import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
+import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { isLinux, isMac, isWindows } from './utils/osUtils';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -314,8 +315,9 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
             clientOptions
         );
         client.registerProposedFeatures();
+        client.registerFeature(new DocumentSettingsClientFeature(client));
 
-        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: ITelemetryContext) => {
+        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: ITelemetryContext /* TODO */) => {
             context.telemetry = { ...context.telemetry, ...evtArgs };
         });
 
