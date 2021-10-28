@@ -1465,6 +1465,18 @@
                 ]
             }
         ],
+        "configurationDefaults": {
+            "[dockercompose]": {
+                "editor.insertSpaces": true,
+                "editor.tabSize": 2,
+                "editor.autoIndent": "advanced",
+                "editor.quickSuggestions": {
+                    "other": true,
+                    "comments": false,
+                    "strings": true
+                }
+            }
+        },
         "configuration": {
             "title": "Docker",
             "properties": {
