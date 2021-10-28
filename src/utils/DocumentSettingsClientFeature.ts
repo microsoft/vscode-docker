@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// Largely copied from https://github.com/microsoft/compose-language-service/blob/main/src/test/clientExtension/DocumentSettingsClientFeature.ts
+
 import * as vscode from 'vscode';
 import { ClientCapabilities, StaticFeature } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
