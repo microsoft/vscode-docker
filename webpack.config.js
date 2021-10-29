@@ -59,7 +59,11 @@ const config = {
                 // Unpack UMD module headers used in some modules since webpack doesn't handle them.
                 test: /dockerfile-language-service|vscode-languageserver-types/,
                 use: { loader: 'umd-compat-loader' }
-            }
+            },
+            {
+                test: /\.node$/,
+                loader: 'node-loader',
+            },
         ]
     },
     plugins: [
@@ -104,16 +108,6 @@ const config = {
             // Ignore a warning from `vscode-extension-telemetry`
             module: /node_modules\/vscode-extension-telemetry/,
             message: /Can't resolve 'applicationinsights-native-metrics'/
-        },
-        {
-            // Ignore a warning for missing optional dependency of `ssh2`
-            module: /node_modules\/ssh2/,
-            message: /Can't resolve 'cpu-features'/
-        },
-        {
-            // Ignore a warning for missing optional dependency of `ssh2`
-            module: /node_modules\/ssh2/,
-            message: /Can't resolve '\.\/crypto\/build\/Release\/sshcrypto.node'/
         },
         (warning) => false, // No other warnings should be ignored
     ],
