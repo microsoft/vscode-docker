@@ -3028,7 +3028,6 @@
         "typescript": "^4.4.3",
         "umd-compat-loader": "^2.1.2",
         "vsce": "^1.93.0",
-        "vscode-nls-dev": "^3.3.2",
         "webpack": "^5.31.2",
         "webpack-bundle-analyzer": "^4.4.1",
         "webpack-cli": "^4.6.0"
