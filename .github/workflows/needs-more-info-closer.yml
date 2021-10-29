@@ -1,0 +1,27 @@
+name: Needs More Info Closer
+on:
+  schedule:
+    - cron: 30 5 * * * # 10:30pm PT
+  workflow_dispatch:
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout triage-actions
+        uses: actions/checkout@v2
+        with:
+          repository: "microsoft/vscode-azuretools"
+          path: ./azuretools
+          ref: v0.2.0-triage-actions
+      - name: npm install
+        run: npm install --production --prefix ./azuretools/triage-actions
+      - name: Run Needs More Info Closer
+        uses: ./azuretools/triage-actions/needs-more-info-closer
+        with:
+          token: ${{secrets.AZCODE_BOT_PAT}}
+          label: needs more info
+          closeDays: 14
+          closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity. See also our [issue reporting](https://aka.ms/azcodeissuereporting) guidelines.\n\nHappy Coding!"
+          pingDays: 80
+          pingComment: "Hey @${assignee}, this issue might need further attention.\n\n@${author}, you can help us out by closing this issue if the problem no longer exists, or adding more information."
