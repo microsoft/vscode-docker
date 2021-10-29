@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import { ClientCapabilities, StaticFeature } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
-import { DocumentSettings, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsNotificationType, DocumentSettingsRequestType } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
+import { DocumentSettings, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsNotification, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
 
 export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disposable {
     private disposables: vscode.Disposable[] = [];
@@ -30,7 +30,7 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
     public initialize(): void {
         this.disposables.push(
             this.client.onRequest(
-                DocumentSettingsRequestType,
+                DocumentSettingsRequest.method,
                 (params: DocumentSettingsParams): DocumentSettings | undefined => {
                     const textEditor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === params.textDocument.uri);
 
@@ -55,7 +55,7 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
                         tabSize: Number(e.options.tabSize),
                     };
 
-                    this.client.sendNotification(DocumentSettingsNotificationType, params);
+                    this.client.sendNotification(DocumentSettingsNotification.method, params);
                 }
             )
         );

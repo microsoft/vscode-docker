@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, ITelemetryContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
@@ -317,8 +318,13 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
         client.registerProposedFeatures();
         client.registerFeature(new DocumentSettingsClientFeature(client));
 
-        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: ITelemetryContext /* TODO */) => {
-            context.telemetry = { ...context.telemetry, ...evtArgs };
+        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: TelemetryEvent) => {
+            context.telemetry.properties.langServerEventName = evtArgs.eventName;
+            context.telemetry.suppressAll = evtArgs.suppressAll;
+            context.telemetry.suppressIfSuccessful = evtArgs.suppressIfSuccessful;
+
+            Object.assign(context.telemetry.measurements, evtArgs.measurements);
+            Object.assign(context.telemetry.properties, evtArgs.properties);
         });
 
         ctx.subscriptions.push(client.start());
