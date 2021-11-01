@@ -109,6 +109,11 @@ const config = {
             module: /node_modules\/vscode-extension-telemetry/,
             message: /Can't resolve 'applicationinsights-native-metrics'/
         },
+        {
+            // Ignore a warning for missing optional dependency of `ssh2`
+            module: /node_modules\/ssh2/,
+            message: /Can't resolve 'cpu-features'/
+        },
         (warning) => false, // No other warnings should be ignored
     ],
 };
