@@ -1,3 +1,15 @@
+## 1.18.0 - 15 November 2021
+### Added
+* Substantial additions (to completions especially) have been made to the Compose language service. It now has near-parity to the previously-available features. [#3222](https://github.com/microsoft/vscode-docker/issues/3222)
+* The Compose language service has been turned on by default. [#3288](https://github.com/microsoft/vscode-docker/pull/3288)
+* The walkthrough with the [VSCode walkthrough experience](https://code.visualstudio.com/updates/v1_57#_new-getting-started-experience) is no longer an experiment and is visible to all users. The previous "Getting Started" page has been removed. [#3055](https://github.com/microsoft/vscode-docker/issues/3055), [#3248](https://github.com/microsoft/vscode-docker/pull/3248)
+* A command to show `docker stats` in the terminal has been added. [#3063](https://github.com/microsoft/vscode-docker/issues/3063)
+
+### Fixed
+* A few small improvements have been made to the walkthrough. [#3223](https://github.com/microsoft/vscode-docker/issues/3223), [#3235](https://github.com/microsoft/vscode-docker/issues/3235)
+* Azure Arc custom locations should now show up again in the location selection list. [#3213](https://github.com/microsoft/vscode-docker/issues/3213)
+* A fix has been made to an infinite loop error in the Dockerfile language service. [#3268](https://github.com/microsoft/vscode-docker/issues/3268)
+
 ## 1.17.0 - 20 September 2021
 ### Added
 * Docker Context lookup at the time of extension activation will now always try using the gRPC API first, due to superior performance. Previously this was an experiment. [#3157](https://github.com/microsoft/vscode-docker/pull/3157)
