@@ -1,4 +1,4 @@
-FROM ruby:2.5-slim
+FROM ruby:slim
 
 LABEL Name={{ serviceName }} Version={{ version }}
 
