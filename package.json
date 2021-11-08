@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.17.5-alpha",
+    "version": "1.18.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -3051,7 +3051,7 @@
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.2.12",
-        "@microsoft/compose-language-service": "^0.0.2-alpha",
+        "@microsoft/compose-language-service": "^0.0.4-alpha",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.7.2",
         "dockerode": "^3.2.1",
