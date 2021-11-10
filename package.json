@@ -2317,7 +2317,7 @@
                 },
                 "docker.dockerPath": {
                     "type": "string",
-                    "default": "docker",
+                    "default": "",
                     "description": "%vscode-docker.config.docker.dockerPath%",
                     "scope": "machine-overridable"
                 },

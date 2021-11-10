@@ -33,7 +33,6 @@ const dockerConfigFile = path.join(os.homedir(), '.docker', 'config.json');
 const dockerContextsFolder = path.join(os.homedir(), '.docker', 'contexts', 'meta');
 
 const WindowsLocalPipe = 'npipe:////./pipe/docker_engine';
-const UnixLocalPipe = 'unix:///var/run/docker.sock';
 
 const defaultContext: Partial<DockerContext> = {
     Id: 'default',
@@ -249,7 +248,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 contextList = [{
                     ...defaultContext,
                     Current: true,
-                    DockerEndpoint: isWindows() ? WindowsLocalPipe : UnixLocalPipe,
+                    DockerEndpoint: isWindows() ? WindowsLocalPipe : this.getUnixLocalPipe(),
                 } as DockerContext];
             }
 
@@ -311,7 +310,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             return {
                 ...defaultContext,
                 Current: true,
-                DockerEndpoint: isWindows() ? WindowsLocalPipe : UnixLocalPipe,
+                DockerEndpoint: isWindows() ? WindowsLocalPipe : this.getUnixLocalPipe(),
             } as DockerContext;
         }
 
@@ -435,6 +434,17 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {
         void commands.executeCommand('setContext', vsCodeContext, value);
+    }
+
+    private getUnixLocalPipe(): string {
+        // Use podman user socket when available.
+        const podmanUserSocketPath = `/run/user/${process.getuid()}/podman/podman.sock`;
+        if (fse.existsSync(podmanUserSocketPath)) {
+            return `unix://${podmanUserSocketPath}`;
+        }
+
+        // Use system socket.
+        return 'unix:///var/run/docker.sock';
     }
 }
 

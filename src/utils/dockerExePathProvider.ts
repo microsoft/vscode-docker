@@ -4,12 +4,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import { IActionContext } from 'vscode-azureextensionui';
 
 export const DefaultDockerPath: string = 'docker';
+export const DefaultPodmanPath: string = 'podman';
 
 export function dockerExePath(context?: IActionContext): string {
-    const retval = vscode.workspace.getConfiguration('docker').get('dockerPath', DefaultDockerPath);
+    let retval: string = vscode.workspace.getConfiguration('docker').get('dockerPath', '');
+    if (retval === '') {
+        try {
+            cp.execFileSync(DefaultPodmanPath, ['version'], { stdio: 'ignore' });
+            retval = DefaultPodmanPath;
+        }
+        catch {
+            retval = DefaultDockerPath;
+        }
+    }
     if (retval !== DefaultDockerPath && context) {
         context.telemetry.properties.nonstandardDockerPath = 'true';
     }
