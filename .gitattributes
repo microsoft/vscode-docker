@@ -1,2 +1,5 @@
 # Stop git from breaking this script by putting CRLF in place of LF
 resources/netCore/vsdbg text eol=lf
+
+# Mark some files as generated to prevent them from showing in the repo's language stats
+NOTICE.html linguist-vendored=true
