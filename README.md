@@ -28,9 +28,9 @@ In addition, you can use the Problems panel (<kbd>Ctrl+Shift+M</kbd> on Windows/
 
 ### Generating Docker files
 
-You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate `Dockerfile` and `.dockerignore` files and add them to your workspace. The command will also query you if you want the Docker Compose files added as well; this is optional.
+You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate a `Dockerfile` and `.dockerignore` file and add them to your workspace. The command will also ask you if you want to add Docker Compose files as well, but this is optional.
 
-The extension recognizes workspaces that use most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes generated Docker files accordingly.
+The extension can scaffold Docker files for most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes the generated Docker files accordingly. When these files are created, we also create the necessary artifacts to provide first-class debugging support for Node.js, Python, and .NET (C#). 
 
 ### Docker view
 
