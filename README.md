@@ -30,7 +30,7 @@ In addition, you can use the Problems panel (<kbd>Ctrl+Shift+M</kbd> on Windows/
 
 You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate a `Dockerfile` and `.dockerignore` file and add them to your workspace. The command will also ask you if you want to add Docker Compose files as well, but this is optional.
 
-The extension can scaffold Docker files for most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes the generated Docker files accordingly. When these files are created, we also create the necessary artifacts to provide first-class debugging support for Node.js, Python, and .NET (C#). 
+The extension can scaffold Docker files for most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes the generated Docker files accordingly. When these files are created, we also create the necessary artifacts to provide first-class debugging support for Node.js, Python, and .NET (C#).
 
 ### Docker view
 
@@ -55,18 +55,23 @@ You can run Docker commands to manage [images](https://docs.docker.com/engine/re
 
 ### Docker Compose
 
-[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Visual Studio Code's experience for authoring `docker-compose.yml` is very rich, providing IntelliSense for valid Docker compose directives:
+[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Our [Compose Language Service](https://github.com/microsoft/compose-language-service) in the Docker extension gives you IntelliSense and tab completions when authoring `docker-compose.yml` files.
 
- ![Docker Compose IntelliSense](resources/readme/dockercomposeintellisense.png)
+ ![Docker Compose IntelliSense](resources/readme/tab-completions.gif)
 
-For the `image` directive, you can press <kbd>ctrl+space</kbd> and VS Code will query the Docker Hub index for public images:
 
- ![Docker Compose image suggestions](resources/readme/dockercomposeimageintellisense.png)
+We also provide tooltips when you hover over a Docker Compose YAML attribute.
 
-VS Code will first show a list of popular images along with metadata such as the number of stars and description. If you continue typing, VS Code will query the Docker Hub index for matching images, including searching public profiles. For example, searching for 'Microsoft' will show you all the public Microsoft images.
+ ![Docker Compose Tooltips](resources/readme/hover-support.jpg)
 
- ![Docker Compose Microsoft image suggestions](resources/readme/dockercomposesearch.png)
 
+While `Compose Up` allows you to run all of your services at once, our new feature `Compose Up - Select Services` lets you select any combination of the services you want to run.
+
+![Docker Compose Up - Select Subset](resources/readme/select-subset.gif)
+
+Once your `Compose Up` command completes, navigate to the Docker Explorer to view your services as a Compose Group. This allows you to start, stop, and view the logs of each service all at once.
+
+![Docker Compose Groups](resources/readme/compose-group.png)
 
 ### Using image registries
 
