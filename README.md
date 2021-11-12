@@ -69,7 +69,7 @@ While `Compose Up` allows you to run all of your services at once, our new featu
 
 ![Docker Compose Up - Select Subset](resources/readme/select-subset.gif)
 
-Once your `Compose Up` command completes, navigate to the Docker Explorer to view your services as a Compose Group. This allows you to start, stop, and view the logs of each service all at once.
+Once your `Compose Up` command completes, navigate to the Docker Explorer to view your services as a Compose Group. This allows you to start, stop, and view the logs of each service as a group.
 
 ![Docker Compose Groups](resources/readme/compose-group.png)
 
