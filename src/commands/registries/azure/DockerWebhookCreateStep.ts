@@ -50,7 +50,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             // NOTE: The response to the information message is not awaited but handled independently of the wizard steps.
             //       VS Code will hide such messages in the notifications pane after a period of time; awaiting them risks
             //       the user never noticing them in the first place, which means the wizard would never complete, and the
-            //       user left with the impression that the action is hung.
+            //       user left with the impression that the action never completes.
 
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window
