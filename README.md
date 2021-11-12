@@ -62,7 +62,7 @@ You can run Docker commands to manage [images](https://docs.docker.com/engine/re
 
 We also provide tooltips when you hover over a Docker Compose YAML attribute.
 
- ![Docker Compose Tooltips](resources/readme/hover-support.jpg)
+ ![Docker Compose Tooltips](resources/readme/hover-text.png)
 
 
 While `Compose Up` allows you to run all of your services at once, our new feature `Compose Up - Select Services` lets you select any combination of the services you want to run.
