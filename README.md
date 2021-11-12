@@ -28,9 +28,9 @@ In addition, you can use the Problems panel (<kbd>Ctrl+Shift+M</kbd> on Windows/
 
 ### Generating Docker files
 
-You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate `Dockerfile` and `.dockerignore` files and add them to your workspace. The command will also query you if you want the Docker Compose files added as well; this is optional.
+You can add Docker files to your workspace by opening the Command Palette (<kbd>F1</kbd>) and using **Docker: Add Docker Files to Workspace** command. The command will generate a `Dockerfile` and `.dockerignore` file and add them to your workspace. The command will also ask you if you want to add Docker Compose files as well, but this is optional.
 
-The extension recognizes workspaces that use most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes generated Docker files accordingly.
+The extension can scaffold Docker files for most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes the generated Docker files accordingly. When these files are created, we also create the necessary artifacts to provide first-class debugging support for Node.js, Python, and .NET (C#).
 
 ### Docker view
 
@@ -55,34 +55,39 @@ You can run Docker commands to manage [images](https://docs.docker.com/engine/re
 
 ### Docker Compose
 
-[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Visual Studio Code's experience for authoring `docker-compose.yml` is very rich, providing IntelliSense for valid Docker compose directives:
+[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Our [Compose Language Service](https://github.com/microsoft/compose-language-service) in the Docker extension gives you IntelliSense and tab completions when authoring `docker-compose.yml` files.
 
- ![Docker Compose IntelliSense](resources/readme/dockercomposeintellisense.png)
+ ![Docker Compose IntelliSense](resources/readme/tab-completions.gif)
 
-For the `image` directive, you can press <kbd>ctrl+space</kbd> and VS Code will query the Docker Hub index for public images:
 
- ![Docker Compose image suggestions](resources/readme/dockercomposeimageintellisense.png)
+We also provide tooltips when you hover over a Docker Compose YAML attribute.
 
-VS Code will first show a list of popular images along with metadata such as the number of stars and description. If you continue typing, VS Code will query the Docker Hub index for matching images, including searching public profiles. For example, searching for 'Microsoft' will show you all the public Microsoft images.
+ ![Docker Compose Tooltips](resources/readme/hover-support.png)
 
- ![Docker Compose Microsoft image suggestions](resources/readme/dockercomposesearch.png)
 
+While `Compose Up` allows you to run all of your services at once, our new feature `Compose Up - Select Services` lets you select any combination of the services you want to run.
+
+![Docker Compose Up - Select Subset](resources/readme/select-subset.gif)
+
+Once your `Compose Up` command completes, navigate to the Docker Explorer to view your services as a Compose Group. This allows you to start, stop, and view the logs of each service as a group.
+
+![Docker Compose Groups](resources/readme/compose-group.png)
 
 ### Using image registries
 
-You can display the content and push/pull/delete images from [Docker Hub](https://hub.docker.com/) and [Azure Container Registry](https://docs.microsoft.com/azure/container-registry/):
+You can display the content and push, pull, or delete images from [Docker Hub](https://hub.docker.com/) and [Azure Container Registry](https://docs.microsoft.com/azure/container-registry/):
 
 ![Azure Container Registry content](resources/readme/container-registry.png)
 
-An image in an Azure Container Registry can be deployed to Azure App Service directly from VS Code; see [Deploy images to Azure App Service](https://aka.ms/AA7arf8) page. For more information about how to authenticate to and work with registries see [Using container registries](https://aka.ms/AA7arf9) page.
+An image in an Azure Container Registry can be deployed to Azure App Service directly from VS Code. See [Deploy images to Azure App Service](https://aka.ms/AA7arf8) to get started. For more information about how to authenticate to and work with registries, see [Using container registries](https://aka.ms/AA7arf9).
 
 ### Debugging services running inside a container
 
-You can debug services built using Node.js, Python, or .NET (C#) that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information see [Debug container application](https://aka.ms/AA7arfb)  and [Extension Properties and Tasks](https://aka.ms/AA7ay8l) pages.
+You can debug services built using Node.js, Python, or .NET (C#) that are running inside a container. The extension offers custom tasks that help with launching a service under the debugger and with attaching the debugger to a running service instance. For more information, see [Debug containerized apps](https://aka.ms/AA7arfb)  and [Customize the Docker extension](https://aka.ms/AA7ay8l).
 
 ### Azure CLI integration
 
-You can start Azure CLI (command-line interface) in a standalone, Linux-based container with **Docker Images: Run Azure CLI** command. This allows access to full Azure CLI command set in an isolated environment. See [Get started with Azure CLI](https://docs.microsoft.com/cli/azure/get-started-with-azure-cli?view=azure-cli-latest#sign-in) page for more information on available commands.
+You can start Azure CLI (command-line interface) in a standalone, Linux-based container with **Docker Images: Run Azure CLI** command. This gives you access to the full Azure CLI command set in an isolated environment. For more information on available commands, see [Get started with Azure CLI](https://docs.microsoft.com/cli/azure/get-started-with-azure-cli?view=azure-cli-latest#sign-in).
 
 ## Contributing
 
