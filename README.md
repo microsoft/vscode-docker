@@ -32,9 +32,9 @@ You can add Docker files to your workspace by opening the Command Palette (<kbd>
 
 The extension can scaffold Docker files for most popular development languages (C#, Node.js, Python, Ruby, Go, and Java) and customizes the generated Docker files accordingly. When these files are created, we also create the necessary artifacts to provide first-class debugging support for Node.js, Python, and .NET (C#).
 
-### Docker view
+### Docker Explorer
 
-The Docker extension contributes a Docker view to VS Code. The Docker view lets you examine and manage Docker assets: containers, images, volumes, networks, and container registries. If the Azure Account extension is installed, you can browse your Azure Container Registries as well.
+The Docker extension contributes a Docker Explorer view to VS Code. The Docker Explorer lets you examine and manage Docker assets: containers, images, volumes, networks, and container registries. If the Azure Account extension is installed, you can browse your Azure Container Registries as well.
 
 The right-click menu provides access to commonly used commands for each type of asset.
 
@@ -55,7 +55,7 @@ You can run Docker commands to manage [images](https://docs.docker.com/engine/re
 
 ### Docker Compose
 
-[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Our [Compose Language Service](https://github.com/microsoft/compose-language-service) in the Docker extension gives you IntelliSense and tab completions when authoring `docker-compose.yml` files.
+[Docker Compose](https://docs.docker.com/compose/) lets you define and run multi-container applications with Docker. Our [Compose Language Service](https://github.com/microsoft/compose-language-service) in the Docker extension gives you IntelliSense and tab completions when authoring `docker-compose.yml` files. Press `Ctrl+Space` to see a list of valid Compose directives.
 
  ![Docker Compose IntelliSense](resources/readme/tab-completions.gif)
 
