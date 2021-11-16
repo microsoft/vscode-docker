@@ -35,6 +35,7 @@ export function isNewContextType(contextType: ContextType): boolean {
 }
 
 export async function getComposeCliCommand(): Promise<string> {
+    // TODO: exe path
     return isNewContextType(await ext.dockerContextManager.getCurrentContextType()) ? 'docker compose' : 'docker-compose';
 }
 
@@ -42,6 +43,7 @@ export async function getComposeCliCommand(): Promise<string> {
 // In order to support backwards compatibility, we rewrite the command, rather than building it correctly from the beginning with `getComposeCliCommand()`
 export async function rewriteComposeCommandIfNeeded(command: string): Promise<string> {
     // Replace 'docker-compose' or 'docker compose' at the start of a string with the correct compose CLI command
+    // TODO: exe path
     command = command.replace(/^docker(-|\s+)compose/i, await getComposeCliCommand());
 
     if (isNewContextType(await ext.dockerContextManager.getCurrentContextType())) {

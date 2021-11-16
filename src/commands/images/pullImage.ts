@@ -34,6 +34,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
             continue;
         }
 
+        // TODO: exe path
         await executeAsTask(context, `${dockerExePath(context)} pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }

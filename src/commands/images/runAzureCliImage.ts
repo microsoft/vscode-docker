@@ -45,6 +45,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             vol += ` -v ${workspaceFolder.uri.fsPath}:/workspace`;
         }
 
+        // TODO: exe path
         await executeAsTask(context, `${dockerExePath(context)} run ${option} ${vol.trim()} -it --rm mcr.microsoft.com/azure-cli:latest`, 'Azure CLI', { addDockerEnv: true, focus: true });
     }
 }

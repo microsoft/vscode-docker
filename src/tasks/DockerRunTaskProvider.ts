@@ -82,6 +82,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
+        // TODO: exe path
             .create('docker', 'run', '-dt')
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)

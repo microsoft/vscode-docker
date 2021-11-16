@@ -2316,10 +2316,17 @@
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
                 },
                 "docker.dockerPath": {
-                    "type": "string",
-                    "default": "docker",
                     "description": "%vscode-docker.config.docker.dockerPath%",
-                    "scope": "machine-overridable"
+                    "scope": "machine-overridable",
+                    "type": "string",
+                    "default": "docker"
+                },
+                "docker.composeCommand": {
+                    "description": "%vscode-docker.config.docker.dockerPath%",
+                    "scope": "machine-overridable",
+                    "type": "string",
+                    "enum": ["docker-compose", "docker compose"],
+                    "default": "docker-compose"
                 },
                 "docker.enableDockerComposeLanguageService": {
                     "type": "boolean",

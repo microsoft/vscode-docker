@@ -75,6 +75,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
         const commandProvider = Array.isArray(command) ? () => command : command;
 
         if (isWindows()) {
+            // TODO: exe path
             let dockerCommand = 'docker exec ';
 
             if (options?.user) {

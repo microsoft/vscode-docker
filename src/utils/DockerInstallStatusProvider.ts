@@ -33,7 +33,7 @@ class DockerInstallStatusProvider implements IDockerInstallStatusProvider {
 
     public async isDockerInstalledRealTimeCheck(): Promise<boolean> {
         try {
-
+            // TODO: exe path
             await execAsync(`${dockerExePath()} -v`);
             return true; // As long as the docker command did't throw exception, assume it is installed.
         } catch (error) {

@@ -69,6 +69,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     addImageTaggingTelemetry(context, finalTag, '');
 
     // Finally push the image
+    // TODO: exe path
     await executeAsTask(context, `${dockerExePath(context)} push ${finalTag}`, finalTag, { addDockerEnv: true });
 }
 

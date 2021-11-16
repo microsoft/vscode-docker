@@ -29,6 +29,7 @@ import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClien
 // for command duration.
 const ContextCmdExecOptions: ExecOptions = { timeout: 5000 };
 
+// TODO: exe path
 const dockerConfigFile = path.join(os.homedir(), '.docker', 'config.json');
 const dockerContextsFolder = path.join(os.homedir(), '.docker', 'contexts', 'meta');
 
@@ -187,6 +188,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {
+        // TODO: exe path
         const { stdout } = await execAsync(`${dockerExePath(actionContext)} context inspect ${contextName}`, { timeout: 10000 });
 
         // The result is an array with one entry
@@ -195,11 +197,13 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public async use(actionContext: IActionContext, contextName: string): Promise<void> {
+        // TODO: exe path
         const useCmd: string = `${dockerExePath(actionContext)} context use ${contextName}`;
         await execAsync(useCmd, ContextCmdExecOptions);
     }
 
     public async remove(actionContext: IActionContext, contextName: string): Promise<void> {
+        // TODO: exe path
         const removeCmd: string = `${dockerExePath(actionContext)} context rm ${contextName}`;
         await spawnAsync(removeCmd, ContextCmdExecOptions);
     }
@@ -333,6 +337,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     private async tryGetContextsFromCli(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<DockerContext[] | undefined> {
+        // TODO: exe path
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: maybeFixedContextName } });
 
@@ -418,6 +423,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             } else {
                 // Otherwise we look at the output of `docker serve --help`
                 // TODO: this is not a very good heuristic
+                // TODO: exe path
                 const { stdout } = await execAsync(`${dockerExePath()} serve --help`);
 
                 if (/^\s*Start an api server/i.test(stdout)) {

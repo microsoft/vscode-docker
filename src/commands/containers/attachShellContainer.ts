@@ -47,6 +47,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
             // If so use it, otherwise use sh
             try {
                 // If this succeeds, bash is present (exit code 0)
+                // TODO: exe path
                 await execAsync(`${dockerExePath(context)} exec -i ${node.containerId} sh -c "which bash"`);
                 shellCommand = 'bash';
             } catch {

@@ -39,6 +39,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
         };
 
         await vscode.window.withProgress(progressOptions, async () => {
+            // TODO: exe path
             let command = CommandLineBuilder.create('docker', 'login');
 
             if (creds.registryPath) {

@@ -9,5 +9,6 @@ import { executeAsTask } from '../../utils/executeAsTask';
 
 export async function stats(context: IActionContext): Promise<void> {
     // Don't wait
+    // TODO: exe path
     void executeAsTask(context, `${dockerExePath(context)} stats`, 'docker stats', { addDockerEnv: true });
 }

@@ -119,6 +119,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
+                // TODO: exe path
                 pipeProgram: 'docker',
                 /* eslint-disable no-template-curly-in-string */
                 pipeArgs: ['exec', '-i', containerName, '${debuggerCommand}'],
@@ -164,6 +165,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             // and processName will be undefined.
             processName: debugConfiguration.processId ? undefined : debugConfiguration.processName || 'dotnet',
             pipeTransport: {
+                // TODO: exe path
                 pipeProgram: 'docker',
                 pipeArgs: ['exec', '-i', containerName],
                 // eslint-disable-next-line no-template-curly-in-string
@@ -296,6 +298,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
             const command = CommandLineBuilder
+            // TODO: exe path
                 .create('docker', 'cp')
                 .withQuotedArg(vsDbgInstallBasePath)
                 .withQuotedArg(containerDebuggerPath)
@@ -306,6 +309,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
         const command = CommandLineBuilder
+        // TODO: exe path
             .create('docker', 'exec', '-i')
             .withQuotedArg(containerName)
             .withArg(containerOS === 'windows' ? 'cmd /C' : '/bin/sh -c')

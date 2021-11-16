@@ -42,6 +42,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
 
     addImageTaggingTelemetry(context, node.fullTag, '');
 
+    // TODO: exe path
     const command = `${dockerExePath(context)} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
     const title = localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI');
     const options = {
@@ -52,6 +53,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
         await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     } catch {
         // If it fails, try logging in and make one more attempt
+        // TODO: exe path
         await executeAsTask(context, `${dockerExePath(context)} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
         await executeAsTask(context, command, title, options);
     }
@@ -62,9 +64,11 @@ async function getImagePorts(fullTag: string, context: IActionContext): Promise<
         const result: number[] = [];
 
         // 1. Pull the image to the default context
+        // TODO: exe path
         await execAsync(`${dockerExePath(context)} --context default pull ${fullTag}`);
 
         // 2. Inspect it in the default context to find out the ports to map
+        // TODO: exe path
         const { stdout } = await execAsync(`${dockerExePath(context)} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
 
         try {

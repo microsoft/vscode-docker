@@ -90,6 +90,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(options: DockerBuildOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
+        // TODO: exe path
             .create('docker', 'build', '--rm')
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)

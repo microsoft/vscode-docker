@@ -168,6 +168,7 @@ export async function selectCommandTemplate(
 
     let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
 
+    // TODO: exe path
     if (resolvedCommand.startsWith(DefaultDockerPath + ' ')) {
         const dockerPath = dockerExePath(actionContext);
         if (dockerPath !== DefaultDockerPath) {

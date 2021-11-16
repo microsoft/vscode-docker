@@ -8,6 +8,7 @@ import { IActionContext } from 'vscode-azureextensionui';
 
 export const DefaultDockerPath: string = 'docker';
 
+// TODO: exe path
 export function dockerExePath(context?: IActionContext): string {
     const retval = vscode.workspace.getConfiguration('docker').get('dockerPath', DefaultDockerPath);
     if (retval !== DefaultDockerPath && context) {

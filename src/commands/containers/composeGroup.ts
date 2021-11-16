@@ -53,6 +53,7 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
 
     const projectNameArgument = isWindows() ? `-p "${projectName}"` : `-p '${projectName}'`;
 
+    // TODO: exe path
     const terminalCommand = `docker-compose ${filesArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
 
     await executeAsTask(context, await rewriteComposeCommandIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
