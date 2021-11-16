@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.18.0",
+    "version": "1.18.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -3039,7 +3039,7 @@
         "ts-loader": "^9.2.3",
         "typescript": "^4.4.3",
         "umd-compat-loader": "^2.1.2",
-        "vsce": "^1.93.0",
+        "vsce": "^2.3.0",
         "webpack": "^5.31.2",
         "webpack-bundle-analyzer": "^4.4.1",
         "webpack-cli": "^4.6.0"
@@ -3047,7 +3047,7 @@
     "dependencies": {
         "@azure/arm-appservice": "^6.1.0",
         "@azure/arm-authorization": "^8.3.3",
-        "@azure/arm-containerregistry": "^8.0.0",
+        "@azure/arm-containerregistry": "^9.0.0",
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.2.12",
@@ -3059,7 +3059,7 @@
         "glob": "^7.1.6",
         "gradle-to-js": "^2.0.0",
         "handlebars": "^4.7.6",
-        "node-fetch": "^2.6.2",
+        "node-fetch": "^2.6.6",
         "semver": "^7.3.5",
         "tar": "^6.1.11",
         "tar-stream": "^2.2.0",
