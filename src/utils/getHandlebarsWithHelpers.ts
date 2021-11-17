@@ -5,14 +5,15 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import type * as Handlebars from 'handlebars'; // These are only dev-time imports so don't need to be lazy
 import { ScaffoldingWizardContext } from '../scaffolding/wizard/ScaffoldingWizardContext';
 import { DockerExtensionKind, getVSCodeRemoteInfo } from './getVSCodeRemoteInfo';
 import { isWindows } from './osUtils';
 import { pathNormalize } from './pathNormalize';
 import { PlatformOS } from './platform';
 
-let handlebars: typeof import('handlebars') | undefined;
-export async function getHandlebarsWithHelpers(): Promise<typeof import('handlebars')> {
+let handlebars: typeof Handlebars | undefined;
+export async function getHandlebarsWithHelpers(): Promise<typeof Handlebars> {
     if (!handlebars) {
         handlebars = await import('handlebars');
 

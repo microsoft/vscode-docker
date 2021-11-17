@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import { Site } from '@azure/arm-appservice/esm/models'; // These are only dev-time imports so don't need to be lazy
+import type { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
+import type { Site } from '@azure/arm-appservice/esm/models'; // These are only dev-time imports so don't need to be lazy
 import { Progress } from "vscode";
-import { CustomLocation } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import type { CustomLocation } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Dockerode = require('dockerode');
+import * as Dockerode from 'dockerode';
 import { Socket } from 'net';
 import { CancellationTokenSource, env, MessageItem, Uri, window, workspace } from 'vscode';
 import { localize } from '../../localize';
