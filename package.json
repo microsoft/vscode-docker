@@ -230,6 +230,14 @@
                 {
                     "command": "vscode-docker.help.openWalkthrough",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.images.showDangling",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.images.hideDangling",
+                    "when": "never"
                 }
             ],
             "editor/context": [
