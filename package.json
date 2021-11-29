@@ -350,12 +350,12 @@
                 {
                     "command": "vscode-docker.images.showDangling",
                     "when": "view == dockerImages && !vscode-docker:newSdkContext && !vscode-docker:danglingShown",
-                    "group": "navigation@2"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "vscode-docker.images.hideDangling",
                     "when": "view == dockerImages && !vscode-docker:newSdkContext && vscode-docker:danglingShown",
-                    "group": "navigation@2"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "vscode-docker.images.configureExplorer",

@@ -35,7 +35,7 @@ import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
-import { showDanglingImages, hideDanglingImages } from "./images/showDanglingImages";
+import { hideDanglingImages, setInitialDanglingContextValue, showDanglingImages } from "./images/showDanglingImages";
 import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
 import { pushImage } from "./images/pushImage";
@@ -147,6 +147,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.prune', pruneImages);
     registerCommand('vscode-docker.images.showDangling', showDanglingImages);
     registerCommand('vscode-docker.images.hideDangling', hideDanglingImages);
+    setInitialDanglingContextValue();
     registerWorkspaceCommand('vscode-docker.images.pull', pullImage);
     registerWorkspaceCommand('vscode-docker.images.push', pushImage);
     registerCommand('vscode-docker.images.remove', removeImage);
