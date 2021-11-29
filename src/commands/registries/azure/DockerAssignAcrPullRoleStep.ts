@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from "vscode";
-import { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";

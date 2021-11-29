@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import Dockerode = require('dockerode');
+import * as Dockerode from 'dockerode';
 import * as nodepath from 'path';
 import * as stream from 'stream';
 import * as tarstream from 'tar-stream';
