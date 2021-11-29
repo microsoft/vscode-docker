@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from "path";
-import vscode = require('vscode');
+import * as vscode from 'vscode';
 import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
 import { localize } from '../localize';
@@ -34,21 +34,21 @@ export function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.U
 }
 
 function getDockerFileGlobPatterns(): string[] {
-    return getGlobPatterns([DOCKERFILE_GLOB_PATTERN], /^dockerfile$/i);
+    return getGlobPatterns([DOCKERFILE_GLOB_PATTERN], 'dockerfile');
 }
 
 function getDockerComposeFileGlobPatterns(): string[] {
-    return getGlobPatterns([COMPOSE_FILE_GLOB_PATTERN], /^yaml$/i);
+    return getGlobPatterns([COMPOSE_FILE_GLOB_PATTERN], 'dockercompose');
 }
 
-function getGlobPatterns(globPatterns: string[], fileTypeRegEx: RegExp): string[] {
+function getGlobPatterns(globPatterns: string[], languageId: string): string[] {
     const result: string[] = globPatterns;
     try {
         const config = vscode.workspace.getConfiguration('files').get<unknown>('associations');
         if (config) {
             for (const globPattern of Object.keys(config)) {
-                const fileType = <string | undefined>config[globPattern];
-                if (fileType && fileTypeRegEx.test(fileType)) {
+                const associationLanguageId = <string | undefined>config[globPattern];
+                if (languageId.toLowerCase() === associationLanguageId.toLowerCase()) {
                     result.push(globPattern);
                 }
             }
