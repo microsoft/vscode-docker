@@ -11,19 +11,21 @@ export const danglingImagesMementoKey = 'vscode-docker.images.showDanglingImages
 const danglingImagesContextKey = 'vscode-docker:danglingShown';
 
 export async function showDanglingImages(context: IActionContext): Promise<void> {
-    await setDanglingContextValue(true);
     await ext.context.globalState.update(danglingImagesMementoKey, true);
+    setDanglingContextValue(true);
+    void ext.imagesTree.refresh(context);
 }
 
 export async function hideDanglingImages(context: IActionContext): Promise<void> {
-    await setDanglingContextValue(false);
     await ext.context.globalState.update(danglingImagesMementoKey, false);
+    setDanglingContextValue(false);
+    void ext.imagesTree.refresh(context);
 }
 
 export function setInitialDanglingContextValue(): void {
-    void setDanglingContextValue(ext.context.globalState.get(danglingImagesMementoKey, false));
+    setDanglingContextValue(ext.context.globalState.get(danglingImagesMementoKey, false));
 }
 
-async function setDanglingContextValue(value: boolean): Promise<void> {
-    return vscode.commands.executeCommand('setContext', danglingImagesContextKey, value);
+function setDanglingContextValue(value: boolean): void {
+    void vscode.commands.executeCommand('setContext', danglingImagesContextKey, value);
 }
