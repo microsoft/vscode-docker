@@ -26,7 +26,18 @@ export interface DockerComposeDownOptions {
     };
 }
 
-export type DockerComposeOptions = (DockerComposeUpOptions | DockerComposeDownOptions) & { envFiles?: string[], files?: string[] };
+export interface DockerComposeUpAndDownOptions {
+    envFile?: string;
+
+    /**
+     * @deprecated Use `envFile` instead
+     */
+    envFiles?: string[];
+
+    files?: string[];
+}
+
+export type DockerComposeOptions = (DockerComposeUpOptions | DockerComposeDownOptions) & DockerComposeUpAndDownOptions;
 
 export interface DockerComposeTaskDefinitionBase extends TaskDefinitionBase {
     dockerCompose?: DockerComposeOptions;
