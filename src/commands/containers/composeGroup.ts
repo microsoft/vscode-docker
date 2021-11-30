@@ -44,7 +44,8 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
 
     const workingDirectory = getComposeWorkingDirectory(node);
     const filesArgument = getComposeFiles(node)?.map(f => isWindows() ? `-f "${f}"` : `-f '${f}'`)?.join(' ');
-    const projectName = getProjectName(node);
+    const projectName = getComposeProjectName(node);
+    const envFile = getComposeEnvFile(node);
 
     if (!workingDirectory || !filesArgument || !projectName) {
         context.errorHandling.suppressReportIssue = true;
@@ -52,8 +53,9 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
     }
 
     const projectNameArgument = isWindows() ? `-p "${projectName}"` : `-p '${projectName}'`;
+    const envFileArgument = envFile ? (isWindows() ? `--env-file "${envFile}"` : `--env-file '${envFile}'`) : '';
 
-    const terminalCommand = `docker-compose ${filesArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
+    const terminalCommand = `docker-compose ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
 
     await executeAsTask(context, await rewriteComposeCommandIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
 }
@@ -73,8 +75,14 @@ function getComposeFiles(node: ContainerGroupTreeItem): string[] | undefined {
     return container?.labels?.['com.docker.compose.project.config_files']?.split(',')?.map(f => path.parse(f).base);
 }
 
-function getProjectName(node: ContainerGroupTreeItem): string | undefined {
+function getComposeProjectName(node: ContainerGroupTreeItem): string | undefined {
     // Find a container with the `com.docker.compose.project` label, which gives the project name
     const container = (node.ChildTreeItems as ContainerTreeItem[]).find(c => c.labels?.['com.docker.compose.project']);
     return container?.labels?.['com.docker.compose.project'];
+}
+
+function getComposeEnvFile(node: ContainerGroupTreeItem): string | undefined {
+    // Find a container with the `com.docker.compose.project.environment_file` label, which gives the environment file absolute path
+    const container = (node.ChildTreeItems as ContainerTreeItem[]).find(c => c.labels?.['com.docker.compose.project.environment_file']);
+    return container?.labels?.['com.docker.compose.project.environment_file'];
 }
