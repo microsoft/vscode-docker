@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { DockerImage } from "../../docker/Images";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
@@ -58,7 +59,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     }
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
-        const includeDangling = ext.context.globalState.get('vscode-docker.images.showDanglingImages', false);
+        const includeDangling = ext.context.globalState.get(danglingImagesMementoKey, false);
         const result = await ext.dockerClient.getImages(context, includeDangling);
         this.outdatedImageChecker.markOutdatedImages(result);
         return result;

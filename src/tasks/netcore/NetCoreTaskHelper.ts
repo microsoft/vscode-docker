@@ -6,7 +6,6 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import * as process from 'process';
 import { WorkspaceFolder } from 'vscode';
 import { parseError } from 'vscode-azureextensionui';
 import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
@@ -14,7 +13,6 @@ import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper'
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -45,8 +43,6 @@ export interface NetCoreTaskScaffoldingOptions {
 }
 
 const UserSecretsRegex = /UserSecretsId/i;
-const MacNuGetPackageFallbackFolderPath = '/usr/local/share/dotnet/sdk/NuGetFallbackFolder';
-const LinuxNuGetPackageFallbackFolderPath = '/usr/share/dotnet/sdk/NuGetFallbackFolder';
 
 export class NetCoreTaskHelper implements TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
@@ -223,36 +219,23 @@ export class NetCoreTaskHelper implements TaskHelper {
                 permissions: 'ro'
             };
 
-            const nugetVolume: DockerContainerVolume = {
+            const nugetRootVolume: DockerContainerVolume = {
                 localPath: path.join(os.homedir(), '.nuget', 'packages'),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
                 permissions: 'ro'
             };
 
-            let programFilesEnvironmentVariable: string | undefined;
-
-            if (isWindows()) {
-                programFilesEnvironmentVariable = process.env.ProgramFiles;
-
-                if (programFilesEnvironmentVariable === undefined) {
-                    throw new Error(localize('vscode-docker.tasks.netCore.programFilesUndefined', 'The environment variable \'ProgramFiles\' is not defined. This variable is used to locate the NuGet fallback folder.'));
-                }
-            }
-
-            const nugetFallbackVolume: DockerContainerVolume = {
-                localPath: isWindows() ? path.join(programFilesEnvironmentVariable, 'dotnet', 'sdk', 'NuGetFallbackFolder') :
-                    (isMac() ? MacNuGetPackageFallbackFolderPath : LinuxNuGetPackageFallbackFolderPath),
-                containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\fallbackpackages' : '/root/.nuget/fallbackpackages',
+            const nugetUserVolume: DockerContainerVolume = {
+                localPath: nugetRootVolume.localPath, // Same local path as the root one
+                containerPath: runOptions.os === 'Windows' ? 'C:\\Users\\ContainerUser\\.nuget\\packages' : '/home/appuser/.nuget/packages',
                 permissions: 'ro'
             };
 
             addVolumeWithoutConflicts(volumes, appVolume);
             addVolumeWithoutConflicts(volumes, srcVolume);
             addVolumeWithoutConflicts(volumes, debuggerVolume);
-            addVolumeWithoutConflicts(volumes, nugetVolume);
-            if (await fse.pathExists(nugetFallbackVolume.localPath)) {
-                addVolumeWithoutConflicts(volumes, nugetFallbackVolume);
-            }
+            addVolumeWithoutConflicts(volumes, nugetRootVolume);
+            addVolumeWithoutConflicts(volumes, nugetUserVolume);
         }
 
         if (userSecrets || ssl) {

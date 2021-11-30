@@ -29,7 +29,10 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         const definition = cloneObject(task.definition);
         definition.dockerCompose = definition.dockerCompose || {};
         definition.dockerCompose.files = definition.dockerCompose.files || [];
-        definition.dockerCompose.envFiles = definition.dockerCompose.envFiles || [];
+
+        // Fix wrong environment file option name
+        definition.dockerCompose.envFile = this.normalizeEnvFile(definition.dockerCompose);
+        definition.dockerCompose.envFiles = undefined;
 
         await this.validateResolvedDefinition(context, definition.dockerCompose);
 
@@ -66,10 +69,8 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             }
         }
 
-        for (const file of dockerCompose.envFiles) {
-            if (!(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(file, context.folder))))) {
-                throw new Error(localize('vscode-docker.tasks.composeProvider.invalidEnvFile', 'One or more environment files does not exist or could not be accessed.'));
-            }
+        if (dockerCompose.envFile && !(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerCompose.envFile, context.folder))))) {
+            throw new Error(localize('vscode-docker.tasks.composeProvider.invalidEnvFile', 'Environment file does not exist or could not be accessed.'));
         }
     }
 
@@ -87,7 +88,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             return CommandLineBuilder
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
-                .withArrayArgs('--env-file', options.envFiles)
+                .withNamedArg('--env-file', options.envFile)
                 .withArrayArgs('--profile', options.up.profiles)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
@@ -100,11 +101,24 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             return CommandLineBuilder
                 .create(await getComposeCliCommand())
                 .withArrayArgs('-f', options.files)
-                .withArrayArgs('--env-file', options.envFiles)
+                .withNamedArg('--env-file', options.envFile)
                 .withArg('down')
                 .withNamedArg('--rmi', options.down.removeImages)
                 .withFlagArg('--volumes', options.down.removeVolumes)
                 .withArg(options.down.customOptions);
+        }
+    }
+
+    private normalizeEnvFile(options: DockerComposeOptions): string {
+        if (options.envFile) {
+            // If the new option is specified, always use it
+            return options.envFile;
+        } else if (options.envFiles?.length) {
+            // Otherwise use the old option if it is specified
+            // Compose' behavior is to ignore all prior entries and use only the last environment file
+            return options.envFiles[options.envFiles.length - 1];
+        } else {
+            return undefined;
         }
     }
 }
