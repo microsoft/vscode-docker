@@ -30,7 +30,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         definition.dockerCompose = definition.dockerCompose || {};
         definition.dockerCompose.files = definition.dockerCompose.files || [];
 
-        // Fix wrong environment file variable name
+        // Fix wrong environment file option name
         definition.dockerCompose.envFile = this.normalizeEnvFile(definition.dockerCompose);
         definition.dockerCompose.envFiles = undefined;
 
@@ -111,8 +111,10 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
     private normalizeEnvFile(options: DockerComposeOptions): string {
         if (options.envFile) {
+            // If the new option is specified, always use it
             return options.envFile;
         } else if (options.envFiles?.length) {
+            // Otherwise use the old option if it is specified
             // Compose' behavior is to ignore all prior entries and use only the last environment file
             return options.envFiles[options.envFiles.length - 1];
         } else {
