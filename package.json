@@ -1424,6 +1424,10 @@
                                     "type": "string"
                                 }
                             },
+                            "envFile": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.envFile.description%"
+                            },
                             "files": {
                                 "type": "array",
                                 "description": "%vscode-docker.tasks.docker-compose.dockerCompose.files.description%",
