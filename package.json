@@ -3089,7 +3089,7 @@
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
         "vscode-azureappservice": "^0.86.4",
-        "vscode-azureextensionui": "^0.48.4",
+        "vscode-azureextensionui": "^0.48.7",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",
