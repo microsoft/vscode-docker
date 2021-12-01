@@ -63,5 +63,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         shellCommand
     );
 
-    await executeAsTask(context, terminalCommand, `Shell: ${node.containerName}`, { addDockerEnv: true, alwaysRunNew: true, focus: true });
+    const terminalTitle = localize('vscode-docker.commands.containers.attachShellContainer.terminalTitle', 'Shell: {0}', node.containerName);
+
+    await executeAsTask(context, terminalCommand, terminalTitle, { addDockerEnv: true, alwaysRunNew: true, focus: true });
 }
