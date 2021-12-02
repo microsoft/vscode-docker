@@ -41,7 +41,7 @@ steps:
   condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
 
 - task: PublishBuildArtifacts@1
-  displayName: 'Publish Package'
+  displayName: 'Publish SBoM'
   inputs:
     PathtoPublish: '$(build.artifactstagingdirectory)/_manifest'
     ArtifactName: '_manifest'
