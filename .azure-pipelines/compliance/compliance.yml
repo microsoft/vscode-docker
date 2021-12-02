@@ -31,3 +31,16 @@ steps:
   inputs:
     AllTools: true
   condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
+
+- task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+  displayName: 'SBoM Generation Task'
+  inputs:
+    BuildDropPath: '$(build.artifactstagingdirectory)'
+  #condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Package'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)/_manifest'
+    ArtifactName: '_manifest'
+  #condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
