@@ -29,7 +29,9 @@ steps:
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
   displayName: 'Post Analysis'
   inputs:
-    AllTools: true
+    AllTools: false
+    CredScan: true
+    PoliCheck: true
   condition: in(variables['Build.Reason'], 'Manual', 'Schedule')
 
 - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
