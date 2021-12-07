@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ext } from '../extensionVariables';
+import { dockerExePath } from '../utils/dockerExePathProvider';
 import { DockerObject } from './Common';
 
 export type ContextType = 'aci' | 'moby';
@@ -35,7 +36,7 @@ export function isNewContextType(contextType: ContextType): boolean {
 }
 
 export async function getComposeCliCommand(): Promise<string> {
-    return isNewContextType(await ext.dockerContextManager.getCurrentContextType()) ? 'docker compose' : 'docker-compose';
+    return isNewContextType(await ext.dockerContextManager.getCurrentContextType()) ? `${dockerExePath()} compose` : 'docker-compose';
 }
 
 // This method is needed because in certain scenarios--e.g. command customization--the compose command is defined by the user
