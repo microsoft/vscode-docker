@@ -7,6 +7,7 @@ import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
+import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { getVSCodeRemoteInfo, RemoteKind } from '../../utils/getVSCodeRemoteInfo';
 import { isLinux } from '../../utils/osUtils';
 import { PythonProjectType } from '../../utils/pythonUtils';
@@ -79,7 +80,7 @@ export class PythonDebugHelper implements DebugHelper {
                 },
                 true);
 
-        const args = [...debugConfiguration.python.args || pythonRunTaskOptions.args || [], containerName];
+        const args = [...(debugConfiguration.python.args || pythonRunTaskOptions.args || []), dockerExePath(context.actionContext), containerName];
         const launcherPath = path.join(ext.context.asAbsolutePath('resources'), 'python', 'launcher.py');
 
         return {
