@@ -222,6 +222,15 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
 }
 
 export async function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType): Promise<DirectoryItemStat | undefined> {
+    // This PowerShell command is a bit complicated; to break it down:
+    // Get file info and store in $finfo variable:
+    //     $finfo = Get-Item -Path '${itemPath}';
+    // Output formatted like Linux above:
+    //     Write-Output ('{0};{1};{2};{3}' -f ...
+    // Emit the file timestamp from Unix time in milliseconds:
+    //     ([System.DateTimeOffset]$finfo.CreationTimeUtc).ToUnixTimeMilliseconds()
+    // PS 5.0 lacks a ternary, so this creates a two-element array and uses the true/false value as an index:
+    //     @('file','directory')[$finfo.PSIsContainer]
     const command: string[] = ['powershell', '-Command', `$finfo = Get-Item -Path '${itemPath}'; Write-Output ('{0};{1};{2};{3}' -f ([System.DateTimeOffset]$finfo.CreationTimeUtc).ToUnixTimeMilliseconds(), ([System.DateTimeOffset]$finfo.LastWriteTimeUtc).ToUnixTimeMilliseconds(), $finfo.Length, @('file','directory')[$finfo.PSIsContainer])`];
 
     try {
