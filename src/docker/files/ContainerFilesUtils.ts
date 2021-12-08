@@ -221,161 +221,46 @@ export async function statLinuxContainerItem(executor: DockerContainerExecutor, 
     return undefined;
 }
 
-function parseWmiList(wmiList: string): { [key: string]: string } | undefined {
-    const lines = wmiList.replace(/[\r]+/g, '').split('\n');
-
-    let parsedObject: { [key: string]: string };
-
-    for (const line of lines) {
-        const index = line.indexOf('=');
-
-        if (index > 0) {
-            const name = line.substr(0, index);
-            const value = line.substr(index + 1);
-
-            if (parsedObject === undefined) {
-                parsedObject = {};
-            }
-
-            parsedObject[name] = value;
-        }
-    }
-
-    return parsedObject;
-}
-
-function parseWmiTime(wmiTime: string): number | undefined {
-    if (wmiTime) {
-        const match = /^(?<year>\d{4})(?<month>\d{2})(?<day>\d{2})(?<hour>\d{2})(?<minute>\d{2})(?<second>\d{2})\.(?<micro>\d{6})(?<offset>[+-]\d{3})$/.exec(wmiTime);
-
-        if (match) {
-
-            const options = {
-                year: parseInt(match.groups.year, 10),
-                month: parseInt(match.groups.month, 10) - 1,
-                day: parseInt(match.groups.day, 10),
-                hour: parseInt(match.groups.hour, 10),
-                minute: parseInt(match.groups.minute, 10),
-                second: parseInt(match.groups.second, 10),
-                millisecond: parseInt(match.groups.micro, 10) / 1000
-            };
-
-            // TODO: Add ObjectSupport constructor to type definitions.
-            const time = dayjs(<dayjs.ConfigType><unknown>options).utcOffset(parseInt(match.groups.offset, 10));
-
-            return time.valueOf();
-        }
-    }
-
-    return undefined;
-}
-
-const CreationDate = 'CreationDate';
-const FileSize = 'FileSize';
-const LastModified = 'LastModified';
-
-async function statWindowsContainerDirectory(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
-    if (/^[a-zA-Z]:\\$/.test(itemPath)) {
-
-        //
-        // For root directories, assume they exist and return a faked stat...
-        //
-        // TODO: Find a WMI command that provides such properties for root directories.
-        //
-
-        return {
-            ctime: 0,
-            mtime: Date.now(),
-            size: 0,
-            type: 'directory'
-        };
-    }
-
-    const parsedPath = path.win32.parse(itemPath);
-
-    const drive = parsedPath.root.replace(/\\/, '');
-    const wmipath = parsedPath.dir.concat('\\');
-    const filename = parsedPath.base;
-    const command = ['cmd', '/C', `wmic fsdir where "drive='${drive}' and path='${wmipath}' and filename='${filename}'" get ${CreationDate}, ${LastModified} /format:list`];
+export async function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType): Promise<DirectoryItemStat | undefined> {
+    // This PowerShell command is a bit complicated; to break it down:
+    // Get file info and store in $finfo variable:
+    //     $finfo = Get-Item -Path '${itemPath}';
+    // Output formatted like Linux above:
+    //     Write-Output ('{0};{1};{2};{3}' -f ...
+    // Emit the file timestamp from Unix time in milliseconds:
+    //     ([System.DateTimeOffset]$finfo.CreationTimeUtc).ToUnixTimeMilliseconds()
+    // PS 5.0 lacks a ternary, so this creates a two-element array and uses the true/false value as an index:
+    //     @('file','directory')[$finfo.PSIsContainer]
+    const command: string[] = ['powershell', '-Command', `$finfo = Get-Item -Path '${itemPath}'; Write-Output ('{0};{1};{2};{3}' -f ([System.DateTimeOffset]$finfo.CreationTimeUtc).ToUnixTimeMilliseconds(), ([System.DateTimeOffset]$finfo.LastWriteTimeUtc).ToUnixTimeMilliseconds(), $finfo.Length, @('file','directory')[$finfo.PSIsContainer])`];
 
     try {
-        const parsedResult = await tryWithItems(
+        const result = await tryWithItems(
             users,
-            async user => {
-                const result = await executor(command, user);
+            user => executor(command, user)
+        );
 
-                return parseWmiList(result);
-            });
+        const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
 
-        if (parsedResult) {
+        const statMatch = statRegex.exec(result);
+
+        if (statMatch) {
             return {
-                ctime: parseWmiTime(parsedResult[CreationDate]),
-                mtime: parseWmiTime(parsedResult[LastModified]),
-                size: 0,
-                type: 'directory'
+                ctime: parseInt(statMatch.groups.ctime, 10),
+                mtime: parseInt(statMatch.groups.mtime, 10),
+                size: parseInt(statMatch.groups.size, 10),
+                type: statMatch.groups.type as DirectoryItemType,
             };
         }
     } catch {
-        // NOTE: Not every Windows container contains the WMI subsystem (e.g. Nanoserver used for .NET Core apps);
-        //       if the call fails, assume it isn't installed and fake a "recently updated" directory.
-        // TODO: Find a non-WMI means to obtain file system information (in a normalized, non-localized, manner).
+        // NOTE: Not every Windows container contains PowerShell (e.g. Nanoserver used for .NET Core apps);
+        //       if the call fails, assume it isn't installed and fake a "recently updated" file or directory.
         return {
             ctime: 0,
             mtime: Date.now(),
             size: 0,
-            type: 'directory'
+            type: itemType,
         };
     }
 
     return undefined;
-}
-
-async function statWindowsContainerFile(executor: DockerContainerExecutor, itemPath: string): Promise<DirectoryItemStat | undefined> {
-
-    const name = itemPath.replace(/\\/, '\\\\');
-    const command = ['cmd', '/C', `wmic datafile where "name='${name}'" get ${CreationDate}, ${FileSize}, ${LastModified} /format:list`];
-
-    try {
-        const parsedResult = await tryWithItems(
-            users,
-            async user => {
-                const result = await executor(command, user);
-
-                return parseWmiList(result);
-            });
-
-        if (parsedResult) {
-            return {
-                ctime: parseWmiTime(parsedResult[CreationDate]),
-                mtime: parseWmiTime(parsedResult[LastModified]),
-                size: parseInt(parsedResult[FileSize], 10),
-                type: 'file'
-            };
-        }
-    } catch {
-        // NOTE: Not every Windows container contains the WMI subsystem (e.g. Nanoserver used for .NET Core apps);
-        //       if the call fails, assume it isn't installed and fake a "recently updated" file.
-        // TODO: Find a non-WMI means to obtain file system information (in a normalized, non-localized, manner).
-        return {
-            ctime: 0,
-            mtime: Date.now(),
-            size: 0,
-            type: 'file'
-        };
-    }
-
-    return undefined;
-}
-
-export async function statWindowsContainerItem(executor: DockerContainerExecutor, itemPath: string, itemType: DirectoryItemType | undefined): Promise<DirectoryItemStat | undefined> {
-    if (itemType === undefined) {
-        throw new Error(localize('docker.files.containerFilesUtils.unknownDirectoryItemType', 'Unable to stat Windows directory items without prior knowledge of the item type.'));
-    }
-
-    switch (itemType) {
-        case 'directory': return await statWindowsContainerDirectory(executor, itemPath);
-        case 'file': return await statWindowsContainerFile(executor, itemPath);
-        default:
-            throw new UnrecognizedDirectoryItemTypeError();
-    }
 }
