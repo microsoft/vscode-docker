@@ -236,9 +236,7 @@ export async function statWindowsContainerItem(executor: DockerContainerExecutor
     try {
         const result = await tryWithItems(
             users,
-            async user => {
-                return await executor(command, user);
-            }
+            user => executor(command, user)
         );
 
         const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
