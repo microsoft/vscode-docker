@@ -8,6 +8,7 @@ import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { dockerExePath } from '../utils/dockerExePathProvider';
 import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
@@ -82,8 +83,8 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
-        // TODO: exe path
-            .create('docker', 'run', '-dt')
+            // TODO: exe path
+            .create(dockerExePath(), 'run', '-dt')
             .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
             .withNamedArg('--name', runOptions.containerName)
             .withNamedArg('--network', runOptions.network)

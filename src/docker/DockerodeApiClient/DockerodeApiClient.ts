@@ -12,6 +12,7 @@ import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
 import { cloneObject } from '../../utils/cloneObject';
+import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { isWindows } from '../../utils/osUtils';
 import { bufferToString, execStreamAsync } from '../../utils/spawnAsync';
 import { DockerInfo, PruneResult } from '../Common';
@@ -76,7 +77,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
         if (isWindows()) {
             // TODO: exe path
-            let dockerCommand = 'docker exec ';
+            let dockerCommand = `${dockerExePath(context)} exec `;
 
             if (options?.user) {
                 dockerCommand += `--user "${options.user}" `;

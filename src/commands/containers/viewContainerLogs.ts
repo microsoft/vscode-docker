@@ -26,5 +26,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         node.containerId
     );
 
-    await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true });
+    const terminalTitle = localize('vscode-docker.commands.containers.viewLogs.terminalTitle', 'Logs: {0}', node.containerName);
+
+    await executeAsTask(context, terminalCommand, terminalTitle, { addDockerEnv: true });
 }
