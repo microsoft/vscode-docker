@@ -232,7 +232,7 @@ export async function statWindowsContainerItem(executor: DockerContainerExecutor
             }
         );
 
-        const statRegex = /^(?<ctime>\d+|[W]);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
+        const statRegex = /^(?<ctime>\d+);(?<mtime>\d+);(?<size>\d+);(?<type>.+)$/g;
 
         const statMatch = statRegex.exec(result);
 
