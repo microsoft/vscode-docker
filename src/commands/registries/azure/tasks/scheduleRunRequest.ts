@@ -47,39 +47,44 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 
     const tarFilePath: string = getTempSourceArchivePath();
 
-    // Prepare to run.
-    ext.outputChannel.show();
+    try {
+        // Prepare to run.
+        ext.outputChannel.show();
 
-    const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
+        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
+        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
 
-    let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
-    if (requestType === 'DockerBuildRequest') {
-        runRequest = {
-            type: requestType,
-            imageNames: [imageName],
-            isPushEnabled: true,
-            sourceLocation: uploadedSourceLocation,
-            platform: { os: osType },
-            dockerFilePath: fileItem.relativeFilePath
-        };
-    } else {
-        runRequest = {
-            type: 'FileTaskRunRequest',
-            taskFilePath: fileItem.relativeFilePath,
-            sourceLocation: uploadedSourceLocation,
-            platform: { os: osType }
-        };
+        let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
+        if (requestType === 'DockerBuildRequest') {
+            runRequest = {
+                type: requestType,
+                imageNames: [imageName],
+                isPushEnabled: true,
+                sourceLocation: uploadedSourceLocation,
+                platform: { os: osType },
+                dockerFilePath: fileItem.relativeFilePath
+            };
+        } else {
+            runRequest = {
+                type: 'FileTaskRunRequest',
+                taskFilePath: fileItem.relativeFilePath,
+                sourceLocation: uploadedSourceLocation,
+                platform: { os: osType }
+            };
+        }
+
+        // Schedule the run and Clean up.
+        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
+
+        const run = await (await node.getClient(context)).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
+        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
+
+        void streamLogs(context, node, run);
+    } finally {
+        if (await fse.pathExists(tarFilePath)) {
+            await fse.unlink(tarFilePath);
+        }
     }
-
-    // Schedule the run and Clean up.
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
-
-    const run = await (await node.getClient(context)).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
-
-    void streamLogs(context, node, run);
-    await fse.unlink(tarFilePath);
 }
 
 async function quickPickImageName(context: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
