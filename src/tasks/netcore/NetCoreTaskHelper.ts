@@ -204,31 +204,31 @@ export class NetCoreTaskHelper implements TaskHelper {
             const appVolume: DockerContainerVolume = {
                 localPath: path.dirname(helperOptions.appProject),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\app' : '/app',
-                permissions: 'rw'
+                permissions: 'rw,z'
             };
 
             const srcVolume: DockerContainerVolume = {
                 localPath: folder.uri.fsPath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
-                permissions: 'rw'
+                permissions: 'rw,z'
             };
 
             const debuggerVolume: DockerContainerVolume = {
                 localPath: vsDbgInstallBasePath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             const nugetRootVolume: DockerContainerVolume = {
                 localPath: path.join(os.homedir(), '.nuget', 'packages'),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             const nugetUserVolume: DockerContainerVolume = {
                 localPath: nugetRootVolume.localPath, // Same local path as the root one
                 containerPath: runOptions.os === 'Windows' ? 'C:\\Users\\ContainerUser\\.nuget\\packages' : '/home/appuser/.nuget/packages',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             addVolumeWithoutConflicts(volumes, appVolume);
@@ -254,7 +254,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.hostUserSecretsFolder,
                 containerPath: containerSecretsFolders.containerUserSecretsFolder,
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             addVolumeWithoutConflicts(volumes, userSecretsVolume);
@@ -263,7 +263,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 const certVolume: DockerContainerVolume = {
                     localPath: hostSecretsFolders.hostCertificateFolder,
                     containerPath: containerSecretsFolders.containerCertificateFolder,
-                    permissions: 'ro'
+                    permissions: 'ro,z'
                 };
 
                 addVolumeWithoutConflicts(volumes, certVolume);

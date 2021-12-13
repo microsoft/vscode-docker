@@ -1225,7 +1225,9 @@
                                             "description": "%vscode-docker.tasks.docker-run.dockerRun.volumes.permissions%",
                                             "enum": [
                                                 "rw",
-                                                "ro"
+                                                "ro",
+                                                "rw,z",
+                                                "ro,z"
                                             ]
                                         }
                                     },

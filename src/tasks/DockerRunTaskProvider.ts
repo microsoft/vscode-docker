@@ -9,7 +9,7 @@ import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { dockerExePath } from '../utils/dockerExePathProvider';
-import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerRunOptions, DockerContainerVolume } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
@@ -91,7 +91,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withKeyValueArgs('-e', runOptions.env)
             .withArrayArgs('--env-file', runOptions.envFiles)
             .withKeyValueArgs('--label', getAggregateLabels(runOptions.labels, defaultVsCodeLabels))
-            .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${volume.permissions ? ':' + volume.permissions : ''}`)
+            .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${this.getVolumeOptions(volume, runOptions.os === 'Windows')}`)
             .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
             .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
             .withNamedArg('--entrypoint', runOptions.entrypoint)
@@ -99,5 +99,25 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             .withArg(runOptions.customOptions)
             .withQuotedArg(runOptions.image)
             .withArgs(runOptions.command);
+    }
+
+    private getVolumeOptions(volume: DockerContainerVolume, isWindows: boolean): string {
+        if (!volume.permissions) {
+            return '';
+        } else if (!isWindows) {
+            return ':' + volume.permissions;
+        } else {
+            // The 'z' and 'Z' options aren't supported on Windows containers, normalize to simply ro / rw
+            switch (volume.permissions as string) {
+                case 'ro,Z':
+                case 'ro,z':
+                    return ':ro';
+                case 'rw,Z':
+                case 'rw,z':
+                    return ':rw';
+                default:
+                    return ':' + volume.permissions;
+            }
+        }
     }
 }

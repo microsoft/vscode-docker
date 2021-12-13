@@ -126,7 +126,7 @@ export class PythonTaskHelper implements TaskHelper {
         const dbgVolume: DockerContainerVolume = {
             localPath: launcherFolder,
             containerPath: '/debugpy',
-            permissions: 'ro'
+            permissions: 'ro,z'
         };
 
         addVolumeWithoutConflicts(volumes, dbgVolume);
