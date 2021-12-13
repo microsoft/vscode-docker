@@ -102,9 +102,22 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
     }
 
     private getVolumeOptions(volume: DockerContainerVolume, isWindows: boolean): string {
-        return !volume.permissions ? '' :
-            !isWindows ? `:${volume.permissions}` :
-                // for Windows, filter out the unsupported 'z'/'Z' options.
-                `:${volume.permissions.split(',').filter(s => s !== 'z' && s !== 'Z').join(',')}`;
+        if (!volume.permissions) {
+            return '';
+        } else if (!isWindows) {
+            return ':' + volume.permissions;
+        } else {
+            // The 'z' and 'Z' options aren't supported on Windows containers, normalize to simply ro / rw
+            switch (volume.permissions as string) {
+                case 'ro,Z':
+                case 'ro,z':
+                    return ':ro';
+                case 'rw,Z':
+                case 'rw,z':
+                    return ':rw';
+                default:
+                    return ':' + volume.permissions;
+            }
+        }
     }
 }
