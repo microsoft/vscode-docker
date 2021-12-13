@@ -3079,7 +3079,7 @@
         "@grpc/grpc-js": "^1.2.12",
         "@microsoft/compose-language-service": "^0.0.4-alpha",
         "dayjs": "^1.10.4",
-        "dockerfile-language-server-nodejs": "^0.7.2",
+        "dockerfile-language-server-nodejs": "^0.7.3",
         "dockerode": "^3.2.1",
         "fs-extra": "^10.0.0",
         "glob": "^7.1.6",
