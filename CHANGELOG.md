@@ -5,6 +5,8 @@
 ### Fixed
 * `docker-run` and `docker-build` tasks will now respect the `docker.dockerPath` setting. [#3281](https://github.com/microsoft/vscode-docker/issues/3281)
 * Several fixes and enhancements to the Compose language service have been made. [#78](https://github.com/microsoft/compose-language-service/issues/78), [#70](https://github.com/microsoft/compose-language-service/issues/70), [#69](https://github.com/microsoft/compose-language-service/issues/69), [#68](https://github.com/microsoft/compose-language-service/issues/68), [#65](https://github.com/microsoft/compose-language-service/issues/65)
+* For .NET projects, the `/p:UseAppHost=false` argument is added to the `dotnet publish` command line, in order to prevent a duplicate executable file being created and bloating image size. [#3371](https://github.com/microsoft/vscode-docker/issues/3371)
+* The `envFiles` option in `docker-compose` tasks has been replaced with `envFile`, as only one is actually allowed. [#3339](https://github.com/microsoft/vscode-docker/pull/3339)
 
 ## 1.18.0 - 15 November 2021
 ### Added
