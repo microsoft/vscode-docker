@@ -1,3 +1,11 @@
+## 1.19.0 - 17 January 2022
+### Added
+* For volume mappings in `docker-run` tasks, the `ro,z` and `rw,z` permissions have been added, allowing support for SELinux systems. [#3289](https://github.com/microsoft/vscode-docker/pull/3289)
+
+### Fixed
+* `docker-run` and `docker-build` tasks will now respect the `docker.dockerPath` setting. [#3281](https://github.com/microsoft/vscode-docker/issues/3281)
+* Several fixes and enhancements to the Compose language service have been made. [#78](https://github.com/microsoft/compose-language-service/issues/78), [#70](https://github.com/microsoft/compose-language-service/issues/70), [#69](https://github.com/microsoft/compose-language-service/issues/69), [#68](https://github.com/microsoft/compose-language-service/issues/68), [#65](https://github.com/microsoft/compose-language-service/issues/65)
+
 ## 1.18.0 - 15 November 2021
 ### Added
 * Substantial additions (to completions especially) have been made to the Compose language service. It now has near-parity to the previously-available features. [#3222](https://github.com/microsoft/vscode-docker/issues/3222)
