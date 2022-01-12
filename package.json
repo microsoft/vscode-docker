@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.19.0",
+    "version": "1.19.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -3073,7 +3073,7 @@
     "dependencies": {
         "@azure/arm-appservice": "^6.1.0",
         "@azure/arm-authorization": "^8.3.3",
-        "@azure/arm-containerregistry": "^9.0.0",
+        "@azure/arm-containerregistry": "^10.0.0",
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.5.0",
