@@ -26,7 +26,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         const locationName: string = nonNullProp(location, 'name');
         const resourceGroup = nonNullProp(context, 'resourceGroup');
         try {
-            context.registry = await client.registries.create(
+            context.registry = await client.registries.beginCreateAndWait(
                 nonNullProp(resourceGroup, 'name'),
                 newRegistryName,
                 {

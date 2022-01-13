@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { ContainerRegistryManagementClient, DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
@@ -42,8 +42,8 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 
     const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
-    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrModels.OS>>{ label: item, data: item });
-    const osType: AcrModels.OS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
+    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });
+    const osType: AcrOS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
 
     const tarFilePath: string = getTempSourceArchivePath();
 
@@ -54,7 +54,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
 
-        let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
+        let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
         if (requestType === 'DockerBuildRequest') {
             runRequest = {
                 type: requestType,
@@ -76,7 +76,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Schedule the run and Clean up.
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
-        const run = await (await node.getClient(context)).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
+        const run = await (await node.getClient(context)).registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
         void streamLogs(context, node, run);
@@ -139,7 +139,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
-async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrModels.Run): Promise<void> {
+async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrRun): Promise<void> {
     const result = await (await node.getClient(context)).runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
 
     const storageBlob = await import('@azure/storage-blob');

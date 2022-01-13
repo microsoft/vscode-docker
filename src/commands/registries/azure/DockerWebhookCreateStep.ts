@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import type { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
+import type { WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import * as vscode from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
@@ -84,13 +84,13 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const registryTreeItem: AzureRegistryTreeItem = (<AzureRepositoryTreeItem>node.parent).parent;
         const armContainerRegistry = await import('@azure/arm-containerregistry');
         const crmClient = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
-        const webhookCreateParameters: AcrModels.WebhookCreateParameters = {
+        const webhookCreateParameters: WebhookCreateParameters = {
             location: registryTreeItem.registryLocation,
             serviceUri: appUri,
             scope: `${node.parent.repoName}:${node.tag}`,
             actions: ["push"],
             status: 'enabled'
         };
-        return await crmClient.webhooks.create(registryTreeItem.resourceGroup, registryTreeItem.registryName, webhookName, webhookCreateParameters);
+        return await crmClient.webhooks.beginCreateAndWait(registryTreeItem.resourceGroup, registryTreeItem.registryName, webhookName, webhookCreateParameters);
     }
 }
