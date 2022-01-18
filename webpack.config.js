@@ -68,7 +68,6 @@ const config = {
     },
     plugins: [
         // Copy some needed resource files from external sources
-        // @ts-expect-error: Spurious type incompatibility error
         new CopyPlugin({
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
@@ -124,7 +123,6 @@ const config = {
 };
 
 if (debugWebpack) {
-    // @ts-expect-error: Spurious type incompatibility error
     config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
     console.log('Config:', config);
 }
