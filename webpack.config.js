@@ -114,6 +114,11 @@ const config = {
             module: /node_modules\/ssh2/,
             message: /Can't resolve 'cpu-features'/
         },
+        {
+            // Ignore another warning for missing optional dependency of `ssh2`, if VS build tools aren't installed
+            module: /node_modules\/ssh2/,
+            message: /Can't resolve '.\/crypto\/build\/Release\/sshcrypto.node'/
+        },
         (warning) => false, // No other warnings should be ignored
     ],
 };
