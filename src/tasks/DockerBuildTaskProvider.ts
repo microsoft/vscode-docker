@@ -17,7 +17,7 @@ import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
 import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
-import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
+import { DockerBuildTaskContext, getDefaultImageName, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
     label?: string;
@@ -48,6 +48,13 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
             throwIfCancellationRequested(context);
         }
+
+        // Fill in some obvious default values
+        /* eslint-disable no-template-curly-in-string */
+        definition.dockerBuild.context = definition.dockerBuild.context || '${workspaceFolder}';
+        definition.dockerBuild.dockerfile = definition.dockerBuild.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
+        /* eslint-enable no-template-curly-in-string */
+        definition.dockerBuild.tag = definition.dockerBuild.tag || getDefaultImageName(context.folder.name);
 
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
@@ -10,7 +11,7 @@ import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationP
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { localize } from '../localize';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
-import { pathNormalize } from '../utils/pathNormalize';
+import { makeAbsolute, pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
@@ -156,6 +157,8 @@ export async function getOfficialBuildTaskForDockerfile(context: IActionContext,
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
     buildTasks =
         buildTasks.filter(buildTask => {
+            const taskDockerfilePath = makeAbsolute();
+
             return pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? '', folder)) === resolvedDockerfile &&
                 buildTask.scope === folder;
         });
