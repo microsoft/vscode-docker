@@ -11,7 +11,7 @@ import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationP
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { localize } from '../localize';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
-import { makeAbsolute, pathNormalize } from '../utils/pathNormalize';
+import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
@@ -157,10 +157,15 @@ export async function getOfficialBuildTaskForDockerfile(context: IActionContext,
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
     buildTasks =
         buildTasks.filter(buildTask => {
-            const taskDockerfilePath = makeAbsolute();
+            const taskDockerfile = pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? 'Dockerfile', folder));
+            const taskContext = pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.context ?? '', folder));
 
-            return pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? '', folder)) === resolvedDockerfile &&
-                buildTask.scope === folder;
+            if (taskDockerfile && taskContext) {
+                const taskDockerfileAbsPath = path.resolve(taskContext, taskDockerfile);
+                return taskDockerfileAbsPath === resolvedDockerfile && buildTask.scope === folder;
+            }
+
+            return false;
         });
 
     if (buildTasks.length === 1) {
