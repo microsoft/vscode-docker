@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { getThemedIconPath } from "../getThemedIconPath";
 import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
@@ -117,8 +117,8 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         if (this.newContainerUser) {
-            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Get started with Docker containers...'), 'https://aka.ms/getstartedwithdocker');
-            dockerTutorialTreeItem.iconPath = getThemedIconPath('docker');
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Tutorial: Get started with Docker'), 'https://aka.ms/getstartedwithdocker');
+            dockerTutorialTreeItem.iconPath = new ThemeIcon('link-external');
             return [dockerTutorialTreeItem];
         }
         return super.getTreeItemForEmptyList();
