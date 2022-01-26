@@ -90,7 +90,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 async function quickPickImageName(context: IActionContext, rootFolder: vscode.WorkspaceFolder, dockerFileItem: Item | undefined): Promise<string> {
     const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
     const dockerFileKey = `ACR_buildTag_${absFilePath}`;
-    const prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
+    const prevImageName: string | undefined = ext.context.workspaceState.get(dockerFileKey);
     let suggestedImageName: string;
 
     if (!prevImageName) {
@@ -112,7 +112,7 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     const imageName: string = await getTagFromUserInput(context, suggestedImageName);
     addImageTaggingTelemetry(context, imageName, '.after');
 
-    await ext.context.globalState.update(dockerFileKey, imageName);
+    await ext.context.workspaceState.update(dockerFileKey, imageName);
     return imageName;
 }
 
