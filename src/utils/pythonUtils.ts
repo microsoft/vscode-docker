@@ -14,7 +14,7 @@ export const PythonDefaultDebugPort: number = 5678;
 export const PythonDefaultPorts = new Map<PythonProjectType, number | undefined>([
     ['django', 8000],
     ['fastapi', 8000],
-    ['flask', 5000],
+    ['flask', 5001],
     ['general', undefined],
 ]);
 
