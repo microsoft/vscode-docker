@@ -14,10 +14,13 @@ export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContex
     }
 
     public async prompt(wizardContext: ScaffoldingWizardContext): Promise<void> {
+        // If there are random suggested ports, show those, otherwise show the default
+        const suggestedPorts = wizardContext.suggestedRandomPorts?.length ? wizardContext.suggestedRandomPorts : this.defaultPorts;
+
         const opt: vscode.InputBoxOptions = {
-            placeHolder: this.defaultPorts.join(', '),
+            placeHolder: suggestedPorts.join(', '),
             prompt: localize('vscode-docker.scaffold.choosePortsStep.whatPorts', 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.'),
-            value: this.defaultPorts.join(', '),
+            value: suggestedPorts.join(', '),
             validateInput: (value: string): string | undefined => {
                 const result = splitPorts(value);
                 if (!result) {
