@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
 import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
@@ -156,8 +157,15 @@ export async function getOfficialBuildTaskForDockerfile(context: IActionContext,
     let buildTasks: DockerBuildTask[] = await tasks.fetchTasks({ type: 'docker-build' }) || [];
     buildTasks =
         buildTasks.filter(buildTask => {
-            return pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? '', folder)) === resolvedDockerfile &&
-                buildTask.scope === folder;
+            const taskDockerfile = pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.dockerfile ?? 'Dockerfile', folder));
+            const taskContext = pathNormalize(resolveVariables(buildTask.definition?.dockerBuild?.context ?? '', folder));
+
+            if (taskDockerfile && taskContext) {
+                const taskDockerfileAbsPath = path.resolve(taskContext, taskDockerfile);
+                return taskDockerfileAbsPath === resolvedDockerfile && buildTask.scope === folder;
+            }
+
+            return false;
         });
 
     if (buildTasks.length === 1) {

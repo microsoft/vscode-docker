@@ -72,19 +72,13 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
-        if (!dockerBuild.tag) {
-            throw new Error(localize('vscode-docker.tasks.buildProvider.noDockerImage', 'No Docker image name was provided or resolved.'));
-        }
-
         if (!dockerBuild.context) {
             throw new Error(localize('vscode-docker.tasks.buildProvider.noBuildContext', 'No Docker build context was provided or resolved.'));
         } else if (!await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.context, context.folder)))) {
             throw new Error(localize('vscode-docker.tasks.buildProvider.invalidBuildContext', 'The Docker build context \'{0}\' does not exist or could not be accessed.', dockerBuild.context));
         }
 
-        if (!dockerBuild.dockerfile) {
-            throw new Error(localize('vscode-docker.tasks.buildProvider.noDockerfile', 'No Dockerfile was provided or resolved.'));
-        } else if (!await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.dockerfile, context.folder)))) {
+        if (dockerBuild.dockerfile && !await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.dockerfile, context.folder)))) {
             throw new Error(localize('vscode-docker.tasks.buildProvider.invalidDockerfile', 'The Dockerfile \'{0}\' does not exist or could not be accessed.', dockerBuild.dockerfile));
         }
     }
