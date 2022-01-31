@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, openInPortal } from 'vscode-azureextensionui';
+import { openInPortal } from '@microsoft/vscode-azext-azureutils';
+import { IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';

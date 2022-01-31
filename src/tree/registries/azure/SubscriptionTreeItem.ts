@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
+import { createAzureClient, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from '@microsoft/vscode-azext-azureutils';
 import { window } from 'vscode';
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, createAzureClient, IActionContext, ICreateChildImplContext, ISubscriptionContext, LocationListStep, ResourceGroupListStep, SubscriptionTreeItemBase } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, IActionContext, ICreateChildImplContext, ISubscriptionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
 import { nonNullProp } from '../../../utils/nonNull';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";

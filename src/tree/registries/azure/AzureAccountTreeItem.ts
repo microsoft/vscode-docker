@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureAccountTreeItemBase } from "@microsoft/vscode-azext-azureutils";
 import { Disposable } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
 import { AzureAccountExtensionListener } from "../../../utils/AzureAccountExtensionListener";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";

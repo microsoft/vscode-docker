@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtLocation, createAzureClient, LocationListStep } from '@microsoft/vscode-azext-azureutils';
 import { Progress } from 'vscode';
-import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep, parseError } from 'vscode-azureextensionui';
+import { AzureWizardExecuteStep, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../../extensionVariables';
 import { localize } from '../../../../localize';
 import { nonNullProp } from '../../../../utils/nonNull';

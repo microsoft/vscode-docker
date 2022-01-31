@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
-import { AzureNameStep, createAzureClient, ResourceGroupListStep, resourceGroupNamingRules } from 'vscode-azureextensionui';
+import { createAzureClient, ResourceGroupListStep, resourceGroupNamingRules } from '@microsoft/vscode-azext-azureutils';
+import { AzureNameStep } from 'vscode-azureextensionui';
 import { localize } from '../../../../localize';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
