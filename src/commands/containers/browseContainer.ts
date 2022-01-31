@@ -20,6 +20,7 @@ const commonWebPorts = [
     3001,   // (Node.js) Sails.js
     5001,   // (.NET Core) ASP.NET SSL
     5000,   // (.NET Core) ASP.NET HTTP and (Python) Flask
+    5002,   // (Python) Flask (newer Flask apps)
     8000,   // (Python) Django and FastAPI
     8080,   // (Node.js)
     8081    // (Node.js)

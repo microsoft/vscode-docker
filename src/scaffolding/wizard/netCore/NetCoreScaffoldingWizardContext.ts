@@ -13,6 +13,7 @@ import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { NetCoreChooseOsStep } from './NetCoreChooseOsStep';
 import { NetCoreGatherInformationStep } from './NetCoreGatherInformationStep';
+import { NetCoreTryGetRandomPortStep } from './NetCoreTryGetRandomPortStep';
 
 const chooseProjectFile = localize('vscode-docker.scaffold.platforms.netCore.chooseProject', 'Choose a project file');
 const netCoreGlobPatterns = [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN];
@@ -32,6 +33,7 @@ export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardConte
     ];
 
     if (wizardContext.platform === '.NET: ASP.NET Core' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
+        promptSteps.push(new NetCoreTryGetRandomPortStep());
         promptSteps.push(new ChoosePortsStep([5000]));
     }
 

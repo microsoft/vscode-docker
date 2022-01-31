@@ -68,7 +68,6 @@ const config = {
     },
     plugins: [
         // Copy some needed resource files from external sources
-        // @ts-expect-error: Spurious type incompatibility error
         new CopyPlugin({
             patterns: [
                 './node_modules/vscode-azureextensionui/resources/**/*.svg',
@@ -114,12 +113,16 @@ const config = {
             module: /node_modules\/ssh2/,
             message: /Can't resolve 'cpu-features'/
         },
+        {
+            // Ignore another warning for missing optional dependency of `ssh2`, if VS build tools aren't installed
+            module: /node_modules\/ssh2/,
+            message: /Can't resolve '.\/crypto\/build\/Release\/sshcrypto.node'/
+        },
         (warning) => false, // No other warnings should be ignored
     ],
 };
 
 if (debugWebpack) {
-    // @ts-expect-error: Spurious type incompatibility error
     config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
     console.log('Config:', config);
 }

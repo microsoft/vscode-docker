@@ -168,14 +168,6 @@
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
                 {
-                    "command": "vscode-docker.containers.composeGroup.start",
-                    "when": "never"
-                },
-                {
-                    "command": "vscode-docker.containers.composeGroup.stop",
-                    "when": "never"
-                },
-                {
                     "command": "vscode-docker.containers.composeGroup.restart",
                     "when": "never"
                 },
@@ -1015,11 +1007,13 @@
                             },
                             "context": {
                                 "type": "string",
-                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.context%"
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.context%",
+                                "default": "${workspaceFolder}"
                             },
                             "dockerfile": {
                                 "type": "string",
-                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.dockerfile%"
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.dockerfile%",
+                                "default": "${workspaceFolder}/Dockerfile"
                             },
                             "labels": {
                                 "type": "object",
@@ -1051,7 +1045,10 @@
                                 "type": "string",
                                 "description": "%vscode-docker.tasks.docker-build.dockerBuild.customOptions%"
                             }
-                        }
+                        },
+                        "required": [
+                            "context"
+                        ]
                     },
                     "platform": {
                         "type": "string",
@@ -1087,7 +1084,10 @@
                         "description": "%vscode-docker.tasks.docker-build.python.description%",
                         "type": "object"
                     }
-                }
+                },
+                "required": [
+                    "dockerBuild"
+                ]
             },
             {
                 "type": "docker-run",
@@ -3064,7 +3064,7 @@
         "ts-loader": "^9.2.3",
         "typescript": "^4.5.4",
         "umd-compat-loader": "^2.1.2",
-        "vsce": "^2.5.1",
+        "vsce": "^2.6.4",
         "webpack": "^5.65.0",
         "webpack-bundle-analyzer": "^4.4.1",
         "webpack-cli": "^4.6.0"
@@ -3078,7 +3078,7 @@
         "@grpc/grpc-js": "^1.5.0",
         "@microsoft/compose-language-service": "^0.0.5-alpha",
         "dayjs": "^1.10.4",
-        "dockerfile-language-server-nodejs": "^0.7.3",
+        "dockerfile-language-server-nodejs": "^0.8.0",
         "dockerode": "^3.2.1",
         "fs-extra": "^10.0.0",
         "glob": "^7.1.6",
