@@ -59,9 +59,15 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
     };
 
     const response = await httpRequest<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
-        // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
-        await subContext.credentials.signRequest(request);
-        const token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
+        // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field
+        let token: string;
+        if (subContext.credentials.getToken) {
+            token = await subContext.credentials.getToken();
+        } else {
+            // If `getToken()` isn't defined we have to pick the token off the signed Authorization header
+            await subContext.credentials.signRequest(request);
+            token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
+        }
 
         const formData = new URLSearchParams({ ...options.form, access_token: token });
         return new Request(request.url, { method: 'POST', body: formData });
