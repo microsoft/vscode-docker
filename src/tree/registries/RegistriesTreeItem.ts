@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getRegistryProviders } from "./all/getRegistryProviders";

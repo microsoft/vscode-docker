@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";

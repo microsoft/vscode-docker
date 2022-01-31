@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { localize } from "../../localize";
 import { getThemedIconPath } from '../getThemedIconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";

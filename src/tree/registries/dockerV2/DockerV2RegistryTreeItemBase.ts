@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { URL } from "url";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { PAGE_SIZE } from "../../../constants";
 import { IOAuthContext, RequestLike } from "../../../utils/httpRequest";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";

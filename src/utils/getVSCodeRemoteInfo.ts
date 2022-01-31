@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { env, ExtensionKind, extensions } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { extensionId } from '../constants';
 
 export enum DockerExtensionKind {

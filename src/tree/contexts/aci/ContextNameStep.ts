@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ResourceGroupListStep, resourceGroupNamingRules } from '@microsoft/vscode-azext-azureutils';
-import { AzureNameStep } from 'vscode-azureextensionui';
+import { AzureNameStep } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { IAciWizardContext } from './IAciWizardContext';

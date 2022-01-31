@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { OutgoingHttpHeaders } from 'http';
-import { appendExtensionUserAgent } from 'vscode-azureextensionui';
+import { appendExtensionUserAgent } from '@microsoft/vscode-azext-utils';
 
 const userAgentKey = 'User-Agent';
 

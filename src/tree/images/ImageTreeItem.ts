@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { MarkdownString, ThemeColor, ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { getTreeId } from "../LocalRootTreeItemBase";

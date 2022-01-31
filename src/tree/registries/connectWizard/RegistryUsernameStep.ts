@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { InputBoxOptions } from 'vscode';
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
+import { AzureWizardPromptStep } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../../localize';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 

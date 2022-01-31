@@ -6,7 +6,7 @@
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { ThemeIcon } from 'vscode';
-import { AzExtTreeItem } from 'vscode-azureextensionui';
+import { AzExtTreeItem } from '@microsoft/vscode-azext-utils';
 import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
 

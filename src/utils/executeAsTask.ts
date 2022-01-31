@@ -5,7 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { addDockerSettingsToEnv } from './addDockerSettingsToEnv';
 
 interface ExecuteAsTaskOptions {

@@ -7,7 +7,7 @@ import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import { MessageItem } from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 import { isMac, isWindows } from '../../utils/osUtils';

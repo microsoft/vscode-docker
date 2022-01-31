@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPickerContext, UserCancelledError } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeDataProvider, AzExtTreeItem, ITreeItemPickerContext, UserCancelledError } from "@microsoft/vscode-azext-utils";
 
 export interface MultiSelectNode {
     readonly canMultiSelect: boolean;

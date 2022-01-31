@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';

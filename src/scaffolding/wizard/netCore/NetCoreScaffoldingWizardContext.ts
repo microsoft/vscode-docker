@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
+import { AzureWizardPromptStep, IWizardOptions } from '@microsoft/vscode-azext-utils';
 import { CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN } from '../../../constants';
 import { localize } from '../../../localize';
 import { PlatformOS } from '../../../utils/platform';

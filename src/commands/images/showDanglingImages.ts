@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 
 export const danglingImagesMementoKey = 'vscode-docker.images.showDanglingImages';
 const danglingImagesContextKey = 'vscode-docker:danglingShown';

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
+import { IActionContext, TelemetryProperties } from "@microsoft/vscode-azext-utils";
 import { DockerPort } from '../../docker/Containers';
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';

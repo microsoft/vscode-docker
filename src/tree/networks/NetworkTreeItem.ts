@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { MarkdownString, ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { builtInNetworks } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";

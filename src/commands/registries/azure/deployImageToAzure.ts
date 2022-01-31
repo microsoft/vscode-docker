@@ -7,7 +7,7 @@ import type { WebSiteManagementModels } from '@azure/arm-appservice'; // These a
 import { ResourceGroupListStep } from '@microsoft/vscode-azext-azureutils';
 import { env, Uri, window } from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from "vscode-azureextensionui";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';

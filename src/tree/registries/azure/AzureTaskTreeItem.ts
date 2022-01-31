@@ -5,7 +5,7 @@
 
 import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { localize } from '../../../localize';
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";

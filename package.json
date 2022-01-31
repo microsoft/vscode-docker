@@ -3079,6 +3079,7 @@
         "@grpc/grpc-js": "^1.5.0",
         "@microsoft/compose-language-service": "^0.0.5-alpha",
         "@microsoft/vscode-azext-azureutils": "file:../vscode-azuretools/azure/microsoft-vscode-azext-azureutils-0.0.1.tgz",
+        "@microsoft/vscode-azext-utils": "file:../vscode-azuretools/ui/microsoft-vscode-azext-utils-0.0.1.tgz",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.8.0",
         "dockerode": "^3.2.1",

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 
 export async function registryHelp(context: IActionContext): Promise<void> {
     void vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/helpicon_containerregistries'));

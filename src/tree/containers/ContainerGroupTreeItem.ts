@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";

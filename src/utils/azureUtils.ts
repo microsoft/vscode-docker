@@ -5,7 +5,7 @@
 
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { ISubscriptionContext } from 'vscode-azureextensionui';
+import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { localize } from '../localize';
 import { httpRequest, RequestOptionsLike } from './httpRequest';
 

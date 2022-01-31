@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { RequestLike } from "../../utils/httpRequest";
 import { IRepositoryAuthTreeItem } from "../../utils/registryRequestUtils";
 import { getRegistryContextValue, repositorySuffix } from "./registryContextValues";

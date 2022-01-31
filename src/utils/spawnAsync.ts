@@ -5,7 +5,7 @@
 
 import * as cp from 'child_process';
 import { CancellationToken, Disposable } from 'vscode';
-import { UserCancelledError } from 'vscode-azureextensionui';
+import { UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { isMac } from './osUtils';

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { localize } from '../../localize';
 import { RegistryApi } from "./all/RegistryApi";
 import { azureRegistryProviderId } from "./azure/azureRegistryProvider";

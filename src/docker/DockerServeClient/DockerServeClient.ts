@@ -9,7 +9,7 @@ import * as Contexts from '@docker/sdk/contexts.d'; // Imports from the containe
 import * as Volumes from '@docker/sdk/volumes.d'; // Imports from the volumes.d.ts file to prevent a tsc error (workaround for https://github.com/docker/node-sdk/issues/71)
 import { Client as GrpcClient, Metadata } from '@grpc/grpc-js';
 import { CancellationToken } from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
 import { DockerInfo, DockerOSType, PruneResult } from '../Common';
 import { DockerContainer, DockerContainerInspection } from '../Containers';

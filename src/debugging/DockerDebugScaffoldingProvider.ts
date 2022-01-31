@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { MessageItem, window } from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
+import { DialogResponses } from '@microsoft/vscode-azext-utils';
 import { localize } from '../localize';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';

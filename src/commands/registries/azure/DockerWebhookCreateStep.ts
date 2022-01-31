@@ -8,7 +8,7 @@ import type { ContainerRegistryManagementModels as AcrModels } from '@azure/arm-
 import { createAzureClient } from '@microsoft/vscode-azext-azureutils';
 import * as vscode from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizardExecuteStep } from "vscode-azureextensionui";
+import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';

@@ -6,7 +6,7 @@
 import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
 import { ContextType, DockerContext, isNewContextType } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as assert from 'assert';
 
 const DefaultPickIndex = 0;

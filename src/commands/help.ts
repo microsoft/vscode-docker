@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickOptions } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickOptions } from '@microsoft/vscode-azext-utils';
 import { extensionId } from '../constants';
 import { localize } from '../localize';
 

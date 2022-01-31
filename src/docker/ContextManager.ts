@@ -11,7 +11,7 @@ import * as path from 'path';
 import { URL } from 'url';
 import { commands, Event, EventEmitter, window, workspace } from 'vscode';
 import { Disposable } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling, IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';

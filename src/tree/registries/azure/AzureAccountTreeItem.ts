@@ -5,7 +5,7 @@
 
 import { AzureAccountTreeItemBase } from "@microsoft/vscode-azext-azureutils";
 import { Disposable } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, ISubscriptionContext } from "@microsoft/vscode-azext-utils";
 import { AzureAccountExtensionListener } from "../../../utils/AzureAccountExtensionListener";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";

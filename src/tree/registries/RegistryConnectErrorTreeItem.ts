@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ThemeColor, ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, GenericTreeItem, parseError } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, GenericTreeItem, parseError } from "@microsoft/vscode-azext-utils";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";

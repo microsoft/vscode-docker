@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { localize } from '../localize';
 import { copyWizardContext } from './copyWizardContext';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';

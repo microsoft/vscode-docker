@@ -9,7 +9,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../../extensionVariables';
 import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';

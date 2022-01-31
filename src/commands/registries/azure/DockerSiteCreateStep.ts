@@ -8,7 +8,7 @@ import type { Site } from '@azure/arm-appservice/esm/models'; // These are only 
 import { AzExtLocation, LocationListStep, createAzureClient } from '@microsoft/vscode-azext-azureutils';
 import { Progress } from "vscode";
 import type { CustomLocation } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizardExecuteStep } from "vscode-azureextensionui";
+import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';

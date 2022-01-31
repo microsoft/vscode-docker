@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { commands } from "vscode";
-import { IActionContext, registerCommand as registerCommandAzUI } from "vscode-azureextensionui";
+import { IActionContext, registerCommand as registerCommandAzUI } from "@microsoft/vscode-azext-utils";
 import { ext } from "../extensionVariables";
 import { scaffold } from "../scaffolding/scaffold";
 import { scaffoldCompose } from "../scaffolding/scaffoldCompose";

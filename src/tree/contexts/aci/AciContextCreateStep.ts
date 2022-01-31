@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Progress } from 'vscode';
-import { AzureWizardExecuteStep, parseError } from 'vscode-azureextensionui';
+import { AzureWizardExecuteStep, parseError } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { executeAsTask } from '../../../utils/executeAsTask';
