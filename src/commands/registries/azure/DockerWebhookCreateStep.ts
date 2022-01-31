@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import type { WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
+import type { Webhook, WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import * as vscode from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
@@ -68,7 +68,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         return !!context.site && (this._treeItem.parent instanceof AzureRepositoryTreeItem || this._treeItem.parent instanceof DockerHubRepositoryTreeItem);
     }
 
-    private async createWebhookForApp(context: IAppServiceWizardContext, node: RemoteTagTreeItem, site: WebSiteManagementModels.Site, appUri: string): Promise<AcrModels.Webhook | undefined> {
+    private async createWebhookForApp(context: IAppServiceWizardContext, node: RemoteTagTreeItem, site: WebSiteManagementModels.Site, appUri: string): Promise<Webhook | undefined> {
         const maxLength: number = 50;
         const numRandomChars: number = 6;
 

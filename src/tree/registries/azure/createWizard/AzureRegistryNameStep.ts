@@ -41,7 +41,7 @@ async function validateRegistryName(name: string, client: ContainerRegistryManag
     } else if (name.match(/[^a-z0-9]/i)) {
         return localize('vscode-docker.tree.registries.azure.createWizard.nameAlphanumeric', 'The name can only contain alphanumeric characters.');
     } else {
-        const nameStatus = await client.registries.checkNameAvailability({ name });
+        const nameStatus = await client.registries.checkNameAvailability({ name, type: 'Microsoft.ContainerRegistry/registries' });
         return nameStatus.message;
     }
 }

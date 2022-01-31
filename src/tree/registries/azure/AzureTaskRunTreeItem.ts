@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { ImageDescriptor, Run as AcrRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { ThemeColor, ThemeIcon } from "vscode";
@@ -18,9 +18,9 @@ export class AzureTaskRunTreeItem extends AzExtTreeItem {
     public contextValue: string = AzureTaskRunTreeItem.contextValue;
     public parent: AzureTaskTreeItem;
 
-    private _run: AcrModels.Run;
+    private _run: AcrRun;
 
-    public constructor(parent: AzureTaskTreeItem, run: AcrModels.Run) {
+    public constructor(parent: AzureTaskTreeItem, run: AcrRun) {
         super(parent);
         this._run = run;
     }
@@ -45,7 +45,7 @@ export class AzureTaskRunTreeItem extends AzExtTreeItem {
         return this._run.createTime;
     }
 
-    public get outputImage(): AcrModels.ImageDescriptor | undefined {
+    public get outputImage(): ImageDescriptor | undefined {
         return this._run.outputImages && this._run.outputImages[0];
     }
 

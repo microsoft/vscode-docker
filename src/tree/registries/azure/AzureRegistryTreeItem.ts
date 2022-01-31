@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { ContainerRegistryManagementClient, Registry, RegistryListCredentialsResult } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { URL } from "url";
 import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
@@ -23,7 +23,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
 
     private _tasksTreeItem: AzureTasksTreeItem;
 
-    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly registry: AcrModels.Registry) {
+    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly registry: Registry) {
         super(parent, cachedProvider, azureOAuthProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
         this.authContext = {
@@ -101,10 +101,10 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await (await this.getClient(context)).registries.deleteMethod(this.resourceGroup, this.registryName);
+        await (await this.getClient(context)).registries.beginDeleteAndWait(this.resourceGroup, this.registryName);
     }
 
-    public async tryGetAdminCredentials(context: IActionContext): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
+    public async tryGetAdminCredentials(context: IActionContext): Promise<RegistryListCredentialsResult | undefined> {
         if (this.registry.adminUserEnabled) {
             return await (await this.getClient(context)).registries.listCredentials(this.resourceGroup, this.registryName);
         } else {

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { RunListResult, Task as AcrTask } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
@@ -18,10 +18,10 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     public childTypeLabel: string = 'task run';
     public parent: AzureTasksTreeItem;
 
-    private _task: AcrModels.Task | undefined;
+    private _task: AcrTask | undefined;
     private _nextLink: string | undefined;
 
-    public constructor(parent: AzureTasksTreeItem, task: AcrModels.Task | undefined) {
+    public constructor(parent: AzureTasksTreeItem, task: AcrTask | undefined) {
         super(parent);
         this._task = task;
         this.iconPath = new ThemeIcon('tasklist');
@@ -89,7 +89,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         }
     }
 
-    private static async getTaskRuns(context: IActionContext, registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<AcrModels.RunListResult> {
+    private static async getTaskRuns(context: IActionContext, registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<RunListResult> {
         return nextLink === undefined ?
             await (await registryTI.getClient(context)).runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
             await (await registryTI.getClient(context)).runs.listNext(nextLink);

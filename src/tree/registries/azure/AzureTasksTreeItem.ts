@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { TaskListResult } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { ThemeIcon } from "vscode";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
@@ -32,7 +32,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
 
         const registryTI = this.parent;
 
-        const taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
+        const taskListResult: TaskListResult = this._nextLink === undefined ?
             await (await registryTI.getClient(context)).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
             await (await registryTI.getClient(context)).tasks.listNext(this._nextLink);
 
