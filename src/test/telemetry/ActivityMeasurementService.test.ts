@@ -18,7 +18,7 @@ function assertSameDate(a: number, b: number): void {
 
 suite('(unit) telemetry/ActivityMeasurementService', async () => {
     test('Default data returned', async () => {
-        const ams = new ActivityMeasurementService(new TestMemento());
+        const ams = new ActivityMeasurementService(new TestMemento(), false);
 
         const overallData = ams.getActivityMeasurement('overall');
         const overallNoEditData = ams.getActivityMeasurement('overallnoedit');
@@ -31,7 +31,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
     });
 
     test('overall increments overall only', async () => {
-        const ams = new ActivityMeasurementService(new TestMemento());
+        const ams = new ActivityMeasurementService(new TestMemento(), false);
 
         await ams.recordActivity('overall');
 
@@ -46,7 +46,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
     });
 
     test('overallnoedit increments both', async () => {
-        const ams = new ActivityMeasurementService(new TestMemento());
+        const ams = new ActivityMeasurementService(new TestMemento(), false);
 
         await ams.recordActivity('overallnoedit');
 
@@ -63,7 +63,7 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
     });
 
     test('Record is once per day', async () => {
-        const ams = new ActivityMeasurementService(new TestMemento());
+        const ams = new ActivityMeasurementService(new TestMemento(), false);
 
         await ams.recordActivity('overall');
         await ams.recordActivity('overall');
@@ -77,11 +77,11 @@ suite('(unit) telemetry/ActivityMeasurementService', async () => {
 
     test('Loading from storage', async () => {
         const memento = new TestMemento();
-        const ams1 = new ActivityMeasurementService(memento);
+        const ams1 = new ActivityMeasurementService(memento, false);
         await ams1.recordActivity('overallnoedit');
 
         // Get a new object without memory
-        const ams2 = new ActivityMeasurementService(memento);
+        const ams2 = new ActivityMeasurementService(memento, false);
 
         const overallData = ams2.getActivityMeasurement('overall');
         const overallNoEditData = ams2.getActivityMeasurement('overallnoedit');
