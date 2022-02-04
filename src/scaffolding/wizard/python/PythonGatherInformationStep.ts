@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as fse from 'fs-extra';
 import * as path from 'path';
+import * as vscode from 'vscode';
 import { inferPythonArgs, PythonDefaultDebugPort, PythonDefaultPorts } from '../../../utils/pythonUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
@@ -42,19 +42,23 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
     private async getDjangoCmdParts(wizardContext: PythonScaffoldingWizardContext): Promise<void> {
         const { app, args, bindPort } = this.getCommonProps(wizardContext);
 
-        // For Django apps, there **usually** exists a "wsgi" module in a sub-folder named the same as the project folder.
-        // So we check if that path exists, then use it. Else, we output the comment below instructing the user to enter
+        // For Django apps, there **usually** exists a "wsgi" module in an immediate sub-folder of the primary artifact's folder.
+        // So we try to find and use that. Else, we output the comment below instructing the user to enter
         // the correct python path to the wsgi module.
 
-        let wsgiModule: string;
-        const serviceName = path.basename(wizardContext.workspaceFolder.uri.fsPath);
-        const wsgiPath = path.join(wizardContext.workspaceFolder.uri.fsPath, serviceName, 'wsgi.py');
+        const wsgiPaths = await vscode.workspace.findFiles(
+            new vscode.RelativePattern(path.dirname(wizardContext.artifact), '*/[Ww][Ss][Gg][Ii].[Pp][Yy]'),
+            undefined,
+            1
+        );
 
-        if (!(await fse.pathExists(wsgiPath))) {
-            wizardContext.wsgiComment = `# File wsgi.py was not found in subfolder: '${serviceName}'. Please enter the Python path to wsgi file.`;
-            wsgiModule = 'pythonPath.to.wsgi';
-        } else {
+        let wsgiModule: string;
+        if (wsgiPaths?.length) {
+            const serviceName = path.basename(path.dirname(wsgiPaths[0].fsPath));
             wsgiModule = `${serviceName}.wsgi`;
+        } else {
+            wizardContext.wsgiComment = `# File wsgi.py was not found. Please enter the Python path to wsgi file.`;
+            wsgiModule = 'pythonPath.to.wsgi';
         }
 
         wizardContext.pythonCmdParts = [
