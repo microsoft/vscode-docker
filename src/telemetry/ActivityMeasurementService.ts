@@ -38,7 +38,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
-        if (!vscode.env.isTelemetryEnabled) {
+        if (!vscode.env.isTelemetryEnabled && !process.env.DEBUGTELEMETRY) {
             return;
         }
 
@@ -85,7 +85,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to get measurements for
      */
     public getActivityMeasurement(type: ActivityType): ActivityMeasurement {
-        if (!vscode.env.isTelemetryEnabled) {
+        if (!vscode.env.isTelemetryEnabled && !process.env.DEBUGTELEMETRY) {
             return defaultMeasurement;
         }
 
