@@ -29,7 +29,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
     private readonly lazySetterMap: Map<ActivityType, AsyncLazy<void>> = new Map<ActivityType, AsyncLazy<void>>();
     private readonly values: Map<ActivityType, ActivityMeasurement> = new Map<ActivityType, ActivityMeasurement>();
 
-    public constructor(private readonly memento: vscode.Memento) {
+    public constructor(private readonly memento: vscode.Memento, private readonly requireTelemetryEnabled = true) {
     }
 
     /**
@@ -38,7 +38,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to record measurements for
      */
     public async recordActivity(type: ActivityType): Promise<void> {
-        if (!vscode.env.isTelemetryEnabled && !process.env.DEBUGTELEMETRY) {
+        if (this.requireTelemetryEnabled && !vscode.env.isTelemetryEnabled) {
             return;
         }
 
@@ -85,7 +85,7 @@ export class ActivityMeasurementService implements IActivityMeasurementService {
      * @param type The activity type to get measurements for
      */
     public getActivityMeasurement(type: ActivityType): ActivityMeasurement {
-        if (!vscode.env.isTelemetryEnabled && !process.env.DEBUGTELEMETRY) {
+        if (this.requireTelemetryEnabled && !vscode.env.isTelemetryEnabled) {
             return defaultMeasurement;
         }
 
