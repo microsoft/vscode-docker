@@ -1,3 +1,12 @@
+## 1.20.0 - 22 Feb 2022
+### Added
+* The "Compose Start" and "Compose Stop" commands available in the explorer context menu will now also be available in the command palette. [#3140](https://github.com/microsoft/vscode-docker/issues/3140)
+
+### Fixed
+* Flask apps will now use port 5002 by default, and .NET apps will use the semi-random port scaffolded in the `launchSettings.json` file. This will avoid conflicting with port 5000 which is often in-use on Mac. [#3381](https://github.com/microsoft/vscode-docker/issues/3381)
+* Fixed an issue in the container files explorer on Windows containers with other localizations. [#3415](https://github.com/microsoft/vscode-docker/pull/3415)
+* The experience for adding Dockerfiles to Django projects has been improved slightly. [#3410](https://github.com/microsoft/vscode-docker/issues/3410)
+
 ## 1.19.0 - 17 January 2022
 ### Added
 * For volume mappings in `docker-run` tasks, the `ro,z` and `rw,z` permissions have been added, allowing support for SELinux systems. [#3289](https://github.com/microsoft/vscode-docker/pull/3289)
