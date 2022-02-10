@@ -8,12 +8,12 @@ import { Survey } from './SurveyManager';
 
 export const survey3: Survey = {
     id: 'survey3',
-    prompt: localize('vscode-docker.survey.survey3.prompt', 'The Docker extension is always adding new features. Would you like to learn more about them?'),
+    prompt: localize('vscode-docker.survey.survey3.prompt', 'How can we make the Docker extension better?'),
     buttons: new Map<string, string | undefined>([
         [localize('vscode-docker.survey.survey3.button.take', 'Take survey'), 'https://aka.ms/dockerextensionsurvey'],
         [localize('vscode-docker.survey.survey3.button.never', 'Don\'t ask again'), undefined],
     ]),
-    activationDelayMs: 30 * 1000,
+    activationDelayMs: 60 * 1000,
     isEligible: isEligible,
 };
 
