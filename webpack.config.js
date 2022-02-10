@@ -104,8 +104,8 @@ const config = {
             message: /require\.extensions/,
         },
         {
-            // Ignore a warning from `vscode-extension-telemetry`
-            module: /node_modules\/vscode-extension-telemetry/,
+            // Ignore a warning from `@vscode/extension-telemetry`
+            module: /node_modules\/@vscode\/extension-telemetry/,
             message: /Can't resolve 'applicationinsights-native-metrics'/
         },
         {
