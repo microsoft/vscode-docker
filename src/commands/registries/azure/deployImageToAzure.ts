@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import { env, Uri, window } from "vscode";
+import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from "@microsoft/vscode-azext-utils";
+import { Uri, env, window } from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ResourceGroupListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
@@ -14,6 +14,7 @@ import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccoun
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { nonNullProp } from "../../../utils/nonNull";
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
@@ -30,8 +31,8 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
 
-    const vscAzureAppService = await import('vscode-azureappservice');
-    vscAzureAppService.registerAppServiceExtensionVariables(ext);
+    const azExtAzureUtils = await getAzExtAzureUtils();
+    const vscAzureAppService = await getAzExtAppService();
 
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
@@ -47,7 +48,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     }
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
-    promptSteps.push(new ResourceGroupListStep());
+    promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());
     vscAzureAppService.CustomLocationListStep.addStep(wizardContext, promptSteps);
     promptSteps.push(new WebSitesPortPromptStep());
     promptSteps.push(new vscAzureAppService.AppServicePlanListStep());
@@ -64,7 +65,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     await wizard.prompt();
     await wizard.execute();
 
-    const site: WebSiteManagementModels.Site = nonNullProp(wizardContext, 'site');
+    const site: Site = nonNullProp(wizardContext, 'site');
     const siteUri: string = `https://${site.defaultHostName}`;
     const createdNewWebApp: string = localize('vscode-docker.commands.registries.azure.deployImage.created', 'Successfully created web app "{0}": {1}', site.name, siteUri);
     ext.outputChannel.appendLine(createdNewWebApp);

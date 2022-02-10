@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, ConfigurationTarget, MessageItem, workspace, WorkspaceConfiguration } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { ConfigurationTarget, MessageItem, WorkspaceConfiguration, commands, workspace } from 'vscode';
 import { extensionId } from '../constants';
 import { localize } from '../localize';
-import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from '../utils/getVSCodeRemoteInfo';
+import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from '../utils/getVSCodeRemoteInfo';
 import { registerCommand } from './registerCommands';
 
 /**

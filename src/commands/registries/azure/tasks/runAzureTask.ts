@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { TaskRunRequest } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { window } from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
 import { AzureTaskTreeItem } from "../../../../tree/registries/azure/AzureTaskTreeItem";

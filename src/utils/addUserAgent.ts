@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { appendExtensionUserAgent } from '@microsoft/vscode-azext-utils';
 import { OutgoingHttpHeaders } from 'http';
-import { appendExtensionUserAgent } from 'vscode-azureextensionui';
 
 const userAgentKey = 'User-Agent';
 

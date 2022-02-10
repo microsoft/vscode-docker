@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, WorkspaceFolder, tasks, workspace } from 'vscode';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';

@@ -11,7 +11,7 @@ import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
-import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from "../TaskHelper";
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, inferImageName } from "../TaskHelper";
 import { PythonExtensionHelper } from "./PythonExtensionHelper";
 
 export interface PythonTaskRunOptions {

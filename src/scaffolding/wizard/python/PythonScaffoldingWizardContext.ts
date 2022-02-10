@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IWizardOptions } from 'vscode-azureextensionui';
+import { AzureWizardPromptStep, IWizardOptions } from '@microsoft/vscode-azext-utils';
 import { PythonDefaultPorts, PythonProjectType, PythonTarget } from '../../../utils/pythonUtils';
 import { ChoosePortsStep } from '../ChoosePortsStep';
 import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';

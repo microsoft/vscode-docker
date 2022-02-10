@@ -6,13 +6,13 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
+import { isMac, isWindows } from '../../utils/osUtils';
 import { MessageItem } from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
-import { isMac, isWindows } from '../../utils/osUtils';
-import { PlatformOS } from '../../utils/platform';
 import { execAsync } from '../../utils/spawnAsync';
+import { PlatformOS } from '../../utils/platform';
 
 const knownConfiguredProjects = new Set<string>();
 let alreadyTrustedOrSkipped: boolean = false;

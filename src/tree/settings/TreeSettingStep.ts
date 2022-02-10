@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IAzureQuickPickItem, IAzureQuickPickOptions } from "vscode-azureextensionui";
+import { AzureWizardPromptStep, IAzureQuickPickItem, IAzureQuickPickOptions } from "@microsoft/vscode-azext-utils";
 import { localize } from "../../localize";
 import { nonNullProp } from "../../utils/nonNull";
 import { ITreePropertyInfo } from "./ITreeSettingInfo";

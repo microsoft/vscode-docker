@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Registry as AcrRegistry, SkuName as AcrSkuName } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
-import { IResourceGroupWizardContext } from 'vscode-azureextensionui';
+import type { IResourceGroupWizardContext } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
 
 export interface IAzureRegistryWizardContext extends IResourceGroupWizardContext {
     newRegistryName?: string;

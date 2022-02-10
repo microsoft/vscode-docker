@@ -70,7 +70,7 @@ const config = {
         // Copy some needed resource files from external sources
         new CopyPlugin({
             patterns: [
-                './node_modules/vscode-azureextensionui/resources/**/*.svg',
+                './node_modules/@microsoft/vscode-azext-azureutils/resources/**/*.svg',
                 './node_modules/open/xdg-open*', // This script isn't included in the webpack but is needed by `open` on certain systems, so copy it in
             ],
         }),

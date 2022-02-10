@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { PAGE_SIZE } from "../../../constants";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { RemoteRepositoryTreeItemBase } from "../RemoteRepositoryTreeItemBase";

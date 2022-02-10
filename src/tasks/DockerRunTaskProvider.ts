@@ -9,12 +9,12 @@ import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { dockerExePath } from '../utils/dockerExePathProvider';
-import { DockerRunOptions, DockerContainerVolume } from './DockerRunTaskDefinitionBase';
+import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
 import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
-import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
+import { DockerRunTaskContext, TaskHelper, getAssociatedDockerBuildTask, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;

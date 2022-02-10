@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerEvent } from "vscode-azureextensionui";
+import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerEvent } from "@microsoft/vscode-azext-utils";
 import { registerCommand } from '../commands/registerCommands';
 import { ext } from '../extensionVariables';
 import { ContainersTreeItem } from './containers/ContainersTreeItem';

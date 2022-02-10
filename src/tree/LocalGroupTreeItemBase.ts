@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { DockerObject } from "../docker/Common";
 import { LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
 import { CommonProperty } from "./settings/CommonProperties";

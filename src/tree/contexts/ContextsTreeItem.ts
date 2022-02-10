@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext, ResourceGroupListStep } from 'vscode-azureextensionui';
+import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext } from '@microsoft/vscode-azext-utils';
 import { DockerContext } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { getAzExtAzureUtils } from '../../utils/lazyPackages';
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
 import { RegistryApi } from '../registries/all/RegistryApi';
 import { AzureAccountTreeItem } from '../registries/azure/AzureAccountTreeItem';
 import { azureRegistryProviderId } from '../registries/azure/azureRegistryProvider';
@@ -18,7 +19,7 @@ import { AciContextCreateStep } from './aci/AciContextCreateStep';
 import { ContextNameStep } from './aci/ContextNameStep';
 import { IAciWizardContext } from './aci/IAciWizardContext';
 import { ContextGroupTreeItem } from './ContextGroupTreeItem';
-import { contextProperties, ContextProperty } from "./ContextProperties";
+import { ContextProperty, contextProperties } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, ContextProperty> {
@@ -95,6 +96,8 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
             ...actionContext,
         };
 
+        const azExtAzureUtils = await getAzExtAzureUtils();
+
         // Set up the prompt steps
         const promptSteps: AzureWizardPromptStep<IAciWizardContext>[] = [
             new ContextNameStep(),
@@ -110,7 +113,7 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
         }
 
         // Add additional prompt steps
-        promptSteps.push(new ResourceGroupListStep());
+        promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());
 
         // Set up the execute steps
         const executeSteps: AzureWizardExecuteStep<IAciWizardContext>[] = [

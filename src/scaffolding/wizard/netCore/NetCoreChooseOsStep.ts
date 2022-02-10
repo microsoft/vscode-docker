@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IAzureQuickPickItem } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../../localize';
 import { PlatformOS } from '../../../utils/platform';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';

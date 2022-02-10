@@ -5,8 +5,8 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
-import { DialogResponses, IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
@@ -20,10 +20,10 @@ import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { execAsync } from '../../utils/spawnAsync';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { installDebuggersIfNecessary, vsDbgInstallBasePath, VsDbgType } from './VsDbgHelper';
+import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { getWwwAuthenticateContext, HttpErrorResponse } from "../../../utils/httpRequest";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { HttpErrorResponse, getWwwAuthenticateContext } from "../../../utils/httpRequest";
 import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { IAuthProvider } from "../auth/IAuthProvider";

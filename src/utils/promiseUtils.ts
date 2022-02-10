@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { UserCancelledError } from 'vscode-azureextensionui';
+import { UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { localize } from '../localize';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {

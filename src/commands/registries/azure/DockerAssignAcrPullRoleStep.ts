@@ -3,13 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import { Progress } from "vscode";
 import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizardExecuteStep, createAzureClient } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { getArmAppSvc, getArmAuth, getArmContainerRegistry, getAzExtAzureUtils, getUuid } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreateStep
@@ -23,12 +24,13 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         ext.outputChannel.appendLine(message);
         progress.report({ message: message });
 
-        const armAuth = await import('@azure/arm-authorization');
-        const armContainerRegistry = await import('@azure/arm-containerregistry');
-        const armAppService = await import('@azure/arm-appservice');
-        const authClient = createAzureClient(context, armAuth.AuthorizationManagementClient);
-        const crmClient = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
-        const appSvcClient = createAzureClient(context, armAppService.WebSiteManagementClient);
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        const armAuth = await getArmAuth();
+        const armContainerRegistry = await getArmContainerRegistry();
+        const armAppService = await getArmAppSvc();
+        const authClient = azExtAzureUtils.createAzureClient(context, armAuth.AuthorizationManagementClient);
+        const crmClient = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
+        const appSvcClient = azExtAzureUtils.createAzureClient(context, armAppService.WebSiteManagementClient);
 
         // If we're in `execute`, then `shouldExecute` passed and `this.tagTreeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
         const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as AzureRegistryTreeItem;
@@ -61,7 +63,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         }
 
         // 4. On the registry, assign the AcrPull role to the principal representing the website
-        await authClient.roleAssignments.create(registry.id, (await import('uuid')).v4(), {
+        await authClient.roleAssignments.create(registry.id, (await getUuid()).v4(), {
             principalId: siteInfo.identity.principalId,
             roleDefinitionId: acrPullRoleDefinition.id,
             principalType: 'ServicePrincipal',

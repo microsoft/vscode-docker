@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { env, ExtensionKind, extensions } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { ExtensionKind, env, extensions } from 'vscode';
 import { extensionId } from '../constants';
 
 export enum DockerExtensionKind {

@@ -3,15 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExecOptions } from 'child_process';
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { commands, Event, EventEmitter, window, workspace } from 'vscode';
-import { Disposable } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { Disposable, Event, EventEmitter, commands, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';

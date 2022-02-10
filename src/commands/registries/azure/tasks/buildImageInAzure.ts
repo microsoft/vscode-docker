@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { scheduleRunRequest } from './scheduleRunRequest';
 
 export async function buildImageInAzure(context: IActionContext, uri?: vscode.Uri | undefined): Promise<void> {

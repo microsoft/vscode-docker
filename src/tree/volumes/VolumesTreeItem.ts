@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "vscode-azureextensionui";
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
@@ -11,7 +11,7 @@ import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../L
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
-import { volumeProperties, VolumeProperty } from "./VolumeProperties";
+import { VolumeProperty, volumeProperties } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
 
 export class VolumesTreeItem extends LocalRootTreeItemBase<DockerVolume, VolumeProperty> {

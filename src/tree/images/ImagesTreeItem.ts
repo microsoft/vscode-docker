@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { DockerImage } from "../../docker/Images";
 import { ext } from "../../extensionVariables";
@@ -13,7 +13,7 @@ import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
-import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
+import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
 
 export interface DatedDockerImage extends DockerImage {

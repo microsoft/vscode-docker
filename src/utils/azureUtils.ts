@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { ISubscriptionContext } from 'vscode-azureextensionui';
 import { localize } from '../localize';
-import { httpRequest, RequestOptionsLike } from './httpRequest';
+import { RequestOptionsLike, httpRequest } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 

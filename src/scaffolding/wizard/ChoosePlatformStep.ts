@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IAzureQuickPickItem, IWizardOptions } from 'vscode-azureextensionui';
+import { IAzureQuickPickItem, IWizardOptions } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
 import { AllPlatforms, Platform } from '../../utils/platform';
 import { ChoosePortsStep } from './ChoosePortsStep';
