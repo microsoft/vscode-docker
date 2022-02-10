@@ -25,6 +25,10 @@ export async function getHandlebars(): Promise<typeof import('handlebars')> {
     return await import('handlebars');
 }
 
+export async function getUuid(): Promise<typeof import('uuid')> {
+    return await import('uuid');
+}
+
 // This file is really most important for these next two functions, which ensure that the extension variables are registered before the package is used
 
 export async function getAzExtAzureUtils(): Promise<typeof import('@microsoft/vscode-azext-azureutils')> {
@@ -37,10 +41,6 @@ export async function getAzExtAppService(): Promise<typeof import('vscode-azurea
     const appSvc = await import('vscode-azureappservice');
     appSvc.registerAppServiceExtensionVariables(ext);
     return appSvc;
-}
-
-export async function getUuid(): Promise<typeof import('uuid')> {
-    return await import('uuid');
 }
 
 // These are internal but we want to load them lazily
