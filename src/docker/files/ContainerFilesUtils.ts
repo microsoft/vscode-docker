@@ -109,7 +109,7 @@ function parseWindowsType(dirOrSize: string): DirectoryItemType {
 }
 
 function parseWindowsDirectoryItems(input: string, parentPath: string): DirectoryItem[] {
-    const expression = /^(?<date>\d{1,2}\/\d{1,2}\/\d{4})\s+(?<time>\d{1,2}:\d{1,2}( (AM|PM))?)\s+(?<dirOrSize><DIR>|<SYMLINKD>|\d+)\s+(?<name>.*)$/gm;
+    const expression = /^(?<date>\d{1,2}(\/|\.)\d{1,2}(\/|\.)\d{4})\s+(?<time>\d{1,2}:\d{1,2}( (AM|PM))?)\s+(?<dirOrSize><DIR>|<SYMLINKD>|\d+)\s+(?<name>.*)$/gm;
 
     let match = expression.exec(input);
 
