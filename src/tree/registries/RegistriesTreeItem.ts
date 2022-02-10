@@ -51,14 +51,14 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             const children: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 this._cachedProviders,
                 'invalidRegistryProvider',
-                cachedProvider => {
+                async cachedProvider => {
                     const provider = getRegistryProviders().find(rp => rp.id === cachedProvider.id);
                     if (!provider) {
                         throw new Error(localize('vscode-docker.tree.registries.noProvider', 'Failed to find registry provider with id "{0}".', cachedProvider.id));
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    return this.initTreeItem(provider.treeItemFactory(parent, cachedProvider));
+                    return this.initTreeItem(await Promise.resolve(provider.treeItemFactory(parent, cachedProvider)));
                 },
                 cachedInfo => cachedInfo.id
             );

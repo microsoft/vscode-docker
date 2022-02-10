@@ -7,10 +7,9 @@ import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptSt
 import { DockerContext } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { getAzExtAzureUtils } from '../../utils/lazyPackages';
+import { getAzActTreeItem, getAzExtAzureUtils } from '../../utils/lazyPackages';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
 import { RegistryApi } from '../registries/all/RegistryApi';
-import { AzureAccountTreeItem } from '../registries/azure/AzureAccountTreeItem';
 import { azureRegistryProviderId } from '../registries/azure/azureRegistryProvider';
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -103,8 +102,10 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
             new ContextNameStep(),
         ];
 
+        const azActTreeItem = await getAzActTreeItem();
+
         // Create a temporary azure account tree item since Azure might not be connected
-        const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
+        const azureAccountTreeItem = new azActTreeItem.AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
 
         // Add a subscription prompt step (skipped if there is exactly one subscription)
         const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);

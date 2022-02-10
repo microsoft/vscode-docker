@@ -54,7 +54,7 @@ export interface IRegistryProvider {
     /**
      * The factory method for creating the root tree item
      */
-    treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): AzExtParentTreeItem & IRegistryProviderTreeItem;
+    treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): (AzExtParentTreeItem & IRegistryProviderTreeItem) | Promise<AzExtParentTreeItem & IRegistryProviderTreeItem>;
 
     /**
      * Method to call for persisting auth secrets

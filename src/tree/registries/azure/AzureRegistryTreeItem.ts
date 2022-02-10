@@ -15,7 +15,7 @@ import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeIt
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
-import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
+import type { SubscriptionTreeItem } from "./SubscriptionTreeItem"; // These are only dev-time imports so don't need to be lazy
 
 export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     public parent: SubscriptionTreeItem;

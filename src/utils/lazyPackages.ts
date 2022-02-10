@@ -21,6 +21,10 @@ export async function getStorageBlob(): Promise<typeof import('@azure/storage-bl
     return await import('@azure/storage-blob');
 }
 
+export async function getHandlebars(): Promise<typeof import('handlebars')> {
+    return await import('handlebars');
+}
+
 // This file is really most important for these next two functions, which ensure that the extension variables are registered before the package is used
 
 export async function getAzExtAzureUtils(): Promise<typeof import('@microsoft/vscode-azext-azureutils')> {
@@ -37,4 +41,22 @@ export async function getAzExtAppService(): Promise<typeof import('vscode-azurea
 
 export async function getUuid(): Promise<typeof import('uuid')> {
     return await import('uuid');
+}
+
+// These are internal but we want to load them lazily
+
+export async function getAzActTreeItem(): Promise<typeof import('../tree/registries/azure/AzureAccountTreeItem')> {
+    return await import('../tree/registries/azure/AzureAccountTreeItem');
+}
+
+export async function getAzSubTreeItem(): Promise<typeof import('../tree/registries/azure/SubscriptionTreeItem')> {
+    return await import('../tree/registries/azure/SubscriptionTreeItem');
+}
+
+export async function getDockerodeClient(): Promise<typeof import('../docker/DockerodeApiClient/DockerodeApiClient')> {
+    return await import('../docker/DockerodeApiClient/DockerodeApiClient');
+}
+
+export async function getDockerServeClient(): Promise<typeof import('../docker/DockerServeClient/DockerServeClient')> {
+    return await import('../docker/DockerServeClient/DockerServeClient');
 }

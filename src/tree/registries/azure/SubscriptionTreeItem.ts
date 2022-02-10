@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Registry as AcrRegistry, ContainerRegistryManagementClient } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
-import { SubscriptionTreeItemBase } from '@microsoft/vscode-azext-azureutils'; // TODO TODO TODO
+import { SubscriptionTreeItemBase } from '@microsoft/vscode-azext-azureutils'; // This can't be made lazy, so users of this class must be lazy
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, IActionContext, ICreateChildImplContext, ISubscriptionContext } from "@microsoft/vscode-azext-utils";
 import { window } from 'vscode';
 import { localize } from '../../../localize';
@@ -12,7 +12,7 @@ import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../utils/lazy
 import { nonNullProp } from '../../../utils/nonNull';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
-import { AzureAccountTreeItem } from './AzureAccountTreeItem';
+import type { AzureAccountTreeItem } from './AzureAccountTreeItem'; // These are only dev-time imports so don't need to be lazy
 import { AzureRegistryTreeItem } from './AzureRegistryTreeItem';
 import { AzureRegistryCreateStep } from './createWizard/AzureRegistryCreateStep';
 import { AzureRegistryNameStep } from './createWizard/AzureRegistryNameStep';

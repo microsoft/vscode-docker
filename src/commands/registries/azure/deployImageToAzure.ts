@@ -10,11 +10,10 @@ import type { IAppServiceWizardContext } from "vscode-azureappservice"; // These
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
-import { AzureAccountTreeItem } from '../../../tree/registries/azure/AzureAccountTreeItem';
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { getAzActTreeItem, getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { nonNullProp } from "../../../utils/nonNull";
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
@@ -33,6 +32,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
 
     const azExtAzureUtils = await getAzExtAzureUtils();
     const vscAzureAppService = await getAzExtAppService();
+    const azActTreeItem = await getAzActTreeItem();
 
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
@@ -41,7 +41,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     };
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
     // Create a temporary azure account tree item since Azure might not be connected
-    const azureAccountTreeItem = new AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
+    const azureAccountTreeItem = new azActTreeItem.AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
     const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
     if (subscriptionStep) {
         promptSteps.push(subscriptionStep);
