@@ -23,17 +23,11 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
     public childTypeLabel: string = 'registry';
     public parent: AzureAccountTreeItem;
 
-    private _nextLink: string | undefined;
-
     public constructor(parent: AzExtParentTreeItem, root: ISubscriptionContext, public readonly cachedProvider: ICachedRegistryProvider) {
         super(parent, root);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        if (clearCache) {
-            this._nextLink = undefined;
-        }
-
         const armContainerRegistry = await getArmContainerRegistry();
         const azExtAzureUtils = await getAzExtAzureUtils();
         const client: ContainerRegistryManagementClient = azExtAzureUtils.createAzureClient({ ...context, ...this.subscription }, armContainerRegistry.ContainerRegistryManagementClient);
@@ -48,7 +42,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return !!this._nextLink;
+        return false;
     }
 
     public async createChildImpl(context: ICreateChildImplContext): Promise<AzExtTreeItem> {
