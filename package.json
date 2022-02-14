@@ -3077,7 +3077,7 @@
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.5.0",
-        "@microsoft/compose-language-service": "^0.0.5-alpha",
+        "@microsoft/compose-language-service": "^0.1.0",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.8.0",
         "dockerode": "^3.2.1",
