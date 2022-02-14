@@ -3,8 +3,11 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { Survey } from './SurveyManager';
+
+const minimumOverallSessions = 10;
 
 export const survey3: Survey = {
     id: 'survey3',
@@ -18,5 +21,6 @@ export const survey3: Survey = {
 };
 
 async function isEligible(): Promise<boolean> {
-    return true;
+    const overallActivity = ext.activityMeasurementService.getActivityMeasurement('overall');
+    return overallActivity.totalSessions >= minimumOverallSessions;
 }
