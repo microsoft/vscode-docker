@@ -11,10 +11,10 @@ const minimumOverallSessions = 10;
 
 export const survey3: Survey = {
     id: 'survey3',
-    prompt: localize('vscode-docker.survey.survey3.prompt', 'How can we make the Docker extension better?'),
+    prompt: localize('vscode-docker.surveys.survey3.prompt', 'How can we make the Docker extension better?'),
     buttons: new Map<string, string | undefined>([
-        [localize('vscode-docker.survey.survey3.button.take', 'Take survey'), 'https://aka.ms/dockerextensionsurvey'],
-        [localize('vscode-docker.survey.survey3.button.never', 'Don\'t ask again'), undefined],
+        [localize('vscode-docker.surveys.survey3.button.take', 'Take survey'), 'https://aka.ms/dockerextensionsurvey'],
+        [localize('vscode-docker.surveys.survey3.button.never', 'Don\'t ask again'), undefined],
     ]),
     activationDelayMs: 60 * 1000,
     isEligible: isEligible,
