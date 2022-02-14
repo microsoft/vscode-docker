@@ -70,6 +70,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             targetPopulation = tas.TargetPopulation.Team;
         } else if (/alpha/ig.test(extensionVersion.value)) {
             targetPopulation = tas.TargetPopulation.Insiders;
+        } else if (/Insiders/ig.test(vscode.env.appName)) {
+            targetPopulation = tas.TargetPopulation.Insiders;
         } else {
             targetPopulation = tas.TargetPopulation.Public;
         }
