@@ -258,9 +258,9 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
     public async getImages(context: IActionContext, includeDangling: boolean = false, token?: CancellationToken): Promise<DockerImage[]> {
         const filters = {};
         if (!includeDangling) {
-            filters['dangling'] = ["false"];
+            filters['dangling'] = ['false'];
         }
-        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: filters }), token);
+        const images = await this.callWithErrorHandling(context, async () => this.dockerodeClient.listImages({ filters: JSON.stringify(filters) }), token);
         const result: DockerImage[] = [];
 
         for (const image of images) {
