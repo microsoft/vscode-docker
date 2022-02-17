@@ -119,7 +119,7 @@ export class PythonTaskHelper implements TaskHelper {
 
     private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
         if (!launcherFolder) {
-            return;
+            return [];
         }
 
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];

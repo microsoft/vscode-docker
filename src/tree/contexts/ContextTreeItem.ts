@@ -67,10 +67,12 @@ export class ContextTreeItem extends ToolTipTreeItem {
         return this._item.Current;
     }
 
-    public get iconPath(): ThemeIcon {
+    public get iconPath(): ThemeIcon | undefined {
         if (this._item.Current) {
             return new ThemeIcon('plug');
         }
+
+        return undefined;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
