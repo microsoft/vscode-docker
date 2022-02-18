@@ -107,6 +107,7 @@
     "vscode-docker.tasks.docker-compose.dockerCompose.up.scale": "The scale for each service.",
     "vscode-docker.tasks.docker-compose.dockerCompose.up.services": "A subset of services to start. Cannot be combined with `profiles`.",
     "vscode-docker.tasks.docker-compose.dockerCompose.up.profiles": "A subset of profiles to start. Cannot be combined with `services`.",
+    "vscode-docker.tasks.docker-compose.dockerCompose.up.projectName": "An alternative project name.",
     "vscode-docker.tasks.docker-compose.dockerCompose.up.customOptions": "Any other options to add to the `docker-compose up` command.",
     "vscode-docker.tasks.docker-compose.dockerCompose.down.description": "Options for the `docker-compose down` command.",
     "vscode-docker.tasks.docker-compose.dockerCompose.down.removeImages": "Images to remove.",

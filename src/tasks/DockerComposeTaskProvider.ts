@@ -90,6 +90,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 .withArrayArgs('-f', options.files)
                 .withNamedArg('--env-file', options.envFile)
                 .withArrayArgs('--profile', options.up.profiles)
+                .withNamedArg('--project-name', options.up.projectName)
                 .withArg('up')
                 .withFlagArg('--detach', !!options.up.detached)
                 .withFlagArg('--build', !!options.up.build)

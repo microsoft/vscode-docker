@@ -1385,6 +1385,10 @@
                                             "type": "string"
                                         }
                                     },
+                                    "projectName": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.projectName%"
+                                    },
                                     "customOptions": {
                                         "type": "string",
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.up.customOptions%"
@@ -1393,7 +1397,8 @@
                                 "not": {
                                     "required": [
                                         "services",
-                                        "profiles"
+                                        "profiles",
+                                        "projectName"
                                     ]
                                 }
                             },
