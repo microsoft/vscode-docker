@@ -85,7 +85,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                     new RelativePattern(dockerConfigFolder, dockerConfigFile),
                     true, // Don't expect file to be created (since we already verified its existence)
                     false, // Do expect file to change
-                    true // Don't expect file to be deleted (are they uninstalling?!)
+                    true // Don't expect file to be deleted (are they uninstalling?!), but if they do, then the tree view will get an ENOENT that it will replace with a nice "Is Docker running?" error message
                 );
                 this.configFileWatcher.onDidChange(async () => this.refresh(), this);
             }
