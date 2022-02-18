@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, TelemetryProperties } from "vscode-azureextensionui";
+import { IActionContext, IAzureQuickPickItem, TelemetryProperties } from "vscode-azureextensionui";
 import { DockerPort } from '../../docker/Containers';
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
@@ -43,9 +43,21 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     }
 
     const ports = node.ports ?? [];
-    const possiblePorts = ports.filter(port => port.PublicPort && port.PrivatePort) // Ports must be defined (not falsy)
+    const dupedPossiblePorts = ports.filter(port => port.PublicPort && port.PrivatePort) // Ports must be defined (not falsy)
         .filter(port => port.Type ?? 'tcp' === 'tcp') // Type must be undefined or tcp
         .filter(port => port.IP); // IP must be defined (not falsy)
+
+    // There can be multiple ports that are bound to localhost, so let's remove duplicates
+    const possiblePorts: DockerPort[] = Array.from(new Set(
+        // Type cleanup in order to dedupe properly
+        dupedPossiblePorts.map(port => {
+            return {
+                ...port,
+                Type: 'tcp', // Already established that it's either undefined or tcp, let's make it always tcp
+                IP: isLocalhostBinding(port.IP) ? 'localhost' : port.IP, // Turn any localhost IP bindings into "localhost"
+            };
+        })
+    ));
 
     telemetryProperties.possiblePorts = possiblePorts.map(port => port.PrivatePort).toString();
 
@@ -66,25 +78,37 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
 
     // Otherwise, ask the user which port to use...
     if (selectedPort === undefined) {
-        const items = possiblePorts.map(port => ({ label: port.PrivatePort.toString(), port }));
+        const items: IAzureQuickPickItem<DockerPort>[] = possiblePorts.map(port => (
+            {
+                label: port.PrivatePort.toString(),
+                description: port.IP,
+                data: port,
+            }
+        ));
 
         // Sort ports in ascending order...
-        items.sort((a, b) => a.port.PrivatePort - b.port.PrivatePort);
+        items.sort((a, b) => a.data.PrivatePort - b.data.PrivatePort);
 
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const item = await context.ui.showQuickPick(items, { stepName: 'port', placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') });
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 
-        selectedPort = item.port;
+        selectedPort = item.data;
     }
 
     telemetryProperties.selectedPort = selectedPort.PrivatePort.toString();
 
     const protocol = commonSslPorts.some(commonPort => commonPort === selectedPort.PrivatePort) ? 'https' : 'http';
-    const host = selectedPort.IP === '0.0.0.0' ? 'localhost' : selectedPort.IP;
-    const url = `${protocol}://${host}:${selectedPort.PublicPort}`;
+    const url = `${protocol}://${selectedPort.IP}:${selectedPort.PublicPort}`;
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
+}
+
+function isLocalhostBinding(ip: string): boolean {
+    return (
+        ip === '0.0.0.0' || ip === '::' || // IP is standard localhost binding (IPv4 or IPv6)
+        ip === '127.0.0.1' || ip === '::1' // IP is a loopback binding (IPv4 or IPv6)
+    );
 }
