@@ -12,7 +12,6 @@ export interface DockerComposeUpOptions {
         scale?: { [service: string]: number };
         services?: string[];
         profiles?: string[];
-        projectName?: string;
         customOptions?: string;
     };
     down?: never;
@@ -36,6 +35,8 @@ export interface DockerComposeUpAndDownOptions {
     envFiles?: string[];
 
     files?: string[];
+
+    projectName?: string;
 }
 
 export type DockerComposeOptions = (DockerComposeUpOptions | DockerComposeDownOptions) & DockerComposeUpAndDownOptions;
