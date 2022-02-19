@@ -115,7 +115,7 @@
     "vscode-docker.tasks.docker-compose.dockerCompose.envFiles.description": "(DEPRECATED) Use `envFile` instead.",
     "vscode-docker.tasks.docker-compose.dockerCompose.envFile.description": "File of environment variables read in and applied to the Docker containers.",
     "vscode-docker.tasks.docker-compose.dockerCompose.files.description": "The docker-compose files to include, in order.",
-    "vscode-docker.tasks.docker-compose.dockerCompose.projectName": "Override the default project name. If using an alternative project name when composing up, the same project name must be specified when composing down.",
+    "vscode-docker.tasks.docker-compose.dockerCompose.projectName": "Alternate project name to use when naming and labeling Docker objects. If using an alternate project name when composing up, the same project name must be specified when composing down.",
     "vscode-docker.config.docker.promptForRegistryWhenPushingImages": "Prompt for registry selection if the image is not explicitly tagged.",
     "vscode-docker.config.template.build.template": "The command template.",
     "vscode-docker.config.template.build.label": "The label displayed to the user.",
