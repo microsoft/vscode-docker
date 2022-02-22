@@ -35,6 +35,8 @@ export interface DockerComposeUpAndDownOptions {
     envFiles?: string[];
 
     files?: string[];
+
+    projectName?: string;
 }
 
 export type DockerComposeOptions = (DockerComposeUpOptions | DockerComposeDownOptions) & DockerComposeUpAndDownOptions;
