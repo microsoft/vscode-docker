@@ -430,6 +430,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             return result;
         } catch {
             // Best effort
+            return false;
         }
     }
 

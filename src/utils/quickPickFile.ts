@@ -83,6 +83,8 @@ async function quickPickFileItem(context: IActionContext, items: Item[], message
             return await context.ui.showQuickPick<Item>(items, { placeHolder: message });
         }
     }
+
+    return undefined;
 }
 
 export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
