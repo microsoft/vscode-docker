@@ -1439,7 +1439,7 @@
                             },
                             "projectName": {
                                 "type": "string",
-                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.projectName%"
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.projectName.description%"
                             }
                         },
                         "oneOf": [
