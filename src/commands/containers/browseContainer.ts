@@ -31,6 +31,29 @@ const commonSslPorts = [
     5001    // (.NET Core) ASP.NET SSL
 ];
 
+interface BrowsablePort {
+    host: string;
+    hostPort: number;
+    containerPort: number;
+}
+
+function toBrowsablePort(port: DockerPort): BrowsablePort {
+    let host: string = port.IP;
+    if (
+        host === '0.0.0.0' || host === '::' || // IP is standard binding (IPv4 or IPv6)
+        host === '127.0.0.1' || host === '::1' // IP is a common loopback binding (IPv4 or IPv6)
+    ) {
+        // Remap the above to 'localhost' since that's what we'll want to launch
+        host = 'localhost';
+    }
+
+    return {
+        host: host,
+        hostPort: port.PublicPort,
+        containerPort: port.PrivatePort,
+    };
+}
+
 export async function browseContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
@@ -47,47 +70,41 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         .filter(port => port.Type ?? 'tcp' === 'tcp') // Type must be undefined or tcp
         .filter(port => port.IP); // IP must be defined (not falsy)
 
-    // There can be multiple ports that are bound to localhost, so let's remove duplicates
-    const possiblePorts: DockerPort[] = Array.from(new Set(
+    // There can be multiple ports that are bound to localhost, so let's remove duplicates by sending to and from a Set
+    const browsablePorts: BrowsablePort[] = Array.from(new Set(
         // Type cleanup in order to dedupe properly
-        dupedPossiblePorts.map(port => {
-            return {
-                ...port,
-                Type: 'tcp', // Already established that it's either undefined or tcp, let's make it always tcp
-                IP: isLocalhostBinding(port.IP) ? 'localhost' : port.IP, // Turn any localhost IP bindings into "localhost"
-            };
-        })
+        dupedPossiblePorts.map(toBrowsablePort)
     ));
 
-    telemetryProperties.possiblePorts = possiblePorts.map(port => port.PrivatePort).toString();
+    telemetryProperties.possiblePorts = browsablePorts.map(port => port.containerPort).toString();
 
-    if (possiblePorts.length === 0) {
+    if (browsablePorts.length === 0) {
         void context.ui.showWarningMessage(localize('vscode-docker.commands.containers.browseContainer.noPorts', 'No valid ports are available.'));
         return;
     }
 
-    let selectedPort: DockerPort;
-    if (possiblePorts.length === 1) {
+    let selectedPort: BrowsablePort;
+    if (browsablePorts.length === 1) {
         // If there's just a single port, assume that one...
-        selectedPort = possiblePorts[0];
+        selectedPort = browsablePorts[0];
     } else {
         // Otherwise, prefer a common port (in order of preference)...
-        const preferredCommonPrivatePort: number | undefined = commonWebPorts.find(commonPort => possiblePorts.some(possiblePort => commonPort === possiblePort.PrivatePort));
-        selectedPort = possiblePorts.find(possiblePort => possiblePort.PrivatePort === preferredCommonPrivatePort);
+        const preferredCommonPrivatePort: number | undefined = commonWebPorts.find(commonPort => browsablePorts.some(browsablePort => commonPort === browsablePort.containerPort));
+        selectedPort = browsablePorts.find(browsablePort => browsablePort.containerPort === preferredCommonPrivatePort);
     }
 
     // Otherwise, ask the user which port to use...
     if (selectedPort === undefined) {
-        const items: IAzureQuickPickItem<DockerPort>[] = possiblePorts.map(port => (
+        const items: IAzureQuickPickItem<BrowsablePort>[] = browsablePorts.map(port => (
             {
-                label: port.PrivatePort.toString(),
-                description: port.IP,
+                label: port.containerPort.toString(),
+                description: port.host,
                 data: port,
             }
         ));
 
         // Sort ports in ascending order...
-        items.sort((a, b) => a.data.PrivatePort - b.data.PrivatePort);
+        items.sort((a, b) => a.data.containerPort - b.data.containerPort);
 
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         const item = await context.ui.showQuickPick(items, { stepName: 'port', placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') });
@@ -97,18 +114,11 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         selectedPort = item.data;
     }
 
-    telemetryProperties.selectedPort = selectedPort.PrivatePort.toString();
+    telemetryProperties.selectedPort = selectedPort.containerPort.toString();
 
-    const protocol = commonSslPorts.some(commonPort => commonPort === selectedPort.PrivatePort) ? 'https' : 'http';
-    const url = `${protocol}://${selectedPort.IP}:${selectedPort.PublicPort}`;
+    const protocol = commonSslPorts.some(commonPort => commonPort === selectedPort.containerPort) ? 'https' : 'http';
+    const url = `${protocol}://${selectedPort.host}:${selectedPort.host}`;
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
-}
-
-function isLocalhostBinding(ip: string): boolean {
-    return (
-        ip === '0.0.0.0' || ip === '::' || // IP is standard localhost binding (IPv4 or IPv6)
-        ip === '127.0.0.1' || ip === '::1' // IP is a loopback binding (IPv4 or IPv6)
-    );
 }
