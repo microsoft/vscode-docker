@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, GenericTreeItem, parseError } from "@microsoft/vscode-azext-utils";
 import { ThemeColor, ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, GenericTreeItem, parseError } from "vscode-azureextensionui";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
 import { IRegistryProvider } from "./IRegistryProvider";

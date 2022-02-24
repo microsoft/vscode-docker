@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext, registerEvent } from 'vscode-azureextensionui';
+import { IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
 
 type docHandler = (context: IActionContext, doc: vscode.TextDocument) => void;

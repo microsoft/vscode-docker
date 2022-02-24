@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
@@ -14,7 +14,7 @@ import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { containerProperties, ContainerProperty } from "./ContainerProperties";
+import { ContainerProperty, containerProperties } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = DockerContainer & {

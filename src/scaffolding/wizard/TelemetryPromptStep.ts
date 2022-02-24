@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IActionContext, IWizardOptions } from 'vscode-azureextensionui';
+import { AzureWizardPromptStep, IActionContext, IWizardOptions } from '@microsoft/vscode-azext-utils';
 
 export abstract class TelemetryPromptStep<T extends IActionContext> extends AzureWizardPromptStep<T> {
     public async getSubWizard(wizardContext: T): Promise<IWizardOptions<T> | undefined> {

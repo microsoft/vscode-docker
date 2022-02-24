@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureWizardPromptStep } from '@microsoft/vscode-azext-utils';
 import { InputBoxOptions } from 'vscode';
-import { AzureWizardPromptStep } from 'vscode-azureextensionui';
 import { localize } from '../../../localize';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 

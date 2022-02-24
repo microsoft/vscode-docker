@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { execAsync } from '../../utils/spawnAsync';

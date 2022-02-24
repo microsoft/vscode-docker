@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
-import { IActionContext } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';

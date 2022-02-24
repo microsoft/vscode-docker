@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling } from 'vscode-azureextensionui';
+import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
 import { DockerOSType } from '../Common';
 import { DockerApiClient } from '../DockerApiClient';

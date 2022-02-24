@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as cp from 'child_process';
+import { UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, Disposable } from 'vscode';
-import { UserCancelledError } from 'vscode-azureextensionui';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
 import { isMac } from './osUtils';
+import { localize } from '../localize';
 
 const DEFAULT_BUFFER_SIZE = 10 * 1024; // The default Node.js `exec` buffer size is 1 MB, our actual usage is far less
 

@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import { ClientCapabilities, StaticFeature } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
-import { DocumentSettings, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsNotification, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
+import { DocumentSettings, DocumentSettingsNotification, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
 
 /**
  * This class implements functionality to allow the language server to request information about an open document (including tab size and line endings), and also

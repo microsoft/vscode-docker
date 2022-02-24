@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
+import { AzureWizardExecuteStep } from '@microsoft/vscode-azext-utils';
 import { Progress } from 'vscode';
-import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider } from '../../debugging/DockerDebugScaffoldingProvider';
 import { localize } from '../../localize';

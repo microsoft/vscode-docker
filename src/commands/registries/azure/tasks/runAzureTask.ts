@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { TaskRunRequest } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { window } from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
 import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
 import { AzureTaskTreeItem } from "../../../../tree/registries/azure/AzureTaskTreeItem";
@@ -16,8 +16,8 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     }
 
     const registryTI = node.parent.parent;
-    const runRequest: AcrModels.TaskRunRequest = { type: 'TaskRunRequest', taskId: node.id };
-    const run = await (await registryTI.getClient(context)).registries.scheduleRun(registryTI.resourceGroup, registryTI.registryName, runRequest);
+    const runRequest: TaskRunRequest = { type: 'TaskRunRequest', taskId: node.id };
+    const run = await (await registryTI.getClient(context)).registries.beginScheduleRunAndWait(registryTI.resourceGroup, registryTI.registryName, runRequest);
     await node.parent.refresh(context);
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */

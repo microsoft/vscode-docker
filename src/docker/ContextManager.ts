@@ -3,15 +3,14 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExecOptions } from 'child_process';
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { commands, Event, EventEmitter, window, workspace } from 'vscode';
-import { Disposable } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { Disposable, Event, EventEmitter, commands, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
@@ -20,6 +19,7 @@ import { execAsync, spawnAsync } from '../utils/spawnAsync';
 import { dockerExePath } from '../utils/dockerExePathProvider';
 import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClient';
+import { getDockerodeClient, getDockerServeClient } from '../utils/lazyPackages';
 
 // CONSIDER
 // Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
@@ -145,13 +145,13 @@ export class DockerContextManager implements ContextManager, Disposable {
                 this.setVsCodeContext('vscode-docker:aciContext', true);
                 this.setVsCodeContext('vscode-docker:newSdkContext', true);
 
-                const dsc = await import('./DockerServeClient/DockerServeClient');
+                const dsc = await getDockerServeClient();
                 ext.dockerClient = new dsc.DockerServeClient(currentContext);
             } else {
                 this.setVsCodeContext('vscode-docker:aciContext', false);
                 this.setVsCodeContext('vscode-docker:newSdkContext', false);
 
-                const dockerode = await import('./DockerodeApiClient/DockerodeApiClient');
+                const dockerode = await getDockerodeClient();
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
             }
 
@@ -320,7 +320,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     private async tryGetContextsFromApi(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<Promise<DockerContext[] | undefined>> {
         try {
-            const dsc = await import('./DockerServeClient/DockerServeClient');
+            const dsc = await getDockerServeClient();
             const client = new dsc.DockerServeClient({ Name: maybeFixedContextName } as DockerContext); // Context name is the only thing used by DockerServeClient's constructor
             const result = await client.getContexts(actionContext);
             this.setHostSourceFromContextList(actionContext, result, 'api');

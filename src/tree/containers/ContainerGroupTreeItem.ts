@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
-import { AzExtTreeItem } from "vscode-azureextensionui";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";

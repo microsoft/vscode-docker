@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IConnectRegistryWizardOptions } from './IConnectRegistryWizardOptions';
 

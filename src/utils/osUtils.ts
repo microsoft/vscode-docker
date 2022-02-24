@@ -6,7 +6,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { DockerOSType } from '../docker/Common';
 import { ext } from '../extensionVariables';
 

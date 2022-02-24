@@ -5,7 +5,7 @@
 
 import * as Dockerode from 'dockerode';
 import { Socket } from 'net';
-import { CancellationTokenSource, env, MessageItem, Uri, window, workspace } from 'vscode';
+import { CancellationTokenSource, MessageItem, Uri, env, window, workspace } from 'vscode';
 import { localize } from '../../localize';
 import { addDockerSettingsToEnv } from '../../utils/addDockerSettingsToEnv';
 import { cloneObject } from '../../utils/cloneObject';

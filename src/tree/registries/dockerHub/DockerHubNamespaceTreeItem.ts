@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
-import { dockerHubUrl, PAGE_SIZE } from "../../../constants";
+import { AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { PAGE_SIZE, dockerHubUrl } from "../../../constants";
 import { RequestLike } from "../../../utils/httpRequest";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItemBase";

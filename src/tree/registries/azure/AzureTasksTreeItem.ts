@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { Task } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
+import { getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { OpenUrlTreeItem } from "../../OpenUrlTreeItem";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
@@ -32,11 +33,10 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
 
         const registryTI = this.parent;
 
-        const taskListResult: AcrModels.TaskListResult = this._nextLink === undefined ?
-            await (await registryTI.getClient(context)).tasks.list(registryTI.resourceGroup, registryTI.registryName) :
-            await (await registryTI.getClient(context)).tasks.listNext(this._nextLink);
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        const registryClient = await registryTI.getClient(context);
 
-        this._nextLink = taskListResult.nextLink;
+        const taskListResult: Task[] = await azExtAzureUtils.uiUtils.listAllIterator(registryClient.tasks.list(registryTI.resourceGroup, registryTI.registryName));
 
         if (clearCache && taskListResult.length === 0) {
             return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')];

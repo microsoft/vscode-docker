@@ -5,7 +5,7 @@
 
 import { URL } from 'url';
 import { ociClientId } from '../../../constants';
-import { bearerAuthHeader, getWwwAuthenticateContext, HttpErrorResponse, httpRequest, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
+import { HttpErrorResponse, IOAuthContext, RequestLike, RequestOptionsLike, bearerAuthHeader, getWwwAuthenticateContext, httpRequest } from '../../../utils/httpRequest';
 
 export interface ImageRegistry {
     registryMatch: RegExp;
