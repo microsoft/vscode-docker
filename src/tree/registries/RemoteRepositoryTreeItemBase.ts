@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem } from "vscode-azureextensionui";
 import { RequestLike } from "../../utils/httpRequest";
 import { IRepositoryAuthTreeItem } from "../../utils/registryRequestUtils";
 import { getRegistryContextValue, repositorySuffix } from "./registryContextValues";

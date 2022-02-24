@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { DockerOSType } from '../../../docker/Common';
 import { DockerUri } from '../../../docker/files/DockerUri';
 import { localize } from '../../../localize';

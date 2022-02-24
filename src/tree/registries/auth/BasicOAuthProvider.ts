@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { basicAuthHeader, bearerAuthHeader, httpRequest, HttpResponse, IOAuthContext, RequestLike, RequestOptionsLike } from '../../../utils/httpRequest';
+import { HttpResponse, IOAuthContext, RequestLike, RequestOptionsLike, basicAuthHeader, bearerAuthHeader, httpRequest } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { getRegistryPassword } from '../registryPasswords';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';

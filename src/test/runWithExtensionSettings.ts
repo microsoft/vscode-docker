@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationTarget, workspace, WorkspaceConfiguration } from "vscode";
+import { ConfigurationTarget, WorkspaceConfiguration, workspace } from "vscode";
 import { configPrefix } from "../constants";
 
 export async function runWithExtensionSettings<TCallback>(newValues: { [key: string]: unknown }, callback: () => Promise<TCallback>): Promise<TCallback> {

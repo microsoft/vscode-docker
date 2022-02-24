@@ -7,7 +7,7 @@ import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { ShellQuoting } from 'vscode';
 
 suite('(unit) utils/CommandLineBuilder', () => {
-    function testBuilder(name: string, builderInitializer: (CommandLineBuilder) => CommandLineBuilder, expected: string, message: string) {
+    function testBuilder(name: string, builderInitializer: (builder: CommandLineBuilder) => CommandLineBuilder, expected: string, message: string) {
         test(name, () => {
             let builder = CommandLineBuilder.create();
 

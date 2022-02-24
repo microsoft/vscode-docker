@@ -7,7 +7,7 @@ import * as path from 'path';
 import { NodeTaskHelper } from '../../tasks/node/NodeTaskHelper';
 import { inferPackageName, readPackage } from '../../utils/nodeUtils';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions, resolveDockerServerReadyAction } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, ResolvedDebugConfigurationOptions, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DebugConfigurationBase, DockerDebugConfigurationBase } from '../DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { NodeScaffoldingOptions } from '../DockerDebugScaffoldingProvider';

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import { window, workspace, WorkspaceFolder } from 'vscode';
+import { WorkspaceFolder, window, workspace } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 
 const variableMatcher: RegExp = /\$\{[a-z.\-_:]+\}/ig;

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { WebSiteManagementClient, WebSiteManagementModels } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
-import type { Site } from '@azure/arm-appservice/esm/models'; // These are only dev-time imports so don't need to be lazy
+import type { WebSiteManagementClient, Site, SiteConfig, NameValuePair } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
+import type { CustomLocation } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
+import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
+import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import { Progress } from "vscode";
-import type { CustomLocation } from "vscode-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzExtLocation, AzureWizardExecuteStep, createAzureClient, LocationListStep } from "vscode-azureextensionui";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
@@ -17,6 +17,7 @@ import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/docker
 import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { getArmAppSvc, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
@@ -32,11 +33,14 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         ext.outputChannel.appendLine(creatingNewApp);
         progress.report({ message: creatingNewApp });
         const siteConfig = await this.getNewSiteConfig(context);
-        const location: AzExtLocation = await LocationListStep.getLocation(context);
+
+        const azExtAzureUtils = await getAzExtAzureUtils();
+
+        const location: AzExtLocation = await azExtAzureUtils.LocationListStep.getLocation(context);
         const locationName: string = nonNullProp(location, 'name');
 
-        const armAppService = await import('@azure/arm-appservice');
-        const client: WebSiteManagementClient = createAzureClient(context, armAppService.WebSiteManagementClient);
+        const armAppService = await getArmAppSvc();
+        const client: WebSiteManagementClient = azExtAzureUtils.createAzureClient(context, armAppService.WebSiteManagementClient);
         const siteEnvelope: Site = {
             name: context.newSiteName,
             location: locationName,
@@ -54,16 +58,16 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             };
         }
 
-        context.site = await client.webApps.createOrUpdate(nonNullValueAndProp(context.resourceGroup, 'name'), nonNullProp(context, 'newSiteName'), siteEnvelope);
+        context.site = await client.webApps.beginCreateOrUpdateAndWait(nonNullValueAndProp(context.resourceGroup, 'name'), nonNullProp(context, 'newSiteName'), siteEnvelope);
     }
 
-    private async getNewSiteConfig(context: IAppServiceContainerWizardContext): Promise<WebSiteManagementModels.SiteConfig> {
+    private async getNewSiteConfig(context: IAppServiceContainerWizardContext): Promise<SiteConfig> {
         const registryTI: RegistryTreeItemBase = this.node.parent.parent;
 
         let username: string | undefined;
         let password: string | undefined;
         let registryUrl: string | undefined;
-        const appSettings: WebSiteManagementModels.NameValuePair[] = [];
+        const appSettings: NameValuePair[] = [];
 
         // Scenarios:
         // ACR -> App Service, NOT Arc App Service. Use managed service identity.
@@ -129,37 +133,8 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         };
     }
 
-    private async addCustomLocationProperties(site: Site, customLocation: CustomLocation): Promise<void> {
-        const armAppService = await import('@azure/arm-appservice');
-
-        // The type Site coming from package azure/arm-appservice doesn't have the extendedLocation property,
-        // which is needed for custom location. Once this property is added to the type Site, the following
-        // statement that defines the extendedLocation on Site type can be removed.
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        armAppService.WebSiteManagementMappers.Site.type.modelProperties!.extendedLocation = {
-            serializedName: 'extendedLocation',
-            type: {
-                name: "Composite",
-                modelProperties: {
-                    name: {
-                        serializedName: "name",
-                        type: {
-                            name: "String"
-                        }
-                    },
-                    type: {
-                        serializedName: "type",
-                        type: {
-                            name: "String"
-                        }
-                    }
-                }
-            }
-        };
-
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        (<any>site).extendedLocation = { name: customLocation.id, type: 'customLocation' };
+    private addCustomLocationProperties(site: Site, customLocation: CustomLocation): void {
+        site.extendedLocation = { name: customLocation.id, type: 'customLocation' };
     }
 
     public shouldExecute(context: IAppServiceContainerWizardContext): boolean {

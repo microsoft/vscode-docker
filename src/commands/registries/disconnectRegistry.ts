@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, InvalidTreeItem } from "vscode-azureextensionui";
+import { IActionContext, InvalidTreeItem } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../extensionVariables";
 import { ICachedRegistryProvider } from "../../tree/registries/ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../../tree/registries/IRegistryProviderTreeItem";

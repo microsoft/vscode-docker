@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, IActionContext } from "vscode-azureextensionui";
 import { defaultContextNames } from "../../docker/ContextManager";
 import { DockerContext, DockerContextInspection } from "../../docker/Contexts";
 import { ext } from "../../extensionVariables";
@@ -67,10 +67,12 @@ export class ContextTreeItem extends ToolTipTreeItem {
         return this._item.Current;
     }
 
-    public get iconPath(): ThemeIcon {
+    public get iconPath(): ThemeIcon | undefined {
         if (this._item.Current) {
             return new ThemeIcon('plug');
         }
+
+        return undefined;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {

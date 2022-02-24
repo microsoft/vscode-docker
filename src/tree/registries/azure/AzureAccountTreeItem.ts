@@ -3,13 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureAccountTreeItemBase } from "@microsoft/vscode-azext-azureutils"; // This can't be made lazy, so users of this class must be lazy
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, ISubscriptionContext } from "@microsoft/vscode-azext-utils";
 import { Disposable } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureAccountTreeItemBase, IActionContext, ISubscriptionContext } from "vscode-azureextensionui";
 import { AzureAccountExtensionListener } from "../../../utils/AzureAccountExtensionListener";
+import { getAzSubTreeItem } from "../../../utils/lazyPackages";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
 import { getRegistryContextValue, registryProviderSuffix } from "../registryContextValues";
-import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
+import type { SubscriptionTreeItem } from "./SubscriptionTreeItem";
 
 export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IRegistryProviderTreeItem {
     public constructor(parent: AzExtParentTreeItem, public readonly cachedProvider: ICachedRegistryProvider) {
@@ -17,8 +19,9 @@ export class AzureAccountTreeItem extends AzureAccountTreeItemBase implements IR
         this.contextValue = getRegistryContextValue(this, registryProviderSuffix);
     }
 
-    public createSubscriptionTreeItem(subContext: ISubscriptionContext): SubscriptionTreeItem {
-        return new SubscriptionTreeItem(this, subContext, this.cachedProvider);
+    public async createSubscriptionTreeItem(subContext: ISubscriptionContext): Promise<SubscriptionTreeItem> {
+        const azSubTreeItem = await getAzSubTreeItem();
+        return new azSubTreeItem.SubscriptionTreeItem(this, subContext, this.cachedProvider);
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {

@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
+import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../../extensionVariables';
 import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
@@ -20,6 +20,7 @@ import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../.
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
 import { bufferToString } from "../../../../utils/spawnAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
+import { getStorageBlob } from '../../../../utils/lazyPackages';
 
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
@@ -42,8 +43,8 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
 
     const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
 
-    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrModels.OS>>{ label: item, data: item });
-    const osType: AcrModels.OS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
+    const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });
+    const osType: AcrOS = (await context.ui.showQuickPick(osPick, { placeHolder: localize('vscode-docker.commands.registries.azure.tasks.selectOs', 'Select image base OS') })).data;
 
     const tarFilePath: string = getTempSourceArchivePath();
 
@@ -54,7 +55,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
 
-        let runRequest: AcrModels.DockerBuildRequest | AcrModels.FileTaskRunRequest;
+        let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
         if (requestType === 'DockerBuildRequest') {
             runRequest = {
                 type: requestType,
@@ -76,7 +77,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Schedule the run and Clean up.
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
-        const run = await (await node.getClient(context)).registries.scheduleRun(node.resourceGroup, node.registryName, runRequest);
+        const run = await (await node.getClient(context)).registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
         void streamLogs(context, node, run);
@@ -129,7 +130,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
     const uploadUrl: string = sourceUploadLocation.uploadUrl;
     const relativePath: string = sourceUploadLocation.relativePath;
 
-    const storageBlob = await import('@azure/storage-blob');
+    const storageBlob = await getStorageBlob();
     const blobClient = new storageBlob.BlockBlobClient(uploadUrl);
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.creatingBlockBlob', '   Creating block blob'));
     await blobClient.uploadFile(tarFilePath);
@@ -139,10 +140,10 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
-async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrModels.Run): Promise<void> {
+async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrRun): Promise<void> {
     const result = await (await node.getClient(context)).runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
 
-    const storageBlob = await import('@azure/storage-blob');
+    const storageBlob = await getStorageBlob();
     const blobClient = new storageBlob.BlobClient(nonNullProp(result, 'logLink'));
 
     // Start streaming the response to the output channel

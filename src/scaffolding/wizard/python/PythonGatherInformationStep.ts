@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { inferPythonArgs, PythonDefaultDebugPort, PythonDefaultPorts } from '../../../utils/pythonUtils';
+import { PythonDefaultDebugPort, PythonDefaultPorts, inferPythonArgs } from '../../../utils/pythonUtils';
 import { GatherInformationStep } from '../GatherInformationStep';
 import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
 

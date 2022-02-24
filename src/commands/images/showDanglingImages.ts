@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { IActionContext } from 'vscode-azureextensionui';
 
 export const danglingImagesMementoKey = 'vscode-docker.images.showDanglingImages';
 const danglingImagesContextKey = 'vscode-docker:danglingShown';

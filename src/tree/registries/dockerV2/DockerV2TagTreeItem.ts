@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, parseError, UserCancelledError } from 'vscode-azureextensionui';
+import { IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
 import { registryRequest } from '../../../utils/registryRequestUtils';
 import { RemoteTagTreeItem } from '../RemoteTagTreeItem';
 

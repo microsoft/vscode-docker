@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ISubscriptionContext } from 'vscode-azureextensionui';
+import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { acquireAcrAccessToken, acquireAcrRefreshToken } from '../../../utils/azureUtils';
-import { bearerAuthHeader, IOAuthContext, RequestLike } from '../../../utils/httpRequest';
+import { IOAuthContext, RequestLike, bearerAuthHeader } from '../../../utils/httpRequest';
 import { ICachedRegistryProvider } from '../ICachedRegistryProvider';
 import { IDockerCliCredentials } from '../RegistryTreeItemBase';
 import { IAuthProvider } from './IAuthProvider';
