@@ -9,7 +9,7 @@ import * as path from 'path';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { Disposable, Event, EventEmitter, commands, window, workspace } from 'vscode';
+import { commands, Disposable, Event, EventEmitter, FileSystemWatcher, RelativePattern, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
