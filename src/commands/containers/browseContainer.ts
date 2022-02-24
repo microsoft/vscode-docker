@@ -54,6 +54,22 @@ function toBrowsablePort(port: DockerPort): BrowsablePort {
     };
 }
 
+function dedupeBrowsablePorts(browsablePorts: BrowsablePort[]): BrowsablePort[] {
+    const results: BrowsablePort[] = [];
+
+    for (const browsablePort of browsablePorts) {
+        // Dedupe based on host and *container* port. If both are the same, it won't be added. The host port is ignored,
+        // because when asking the user we present the *container* port, since the host port is often random.
+        if (results.some(p => p.host === browsablePort.host && p.containerPort === browsablePort.containerPort)) {
+            continue;
+        }
+
+        results.push(browsablePort);
+    }
+
+    return results;
+}
+
 export async function browseContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     const telemetryProperties = <BrowseTelemetryProperties>context.telemetry.properties;
 
@@ -71,10 +87,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         .filter(port => port.IP); // IP must be defined (not falsy)
 
     // There can be multiple ports that are bound to localhost, so let's remove duplicates by sending to and from a Set
-    const browsablePorts: BrowsablePort[] = Array.from(new Set(
-        // Type cleanup in order to dedupe properly
-        dupedPossiblePorts.map(toBrowsablePort)
-    ));
+    const browsablePorts: BrowsablePort[] = dedupeBrowsablePorts(dupedPossiblePorts.map(toBrowsablePort));
 
     telemetryProperties.possiblePorts = browsablePorts.map(port => port.containerPort).toString();
 
@@ -98,7 +111,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         const items: IAzureQuickPickItem<BrowsablePort>[] = browsablePorts.map(port => (
             {
                 label: port.containerPort.toString(),
-                description: port.host,
+                description: `${port.host}:${port.hostPort}`,
                 data: port,
             }
         ));
@@ -117,7 +130,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     telemetryProperties.selectedPort = selectedPort.containerPort.toString();
 
     const protocol = commonSslPorts.some(commonPort => commonPort === selectedPort.containerPort) ? 'https' : 'http';
-    const url = `${protocol}://${selectedPort.host}:${selectedPort.host}`;
+    const url = `${protocol}://${selectedPort.host}:${selectedPort.hostPort}`;
 
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     vscode.env.openExternal(vscode.Uri.parse(url));
