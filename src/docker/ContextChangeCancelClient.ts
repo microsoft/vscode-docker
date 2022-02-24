@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, Disposable } from 'vscode';
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
-import { CancellationPromiseSource, getCancelPromise, TimeoutPromiseSource } from '../utils/promiseUtils';
+import { CancellationPromiseSource, TimeoutPromiseSource, getCancelPromise } from '../utils/promiseUtils';
 
 export abstract class ContextChangeCancelClient implements Disposable {
     protected contextChangeCps: CancellationPromiseSource = new CancellationPromiseSource();

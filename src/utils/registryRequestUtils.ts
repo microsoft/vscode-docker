@@ -5,7 +5,7 @@
 
 import { URL } from "url";
 import { ociClientId } from "../constants";
-import { ErrorHandling, httpRequest, RequestLike, RequestOptionsLike, ResponseLike } from './httpRequest';
+import { ErrorHandling, RequestLike, RequestOptionsLike, ResponseLike, httpRequest } from './httpRequest';
 
 export function getNextLinkFromHeaders(response: IRegistryRequestResponse<unknown>): string | undefined {
     const linkHeader: string | undefined = response.headers.get('link') as string;

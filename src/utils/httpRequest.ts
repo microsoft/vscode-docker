@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
+import { Request, RequestInit, Response, default as fetch } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { localize } from '../localize';
 
@@ -90,7 +90,7 @@ export class HttpErrorResponse extends Error {
         super(localize('vscode-docker.utils.httpRequest', 'Request to {0} failed with status {1}: {2}', response.url, response.status, response.statusText));
     }
 
-    // This method lets parseError from vscode-azureextensionui get the HTTP status code as the error code
+    // This method lets parseError from @microsoft/vscode-azext-utils get the HTTP status code as the error code
     public get code(): number {
         return this.response.status;
     }

@@ -6,8 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { MessageItem, Progress } from 'vscode';
-import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from 'vscode-azureextensionui';
+import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { getHandlebarsWithHelpers } from '../../utils/getHandlebarsWithHelpers';
@@ -20,7 +19,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
         super();
     }
 
-    public async execute(wizardContext: TWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
+    public async execute(wizardContext: TWizardContext, progress: vscode.Progress<{ message?: string; increment?: number; }>): Promise<void> {
         progress.report({ message: localize('vscode-docker.scaffold.scaffoldFileStep.progress', 'Creating \'{0}\'...', this.fileType) });
 
         const handlebars = await getHandlebarsWithHelpers();
@@ -143,10 +142,10 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
 
         // Otherwise, prompt
         const prompt = localize('vscode-docker.scaffold.scaffoldFileStep.prompt', 'Do you want to overwrite \'{0}\'?', this.fileType);
-        const overwrite: MessageItem = {
+        const overwrite: vscode.MessageItem = {
             title: localize('vscode-docker.scaffold.scaffoldFileStep.overwrite', 'Overwrite')
         };
-        const overwriteAll: MessageItem = {
+        const overwriteAll: vscode.MessageItem = {
             title: localize('vscode-docker.scaffold.scaffoldFileStep.overwriteAll', 'Overwrite All')
         };
 

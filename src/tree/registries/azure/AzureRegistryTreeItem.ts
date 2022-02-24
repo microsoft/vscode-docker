@@ -3,18 +3,19 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementClient, ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { ContainerRegistryManagementClient, Registry, RegistryListCredentialsResult } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { URL } from "url";
-import { AzExtTreeItem, createAzureClient, IActionContext } from "vscode-azureextensionui";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
+import { getArmContainerRegistry, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { nonNullProp } from "../../../utils/nonNull";
 import { getIconPath } from "../../getThemedIconPath";
-import { azureOAuthProvider, IAzureOAuthContext } from "../auth/AzureOAuthProvider";
+import { IAzureOAuthContext, azureOAuthProvider } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { AzureRepositoryTreeItem } from "./AzureRepositoryTreeItem";
 import { AzureTasksTreeItem } from "./AzureTasksTreeItem";
-import { SubscriptionTreeItem } from "./SubscriptionTreeItem";
+import type { SubscriptionTreeItem } from "./SubscriptionTreeItem"; // These are only dev-time imports so don't need to be lazy
 
 export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     public parent: SubscriptionTreeItem;
@@ -23,7 +24,7 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
 
     private _tasksTreeItem: AzureTasksTreeItem;
 
-    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly registry: AcrModels.Registry) {
+    public constructor(parent: SubscriptionTreeItem, cachedProvider: ICachedRegistryProvider, private readonly registry: Registry) {
         super(parent, cachedProvider, azureOAuthProvider);
         this._tasksTreeItem = new AzureTasksTreeItem(this);
         this.authContext = {
@@ -54,8 +55,9 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public async getClient(context: IActionContext): Promise<ContainerRegistryManagementClient> {
-        const armContainerRegistry = await import('@azure/arm-containerregistry');
-        return createAzureClient({ ...context, ...this.subscription }, armContainerRegistry.ContainerRegistryManagementClient);
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        const armContainerRegistry = await getArmContainerRegistry();
+        return azExtAzureUtils.createAzureClient({ ...context, ...this.subscription }, armContainerRegistry.ContainerRegistryManagementClient);
     }
 
     public get label(): string {
@@ -101,10 +103,10 @@ export class AzureRegistryTreeItem extends DockerV2RegistryTreeItemBase {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await (await this.getClient(context)).registries.deleteMethod(this.resourceGroup, this.registryName);
+        await (await this.getClient(context)).registries.beginDeleteAndWait(this.resourceGroup, this.registryName);
     }
 
-    public async tryGetAdminCredentials(context: IActionContext): Promise<AcrModels.RegistryListCredentialsResult | undefined> {
+    public async tryGetAdminCredentials(context: IActionContext): Promise<RegistryListCredentialsResult | undefined> {
         if (this.registry.adminUserEnabled) {
             return await (await this.getClient(context)).registries.listCredentials(this.resourceGroup, this.registryName);
         } else {

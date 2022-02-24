@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.20.0",
+    "version": "1.20.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -1438,6 +1438,10 @@
                                 "items": {
                                     "type": "string"
                                 }
+                            },
+                            "projectName": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.docker-compose.dockerCompose.projectName.description%"
                             }
                         },
                         "oneOf": [
@@ -3073,13 +3077,16 @@
         "webpack-cli": "^4.6.0"
     },
     "dependencies": {
-        "@azure/arm-appservice": "^6.1.0",
+        "@azure/arm-appservice": "^11.0.0",
         "@azure/arm-authorization": "^8.3.3",
-        "@azure/arm-containerregistry": "^9.0.0",
+        "@azure/arm-containerregistry": "^10.0.0",
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
         "@grpc/grpc-js": "^1.5.0",
         "@microsoft/compose-language-service": "^0.1.0",
+        "@microsoft/vscode-azext-azureappservice": "^0.1.3",
+        "@microsoft/vscode-azext-azureutils": "^0.1.1",
+        "@microsoft/vscode-azext-utils": "^0.1.0",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.8.0",
         "dockerode": "^3.2.1",
@@ -3087,13 +3094,11 @@
         "glob": "^7.1.6",
         "gradle-to-js": "^2.0.0",
         "handlebars": "^4.7.6",
-        "node-fetch": "^2.6.6",
+        "node-fetch": "^2.6.7",
         "semver": "^7.3.5",
         "tar": "^6.1.11",
         "tar-stream": "^2.2.0",
         "uuid": "^8.3.2",
-        "vscode-azureappservice": "^0.86.5",
-        "vscode-azureextensionui": "^0.49.1",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",

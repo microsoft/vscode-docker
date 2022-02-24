@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { workspace } from "vscode";
-import { IActionContext } from "vscode-azureextensionui";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
@@ -13,7 +13,7 @@ import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../L
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
-import { networkProperties, NetworkProperty } from "./NetworkProperties";
+import { NetworkProperty, networkProperties } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<DockerNetwork, NetworkProperty> {

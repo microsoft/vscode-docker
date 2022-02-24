@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem } from "@microsoft/vscode-azext-utils";
 import { RegistryApi } from "./all/RegistryApi";
 import { IConnectRegistryWizardOptions } from "./connectWizard/IConnectRegistryWizardOptions";
 import { ICachedRegistryProvider } from "./ICachedRegistryProvider";
@@ -54,7 +54,7 @@ export interface IRegistryProvider {
     /**
      * The factory method for creating the root tree item
      */
-    treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): AzExtParentTreeItem & IRegistryProviderTreeItem;
+    treeItemFactory(parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): (AzExtParentTreeItem & IRegistryProviderTreeItem) | Promise<AzExtParentTreeItem & IRegistryProviderTreeItem>;
 
     /**
      * Method to call for persisting auth secrets

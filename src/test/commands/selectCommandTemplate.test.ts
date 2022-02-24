@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as assert from 'assert';
+import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
 import { ContextType, DockerContext, isNewContextType } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
-import { IActionContext, IAzureQuickPickItem } from 'vscode-azureextensionui';
-import * as assert from 'assert';
 
 const DefaultPickIndex = 0;
 

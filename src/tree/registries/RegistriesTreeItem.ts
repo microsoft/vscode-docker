@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, UserCancelledError, parseError } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getRegistryProviders } from "./all/getRegistryProviders";
@@ -51,14 +51,14 @@ export class RegistriesTreeItem extends AzExtParentTreeItem {
             const children: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 this._cachedProviders,
                 'invalidRegistryProvider',
-                cachedProvider => {
+                async cachedProvider => {
                     const provider = getRegistryProviders().find(rp => rp.id === cachedProvider.id);
                     if (!provider) {
                         throw new Error(localize('vscode-docker.tree.registries.noProvider', 'Failed to find registry provider with id "{0}".', cachedProvider.id));
                     }
 
                     const parent = provider.isSingleRegistry ? this._connectedRegistriesTreeItem : this;
-                    return this.initTreeItem(provider.treeItemFactory(parent, cachedProvider));
+                    return this.initTreeItem(await Promise.resolve(provider.treeItemFactory(parent, cachedProvider)));
                 },
                 cachedInfo => cachedInfo.id
             );

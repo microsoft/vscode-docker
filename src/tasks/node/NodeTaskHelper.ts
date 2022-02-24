@@ -7,13 +7,13 @@ import * as path from 'path';
 import { WorkspaceFolder } from 'vscode';
 import { NodeScaffoldingOptions } from '../../debugging/DockerDebugScaffoldingProvider';
 import { Lazy } from '../../utils/lazy';
-import { inferCommand, inferPackageName, InspectMode, NodePackage, readPackage } from '../../utils/nodeUtils';
+import { InspectMode, NodePackage, inferCommand, inferPackageName, readPackage } from '../../utils/nodeUtils';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuildTaskDefinitionBase';
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper, getDefaultContainerName, getDefaultImageName, inferImageName } from '../TaskHelper';
 
 export interface NodeTaskBuildOptions {
     package?: string;

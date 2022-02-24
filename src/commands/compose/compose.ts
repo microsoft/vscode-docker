@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { IActionContext, UserCancelledError } from 'vscode-azureextensionui';
 import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
-import { createFileItem, Item, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
+import { Item, createFileItem, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';
 import { getComposeProfileList, getComposeProfilesOrServices, getComposeServiceList } from './getComposeSubsetList';

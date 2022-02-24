@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commonProperties, CommonProperty } from "../settings/CommonProperties";
+import { CommonProperty, commonProperties } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
 export type VolumeProperty = CommonProperty | 'VolumeName';

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { IActionContext, parseError } from 'vscode-azureextensionui';
 import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";

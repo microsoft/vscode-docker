@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem, GenericTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, GenericTreeItem } from "@microsoft/vscode-azext-utils";
 
 export class OpenUrlTreeItem extends GenericTreeItem {
     private _url: string;

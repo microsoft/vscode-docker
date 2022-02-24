@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ConfigurationChangeEvent, ConfigurationTarget, ThemeColor, ThemeIcon, TreeView, TreeViewVisibilityChangeEvent, window, workspace, WorkspaceConfiguration } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IParsedError, parseError, registerEvent } from "vscode-azureextensionui";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IParsedError, parseError, registerEvent } from "@microsoft/vscode-azext-utils";
+import { ConfigurationChangeEvent, ConfigurationTarget, ThemeColor, ThemeIcon, TreeView, TreeViewVisibilityChangeEvent, WorkspaceConfiguration, window, workspace } from "vscode";
 import { showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
 import { DockerObject } from "../docker/Common";
@@ -12,12 +12,12 @@ import { NotSupportedError } from "../docker/NotSupportedError";
 import { ext } from "../extensionVariables";
 import { localize } from "../localize";
 import { dockerInstallStatusProvider } from "../utils/DockerInstallStatusProvider";
-import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
+import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from "../utils/getVSCodeRemoteInfo";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
 import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSettingInfo";
-import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./settings/ITreeSettingsWizardContext";
+import { ITreeSettingWizardInfo, ITreeSettingsWizardContext } from "./settings/ITreeSettingsWizardContext";
 import { TreeSettingListStep } from "./settings/TreeSettingListStep";
 import { TreeSettingStep } from "./settings/TreeSettingStep";
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { Lazy, AsyncLazy } from '../../utils/lazy';
+import { AsyncLazy, Lazy } from '../../utils/lazy';
 import { delay } from '../../utils/promiseUtils';
 
 suite('(unit) Lazy tests', () => {

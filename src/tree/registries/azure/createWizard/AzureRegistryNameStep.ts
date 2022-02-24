@@ -4,18 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
-import { AzureNameStep, createAzureClient, ResourceGroupListStep, resourceGroupNamingRules } from 'vscode-azureextensionui';
+import { AzureNameStep } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../../../localize';
+import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../../utils/lazyPackages';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
 export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardContext> {
     protected async isRelatedNameAvailable(context: IAzureRegistryWizardContext, name: string): Promise<boolean> {
-        return await ResourceGroupListStep.isNameAvailable(context, name);
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        return await azExtAzureUtils.ResourceGroupListStep.isNameAvailable(context, name);
     }
 
     public async prompt(context: IAzureRegistryWizardContext): Promise<void> {
-        const armContainerRegistry = await import('@azure/arm-containerregistry');
-        const client = createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        const armContainerRegistry = await getArmContainerRegistry();
+        const client = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         context.newRegistryName = (await context.ui.showInputBox({
             placeHolder: localize('vscode-docker.tree.registries.azure.createWizard.name', 'Registry name'),
             prompt: localize('vscode-docker.tree.registries.azure.createWizard.namePrompt', 'Provide a registry name'),
@@ -23,7 +26,7 @@ export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardCon
             validateInput: (name: string) => validateRegistryName(name, client)
         })).trim();
 
-        context.relatedNameTask = this.generateRelatedName(context, context.newRegistryName, resourceGroupNamingRules);
+        context.relatedNameTask = this.generateRelatedName(context, context.newRegistryName, azExtAzureUtils.resourceGroupNamingRules);
     }
 
     public shouldPrompt(context: IAzureRegistryWizardContext): boolean {
@@ -41,7 +44,7 @@ async function validateRegistryName(name: string, client: ContainerRegistryManag
     } else if (name.match(/[^a-z0-9]/i)) {
         return localize('vscode-docker.tree.registries.azure.createWizard.nameAlphanumeric', 'The name can only contain alphanumeric characters.');
     } else {
-        const nameStatus = await client.registries.checkNameAvailability({ name });
+        const nameStatus = await client.registries.checkNameAvailability({ name, type: 'Microsoft.ContainerRegistry/registries' });
         return nameStatus.message;
     }
 }

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import { ProgressLocation, window } from 'vscode';
-import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from "../../../localize";
-import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
+import type { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 
 export async function deleteAzureRepository(context: IActionContext, node?: AzureRepositoryTreeItem): Promise<void> {

@@ -5,7 +5,7 @@
 
 import * as path from "path";
 import * as vscode from 'vscode';
-import { DialogResponses, IActionContext } from 'vscode-azureextensionui';
+import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
 import { localize } from '../localize';
 
@@ -83,6 +83,8 @@ async function quickPickFileItem(context: IActionContext, items: Item[], message
             return await context.ui.showQuickPick<Item>(items, { placeHolder: message });
         }
     }
+
+    return undefined;
 }
 
 export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {

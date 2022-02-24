@@ -11,7 +11,7 @@ import { DockerBuildOptions } from "../DockerBuildTaskDefinitionBase";
 import { DockerBuildTaskDefinition } from "../DockerBuildTaskProvider";
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from "../DockerRunTaskDefinitionBase";
 import { DockerRunTaskDefinition } from "../DockerRunTaskProvider";
-import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from "../TaskHelper";
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskScaffoldContext, TaskHelper, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, inferImageName } from "../TaskHelper";
 import { PythonExtensionHelper } from "./PythonExtensionHelper";
 
 export interface PythonTaskRunOptions {
@@ -119,7 +119,7 @@ export class PythonTaskHelper implements TaskHelper {
 
     private inferVolumes(runOptions: DockerRunOptions, launcherFolder: string): DockerContainerVolume[] {
         if (!launcherFolder) {
-            return;
+            return [];
         }
 
         const volumes = runOptions?.volumes ? [...runOptions.volumes] : [];
