@@ -8,16 +8,16 @@ jobs:
   main:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout triage-actions
+      - name: Checkout Actions
         uses: actions/checkout@v2
         with:
-          repository: "microsoft/vscode-azuretools"
-          path: ./azuretools
-          ref: v0.2.0-triage-actions
-      - name: npm install
-        run: npm install --production --prefix ./azuretools/triage-actions
+          repository: "microsoft/vscode-github-triage-actions"
+          path: ./actions
+          ref: stable
+      - name: Install Actions
+        run: npm install --production --prefix ./actions
       - name: Run Locker
-        uses: ./azuretools/triage-actions/locker
+        uses: ./actions/locker
         with:
           token: ${{secrets.AZCODE_BOT_PAT}}
           daysSinceClose: 45
