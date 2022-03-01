@@ -1085,6 +1085,22 @@
                     "python": {
                         "description": "%vscode-docker.tasks.docker-build.python.description%",
                         "type": "object"
+                    },
+                    "options": {
+                        "description": "%vscode-docker.tasks.options.description%",
+                        "properties": {
+                            "cwd": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.options.cwd.description%"
+                            },
+                            "env": {
+                                "type": "object",
+                                "description": "%vscode-docker.tasks.options.env.description%",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 },
                 "required": [
@@ -1344,6 +1360,22 @@
                                 ]
                             }
                         ]
+                    },
+                    "options": {
+                        "description": "%vscode-docker.tasks.options.description%",
+                        "properties": {
+                            "cwd": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.options.cwd.description%"
+                            },
+                            "env": {
+                                "type": "object",
+                                "description": "%vscode-docker.tasks.options.env.description%",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -1464,6 +1496,22 @@
                             "files": [
                                 "${workspaceFolder}/docker-compose.yml"
                             ]
+                        }
+                    },
+                    "options": {
+                        "description": "%vscode-docker.tasks.options.description%",
+                        "properties": {
+                            "cwd": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.options.cwd.description%"
+                            },
+                            "env": {
+                                "type": "object",
+                                "description": "%vscode-docker.tasks.options.env.description%",
+                                "additionalProperties": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 },
