@@ -68,7 +68,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
         addDockerSettingsToEnv(newEnv, process.env);
         await spawnAsync(
             commandLine,
-            { cwd: this.resolvedDefinition.options.cwd || folder.uri.fsPath, env: newEnv },
+            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
             (stdout: string) => {
                 this.writeOutput(stdout);
             },
