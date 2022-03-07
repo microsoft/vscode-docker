@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { Platform } from '../../utils/platform';
 
 export type ScaffoldedFileType = '.dockerignore' | 'Dockerfile' | 'docker-compose.yml' | 'docker-compose.debug.yml' | 'requirements.txt';
@@ -30,6 +30,7 @@ export interface ScaffoldingWizardContext extends IActionContext {
     // These are calculated depending on platform, with defaults
     version?: string;
     serviceName?: string;
+    suggestedRandomPorts?: number[];
 
     // Other properties that get calculated or set later
     overwriteAll?: boolean;

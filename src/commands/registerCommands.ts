@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, registerCommand as registerCommandAzUI } from "@microsoft/vscode-azext-utils";
 import { commands } from "vscode";
-import { IActionContext, registerCommand as registerCommandAzUI } from "vscode-azureextensionui";
 import { ext } from "../extensionVariables";
 import { scaffold } from "../scaffolding/scaffold";
 import { scaffoldCompose } from "../scaffolding/scaffoldCompose";

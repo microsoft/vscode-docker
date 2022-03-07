@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../localize';
 
 export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {

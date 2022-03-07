@@ -3,15 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ExecOptions } from 'child_process';
-import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { commands, Event, EventEmitter, window, workspace } from 'vscode';
-import { Disposable } from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { commands, Disposable, Event, EventEmitter, FileSystemWatcher, RelativePattern, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
@@ -20,6 +18,7 @@ import { execAsync, spawnAsync } from '../utils/spawnAsync';
 import { dockerExePath } from '../utils/dockerExePathProvider';
 import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClient';
+import { getDockerodeClient, getDockerServeClient } from '../utils/lazyPackages';
 
 // CONSIDER
 // Any of the commands related to Docker context can take a very long time to execute (a minute or longer)
@@ -30,8 +29,9 @@ import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClien
 const ContextCmdExecOptions: ExecOptions = { timeout: 5000 };
 
 // TODO: exe path
-const dockerConfigFile = path.join(os.homedir(), '.docker', 'config.json');
-const dockerContextsFolder = path.join(os.homedir(), '.docker', 'contexts', 'meta');
+const dockerConfigFolder = path.join(os.homedir(), '.docker');
+const dockerConfigFile = 'config.json';
+const dockerContextsFolder = path.join(dockerConfigFolder, 'contexts', 'meta');
 
 const WindowsLocalPipe = 'npipe:////./pipe/docker_engine';
 const UnixLocalPipe = 'unix:///var/run/docker.sock';
@@ -69,8 +69,8 @@ export class DockerContextManager implements ContextManager, Disposable {
     private readonly loadingFinishedEmitter = new EventEmitter<unknown | undefined>();
     private readonly contextsCache: AsyncLazy<DockerContext[]>;
     private readonly newCli: AsyncLazy<boolean>;
-    private readonly configFileWatcher: fs.FSWatcher;
-    private readonly contextFolderWatcher: fs.FSWatcher;
+    private readonly configFileWatcher: FileSystemWatcher | undefined;
+    private readonly contextFolderWatcher: FileSystemWatcher | undefined;
     private refreshing: boolean = false;
 
     public constructor() {
@@ -81,8 +81,14 @@ export class DockerContextManager implements ContextManager, Disposable {
         // The file watchers are not strictly necessary; they serve to help the extension detect context switches
         // that are done in CLI. Worst case, a user would have to restart VSCode.
         try {
-            if (fse.existsSync(dockerConfigFile)) {
-                this.configFileWatcher = fs.watch(dockerConfigFile, async () => this.refresh());
+            if (fse.existsSync(path.join(dockerConfigFolder, dockerConfigFile))) {
+                this.configFileWatcher = workspace.createFileSystemWatcher(
+                    new RelativePattern(dockerConfigFolder, dockerConfigFile),
+                    true, // Don't expect file to be created (since we already verified its existence)
+                    false, // Do expect file to change
+                    true // Don't expect file to be deleted (are they uninstalling?!), but if they do, then the tree view will get an ENOENT that it will replace with a nice "Is Docker running?" error message
+                );
+                this.configFileWatcher.onDidChange(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
@@ -90,7 +96,12 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         try {
             if (fse.existsSync(dockerContextsFolder)) {
-                this.contextFolderWatcher = fs.watch(dockerContextsFolder, async () => this.refresh());
+                this.contextFolderWatcher = workspace.createFileSystemWatcher(
+                    new RelativePattern(dockerContextsFolder, '**')
+                );
+                this.contextFolderWatcher.onDidCreate(async () => this.refresh(), this);
+                this.contextFolderWatcher.onDidChange(async () => this.refresh(), this);
+                this.contextFolderWatcher.onDidDelete(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
@@ -101,8 +112,8 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public dispose(): void {
-        void this.configFileWatcher?.close();
-        void this.contextFolderWatcher?.close();
+        void this.configFileWatcher?.dispose();
+        void this.contextFolderWatcher?.dispose();
 
         // No event is fired so the client present at the end needs to be disposed manually
         void ext.dockerClient?.dispose();
@@ -146,13 +157,13 @@ export class DockerContextManager implements ContextManager, Disposable {
                 this.setVsCodeContext('vscode-docker:aciContext', true);
                 this.setVsCodeContext('vscode-docker:newSdkContext', true);
 
-                const dsc = await import('./DockerServeClient/DockerServeClient');
+                const dsc = await getDockerServeClient();
                 ext.dockerClient = new dsc.DockerServeClient(currentContext);
             } else {
                 this.setVsCodeContext('vscode-docker:aciContext', false);
                 this.setVsCodeContext('vscode-docker:newSdkContext', false);
 
-                const dockerode = await import('./DockerodeApiClient/DockerodeApiClient');
+                const dockerode = await getDockerodeClient();
                 ext.dockerClient = new dockerode.DockerodeApiClient(currentContext);
             }
 
@@ -324,7 +335,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     private async tryGetContextsFromApi(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<Promise<DockerContext[] | undefined>> {
         try {
-            const dsc = await import('./DockerServeClient/DockerServeClient');
+            const dsc = await getDockerServeClient();
             const client = new dsc.DockerServeClient({ Name: maybeFixedContextName } as DockerContext); // Context name is the only thing used by DockerServeClient's constructor
             const result = await client.getContexts(actionContext);
             this.setHostSourceFromContextList(actionContext, result, 'api');
@@ -436,6 +447,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             return result;
         } catch {
             // Best effort
+            return false;
         }
     }
 

@@ -6,8 +6,8 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { parseError } from '@microsoft/vscode-azext-utils';
 import { WorkspaceFolder } from 'vscode';
-import { parseError } from 'vscode-azureextensionui';
 import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
@@ -20,7 +20,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskContext, DockerTaskScaffoldContext, TaskHelper, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, inferImageName } from '../TaskHelper';
 import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
@@ -204,31 +204,31 @@ export class NetCoreTaskHelper implements TaskHelper {
             const appVolume: DockerContainerVolume = {
                 localPath: path.dirname(helperOptions.appProject),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\app' : '/app',
-                permissions: 'rw'
+                permissions: 'rw,z'
             };
 
             const srcVolume: DockerContainerVolume = {
                 localPath: folder.uri.fsPath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
-                permissions: 'rw'
+                permissions: 'rw,z'
             };
 
             const debuggerVolume: DockerContainerVolume = {
                 localPath: vsDbgInstallBasePath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             const nugetRootVolume: DockerContainerVolume = {
                 localPath: path.join(os.homedir(), '.nuget', 'packages'),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             const nugetUserVolume: DockerContainerVolume = {
                 localPath: nugetRootVolume.localPath, // Same local path as the root one
                 containerPath: runOptions.os === 'Windows' ? 'C:\\Users\\ContainerUser\\.nuget\\packages' : '/home/appuser/.nuget/packages',
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             addVolumeWithoutConflicts(volumes, appVolume);
@@ -254,7 +254,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.hostUserSecretsFolder,
                 containerPath: containerSecretsFolders.containerUserSecretsFolder,
-                permissions: 'ro'
+                permissions: 'ro,z'
             };
 
             addVolumeWithoutConflicts(volumes, userSecretsVolume);
@@ -263,7 +263,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 const certVolume: DockerContainerVolume = {
                     localPath: hostSecretsFolders.hostCertificateFolder,
                     containerPath: containerSecretsFolders.containerCertificateFolder,
-                    permissions: 'ro'
+                    permissions: 'ro,z'
                 };
 
                 addVolumeWithoutConflicts(volumes, certVolume);

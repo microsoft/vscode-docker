@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureWizardExecuteStep } from 'vscode-azureextensionui';
+import { AzureWizardExecuteStep } from '@microsoft/vscode-azext-utils';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
 export class OpenDockerfileStep extends AzureWizardExecuteStep<ScaffoldingWizardContext> {

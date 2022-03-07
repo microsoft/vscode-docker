@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureWizardExecuteStep, parseError } from '@microsoft/vscode-azext-utils';
 import { Progress } from 'vscode';
-import { AzureWizardExecuteStep, parseError } from 'vscode-azureextensionui';
 import { ext } from '../../../extensionVariables';
 import { localize } from '../../../localize';
 import { executeAsTask } from '../../../utils/executeAsTask';

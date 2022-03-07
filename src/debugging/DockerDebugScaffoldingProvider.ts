@@ -3,19 +3,19 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DialogResponses } from '@microsoft/vscode-azext-utils';
 import { MessageItem, window } from 'vscode';
-import { DialogResponses } from 'vscode-azureextensionui';
 import { localize } from '../localize';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
-import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
+import { NetCoreTaskScaffoldingOptions, netCoreTaskHelper } from '../tasks/netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
 import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
 import { PythonProjectType, PythonTarget } from '../utils/pythonUtils';
-import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
+import { DockerDebugScaffoldContext, addDebugConfiguration } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
-import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
+import { NetCoreDebugScaffoldingOptions, netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
 import { pythonDebugHelper } from './python/PythonDebugHelper';
 

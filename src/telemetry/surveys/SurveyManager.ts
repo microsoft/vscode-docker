@@ -4,11 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
+import { survey3 } from './survey3';
 
 // Currently-active surveys should be registered here
-const currentSurveys: Survey[] = [];
+const currentSurveys: Survey[] = [
+    survey3,
+];
 
 const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
 const surveyFlightPrefix = 'vscode-docker.surveys';

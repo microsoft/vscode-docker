@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
 import { isMac, isWindows } from '../utils/osUtils';
 import { MacDockerInstaller, WindowsDockerInstaller } from './dockerInstaller';
 

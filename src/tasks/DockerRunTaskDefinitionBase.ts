@@ -21,7 +21,7 @@ export interface DockerContainerPort {
 export interface DockerContainerVolume {
     localPath: string;
     containerPath: string;
-    permissions?: 'ro' | 'rw';
+    permissions?: 'ro' | 'rw' | 'ro,z' | 'rw,z';
 }
 
 export interface DockerRunOptions {

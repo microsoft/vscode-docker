@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementModels as AcrModels } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { Task as AcrTask, TaskRun as AcrTaskRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "vscode-azureextensionui";
 import { localize } from '../../../localize';
+import { getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { nonNullValue, nonNullValueAndProp } from "../../../utils/nonNull";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";
@@ -18,10 +19,9 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     public childTypeLabel: string = 'task run';
     public parent: AzureTasksTreeItem;
 
-    private _task: AcrModels.Task | undefined;
-    private _nextLink: string | undefined;
+    private _task: AcrTask | undefined;
 
-    public constructor(parent: AzureTasksTreeItem, task: AcrModels.Task | undefined) {
+    public constructor(parent: AzureTasksTreeItem, task: AcrTask | undefined) {
         super(parent);
         this._task = task;
         this.iconPath = new ThemeIcon('tasklist');
@@ -41,7 +41,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     }
 
     public hasMoreChildrenImpl(): boolean {
-        return !!this._nextLink;
+        return false;
     }
 
     public get properties(): unknown {
@@ -49,19 +49,13 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     }
 
     public static async hasRunsWithoutTask(context: IActionContext, registryTI: AzureRegistryTreeItem): Promise<boolean> {
-        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, registryTI, AzureTaskTreeItem._noTaskFilter, undefined);
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, registryTI, AzureTaskTreeItem._noTaskFilter);
         return runListResult.length > 0;
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
-        if (clearCache) {
-            this._nextLink = undefined;
-        }
-
         const filter = this._task ? `TaskName eq '${this.taskName}'` : AzureTaskTreeItem._noTaskFilter;
-        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, this.parent.parent, filter, this._nextLink);
-
-        this._nextLink = runListResult.nextLink;
+        const runListResult = await AzureTaskTreeItem.getTaskRuns(context, this.parent.parent, filter);
 
         if (clearCache && runListResult.length === 0 && this._task) {
             const ti = new GenericTreeItem(this, {
@@ -89,9 +83,10 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
         }
     }
 
-    private static async getTaskRuns(context: IActionContext, registryTI: AzureRegistryTreeItem, filter: string, nextLink: string | undefined): Promise<AcrModels.RunListResult> {
-        return nextLink === undefined ?
-            await (await registryTI.getClient(context)).runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }) :
-            await (await registryTI.getClient(context)).runs.listNext(nextLink);
+    private static async getTaskRuns(context: IActionContext, registryTI: AzureRegistryTreeItem, filter: string): Promise<AcrTaskRun[]> {
+        const azExtAzureUtils = await getAzExtAzureUtils();
+        const registryClient = await registryTI.getClient(context);
+
+        return await azExtAzureUtils.uiUtils.listAllIterator(registryClient.runs.list(registryTI.resourceGroup, registryTI.registryName, { filter }));
     }
 }

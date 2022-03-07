@@ -4,15 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
+import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from 'vscode-azureextensionui';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
-import { extensionVersion } from './constants';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
@@ -21,6 +20,7 @@ import { ext } from './extensionVariables';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
+import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
@@ -63,19 +63,12 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
+        ext.experimentationService = await createExperimentationService(
+            ctx,
+            process.env.VSCODE_DOCKER_TEAM === '1' ? tas.TargetPopulation.Team : undefined // If VSCODE_DOCKER_TEAM isn't set, let @microsoft/vscode-azext-utils decide target population
+        );
 
-        let targetPopulation: tas.TargetPopulation;
-        if (process.env.DEBUGTELEMETRY || process.env.VSCODE_DOCKER_TEAM === '1') {
-            targetPopulation = tas.TargetPopulation.Team;
-        } else if (/alpha/ig.test(extensionVersion.value)) {
-            targetPopulation = tas.TargetPopulation.Insiders;
-        } else {
-            targetPopulation = tas.TargetPopulation.Public;
-        }
-        ext.experimentationService = await createExperimentationService(ctx, targetPopulation);
-
-        // Temporarily disabled--reenable if we need to do any surveys
-        // (new SurveyManager()).activate();
+        (new SurveyManager()).activate();
 
         // Remove the "Report Issue" button from all error messages in favor of the command
         // TODO: use built-in issue reporter if/when support is added to include arbitrary info in addition to repro steps (which we would leave blank to force the user to type *something*)

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { IActionContext, NoResourceFoundError } from 'vscode-azureextensionui';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';

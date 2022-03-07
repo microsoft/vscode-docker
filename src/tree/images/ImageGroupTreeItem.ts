@@ -5,7 +5,7 @@
 
 import { ThemeIcon } from "vscode";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
-import { getImageGroupIcon, ImageProperty } from "./ImageProperties";
+import { ImageProperty, getImageGroupIcon } from "./ImageProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage, ImageProperty> {

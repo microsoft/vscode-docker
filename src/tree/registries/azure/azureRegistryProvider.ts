@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem } from "vscode-azureextensionui";
+import { AzExtParentTreeItem } from "@microsoft/vscode-azext-utils";
+import { getAzActTreeItem } from "../../../utils/lazyPackages";
 import { RegistryApi } from "../all/RegistryApi";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProvider } from "../IRegistryProvider";
-import { AzureAccountTreeItem } from "./AzureAccountTreeItem";
+import type { AzureAccountTreeItem } from "./AzureAccountTreeItem"; // These are only dev-time imports so don't need to be lazy
 
 export const azureRegistryProviderId: string = 'azure';
 
@@ -17,7 +18,10 @@ export const azureRegistryProvider: IRegistryProvider = {
     api: RegistryApi.DockerV2,
     onlyOneAllowed: true,
     connectWizardOptions: undefined,
-    treeItemFactory: (parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider) => new AzureAccountTreeItem(parent, cachedProvider),
+    treeItemFactory: async (parent: AzExtParentTreeItem, cachedProvider: ICachedRegistryProvider): Promise<AzureAccountTreeItem> => {
+        const azActTreeItem = await getAzActTreeItem();
+        return new azActTreeItem.AzureAccountTreeItem(parent, cachedProvider);
+    },
     persistAuth: undefined,
     removeAuth: undefined,
 };

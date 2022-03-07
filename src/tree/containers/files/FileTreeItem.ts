@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtParentTreeItem, AzExtTreeItem } from 'vscode-azureextensionui';
+import { AzExtParentTreeItem, AzExtTreeItem } from '@microsoft/vscode-azext-utils';
 import { DockerUri } from '../../../docker/files/DockerUri';
 
 export class FileTreeItem extends AzExtTreeItem {

@@ -68,10 +68,9 @@ const config = {
     },
     plugins: [
         // Copy some needed resource files from external sources
-        // @ts-expect-error: Spurious type incompatibility error
         new CopyPlugin({
             patterns: [
-                './node_modules/vscode-azureextensionui/resources/**/*.svg',
+                './node_modules/@microsoft/vscode-azext-azureutils/resources/**/*.svg',
                 './node_modules/open/xdg-open*', // This script isn't included in the webpack but is needed by `open` on certain systems, so copy it in
             ],
         }),
@@ -105,8 +104,8 @@ const config = {
             message: /require\.extensions/,
         },
         {
-            // Ignore a warning from `vscode-extension-telemetry`
-            module: /node_modules\/vscode-extension-telemetry/,
+            // Ignore a warning from `@vscode/extension-telemetry`
+            module: /node_modules\/@vscode\/extension-telemetry/,
             message: /Can't resolve 'applicationinsights-native-metrics'/
         },
         {
@@ -114,12 +113,16 @@ const config = {
             module: /node_modules\/ssh2/,
             message: /Can't resolve 'cpu-features'/
         },
+        {
+            // Ignore another warning for missing optional dependency of `ssh2`, if VS build tools aren't installed
+            module: /node_modules\/ssh2/,
+            message: /Can't resolve '.\/crypto\/build\/Release\/sshcrypto.node'/
+        },
         (warning) => false, // No other warnings should be ignored
     ],
 };
 
 if (debugWebpack) {
-    // @ts-expect-error: Spurious type incompatibility error
     config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
     console.log('Config:', config);
 }

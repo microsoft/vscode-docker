@@ -8,6 +8,10 @@ import * as vscode from 'vscode';
 export class TestMemento implements vscode.Memento {
     private readonly values: { [key: string]: never } = {};
 
+    keys(): readonly string[] {
+        return Object.keys(this.values);
+    }
+
     get<T>(key: string, defaultValue?: T): T | undefined {
         return this.values[key] ?? defaultValue;
     }

@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling, IActionContext } from 'vscode-azureextensionui';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ociClientId } from '../../../constants';
 import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
-import { httpRequest, RequestOptionsLike } from '../../../utils/httpRequest';
+import { RequestOptionsLike, httpRequest } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';

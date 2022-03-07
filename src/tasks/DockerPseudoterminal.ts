@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
 import { addDockerSettingsToEnv } from '../utils/addDockerSettingsToEnv';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -64,11 +64,11 @@ export class DockerPseudoterminal implements Pseudoterminal {
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
         this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
-        const newEnv = { ...process.env };
+        const newEnv = { ...process.env, ...this.resolvedDefinition.options?.env };
         addDockerSettingsToEnv(newEnv, process.env);
         await spawnAsync(
             commandLine,
-            { cwd: folder.uri.fsPath, env: newEnv },
+            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
             (stdout: string) => {
                 this.writeOutput(stdout);
             },

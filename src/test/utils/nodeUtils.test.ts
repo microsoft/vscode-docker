@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { inferPackageName, inferCommand, InspectMode, NodePackage } from '../../utils/nodeUtils';
+import { InspectMode, NodePackage, inferCommand, inferPackageName } from '../../utils/nodeUtils';
 
 suite('(unit) utils/nodeUtils', () => {
     suite('inferPackageName', () => {

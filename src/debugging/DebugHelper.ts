@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ConfigurationTarget, debug, DebugConfiguration, ExtensionContext, workspace, WorkspaceFolder } from 'vscode';
-import { IActionContext } from 'vscode-azureextensionui';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { CancellationToken, ConfigurationTarget, DebugConfiguration, ExtensionContext, WorkspaceFolder, debug, workspace } from 'vscode';
 import { localize } from '../localize';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';

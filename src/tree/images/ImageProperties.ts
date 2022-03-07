@@ -7,7 +7,7 @@ import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
 import { DockerImage } from "../../docker/Images";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
-import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
+import { CommonGroupBy, CommonProperty, commonProperties, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 
 export type ImageProperty = CommonProperty | 'FullTag' | 'ImageId' | 'Registry' | 'Repository' | 'RepositoryName' | 'RepositoryNameAndTag' | 'Tag';

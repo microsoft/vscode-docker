@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as os from 'os';
 import * as path from 'path';
-import { window, workspace, WorkspaceFolder } from 'vscode';
+import { WorkspaceFolder, window, workspace } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 
 const variableMatcher: RegExp = /\$\{[a-z.\-_:]+\}/ig;
@@ -41,6 +42,8 @@ function resolveSingleVariable(variable: string, folder?: WorkspaceFolder, addit
             case '${workspaceFolder}':
             case '${workspaceRoot}':
                 return path.normalize(folder.uri.fsPath);
+            case '${userHome}':
+                return os.homedir();
             case '${relativeFile}':
                 return path.relative(path.normalize(folder.uri.fsPath), getActiveFilePath());
             default:

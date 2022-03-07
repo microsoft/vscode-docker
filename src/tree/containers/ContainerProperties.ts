@@ -5,7 +5,7 @@
 
 import { ThemeColor, ThemeIcon } from "vscode";
 import { localize } from "../../localize";
-import { imageProperties, ImageProperty } from "../images/ImageProperties";
+import { ImageProperty, imageProperties } from "../images/ImageProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
 export type ContainerProperty = ImageProperty | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';

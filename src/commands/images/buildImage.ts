@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, UserCancelledError } from "@microsoft/vscode-azext-utils";
 import * as path from "path";
 import * as vscode from "vscode";
-import { IActionContext, UserCancelledError } from "vscode-azureextensionui";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
@@ -53,7 +53,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         if (tagRegex.test(terminalCommand)) {
             const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
             const dockerFileKey = `buildTag_${absFilePath}`;
-            const prevImageName: string | undefined = ext.context.globalState.get(dockerFileKey);
+            const prevImageName: string | undefined = ext.context.workspaceState.get(dockerFileKey);
 
             // Get imageName based previous entries, else on name of subfolder containing the Dockerfile
             const suggestedImageName = prevImageName || getValidImageNameFromPath(dockerFileItem.absoluteFolderPath, 'latest');
@@ -65,7 +65,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             const imageName: string = await getTagFromUserInput(context, suggestedImageName);
             addImageTaggingTelemetry(context, imageName, '.after');
 
-            await ext.context.globalState.update(dockerFileKey, imageName);
+            await ext.context.workspaceState.update(dockerFileKey, imageName);
             terminalCommand = terminalCommand.replace(tagRegex, imageName);
         }
 
