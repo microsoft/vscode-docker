@@ -1,3 +1,9 @@
+## 1.21.0 - 21 Mar 2022
+### Added
+* Added the `projectName` option to `docker-compose` tasks, corresponding to `--project-name`. [#3436](https://github.com/microsoft/vscode-docker/issues/3436)
+* Support for the `options.env` and `options.cwd` options on all task types. [#3437](https://github.com/microsoft/vscode-docker/issues/3437)
+* Support for the `${userHome}` task variable on all task types. [#3455](https://github.com/microsoft/vscode-docker/pull/3455)
+
 ## 1.20.0 - 22 Feb 2022
 ### Added
 * The "Compose Start" and "Compose Stop" commands available in the explorer context menu will now also be available in the command palette. [#3140](https://github.com/microsoft/vscode-docker/issues/3140)
