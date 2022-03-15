@@ -20,7 +20,6 @@ import { ext } from './extensionVariables';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
-import { SurveyManager } from './telemetry/surveys/SurveyManager';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { cryptoUtils } from './utils/cryptoUtils';
@@ -68,7 +67,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             process.env.VSCODE_DOCKER_TEAM === '1' ? tas.TargetPopulation.Team : undefined // If VSCODE_DOCKER_TEAM isn't set, let @microsoft/vscode-azext-utils decide target population
         );
 
-        (new SurveyManager()).activate();
+        // Disabled for now
+        // (new SurveyManager()).activate();
 
         // Remove the "Report Issue" button from all error messages in favor of the command
         // TODO: use built-in issue reporter if/when support is added to include arbitrary info in addition to repro steps (which we would leave blank to force the user to type *something*)

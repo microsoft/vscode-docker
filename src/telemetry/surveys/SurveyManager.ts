@@ -6,11 +6,9 @@
 import * as vscode from 'vscode';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
-import { survey3 } from './survey3';
 
 // Currently-active surveys should be registered here
 const currentSurveys: Survey[] = [
-    survey3,
 ];
 
 const surveyRespondedKeyPrefix = 'vscode-docker.surveys.response';
