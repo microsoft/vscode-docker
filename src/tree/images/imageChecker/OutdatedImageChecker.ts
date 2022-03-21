@@ -27,6 +27,7 @@ export class OutdatedImageChecker {
         this.defaultRequestOptions = {
             method: 'HEAD',
             headers: {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'X-Meta-Source-Client': ociClientId,
                 'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json',
             },
