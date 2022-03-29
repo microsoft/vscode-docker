@@ -5,7 +5,6 @@
 
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { localize } from "../../localize";
 import { executeAsTask } from '../../utils/executeAsTask';
 import { Item, createFileItem, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
@@ -61,9 +60,6 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
 
             // Add the service list if needed
             terminalCommand = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand);
-
-            // Rewrite for the new CLI if needed
-            terminalCommand = await rewriteComposeCommandIfNeeded(terminalCommand);
 
             await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
         }

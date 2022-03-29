@@ -9,7 +9,7 @@ import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
-import { DefaultDockerPath, dockerExePath } from '../utils/dockerExePathProvider';
+import { DefaultDockerPath, dockerExePath, getComposeCommand } from '../utils/dockerExePathProvider';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown' | 'composeUpSubset';
 
@@ -98,7 +98,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         template,
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': await getComposeCommand(context) }
     );
 }
 

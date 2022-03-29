@@ -1604,7 +1604,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+                    "default": "${config:docker.dockerPath} build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
                     "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
@@ -1647,7 +1647,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run --rm -d ${exposedPorts} ${tag}",
+                    "default": "${config:docker.dockerPath} run --rm -d ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
@@ -1690,7 +1690,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run --rm -it ${exposedPorts} ${tag}",
+                    "default": "${config:docker.dockerPath} run --rm -it ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
@@ -1733,7 +1733,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker exec -it ${containerId} ${shellCommand}",
+                    "default": "${config:docker.dockerPath} exec -it ${containerId} ${shellCommand}",
                     "description": "%vscode-docker.config.template.attach.description%"
                 },
                 "docker.commands.logs": {
@@ -1776,7 +1776,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker logs --tail 1000 -f ${containerId}",
+                    "default": "${config:docker.dockerPath} logs --tail 1000 -f ${containerId}",
                     "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
@@ -1822,14 +1822,14 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "docker-compose ${configurationFile} up ${detached} ${build}",
+                            "template": "${composeCommand} ${configurationFile} up ${detached} ${build}",
                             "contextTypes": [
                                 "moby"
                             ]
                         },
                         {
                             "label": "Compose Up",
-                            "template": "docker compose ${configurationFile} up ${detached}"
+                            "template": "${composeCommand} ${configurationFile} up ${detached}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
@@ -1877,14 +1877,14 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "docker-compose ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
+                            "template": "${composeCommand} ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
                             "contextTypes": [
                                 "moby"
                             ]
                         },
                         {
                             "label": "Compose Up",
-                            "template": "docker compose ${configurationFile} ${profileList} up ${detached} ${serviceList}"
+                            "template": "${composeCommand} ${configurationFile} ${profileList} up ${detached} ${serviceList}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUpSubset.description%"
@@ -1932,14 +1932,7 @@
                     "default": [
                         {
                             "label": "Compose Down",
-                            "template": "docker-compose ${configurationFile} down",
-                            "contextTypes": [
-                                "moby"
-                            ]
-                        },
-                        {
-                            "label": "Compose Down",
-                            "template": "docker compose ${configurationFile} down"
+                            "template": "${composeCommand} ${configurationFile} down"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"
@@ -2393,6 +2386,11 @@
                     "type": "string",
                     "default": "docker",
                     "description": "%vscode-docker.config.docker.dockerPath%",
+                    "scope": "machine-overridable"
+                },
+                "docker.composeCommand": {
+                    "type": "string",
+                    "description": "%vscode-docker.config.docker.composeCommand%",
                     "scope": "machine-overridable"
                 },
                 "docker.enableDockerComposeLanguageService": {
