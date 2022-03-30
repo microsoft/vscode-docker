@@ -598,7 +598,7 @@ async function runWithCommandSetting(
             return 'docker';
         },
 
-        getComposeCommand: () => {
+        getComposeCommand: async () => {
             return Promise.resolve('docker-compose');
         }
     };
