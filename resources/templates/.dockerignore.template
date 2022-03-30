@@ -1,5 +1,6 @@
 {{#if pythonProjectType}}
 **/__pycache__
+**/.venv
 {{/if}}
 **/.classpath
 **/.dockerignore
