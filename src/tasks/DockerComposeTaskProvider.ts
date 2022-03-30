@@ -86,7 +86,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             }
 
             return CommandLineBuilder
-                .create(await ext.dockerContextManager.getDockerCommand())
+                .create(await ext.dockerContextManager.getComposeCommand())
                 .withArrayArgs('-f', options.files)
                 .withNamedArg('--env-file', options.envFile)
                 .withArrayArgs('--profile', options.up.profiles)
@@ -100,7 +100,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         } else {
             // Validation earlier guarantees that if up is not defined, down must be
             return CommandLineBuilder
-                .create(await ext.dockerContextManager.getDockerCommand())
+                .create(await ext.dockerContextManager.getComposeCommand())
                 .withArrayArgs('-f', options.files)
                 .withNamedArg('--env-file', options.envFile)
                 .withNamedArg('--project-name', options.projectName)
