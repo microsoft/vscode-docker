@@ -7,7 +7,6 @@ import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
@@ -34,6 +33,6 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
             continue;
         }
 
-        await executeAsTask(context, `${dockerExePath(context)} pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
+        await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
     }
 }

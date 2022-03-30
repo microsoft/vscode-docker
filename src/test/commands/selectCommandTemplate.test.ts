@@ -592,6 +592,14 @@ async function runWithCommandSetting(
 
         getCurrentContextType: async () => {
             return Promise.resolve(contextType as ContextType);
+        },
+
+        getDockerCommand: () => {
+            return 'docker';
+        },
+
+        getComposeCommand: () => {
+            return Promise.resolve('docker-compose');
         }
     };
 

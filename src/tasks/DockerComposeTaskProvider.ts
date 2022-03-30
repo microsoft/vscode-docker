@@ -6,10 +6,10 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { getComposeCommand } from '../utils/dockerExePathProvider';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerComposeOptions, DockerComposeTaskDefinitionBase } from './DockerComposeTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -86,7 +86,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
             }
 
             return CommandLineBuilder
-                .create(await getComposeCommand())
+                .create(await ext.dockerContextManager.getDockerCommand())
                 .withArrayArgs('-f', options.files)
                 .withNamedArg('--env-file', options.envFile)
                 .withArrayArgs('--profile', options.up.profiles)
@@ -100,7 +100,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         } else {
             // Validation earlier guarantees that if up is not defined, down must be
             return CommandLineBuilder
-                .create(await getComposeCommand())
+                .create(await ext.dockerContextManager.getDockerCommand())
                 .withArrayArgs('-f', options.files)
                 .withNamedArg('--env-file', options.envFile)
                 .withNamedArg('--project-name', options.projectName)

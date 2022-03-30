@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { getComposeCommand } from '../../utils/dockerExePathProvider';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { isWindows } from '../../utils/osUtils';
 
@@ -55,7 +54,7 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
     const projectNameArgument = isWindows() ? `-p "${projectName}"` : `-p '${projectName}'`;
     const envFileArgument = envFile ? (isWindows() ? `--env-file "${envFile}"` : `--env-file '${envFile}'`) : '';
 
-    const terminalCommand = `${await getComposeCommand(context)} ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
+    const terminalCommand = `${await ext.dockerContextManager.getComposeCommand(context)} ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
 
     await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
 }
