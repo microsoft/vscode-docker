@@ -5,7 +5,6 @@
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
-import { rewriteComposeCommandIfNeeded } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
@@ -55,9 +54,9 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
     const projectNameArgument = isWindows() ? `-p "${projectName}"` : `-p '${projectName}'`;
     const envFileArgument = envFile ? (isWindows() ? `--env-file "${envFile}"` : `--env-file '${envFile}'`) : '';
 
-    const terminalCommand = `docker-compose ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
+    const terminalCommand = `${await ext.dockerContextManager.getComposeCommand(context)} ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
 
-    await executeAsTask(context, await rewriteComposeCommandIfNeeded(terminalCommand), 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
+    await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
 }
 
 function getComposeWorkingDirectory(node: ContainerGroupTreeItem): string | undefined {

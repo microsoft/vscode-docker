@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ext } from '../extensionVariables';
 import { AsyncLazy } from './lazy';
 import { execAsync } from './spawnAsync';
-import { dockerExePath } from './dockerExePathProvider';
 
 export interface IDockerInstallStatusProvider {
     isDockerInstalled(): Promise<boolean>
@@ -34,7 +34,7 @@ class DockerInstallStatusProvider implements IDockerInstallStatusProvider {
     public async isDockerInstalledRealTimeCheck(): Promise<boolean> {
         try {
 
-            await execAsync(`${dockerExePath()} -v`);
+            await execAsync(`${ext.dockerContextManager.getDockerCommand()} -v`);
             return true; // As long as the docker command did't throw exception, assume it is installed.
         } catch (error) {
             return false; // docker not installed

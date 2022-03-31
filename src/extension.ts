@@ -197,7 +197,9 @@ namespace Configuration {
                     e.affectsConfiguration('docker.certPath') ||
                     e.affectsConfiguration('docker.tlsVerify') ||
                     e.affectsConfiguration('docker.machineName') ||
-                    e.affectsConfiguration('docker.dockerodeOptions')) {
+                    e.affectsConfiguration('docker.dockerodeOptions') ||
+                    e.affectsConfiguration('docker.dockerPath') ||
+                    e.affectsConfiguration('docker.composeCommand')) {
                     await ext.dockerContextManager.refresh();
                 }
             }

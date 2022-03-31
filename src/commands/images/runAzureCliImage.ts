@@ -7,8 +7,8 @@ import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { executeAsTask } from '../../utils/executeAsTask';
 import { getDockerOSType } from '../../utils/osUtils';
 
@@ -45,6 +45,6 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             vol += ` -v ${workspaceFolder.uri.fsPath}:/workspace`;
         }
 
-        await executeAsTask(context, `${dockerExePath(context)} run ${option} ${vol.trim()} -it --rm mcr.microsoft.com/azure-cli:latest`, 'Azure CLI', { addDockerEnv: true, focus: true });
+        await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} run ${option} ${vol.trim()} -it --rm mcr.microsoft.com/azure-cli:latest`, 'Azure CLI', { addDockerEnv: true, focus: true });
     }
 }
