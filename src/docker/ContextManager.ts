@@ -9,7 +9,7 @@ import * as path from 'path';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { commands, Disposable, Event, EventEmitter, FileSystemWatcher, RelativePattern, window, workspace } from 'vscode';
+import { commands, Disposable, Event, EventEmitter, RelativePattern, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
@@ -75,12 +75,10 @@ export class DockerContextManager implements ContextManager, Disposable {
     private readonly loadingFinishedEmitter = new EventEmitter<unknown | undefined>();
     private readonly contextsCache: AsyncLazy<DockerContext[]>;
     private readonly newCli: AsyncLazy<boolean>;
-    private readonly configFileWatcher: FileSystemWatcher | undefined;
-    private readonly contextFolderWatcher: FileSystemWatcher | undefined;
+    private readonly disposables: Disposable[] = [];
     private refreshing: boolean = false;
 
     private readonly composeCommandLazy: AsyncLazy<string>;
-    private readonly composeCommandLazyDisposable: Disposable;
 
     public constructor() {
         this.contextsCache = new AsyncLazy(async () => this.loadContexts());
@@ -91,13 +89,14 @@ export class DockerContextManager implements ContextManager, Disposable {
         // that are done in CLI. Worst case, a user would have to restart VSCode.
         try {
             if (fse.existsSync(path.join(dockerConfigFolder, dockerConfigFile))) {
-                this.configFileWatcher = workspace.createFileSystemWatcher(
+                const configFileWatcher = workspace.createFileSystemWatcher(
                     new RelativePattern(dockerConfigFolder, dockerConfigFile),
                     true, // Don't expect file to be created (since we already verified its existence)
                     false, // Do expect file to change
                     true // Don't expect file to be deleted (are they uninstalling?!), but if they do, then the tree view will get an ENOENT that it will replace with a nice "Is Docker running?" error message
                 );
-                this.configFileWatcher.onDidChange(async () => this.refresh(), this);
+                this.disposables.push(configFileWatcher);
+                configFileWatcher.onDidChange(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
@@ -105,12 +104,13 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         try {
             if (fse.existsSync(dockerContextsFolder)) {
-                this.contextFolderWatcher = workspace.createFileSystemWatcher(
+                const contextFolderWatcher = workspace.createFileSystemWatcher(
                     new RelativePattern(dockerContextsFolder, '**')
                 );
-                this.contextFolderWatcher.onDidCreate(async () => this.refresh(), this);
-                this.contextFolderWatcher.onDidChange(async () => this.refresh(), this);
-                this.contextFolderWatcher.onDidDelete(async () => this.refresh(), this);
+                this.disposables.push(contextFolderWatcher);
+                contextFolderWatcher.onDidCreate(async () => this.refresh(), this);
+                contextFolderWatcher.onDidChange(async () => this.refresh(), this);
+                contextFolderWatcher.onDidDelete(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
@@ -118,19 +118,20 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         // Set up a lazy to determine the compose command to use, and also set up clearing it on context change
         this.composeCommandLazy = new AsyncLazy<string>(async () => this.determineComposeCommand());
-        this.composeCommandLazyDisposable = this.onContextChanged(() => this.composeCommandLazy.clear());
+        this.disposables.push(
+            this.onContextChanged(() => this.composeCommandLazy.clear())
+        );
 
         // Set the initial DockerApiClient to be the context loading client
         ext.dockerClient = new ContextLoadingClient(this.loadingFinishedEmitter.event);
     }
 
     public dispose(): void {
-        void this.configFileWatcher?.dispose();
-        void this.contextFolderWatcher?.dispose();
-        void this.composeCommandLazyDisposable?.dispose();
+        this.disposables.forEach(d => d.dispose());
 
         // No event is fired so the client present at the end needs to be disposed manually
-        void ext.dockerClient?.dispose();
+        // Additionally, it is not part of the disposables array because it is disposed anytime the context changes, not just at the end
+        ext.dockerClient?.dispose();
     }
 
     public get onContextChanged(): Event<DockerContext> {
@@ -151,7 +152,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Because the cache is cleared, this will load all the contexts before returning the current one
             const currentContext = await this.getCurrentContext();
 
-            void ext.dockerClient?.dispose();
+            ext.dockerClient?.dispose();
 
             // Emit some info about what is being connected to
             /* eslint-disable @typescript-eslint/indent */ // The linter is completely wrong about indentation here
