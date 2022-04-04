@@ -93,6 +93,7 @@
         "onCommand:vscode-docker.registries.azure.viewTaskLogs",
         "onCommand:vscode-docker.registries.connectRegistry",
         "onCommand:vscode-docker.registries.copyImageDigest",
+        "onCommand:vscode-docker.registries.copyRemoteFullTag",
         "onCommand:vscode-docker.registries.deleteImage",
         "onCommand:vscode-docker.registries.deployImageToAzure",
         "onCommand:vscode-docker.registries.deployImageToAci",
@@ -588,6 +589,11 @@
                 },
                 {
                     "command": "vscode-docker.registries.copyImageDigest",
+                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
+                    "group": "regs_tag_1_general@2"
+                },
+                {
+                    "command": "vscode-docker.registries.copyRemoteFullTag",
                     "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
                     "group": "regs_tag_1_general@2"
                 },
@@ -2730,6 +2736,11 @@
             {
                 "command": "vscode-docker.registries.copyImageDigest",
                 "title": "%vscode-docker.commands.registries.copyImageDigest%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+                "command": "vscode-docker.registries.copyRemoteFullTag",
+                "title": "%vscode-docker.commands.registries.copyRemoteFullTag%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
