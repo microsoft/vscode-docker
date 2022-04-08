@@ -1,10 +1,15 @@
-## 1.21.0 - 21 Mar 2022
+## 1.22.0 - 18 April 2022
+### Added
+* Added a setting, `docker.composeCommand`, to allow configuring the command used for Compose operations. If unset, the extension will attempt to automatically detect whether to use `docker compose` or `docker-compose`. [#2977](https://github.com/microsoft/vscode-docker/issues/2977)
+* In Python projects, the `.venv` directory is now added to the `.dockerignore` file, so it will no longer be part of the `docker build` context. [#3476](https://github.com/microsoft/vscode-docker/issues/3476)
+
+## 1.21.0 - 21 March 2022
 ### Added
 * Added the `projectName` option to `docker-compose` tasks, corresponding to `--project-name`. [#3436](https://github.com/microsoft/vscode-docker/issues/3436)
 * Support for the `options.env` and `options.cwd` options on all task types. [#3437](https://github.com/microsoft/vscode-docker/issues/3437)
 * Support for the `${userHome}` task variable on all task types. [#3455](https://github.com/microsoft/vscode-docker/pull/3455)
 
-## 1.20.0 - 22 Feb 2022
+## 1.20.0 - 22 February 2022
 ### Added
 * The "Compose Start" and "Compose Stop" commands available in the explorer context menu will now also be available in the command palette. [#3140](https://github.com/microsoft/vscode-docker/issues/3140)
 
