@@ -588,24 +588,24 @@
                     "group": "regs_tag_1_general@1"
                 },
                 {
-                    "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
-                    "group": "regs_tag_1_general@2"
-                },
-                {
                     "command": "vscode-docker.registries.copyRemoteFullTag",
                     "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
                     "group": "regs_tag_1_general@2"
                 },
                 {
+                    "command": "vscode-docker.registries.copyImageDigest",
+                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
+                    "group": "regs_tag_1_general@3"
+                },
+                {
                     "command": "vscode-docker.registries.deployImageToAzure",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
-                    "group": "regs_tag_1_general@3"
+                    "group": "regs_tag_1_general@4"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent && isAzureAccountInstalled",
-                    "group": "regs_tag_1_general@4"
+                    "group": "regs_tag_1_general@5"
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
