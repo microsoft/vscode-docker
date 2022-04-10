@@ -18,6 +18,7 @@ export async function copyRemoteFullTag(context: IActionContext, node?: DockerV2
         });
     }
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    vscode.env.clipboard.writeText(node.fullTag);
+    // Don't wait
+    void vscode.env.clipboard.writeText(node.fullTag);
     return node.fullTag;
 }
