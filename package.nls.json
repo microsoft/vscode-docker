@@ -268,6 +268,7 @@
     "vscode-docker.commands.registries.connect": "Connect Registry...",
     "vscode-docker.commands.registries.reconnectRegistry": "Re-enter credentials",
     "vscode-docker.commands.registries.copyImageDigest": "Copy Image Digest",
+    "vscode-docker.commands.registries.copyRemoteFullTag": "Copy Full Tag",
     "vscode-docker.commands.registries.deleteImage": "Delete Image...",
     "vscode-docker.commands.registries.deployImageToAzure": "Deploy Image to Azure App Service...",
     "vscode-docker.commands.registries.deployImageToAci": "Deploy Image to Azure Container Instances...",
