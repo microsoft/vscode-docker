@@ -2,6 +2,7 @@
 ### Added
 * Added a setting, `docker.composeCommand`, to allow configuring the command used for Compose operations. If unset, the extension will attempt to automatically detect whether to use `docker compose` or `docker-compose`. [#2977](https://github.com/microsoft/vscode-docker/issues/2977)
 * In Python projects, the `.venv` directory is now added to the `.dockerignore` file, so it will no longer be part of the `docker build` context. [#3476](https://github.com/microsoft/vscode-docker/issues/3476)
+* A "Copy Full Tag" command has been added for images in the Registries view. [#3481](https://github.com/microsoft/vscode-docker/pull/3481)
 
 ## 1.21.0 - 21 March 2022
 ### Added
