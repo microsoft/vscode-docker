@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { randomUUID } from "crypto";
 import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { Progress } from "vscode";
@@ -10,7 +11,7 @@ import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { getArmAppSvc, getArmAuth, getArmContainerRegistry, getAzExtAzureUtils, getUuid } from "../../../utils/lazyPackages";
+import { getArmAppSvc, getArmAuth, getArmContainerRegistry, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreateStep
@@ -63,7 +64,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         }
 
         // 4. On the registry, assign the AcrPull role to the principal representing the website
-        await authClient.roleAssignments.create(registry.id, (await getUuid()).v4(), {
+        await authClient.roleAssignments.create(registry.id, randomUUID(), {
             principalId: siteInfo.identity.principalId,
             roleDefinitionId: acrPullRoleDefinition.id,
             principalType: 'ServicePrincipal',
