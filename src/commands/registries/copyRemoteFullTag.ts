@@ -7,12 +7,12 @@ import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { DockerV2TagTreeItem } from '../../tree/registries/dockerV2/DockerV2TagTreeItem';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
+import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
 
-export async function copyRemoteFullTag(context: IActionContext, node?: DockerV2TagTreeItem): Promise<string> {
+export async function copyRemoteFullTag(context: IActionContext, node?: RemoteTagTreeItem): Promise<string> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, {
+        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerV2.tag, registryExpectedContextValues.dockerHub.tag], {
             ...context,
             noItemFoundErrorMessage: localize('vscode-docker.commands.registries.copyRemoteFullTag.noImages', 'No remote images are available to copy the full tag')
         });
