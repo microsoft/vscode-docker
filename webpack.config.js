@@ -25,9 +25,11 @@ const config = {
     cache: true, // Makes 'watch' builds way faster after the first full build
 
     entry: {
+        /* eslint-disable @typescript-eslint/naming-convention */
         './extension.bundle': './src/extension.ts',
         './dockerfile-language-server-nodejs/lib/server': './node_modules/dockerfile-language-server-nodejs/lib/server.js',
         './compose-language-service/lib/server': './node_modules/@microsoft/compose-language-service/lib/server.js',
+        /* eslint-enable @typescript-eslint/naming-convention */
     }, // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
     output: {
         // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
@@ -118,11 +120,22 @@ const config = {
             module: /node_modules\/ssh2/,
             message: /Can't resolve '.\/crypto\/build\/Release\/sshcrypto.node'/
         },
+        {
+            // Ignore a warning for a missing optional dependency of `@microsoft/vscode-azext-azureappservice`
+            module: /node_modules\/@microsoft\/vscode-azext-azureappservice/,
+            message: /Can't resolve 'bufferutil'/
+        },
+        {
+            // Ignore another warning for a missing optional dependency of `@microsoft/vscode-azext-azureappservice`
+            module: /node_modules\/@microsoft\/vscode-azext-azureappservice/,
+            message: /Can't resolve 'utf-8-validate'/
+        },
         (warning) => false, // No other warnings should be ignored
     ],
 };
 
 if (debugWebpack) {
+    // @ts-expect-error for a spurious type incompatibility
     config.plugins.push(new BundleAnalyzerPlugin({ analyzerMode: 'static' }));
     console.log('Config:', config);
 }
