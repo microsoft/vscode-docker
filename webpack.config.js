@@ -121,13 +121,13 @@ const config = {
             message: /Can't resolve '.\/crypto\/build\/Release\/sshcrypto.node'/
         },
         {
-            // Ignore a warning for a missing optional dependency of `@microsoft/vscode-azext-azureappservice`
-            module: /node_modules\/@microsoft\/vscode-azext-azureappservice/,
+            // Ignore a warning for a missing optional dependency of `ws` via `@microsoft/vscode-azext-azureappservice`
+            module: /node_modules\/ws/,
             message: /Can't resolve 'bufferutil'/
         },
         {
-            // Ignore another warning for a missing optional dependency of `@microsoft/vscode-azext-azureappservice`
-            module: /node_modules\/@microsoft\/vscode-azext-azureappservice/,
+            // Ignore another warning for a missing optional dependency of `ws` via `@microsoft/vscode-azext-azureappservice`
+            module: /node_modules\/ws/,
             message: /Can't resolve 'utf-8-validate'/
         },
         (warning) => false, // No other warnings should be ignored
