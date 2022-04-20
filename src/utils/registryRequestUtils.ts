@@ -5,14 +5,17 @@
 
 import { URL } from "url";
 import { ociClientId } from "../constants";
+import { ext } from "../extensionVariables";
 import { ErrorHandling, RequestLike, RequestOptionsLike, ResponseLike, httpRequest } from './httpRequest';
 
 export function getNextLinkFromHeaders(response: IRegistryRequestResponse<unknown>): string | undefined {
     const linkHeader: string | undefined = response.headers.get('link') as string;
     if (linkHeader) {
+        ext.outputChannel.appendLine(`The value of the 'link' header is '${linkHeader}'.`);
         const match = linkHeader.match(/<(.*)>; rel="next"/i);
         return match ? match[1] : undefined;
     } else {
+        ext.outputChannel.appendLine(`The value of the 'link' header is falsy.`);
         return undefined;
     }
 }
