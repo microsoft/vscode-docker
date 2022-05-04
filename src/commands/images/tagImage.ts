@@ -47,7 +47,7 @@ export async function getTagFromUserInput(context: IActionContext, fullTag: stri
 
 const KnownRegistries: { type: string, regex: RegExp }[] = [
     // Like username/path
-    { type: 'dockerhub-namespace', regex: /^[^.:]+\/[^.:]+\/$/ },
+    { type: 'dockerhub-namespace', regex: /^[^.:]+\/[^.:]+$/ },
 
     { type: 'dockerhub-dockerio', regex: /^docker.io.*\// },
     { type: 'gitlab', regex: /gitlab.*\// },
