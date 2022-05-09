@@ -20,7 +20,7 @@ const minCSharpVersionString = '1.23.9';
 const aspNetBaseImage = 'mcr.microsoft.com/dotnet/aspnet';
 const consoleNetBaseImage = 'mcr.microsoft.com/dotnet/runtime';
 const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
-const linuxTagSuffix = '-focal';
+const linuxTagSuffix = '-jammy';
 
 const cSharpExtensionId = 'ms-dotnettools.csharp';
 const cSharpConfigId = 'csharp';
