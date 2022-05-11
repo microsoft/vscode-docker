@@ -33,9 +33,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
     }
 
     public get iconPath(): vscode.ThemeIcon {
-        return (this as vscode.TreeItem).collapsibleState === vscode.TreeItemCollapsibleState.Expanded
-            ? new vscode.ThemeIcon('folder-opened')
-            : new vscode.ThemeIcon('folder');
+        return new vscode.ThemeIcon('folder');
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
