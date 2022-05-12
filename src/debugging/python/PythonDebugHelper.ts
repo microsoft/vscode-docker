@@ -144,7 +144,13 @@ export class PythonDebugHelper implements DebugHelper {
             return 'localhost';
         }
 
-        // For Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
+        // For Docker Desktop on Linux, we also use 'localhost'
+        const dockerInfo = await ext.dockerClient.info(context.actionContext, context.cancellationToken);
+        if (/Docker Desktop/i.test(dockerInfo.OperatingSystem)) {
+            return 'localhost';
+        }
+
+        // For other Docker setups on Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
         // on the bridge network's ip address (predefined network).
         const networkInspection = await ext.dockerClient.inspectNetwork(context.actionContext, 'bridge', context.cancellationToken);
 
