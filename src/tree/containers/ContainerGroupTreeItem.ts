@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon, TreeItem, TreeItemCollapsibleState } from "vscode";
+import { ThemeIcon, TreeItemCollapsibleState } from "vscode";
 import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
@@ -13,13 +13,14 @@ import { DockerContainerInfo, NonComposeGroupName } from "./ContainersTreeItem";
 
 export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContainerInfo, ContainerProperty> {
     public childTypeLabel: string = 'container';
+    public override readonly initialCollapsibleState: TreeItemCollapsibleState | undefined; // TypeScript gets mad if we don't re-declare this here
 
     public constructor(parent: LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty>, group: string, items: DockerContainerInfo[]) {
         super(parent, group, items);
 
         if (this.parent.groupBySetting === 'Compose Project Name') {
             // Expand compose group nodes by default
-            (this as TreeItem).collapsibleState = TreeItemCollapsibleState.Expanded;
+            this.initialCollapsibleState = TreeItemCollapsibleState.Expanded;
         }
     }
 
