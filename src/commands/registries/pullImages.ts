@@ -10,7 +10,6 @@ import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase
 import { RemoteRepositoryTreeItemBase } from '../../tree/registries/RemoteRepositoryTreeItemBase';
 import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
-import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { logInToDockerCli } from './logInToDockerCli';
 
 export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
@@ -33,5 +32,5 @@ async function pullImages(context: IActionContext, node: RegistryTreeItemBase, i
     await logInToDockerCli(context, node);
 
     // TODO: exe path
-    await executeAsTask(context, `${dockerExePath(context)} pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
+    await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
 }

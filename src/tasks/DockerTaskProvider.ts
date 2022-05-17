@@ -5,7 +5,6 @@
 
 import { IActionContext, callWithTelemetryAndErrorHandling, parseError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
-import { DockerOrchestration } from '../constants';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -51,7 +50,6 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 context.platform = getPlatform(task.definition);
 
                 context.actionContext.telemetry.properties.dockerPlatform = context.platform;
-                context.actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
                 await this.executeTaskInternal(context, task);
             });
         } catch (err) {

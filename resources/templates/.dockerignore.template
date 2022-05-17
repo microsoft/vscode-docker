@@ -1,5 +1,6 @@
 {{#if pythonProjectType}}
 **/__pycache__
+**/.venv
 {{/if}}
 **/.classpath
 **/.dockerignore
@@ -26,4 +27,5 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+LICENSE
 README.md

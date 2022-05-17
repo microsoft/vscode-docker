@@ -9,7 +9,6 @@ import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
-import { DefaultDockerPath, dockerExePath } from '../utils/dockerExePathProvider';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown' | 'composeUpSubset';
 
@@ -97,8 +96,8 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         context,
         template,
         [folder.name, configurationFile],
-        folder,
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '' }
+        folder, // TODO: EXE path
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': await ext.dockerContextManager.getComposeCommand(context) }
     );
 }
 
@@ -166,17 +165,7 @@ export async function selectCommandTemplate(
     actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
     actionContext.telemetry.properties.currentContextType = currentContextType;
 
-    let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
-
-    // TODO: exe path
-    if (resolvedCommand.startsWith(DefaultDockerPath + ' ')) {
-        const dockerPath = dockerExePath(actionContext);
-        if (dockerPath !== DefaultDockerPath) {
-            resolvedCommand = dockerPath + resolvedCommand.substring(DefaultDockerPath.length);
-        }
-    }
-
-    return resolvedCommand;
+    return resolveVariables(selectedTemplate.template, folder, additionalVariables);
 }
 
 async function quickPickTemplate(templates: CommandTemplate[], templatePicker: TemplatePicker): Promise<CommandTemplate> {

@@ -27,6 +27,7 @@ export async function registryRequest<T>(
     const options = {
         method: method,
         headers: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'X-Meta-Source-Client': ociClientId,
         },
         ...customOptions,

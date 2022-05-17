@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.20.5-alpha",
+    "version": "1.22.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -93,6 +93,7 @@
         "onCommand:vscode-docker.registries.azure.viewTaskLogs",
         "onCommand:vscode-docker.registries.connectRegistry",
         "onCommand:vscode-docker.registries.copyImageDigest",
+        "onCommand:vscode-docker.registries.copyRemoteFullTag",
         "onCommand:vscode-docker.registries.deleteImage",
         "onCommand:vscode-docker.registries.deployImageToAzure",
         "onCommand:vscode-docker.registries.deployImageToAci",
@@ -587,19 +588,24 @@
                     "group": "regs_tag_1_general@1"
                 },
                 {
+                    "command": "vscode-docker.registries.copyRemoteFullTag",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/",
+                    "group": "regs_tag_1_general@2"
+                },
+                {
                     "command": "vscode-docker.registries.copyImageDigest",
                     "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
-                    "group": "regs_tag_1_general@2"
+                    "group": "regs_tag_1_general@3"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAzure",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
-                    "group": "regs_tag_1_general@3"
+                    "group": "regs_tag_1_general@4"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent && isAzureAccountInstalled",
-                    "group": "regs_tag_1_general@4"
+                    "group": "regs_tag_1_general@5"
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
@@ -1604,7 +1610,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+                    "default": "${config:docker.dockerPath} build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
                     "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
@@ -1647,7 +1653,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run --rm -d ${exposedPorts} ${tag}",
+                    "default": "${config:docker.dockerPath} run --rm -d ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
@@ -1690,7 +1696,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker run --rm -it ${exposedPorts} ${tag}",
+                    "default": "${config:docker.dockerPath} run --rm -it ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
@@ -1733,7 +1739,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker exec -it ${containerId} ${shellCommand}",
+                    "default": "${config:docker.dockerPath} exec -it ${containerId} ${shellCommand}",
                     "description": "%vscode-docker.config.template.attach.description%"
                 },
                 "docker.commands.logs": {
@@ -1776,7 +1782,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "docker logs --tail 1000 -f ${containerId}",
+                    "default": "${config:docker.dockerPath} logs --tail 1000 -f ${containerId}",
                     "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
@@ -1822,14 +1828,14 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "docker-compose ${configurationFile} up ${detached} ${build}",
+                            "template": "${composeCommand} ${configurationFile} up ${detached} ${build}",
                             "contextTypes": [
                                 "moby"
                             ]
                         },
                         {
                             "label": "Compose Up",
-                            "template": "docker compose ${configurationFile} up ${detached}"
+                            "template": "${composeCommand} ${configurationFile} up ${detached}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
@@ -1877,14 +1883,14 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "docker-compose ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
+                            "template": "${composeCommand} ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
                             "contextTypes": [
                                 "moby"
                             ]
                         },
                         {
                             "label": "Compose Up",
-                            "template": "docker compose ${configurationFile} ${profileList} up ${detached} ${serviceList}"
+                            "template": "${composeCommand} ${configurationFile} ${profileList} up ${detached} ${serviceList}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUpSubset.description%"
@@ -1932,14 +1938,7 @@
                     "default": [
                         {
                             "label": "Compose Down",
-                            "template": "docker-compose ${configurationFile} down",
-                            "contextTypes": [
-                                "moby"
-                            ]
-                        },
-                        {
-                            "label": "Compose Down",
-                            "template": "docker compose ${configurationFile} down"
+                            "template": "${composeCommand} ${configurationFile} down"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"
@@ -2396,11 +2395,9 @@
                     "default": "docker"
                 },
                 "docker.composeCommand": {
-                    "description": "%vscode-docker.config.docker.dockerPath%",
-                    "scope": "machine-overridable",
                     "type": "string",
-                    "enum": ["docker-compose", "docker compose"],
-                    "default": "docker-compose"
+                    "description": "%vscode-docker.config.docker.composeCommand%",
+                    "scope": "machine-overridable"
                 },
                 "docker.enableDockerComposeLanguageService": {
                     "type": "boolean",
@@ -2742,6 +2739,11 @@
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
+                "command": "vscode-docker.registries.copyRemoteFullTag",
+                "title": "%vscode-docker.commands.registries.copyRemoteFullTag%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
                 "command": "vscode-docker.registries.deleteImage",
                 "title": "%vscode-docker.commands.registries.deleteImage%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
@@ -3063,7 +3065,7 @@
         ]
     },
     "engines": {
-        "vscode": "^1.64.0"
+        "vscode": "^1.66.0"
     },
     "capabilities": {
         "virtualWorkspaces": false,
@@ -3105,29 +3107,28 @@
         "vscode.yaml"
     ],
     "devDependencies": {
-        "@types/dockerode": "^3.2.3",
+        "@types/dockerode": "^3.3.8",
         "@types/fs-extra": "^9.0.11",
         "@types/glob": "^7.1.3",
         "@types/mocha": "^9.0.0",
-        "@types/node": "14.x",
+        "@types/node": "16.x",
         "@types/node-fetch": "^2.5.12",
-        "@types/semver": "^7.3.4",
+        "@types/semver": "^7.3.9",
         "@types/tar-stream": "^2.2.0",
-        "@types/uuid": "^8.3.0",
-        "@types/vscode": "1.64.0",
+        "@types/vscode": "1.66.0",
         "@types/xml2js": "^0.4.8",
-        "@typescript-eslint/eslint-plugin": "^5.7.0",
-        "@typescript-eslint/parser": "^5.7.0",
+        "@typescript-eslint/eslint-plugin": "^5.19.0",
+        "@typescript-eslint/parser": "^5.19.0",
         "@vscode/test-electron": "^2.0.0",
         "copy-webpack-plugin": "^10.1.0",
-        "eslint": "^8.4.1",
+        "eslint": "^8.13.0",
         "mocha": "^9.0.2",
         "node-loader": "^2.0.0",
         "ts-loader": "^9.2.3",
-        "typescript": "^4.5.4",
+        "typescript": "^4.6.3",
         "umd-compat-loader": "^2.1.2",
         "vsce": "^2.6.4",
-        "webpack": "^5.65.0",
+        "webpack": "^5.72.0",
         "webpack-bundle-analyzer": "^4.4.1",
         "webpack-cli": "^4.6.0"
     },
@@ -3137,23 +3138,22 @@
         "@azure/arm-containerregistry": "^10.0.0",
         "@azure/storage-blob": "^12.4.1",
         "@docker/sdk": "^1.0.3",
-        "@grpc/grpc-js": "^1.5.0",
-        "@microsoft/compose-language-service": "^0.1.0",
-        "@microsoft/vscode-azext-azureappservice": "^0.1.3",
-        "@microsoft/vscode-azext-azureutils": "^0.1.1",
-        "@microsoft/vscode-azext-utils": "^0.1.0",
+        "@grpc/grpc-js": "^1.6.3",
+        "@microsoft/compose-language-service": "^0.1.1",
+        "@microsoft/vscode-azext-azureappservice": "^0.6.0",
+        "@microsoft/vscode-azext-azureutils": "^0.3.0",
+        "@microsoft/vscode-azext-utils": "^0.3.0",
         "dayjs": "^1.10.4",
-        "dockerfile-language-server-nodejs": "^0.8.0",
+        "dockerfile-language-server-nodejs": "^0.9.0",
         "dockerode": "^3.2.1",
         "fs-extra": "^10.0.0",
-        "glob": "^7.1.6",
-        "gradle-to-js": "^2.0.0",
+        "glob": "^8.0.1",
+        "gradle-to-js": "^2.0.1",
         "handlebars": "^4.7.6",
         "node-fetch": "^2.6.7",
-        "semver": "^7.3.5",
+        "semver": "^7.3.7",
         "tar": "^6.1.11",
         "tar-stream": "^2.2.0",
-        "uuid": "^8.3.2",
         "vscode-languageclient": "^7.0.0",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",

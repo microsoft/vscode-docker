@@ -7,10 +7,10 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
-import { dockerExePath } from '../utils/dockerExePathProvider';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -86,7 +86,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
     private async resolveCommandLine(options: DockerBuildOptions): Promise<CommandLineBuilder> {
         return CommandLineBuilder
             // TODO: exe path
-            .create(dockerExePath(), 'build', '--rm')
+            .create(ext.dockerContextManager.getDockerCommand(), 'build', '--rm')
             .withFlagArg('--pull', options.pull)
             .withNamedArg('-f', options.dockerfile)
             .withKeyValueArgs('--build-arg', options.buildArgs)

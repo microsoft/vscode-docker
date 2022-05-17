@@ -7,7 +7,6 @@ import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { PythonExtensionHelper } from '../../tasks/python/PythonExtensionHelper';
 import { PythonRunTaskDefinition } from '../../tasks/python/PythonTaskHelper';
-import { dockerExePath } from '../../utils/dockerExePathProvider';
 import { RemoteKind, getVSCodeRemoteInfo } from '../../utils/getVSCodeRemoteInfo';
 import { isLinux } from '../../utils/osUtils';
 import { PythonProjectType } from '../../utils/pythonUtils';
@@ -80,7 +79,7 @@ export class PythonDebugHelper implements DebugHelper {
                 },
                 true);
 
-        const args = [...(debugConfiguration.python.args || pythonRunTaskOptions.args || []), dockerExePath(context.actionContext), containerName];
+        const args = [...(debugConfiguration.python.args || pythonRunTaskOptions.args || []), ext.dockerContextManager.getDockerCommand(context.actionContext), containerName];
         const launcherPath = path.join(ext.context.asAbsolutePath('resources'), 'python', 'launcher.py');
 
         return {
@@ -145,7 +144,13 @@ export class PythonDebugHelper implements DebugHelper {
             return 'localhost';
         }
 
-        // For Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
+        // For Docker Desktop on Linux, we also use 'localhost'
+        const dockerInfo = await ext.dockerClient.info(context.actionContext, context.cancellationToken);
+        if (/Docker Desktop/i.test(dockerInfo.OperatingSystem)) {
+            return 'localhost';
+        }
+
+        // For other Docker setups on Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
         // on the bridge network's ip address (predefined network).
         const networkInspection = await ext.dockerClient.inspectNetwork(context.actionContext, 'bridge', context.cancellationToken);
 

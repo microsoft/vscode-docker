@@ -9,13 +9,12 @@ import * as path from 'path';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ExecOptions } from 'child_process';
 import { URL } from 'url';
-import { commands, Disposable, Event, EventEmitter, FileSystemWatcher, RelativePattern, window, workspace } from 'vscode';
+import { commands, Disposable, Event, EventEmitter, RelativePattern, window, workspace } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { AsyncLazy } from '../utils/lazy';
 import { isWindows } from '../utils/osUtils';
 import { execAsync, spawnAsync } from '../utils/spawnAsync';
-import { dockerExePath } from '../utils/dockerExePathProvider';
 import { ContextType, DockerContext, DockerContextInspection, isNewContextType } from './Contexts';
 import { ContextLoadingClient } from './ContextLoadingClient/ContextLoadingClient';
 import { getDockerodeClient, getDockerServeClient } from '../utils/lazyPackages';
@@ -36,6 +35,11 @@ const dockerContextsFolder = path.join(dockerConfigFolder, 'contexts', 'meta');
 const WindowsLocalPipe = 'npipe:////./pipe/docker_engine';
 const UnixLocalPipe = 'unix:///var/run/docker.sock';
 
+const DefaultDockerPath: string = 'docker';
+
+const OldComposeCommand: string = 'docker-compose';
+const NewComposeCommand: string = 'docker compose';
+
 const defaultContext: Partial<DockerContext> = {
     Id: 'default',
     Name: 'default',
@@ -55,6 +59,9 @@ export interface ContextManager {
     getCurrentContext(): Promise<DockerContext>;
     getCurrentContextType(): Promise<ContextType>;
 
+    getDockerCommand(context?: IActionContext): string;
+    getComposeCommand(context?: IActionContext): Promise<string>;
+
     inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection>;
     use(actionContext: IActionContext, contextName: string): Promise<void>;
     remove(actionContext: IActionContext, contextName: string): Promise<void>;
@@ -69,9 +76,10 @@ export class DockerContextManager implements ContextManager, Disposable {
     private readonly loadingFinishedEmitter = new EventEmitter<unknown | undefined>();
     private readonly contextsCache: AsyncLazy<DockerContext[]>;
     private readonly newCli: AsyncLazy<boolean>;
-    private readonly configFileWatcher: FileSystemWatcher | undefined;
-    private readonly contextFolderWatcher: FileSystemWatcher | undefined;
+    private readonly disposables: Disposable[] = [];
     private refreshing: boolean = false;
+
+    private readonly composeCommandLazy: AsyncLazy<string>;
 
     public constructor() {
         this.contextsCache = new AsyncLazy(async () => this.loadContexts());
@@ -82,13 +90,14 @@ export class DockerContextManager implements ContextManager, Disposable {
         // that are done in CLI. Worst case, a user would have to restart VSCode.
         try {
             if (fse.existsSync(path.join(dockerConfigFolder, dockerConfigFile))) {
-                this.configFileWatcher = workspace.createFileSystemWatcher(
+                const configFileWatcher = workspace.createFileSystemWatcher(
                     new RelativePattern(dockerConfigFolder, dockerConfigFile),
                     true, // Don't expect file to be created (since we already verified its existence)
                     false, // Do expect file to change
                     true // Don't expect file to be deleted (are they uninstalling?!), but if they do, then the tree view will get an ENOENT that it will replace with a nice "Is Docker running?" error message
                 );
-                this.configFileWatcher.onDidChange(async () => this.refresh(), this);
+                this.disposables.push(configFileWatcher);
+                configFileWatcher.onDidChange(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
@@ -96,27 +105,34 @@ export class DockerContextManager implements ContextManager, Disposable {
 
         try {
             if (fse.existsSync(dockerContextsFolder)) {
-                this.contextFolderWatcher = workspace.createFileSystemWatcher(
+                const contextFolderWatcher = workspace.createFileSystemWatcher(
                     new RelativePattern(dockerContextsFolder, '**')
                 );
-                this.contextFolderWatcher.onDidCreate(async () => this.refresh(), this);
-                this.contextFolderWatcher.onDidChange(async () => this.refresh(), this);
-                this.contextFolderWatcher.onDidDelete(async () => this.refresh(), this);
+                this.disposables.push(contextFolderWatcher);
+                contextFolderWatcher.onDidCreate(async () => this.refresh(), this);
+                contextFolderWatcher.onDidChange(async () => this.refresh(), this);
+                contextFolderWatcher.onDidDelete(async () => this.refresh(), this);
             }
         } catch {
             // Best effort
         }
+
+        // Set up a lazy to determine the compose command to use, and also set up clearing it on context change
+        this.composeCommandLazy = new AsyncLazy<string>(async () => this.determineComposeCommand());
+        this.disposables.push(
+            this.onContextChanged(() => this.composeCommandLazy.clear())
+        );
 
         // Set the initial DockerApiClient to be the context loading client
         ext.dockerClient = new ContextLoadingClient(this.loadingFinishedEmitter.event);
     }
 
     public dispose(): void {
-        void this.configFileWatcher?.dispose();
-        void this.contextFolderWatcher?.dispose();
+        this.disposables.forEach(d => d.dispose());
 
         // No event is fired so the client present at the end needs to be disposed manually
-        void ext.dockerClient?.dispose();
+        // Additionally, it is not part of the disposables array because it is disposed anytime the context changes, not just at the end
+        ext.dockerClient?.dispose();
     }
 
     public get onContextChanged(): Event<DockerContext> {
@@ -137,7 +153,7 @@ export class DockerContextManager implements ContextManager, Disposable {
             // Because the cache is cleared, this will load all the contexts before returning the current one
             const currentContext = await this.getCurrentContext();
 
-            void ext.dockerClient?.dispose();
+            ext.dockerClient?.dispose();
 
             // Emit some info about what is being connected to
             /* eslint-disable @typescript-eslint/indent */ // The linter is completely wrong about indentation here
@@ -200,7 +216,7 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     public async inspect(actionContext: IActionContext, contextName: string): Promise<DockerContextInspection> {
         // TODO: exe path
-        const { stdout } = await execAsync(`${dockerExePath(actionContext)} context inspect ${contextName}`, { timeout: 10000 });
+        const { stdout } = await execAsync(`${this.getDockerCommand(actionContext)} context inspect ${contextName}`, { timeout: 10000 });
 
         // The result is an array with one entry
         const result: DockerContextInspection[] = JSON.parse(stdout) as DockerContextInspection[];
@@ -209,18 +225,42 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     public async use(actionContext: IActionContext, contextName: string): Promise<void> {
         // TODO: exe path
-        const useCmd: string = `${dockerExePath(actionContext)} context use ${contextName}`;
+        const useCmd: string = `${this.getDockerCommand(actionContext)} context use ${contextName}`;
         await execAsync(useCmd, ContextCmdExecOptions);
     }
 
     public async remove(actionContext: IActionContext, contextName: string): Promise<void> {
         // TODO: exe path
-        const removeCmd: string = `${dockerExePath(actionContext)} context rm ${contextName}`;
+        const removeCmd: string = `${this.getDockerCommand(actionContext)} context rm ${contextName}`;
         await spawnAsync(removeCmd, ContextCmdExecOptions);
     }
 
     public async isNewCli(): Promise<boolean> {
         return this.newCli.getValue();
+    }
+
+    public getDockerCommand(context?: IActionContext): string {
+        const retval = workspace.getConfiguration('docker').get('dockerPath', DefaultDockerPath);
+
+        if (retval !== DefaultDockerPath && context) {
+            context.telemetry.properties.nonstandardDockerPath = 'true';
+        }
+
+        return retval;
+    }
+
+    public async getComposeCommand(context?: IActionContext): Promise<string> {
+        const retval = await this.composeCommandLazy.getValue();
+
+        if (context) {
+            if (retval === NewComposeCommand || retval === OldComposeCommand) {
+                context.telemetry.properties.composeCommand = retval;
+            } else {
+                context.telemetry.properties.composeCommand = 'other';
+            }
+        }
+
+        return retval;
     }
 
     private async loadContexts(): Promise<DockerContext[]> {
@@ -350,7 +390,7 @@ export class DockerContextManager implements ContextManager, Disposable {
     private async tryGetContextsFromCli(actionContext: IActionContext, maybeFixedContextName: string | undefined): Promise<DockerContext[] | undefined> {
         // TODO: exe path
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { stdout } = await execAsync(`${dockerExePath()} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: maybeFixedContextName } });
+        const { stdout } = await execAsync(`${this.getDockerCommand(actionContext)} context ls --format="{{json .}}"`, { ...ContextCmdExecOptions, env: { ...process.env, DOCKER_CONTEXT: maybeFixedContextName } });
 
         const result: DockerContext[] = [];
 
@@ -435,7 +475,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // Otherwise we look at the output of `docker serve --help`
                 // TODO: this is not a very good heuristic
                 // TODO: exe path
-                const { stdout } = await execAsync(`${dockerExePath()} serve --help`);
+                const { stdout } = await execAsync(`${this.getDockerCommand()} serve --help`);
 
                 if (/^\s*Start an api server/i.test(stdout)) {
                     result = true;
@@ -453,6 +493,27 @@ export class DockerContextManager implements ContextManager, Disposable {
 
     private setVsCodeContext(vsCodeContext: VSCodeContext, value: boolean): void {
         void commands.executeCommand('setContext', vsCodeContext, value);
+    }
+
+    private async determineComposeCommand(): Promise<string> {
+        const settingValue = workspace.getConfiguration('docker').get<string | undefined>('composeCommand');
+
+        if (settingValue) {
+            // If a value is configured by settings, we'll return it unconditionally
+            return settingValue;
+        }
+
+        // Otherwise, autodetect!
+        try {
+            // Try running `docker compose version`...
+            await execAsync(`${NewComposeCommand} version`);
+
+            // If that command worked, then assume we should use it
+            return NewComposeCommand;
+        } catch {
+            // Otherwise fall back to the old command
+            return OldComposeCommand;
+        }
     }
 }
 

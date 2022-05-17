@@ -12,7 +12,6 @@ import { registryExpectedContextValues } from '../../../tree/registries/registry
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { executeAsTask } from '../../../utils/executeAsTask';
 import { execAsync } from '../../../utils/spawnAsync';
-import { dockerExePath } from '../../../utils/dockerExePathProvider';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 
 export async function deployImageToAci(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
@@ -43,7 +42,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
     addImageTaggingTelemetry(context, node.fullTag, '');
 
     // TODO: exe path
-    const command = `${dockerExePath(context)} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
+    const command = `${ext.dockerContextManager.getDockerCommand(context)} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
     const title = localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI');
     const options = {
         addDockerEnv: false,
@@ -54,7 +53,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
     } catch {
         // If it fails, try logging in and make one more attempt
         // TODO: exe path
-        await executeAsTask(context, `${dockerExePath(context)} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
+        await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
         await executeAsTask(context, command, title, options);
     }
 }
@@ -65,11 +64,11 @@ async function getImagePorts(fullTag: string, context: IActionContext): Promise<
 
         // 1. Pull the image to the default context
         // TODO: exe path
-        await execAsync(`${dockerExePath(context)} --context default pull ${fullTag}`);
+        await execAsync(`${ext.dockerContextManager.getDockerCommand(context)} --context default pull ${fullTag}`);
 
         // 2. Inspect it in the default context to find out the ports to map
         // TODO: exe path
-        const { stdout } = await execAsync(`${dockerExePath(context)} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
+        const { stdout } = await execAsync(`${ext.dockerContextManager.getDockerCommand(context)} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
 
         try {
             const portsJson = <{ [key: string]: never }>JSON.parse(stdout);
