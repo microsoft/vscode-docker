@@ -27,12 +27,32 @@ import { getDockerodeClient, getDockerServeClient } from '../utils/lazyPackages'
 // for command duration.
 const ContextCmdExecOptions: ExecOptions = { timeout: 5000 };
 
+// 'docker config' (for docker swarm) is not supported by podman
 const dockerConfigFolder = path.join(os.homedir(), '.docker');
 const dockerConfigFile = 'config.json';
 const dockerContextsFolder = path.join(dockerConfigFolder, 'contexts', 'meta');
 
+/*
+ TODO: podman 
+ present version of podman is v4, beginning in v2 has equivalent of LocalPipe API 'libpod'
+ WSL2 ubuntu 22.04 includes podman v3 (version i am using)
+
+ https://podman.io/blogs/2020/06/29/podman-v2-announce.html
+ https://github.com/containers/podman
+ https://docs.podman.io/en/latest/_static/api.html
+
+ to find .sock file run `podman info`  (yaml output)
+ host > remoteSocket > path
+      /mnt/wslg/runtime-dir/podman/podman.sock
+ ^^^ to create the socket file 
+ podman system service -t 5000 &
+    (or switch -t 0 to run forever)
+*/ 
 const WindowsLocalPipe = 'npipe:////./pipe/docker_engine';
 const UnixLocalPipe = 'unix:///var/run/docker.sock';
+// ^^^ this assumption is too docker specific. cheap remedy
+// sudo ln -s /mnt/wslg/runtime-dir/podman/podman.sock docker.sock
+// now plugin seems to work. 
 
 const DefaultDockerPath: string = 'docker';
 
@@ -236,6 +256,13 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     public getDockerCommand(context?: IActionContext): string {
+        /*
+        NOTE: for podman add this line to settings (will result in Failed to connect)
+
+    "docker": {
+        "dockerPath": "podman",
+    },        
+        */
         const retval = workspace.getConfiguration('docker').get('dockerPath', DefaultDockerPath);
 
         if (retval !== DefaultDockerPath && context) {
