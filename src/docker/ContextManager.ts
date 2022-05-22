@@ -35,7 +35,7 @@ const dockerContextsFolder = path.join(dockerConfigFolder, 'contexts', 'meta');
 /*
  TODO: podman 
  present version of podman is v4, beginning in v2 has equivalent of LocalPipe API 'libpod'
- WSL2 ubuntu 22.04 includes podman v3 (version i am using)
+ WSL2 ubuntu 22.04 includes podman v3 (version i am using w/ Win11 insiders)
 
  https://podman.io/blogs/2020/06/29/podman-v2-announce.html
  https://github.com/containers/podman
@@ -47,6 +47,13 @@ const dockerContextsFolder = path.join(dockerConfigFolder, 'contexts', 'meta');
  ^^^ to create the socket file 
  podman system service -t 5000 &
     (or switch -t 0 to run forever)
+
+In windows powershell I ran 
+    `podman system connection list`
+
+    ssh://user@localhost:59667/run/user/1000/podman/podman.sock
+    ssh://root@localhost:59667/run/podman/podman.sock
+
 */ 
 const WindowsLocalPipe = 'npipe:////./pipe/docker_engine';
 const UnixLocalPipe = 'unix:///var/run/docker.sock';
