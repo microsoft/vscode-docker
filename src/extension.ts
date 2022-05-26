@@ -5,8 +5,6 @@
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
-import * as fse from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
@@ -15,16 +13,16 @@ import { registerCommands } from './commands/registerCommands';
 import { registerDebugProvider } from './debugging/DebugHelper';
 import { DockerContextManager } from './docker/ContextManager';
 import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
+import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
-import { cryptoUtils } from './utils/cryptoUtils';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
-import { isLinux, isMac, isWindows } from './utils/osUtils';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -58,7 +56,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.errorHandling.rethrow = true;
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
-        activateContext.telemetry.properties.dockerInstallationIDHash = await getDockerInstallationIDHash();
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -82,6 +79,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
                 '.'
             )
         );
+
+        ext.runtimeManager = new ContainerRuntimeManager();
 
         ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
         // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
@@ -114,17 +113,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         void vscode.commands.executeCommand('vscode-docker.activateRuntimeProviderExtensions');
     });
 
-    // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
-    if (process.env.VSCODE_DOCKER_TEAM === '1') {
-        return {
-            memento: {
-                globalState: ctx.globalState,
-                workspaceState: ctx.workspaceState,
-            },
-        };
-    } else {
-        return undefined;
-    }
+    return new DockerExtensionApi(ctx, ext.runtimeManager);
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
@@ -132,37 +121,6 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
         activateContext.telemetry.properties.isActivationEvent = 'true';
         AzureAccountExtensionListener.dispose();
     });
-}
-
-async function getDockerInstallationIDHash(): Promise<string> {
-    try {
-        if (!isLinux()) {
-            const cached = ext.context.globalState.get<string | undefined>('docker.installIdHash', undefined);
-
-            if (cached) {
-                return cached;
-            }
-
-            let installIdFilePath: string | undefined;
-            if (isWindows() && process.env.APPDATA) {
-                installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
-            } else if (isMac()) {
-                installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
-            }
-
-            // Sync is intentionally used for performance, this is on the activation code path
-            if (installIdFilePath && fse.pathExistsSync(installIdFilePath)) {
-                let result = fse.readFileSync(installIdFilePath, 'utf-8');
-                result = cryptoUtils.hashString(result);
-                await ext.context.globalState.update('docker.installIdHash', result);
-                return result;
-            }
-        }
-    } catch {
-        // Best effort
-    }
-
-    return 'unknown';
 }
 
 /* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */

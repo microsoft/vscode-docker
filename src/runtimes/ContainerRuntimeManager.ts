@@ -6,25 +6,31 @@
 import * as vscode from 'vscode';
 import { IContainersClient } from "@microsoft/vscode-container-runtimes";
 
-export class RuntimeManager {
-    readonly #containerRuntimeClients = new Map<string, IContainersClient>();
+export class ContainerRuntimeManager {
+    private readonly containerRuntimeClients = new Map<string, IContainersClient>();
+    private readonly containerRuntimeClientRegisteredEmitter = new vscode.EventEmitter<IContainersClient>();
+
+    public readonly onContainerRuntimeClientRegistered = this.containerRuntimeClientRegisteredEmitter.event;
 
     public registerContainerRuntimeClient(client: IContainersClient): vscode.Disposable {
-        if (this.#containerRuntimeClients.has(client.id)) {
+        if (!client || !client.id) {
+            throw new Error('Invalid client supplied.');
+        }
+
+        if (this.containerRuntimeClients.has(client.id)) {
             throw new Error(`A container runtime client with ID '${client.id}' is already registered.`);
         }
 
-        this.#containerRuntimeClients.set(client.id, client);
+        this.containerRuntimeClients.set(client.id, client);
+
+        this.containerRuntimeClientRegisteredEmitter.fire(client);
 
         return new vscode.Disposable(() => {
-            this.#containerRuntimeClients.delete(client.id);
+            this.containerRuntimeClients.delete(client.id);
         });
     }
 
     public get runtimeClients(): Array<IContainersClient> {
-        return Array.from(this.#containerRuntimeClients.values());
+        return Array.from(this.containerRuntimeClients.values());
     }
 }
-
-const instance = new RuntimeManager();
-export default instance;

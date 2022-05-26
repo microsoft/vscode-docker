@@ -6,6 +6,7 @@
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from "@microsoft/vscode-azext-utils";
 import { ExtensionContext, TreeView } from "vscode";
 import { IContainersClient } from "@microsoft/vscode-container-runtimes";
+import { ContainerRuntimeManager } from "./runtimes/ContainerRuntimeManager";
 // import { ContextManager } from './docker/ContextManager';
 // import { DockerApiClient } from './docker/DockerApiClient';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
@@ -26,6 +27,8 @@ export namespace ext {
 
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
+
+    export let runtimeManager: ContainerRuntimeManager;
 
     //export let dockerContextManager: ContextManager;
     export let dockerClient: IContainersClient;

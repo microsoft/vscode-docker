@@ -5,12 +5,13 @@
 
 import * as vscode from 'vscode';
 import { DockerExtensionExport, IContainersClient } from '@microsoft/vscode-container-runtimes';
-import { RuntimeManager } from './runtimes/RuntimeManager';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 
 export class DockerExtensionApi implements MementoExplorerExport, DockerExtensionExport {
     readonly #extensionMementos: ExtensionMementos | undefined;
+    readonly #runtimeManager: ContainerRuntimeManager;
 
-    public constructor(ctx: vscode.ExtensionContext, private readonly runtimeManager: RuntimeManager) {
+    public constructor(ctx: vscode.ExtensionContext, runtimeManager: ContainerRuntimeManager) {
         // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
         if (process.env.VSCODE_DOCKER_TEAM === '1') {
             this.#extensionMementos = {
@@ -18,6 +19,8 @@ export class DockerExtensionApi implements MementoExplorerExport, DockerExtensio
                 workspaceState: ctx.workspaceState,
             };
         }
+
+        this.#runtimeManager = runtimeManager;
     }
 
     public get memento(): ExtensionMementos | undefined {
@@ -25,11 +28,7 @@ export class DockerExtensionApi implements MementoExplorerExport, DockerExtensio
     }
 
     public registerContainerRuntimeClient(client: IContainersClient): vscode.Disposable {
-        if (!client) {
-            throw new Error('Invalid client supplied.');
-        }
-
-        return this.runtimeManager.registerContainerRuntimeClient(client);
+        return this.#runtimeManager.registerContainerRuntimeClient(client);
     }
 }
 
