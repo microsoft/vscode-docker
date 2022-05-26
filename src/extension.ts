@@ -109,6 +109,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateComposeLanguageClient(ctx);
 
         registerListeners();
+
+        // Activate alternate runtime providers
+        void vscode.commands.executeCommand('vscode-docker.activateRuntimeProviderExtensions');
     });
 
     // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension

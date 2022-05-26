@@ -2403,10 +2403,20 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.enableDockerComposeLanguageService%"
+                },
+                "containers.runtimeProvider": {
+                    "type": "string",
+                    "description": "Which runtime provider to use",
+                    "scope": "machine-overridable"
                 }
             }
         },
         "commands": [
+            {
+                "command": "vscode-docker.activateRuntimeProviderExtensions",
+                "title": "Activate alternate container runtime extensions",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
             {
                 "command": "vscode-docker.compose.down",
                 "title": "%vscode-docker.commands.compose.down%",
