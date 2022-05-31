@@ -88,8 +88,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             asgiModule = wizardContext.pythonArtifact.file.replace(/\.[^/.]+$/, '');
         }
 
-        // Replace forward-slashes with dots.
-        asgiModule = asgiModule.replace(/\//g, '.');
+        // Replace slashes with dots.
+        asgiModule = asgiModule.replace(path.sep, '.');
 
         wizardContext.pythonCmdParts = [
             'gunicorn',
@@ -121,8 +121,8 @@ export class PythonGatherInformationStep extends GatherInformationStep<PythonSca
             wsgiModule = wizardContext.pythonArtifact.file.replace(/\.[^/.]+$/, '');
         }
 
-        // Replace forward-slashes with dots.
-        wsgiModule = wsgiModule.replace(/\//g, '.');
+        // Replace slashes with dots.
+        wsgiModule = wsgiModule.replace(path.sep, '.');
 
         wizardContext.pythonCmdParts = [
             'gunicorn',

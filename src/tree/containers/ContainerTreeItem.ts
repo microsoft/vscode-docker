@@ -16,7 +16,16 @@ import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
 
-export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSelectNode {
+/**
+ * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.
+ */
+interface ContainerTreeItemUsedByRemoteContainers {
+    readonly containerDesc: {
+        readonly Id: string;
+    };
+}
+
+export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSelectNode, ContainerTreeItemUsedByRemoteContainers {
     public static allContextRegExp: RegExp = /Container$/;
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerInfo;
@@ -76,8 +85,6 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
 
     /**
      * @deprecated This is only kept for backwards compatability with the "Remote Containers" extension
-     * They add a context menu item "Attach Visual Studio Code" to our container nodes that relies on containerDesc
-     * https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers
      */
     public get containerDesc(): { Id: string } {
         return {

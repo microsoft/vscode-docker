@@ -11,7 +11,14 @@ import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
 
-export class VolumeTreeItem extends ToolTipTreeItem {
+/**
+ * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.
+ */
+interface VolumeTreeItemUsedByRemoteContainers {
+    readonly volumeName: string;
+}
+
+export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUsedByRemoteContainers {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
     private readonly _item: DockerVolume;
