@@ -113,6 +113,7 @@ async function getServiceSubsets(workspaceFolder: vscode.WorkspaceFolder, compos
         // Start by getting a new command with the exact same files list (replaces the "up ..." or "down ..." with "config --services" or "config --profiles")
         const configCommand = composeCommand.replace(composeCommandReplaceRegex, `config --${type}`);
 
+        // TODO: exe path
         const { stdout } = await execAsync(configCommand, { cwd: workspaceFolder.uri.fsPath });
 
         // The output of the config command is a list of services / profiles, one per line

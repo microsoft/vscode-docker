@@ -506,6 +506,7 @@ export class DockerContextManager implements ContextManager, Disposable {
         // Otherwise, autodetect!
         try {
             // Try running `docker compose version`...
+            // TODO: exe path
             await execAsync(`${NewComposeCommand} version`);
 
             // If that command worked, then assume we should use it

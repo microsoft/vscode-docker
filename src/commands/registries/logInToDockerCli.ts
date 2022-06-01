@@ -51,6 +51,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                 .withArg('--password-stdin');
 
             try {
+                // TODO: exe path
                 await execAsync(command.build(), { stdin: password });
                 ext.outputChannel.appendLine('Login succeeded.');
             } catch (err) {

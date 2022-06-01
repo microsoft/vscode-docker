@@ -5,10 +5,8 @@
 
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from "@microsoft/vscode-azext-utils";
 import { ExtensionContext, TreeView } from "vscode";
-import { IContainersClient } from "@microsoft/vscode-container-runtimes";
+import { IContainersClient } from "@microsoft/container-runtimes";
 import { ContainerRuntimeManager } from "./runtimes/ContainerRuntimeManager";
-// import { ContextManager } from './docker/ContextManager';
-// import { DockerApiClient } from './docker/DockerApiClient';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
@@ -30,8 +28,7 @@ export namespace ext {
 
     export let runtimeManager: ContainerRuntimeManager;
 
-    //export let dockerContextManager: ContextManager;
-    export let dockerClient: IContainersClient;
+    export let containerClient: IContainersClient;
     export let treeInitError: unknown;
     export const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { IContainersClient } from "@microsoft/vscode-container-runtimes";
+import { IContainersClient } from "@microsoft/container-runtimes";
 
 export class ContainerRuntimeManager {
     private readonly containerRuntimeClients = new Map<string, IContainersClient>();
