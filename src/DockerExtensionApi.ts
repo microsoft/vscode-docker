@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DockerExtensionExport, IContainersClient } from '@microsoft/vscode-container-runtimes';
+import { DockerExtensionExport, IContainersClient } from '@microsoft/container-runtimes';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 
 export class DockerExtensionApi implements MementoExplorerExport, DockerExtensionExport {
