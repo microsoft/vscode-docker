@@ -5,7 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandResponseLike, CommandRunner, normalizeCommandResponseLike } from "@microsoft/container-runtimes";
+import { CommandResponseLike, CommandRunner, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
 
 interface ExecuteAsTaskOptions {
     taskName: string;
@@ -16,7 +16,7 @@ interface ExecuteAsTaskOptions {
     focus?: boolean;
 }
 
-export const ExecuteAsTaskRunner: CommandRunner = async <T>(commandResponseLike: CommandResponseLike<T>, options: ExecuteAsTaskOptions): Promise<never> => {
+export const ExecuteAsTaskRunner: CommandRunner<ExecuteAsTaskOptions> = async <T>(commandResponseLike: CommandResponseLike<T>, options: ExecuteAsTaskOptions): Promise<never> => {
     const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
     const task = new vscode.Task(
         { type: 'shell' },
