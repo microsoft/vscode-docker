@@ -6,11 +6,11 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { ContainerOS } from '@microsoft/container-runtimes';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { DockerOSType } from '../docker/Common';
 import { ext } from '../extensionVariables';
 
-export async function getDockerOSType(context: IActionContext): Promise<DockerOSType> {
+export async function getDockerOSType(context: IActionContext): Promise<ContainerOS> {
     if (os.platform() !== 'win32') {
         // On Linux or macOS, this can only ever be linux,
         // so short-circuit the Docker call entirely.

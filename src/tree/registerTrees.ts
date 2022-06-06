@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext, registerEvent } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { registerCommand } from '../commands/registerCommands';
 import { ext } from '../extensionVariables';
 import { ContainersTreeItem } from './containers/ContainersTreeItem';
@@ -26,9 +26,6 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(containersLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.containersTree.loadMore(node, context));
     registerCommand('vscode-docker.containers.refresh', async (context: IActionContext, node?: AzExtTreeItem) => {
-        if (ext.treeInitError) {
-            await ext.dockerContextManager.refresh();
-        }
         await ext.containersTree.refresh(context, node);
     });
 
@@ -41,9 +38,6 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(networksLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.networksTree.loadMore(node, context));
     registerCommand('vscode-docker.networks.refresh', async (context: IActionContext, node?: AzExtTreeItem) => {
-        if (ext.treeInitError) {
-            await ext.dockerContextManager.refresh();
-        }
         await ext.networksTree.refresh(context, node);
     });
 
@@ -56,9 +50,6 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(imagesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.imagesTree.loadMore(node, context));
     registerCommand('vscode-docker.images.refresh', async (context: IActionContext, node?: AzExtTreeItem) => {
-        if (ext.treeInitError) {
-            await ext.dockerContextManager.refresh();
-        }
         await ext.imagesTree.refresh(context, node);
     });
 
@@ -80,9 +71,6 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(volumesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.volumesTree.loadMore(node, context));
     registerCommand('vscode-docker.volumes.refresh', async (context: IActionContext, node?: AzExtTreeItem) => {
-        if (ext.treeInitError) {
-            await ext.dockerContextManager.refresh();
-        }
         await ext.volumesTree.refresh(context, node);
     });
 
@@ -94,18 +82,7 @@ export function registerTrees(): void {
     ext.contextsRoot.registerRefreshEvents(ext.contextsTreeView);
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(contextsLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.contextsTree.loadMore(node, context));
-
-    // Refresh button will trigger a full refresh of context data from underlying source, the change event will actually refresh the tree
     registerCommand('vscode-docker.contexts.refresh', async (context: IActionContext, node?: AzExtTreeItem) => {
-        if (ext.treeInitError) {
-            await ext.dockerContextManager.refresh();
-        }
-        await ext.dockerContextManager.refresh();
-    });
-    // Refresh the contexts tree after contexts change
-    registerEvent('onContextChanged.refresh', ext.dockerContextManager.onContextChanged, async (context: IActionContext) => {
-        context.telemetry.suppressAll = true;
-        context.errorHandling.suppressDisplay = true;
         await ext.contextsTree.refresh(context);
     });
 

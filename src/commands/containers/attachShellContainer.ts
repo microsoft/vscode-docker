@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerOS } from '@microsoft/container-runtimes';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { executeAsTask } from '../../utils/executeAsTask';
-import { execAsync } from '../../utils/spawnAsync';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
@@ -22,9 +21,10 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     }
 
     let shellCommand: string;
-    let osType: DockerOSType;
+    let osType: ContainerOS;
     try {
-        osType = (await ext.dockerClient.inspectContainer(context, node.containerId))?.Platform || 'linux';
+        const inspectResults = await ext.shellClient(ext.containerClient.inspectContainers({ containers: [node.containerId] }), {});
+        osType = inspectResults?.[0]?.operatingSystem || 'linux';
     } catch {
         // Assume Linux if the above fails
         osType = 'linux';
@@ -46,8 +46,8 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
             // If so use it, otherwise use sh
             try {
                 // If this succeeds, bash is present (exit code 0)
-                // TODO: exe path
-                await execAsync(`${ext.dockerContextManager.getDockerCommand(context)} exec -i ${node.containerId} sh -c "which bash"`);
+                // TODO: Exec will not throw if it fails
+                await ext.shellClient(ext.containerClient.execContainer({ container: node.containerId, interactive: true, command: `sh -c "which bash"` }), {});
                 shellCommand = 'bash';
             } catch {
                 shellCommand = 'sh';
