@@ -118,6 +118,7 @@
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
         "onCommand:vscode-docker.contexts.create.aci",
+        "onCommand:vscode-docker.runtimes.activate",
         "onTaskType:docker-build",
         "onTaskType:docker-run",
         "onTaskType:docker-compose",
@@ -232,6 +233,10 @@
                 },
                 {
                     "command": "vscode-docker.images.hideDangling",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.runtimes.activate",
                     "when": "never"
                 }
             ],
@@ -2413,11 +2418,6 @@
         },
         "commands": [
             {
-                "command": "vscode-docker.activateRuntimeProviderExtensions",
-                "title": "Activate alternate container runtime extensions",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
-            {
                 "command": "vscode-docker.compose.down",
                 "title": "%vscode-docker.commands.compose.down%",
                 "category": "%vscode-docker.commands.category.docker%"
@@ -2898,6 +2898,10 @@
                 "title": "%vscode-docker.commands.contexts.create.aci%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(add)"
+            },
+            {
+                "command": "vscode-docker.runtimes.activate",
+                "title": "%vscode-docker.commands.runtimes.activate%"
             }
         ],
         "views": {
@@ -3075,7 +3079,7 @@
         ]
     },
     "engines": {
-        "vscode": "^1.66.0"
+        "vscode": "^1.69.0"
     },
     "capabilities": {
         "virtualWorkspaces": false,
@@ -3123,7 +3127,7 @@
         "@types/node": "16.x",
         "@types/node-fetch": "^2.5.12",
         "@types/semver": "^7.3.9",
-        "@types/vscode": "1.66.0",
+        "@types/vscode": "1.68.0",
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^5.19.0",
         "@typescript-eslint/parser": "^5.19.0",

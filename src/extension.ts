@@ -95,7 +95,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
                     // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
                     isCaseSensitive: true,
                     isReadonly: false
-                })
+                }
+            )
         );
 
         registerTrees();
@@ -110,7 +111,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerListeners();
 
         // Activate alternate runtime providers
-        void vscode.commands.executeCommand('vscode-docker.activateRuntimeProviderExtensions');
+        void vscode.commands.executeCommand('vscode-docker.runtimes.activate');
     });
 
     return new DockerExtensionApi(ctx, ext.runtimeManager);
