@@ -3079,7 +3079,7 @@
         ]
     },
     "engines": {
-        "vscode": "^1.69.0"
+        "vscode": "^1.66.0"
     },
     "capabilities": {
         "virtualWorkspaces": false,
@@ -3127,7 +3127,7 @@
         "@types/node": "16.x",
         "@types/node-fetch": "^2.5.12",
         "@types/semver": "^7.3.9",
-        "@types/vscode": "1.68.0",
+        "@types/vscode": "1.66.0",
         "@types/xml2js": "^0.4.8",
         "@typescript-eslint/eslint-plugin": "^5.19.0",
         "@typescript-eslint/parser": "^5.19.0",
