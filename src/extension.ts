@@ -11,8 +11,7 @@ import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelect
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { registerDebugProvider } from './debugging/DebugHelper';
-import { DockerContextManager } from './docker/ContextManager';
-import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
+import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
@@ -82,11 +81,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         ext.runtimeManager = new ContainerRuntimeManager();
 
-        ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
-        // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
-        // No need to wait thanks to ContextLoadingClient
-        void ext.dockerContextManager.refresh();
-
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
                 'docker',
@@ -94,7 +88,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
                 {
                     // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
                     isCaseSensitive: true,
-                    isReadonly: false
+                    isReadonly: false,
                 }
             )
         );

@@ -5,9 +5,9 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandResponseLike, CommandRunner, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
+import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
 
-interface ExecuteAsTaskOptions {
+interface TaskCommandRunnerOptions {
     taskName: string;
     workspaceFolder?: vscode.WorkspaceFolder;
     cwd?: string;
@@ -16,14 +16,25 @@ interface ExecuteAsTaskOptions {
     focus?: boolean;
 }
 
-export const ExecuteAsTaskRunner: CommandRunner<ExecuteAsTaskOptions> = async <T>(commandResponseLike: CommandResponseLike<T>, options: ExecuteAsTaskOptions): Promise<never> => {
-    const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
+export class TaskCommandRunnerFactory implements ICommandRunnerFactory {
+    public constructor(private readonly options: TaskCommandRunnerOptions) {
+    }
+
+    public getCommandRunner(): CommandRunner {
+        return async <T>(commandResponseLike: CommandResponseLike<T>) => {
+            const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
+            return await executeAsTask(commandResponse.command, commandResponse.args, this.options);
+        };
+    }
+}
+
+async function executeAsTask(command: string, args: vscode.ShellQuotedString[], options: TaskCommandRunnerOptions): Promise<never> {
     const task = new vscode.Task(
         { type: 'shell' },
         options.workspaceFolder ?? vscode.TaskScope.Workspace,
         options.taskName,
-        'Docker',
-        new vscode.ShellExecution(commandResponse.command, commandResponse.args, { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() }),
+        'Containers',
+        new vscode.ShellExecution(command, args, { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() }),
         [] // problemMatchers
     );
 
@@ -56,4 +67,4 @@ export const ExecuteAsTaskRunner: CommandRunner<ExecuteAsTaskOptions> = async <T
     });
 
     return taskEndPromise;
-};
+}

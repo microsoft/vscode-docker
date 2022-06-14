@@ -11,13 +11,13 @@ import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
 
 export async function getDockerOSType(context: IActionContext): Promise<ContainerOS> {
-    if (os.platform() !== 'win32') {
+    if (!isWindows()) {
         // On Linux or macOS, this can only ever be linux,
         // so short-circuit the Docker call entirely.
         return 'linux';
     } else {
-        const info = await ext.dockerClient.info(context);
-        return info?.OSType || 'linux';
+        const info = await ext.defaultShellCR()(ext.containerClient.info({}));
+        return info?.osType || 'linux';
     }
 }
 

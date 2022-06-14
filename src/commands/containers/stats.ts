@@ -5,10 +5,15 @@
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
-import { executeAsTask } from '../../utils/executeAsTask';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 
 export async function stats(context: IActionContext): Promise<void> {
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: 'stats'
+        }
+    );
+
     // Don't wait
-    // TODO: exe path
-    void executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} stats`, 'docker stats', { addDockerEnv: true });
+    void taskCRF.getCommandRunner()(ext.containerClient.statsContainers({ all: true }));
 }

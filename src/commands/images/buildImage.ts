@@ -9,7 +9,6 @@ import * as vscode from "vscode";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
-import { executeAsTask } from "../../utils/executeAsTask";
 import { getValidImageNameFromPath } from "../../utils/getValidImageName";
 import { delay } from "../../utils/promiseUtils";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";

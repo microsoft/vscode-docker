@@ -23,8 +23,6 @@ export async function restartContainer(context: IActionContext, node?: Container
     const references = await confirmAllAffectedContainers(context, nodes);
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.restart.restarting', 'Restarting Container(s)...') }, async () => {
-        await Promise.all(references.map(async ref => {
-            await ext.dockerClient.restartContainer(context, ref);
-        }));
+        await ext.defaultShellCR()(ext.containerClient.restartContainers({ container: references }));
     });
 }

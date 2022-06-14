@@ -6,7 +6,6 @@
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { localize } from "../../localize";
-import { executeAsTask } from '../../utils/executeAsTask';
 import { Item, createFileItem, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';

@@ -5,10 +5,13 @@
 
 import * as vscode from 'vscode';
 import { IContainersClient } from "@microsoft/container-runtimes";
+import { ContextManager } from './ContextManager';
 
 export class ContainerRuntimeManager {
     private readonly containerRuntimeClients = new Map<string, IContainersClient>();
     private readonly containerRuntimeClientRegisteredEmitter = new vscode.EventEmitter<IContainersClient>();
+
+    private readonly _contextManager: ContextManager = new ContextManager();
 
     public readonly onContainerRuntimeClientRegistered = this.containerRuntimeClientRegisteredEmitter.event;
 
@@ -32,5 +35,9 @@ export class ContainerRuntimeManager {
 
     public get runtimeClients(): Array<IContainersClient> {
         return Array.from(this.containerRuntimeClients.values());
+    }
+
+    public get contextManager(): ContextManager {
+        return this._contextManager;
     }
 }

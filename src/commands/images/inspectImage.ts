@@ -17,6 +17,6 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
         });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
-    await openReadOnlyJson(node, inspectInfo);
+    const inspectResult = await ext.defaultShellCR()(ext.containerClient.inspectImages({ images: [node.imageId] }));
+    await openReadOnlyJson(node, inspectResult[0].raw);
 }

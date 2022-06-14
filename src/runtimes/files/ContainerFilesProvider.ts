@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ContainerOS } from '@microsoft/container-runtimes';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
 import { DockerApiClient } from '../DockerApiClient';

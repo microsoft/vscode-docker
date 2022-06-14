@@ -7,7 +7,6 @@ import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { selectLogsCommand } from '../selectCommandTemplate';
 
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {

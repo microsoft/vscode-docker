@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { isWindows } from '../../utils/osUtils';
 
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {

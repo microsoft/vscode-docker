@@ -8,7 +8,6 @@ import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
@@ -23,7 +22,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     let shellCommand: string;
     let osType: ContainerOS;
     try {
-        const inspectResults = await ext.shellClient(ext.containerClient.inspectContainers({ containers: [node.containerId] }), {});
+        const inspectResults = await ext.defaultShellCR()(ext.containerClient.inspectContainers({ containers: [node.containerId] }));
         osType = inspectResults?.[0]?.operatingSystem || 'linux';
     } catch {
         // Assume Linux if the above fails
@@ -36,9 +35,9 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // On Windows containers, always use cmd
         shellCommand = 'cmd';
     } else {
-        const currentContext = await ext.dockerContextManager.getCurrentContext();
+        const currentContext = await ext.runtimeManager.contextManager.getCurrentContext();
 
-        if (currentContext.ContextType === 'aci') {
+        if (currentContext.type === 'aci') {
             // If it's ACI we have to do sh, because it's not possible to check if bash is present
             shellCommand = 'sh';
         } else {
@@ -47,7 +46,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
             try {
                 // If this succeeds, bash is present (exit code 0)
                 // TODO: Exec will not throw if it fails
-                await ext.shellClient(ext.containerClient.execContainer({ container: node.containerId, interactive: true, command: `sh -c "which bash"` }), {});
+                await ext.defaultShellCR()(ext.containerClient.execContainer({ container: node.containerId, interactive: true, command: `sh -c "which bash"` }));
                 shellCommand = 'bash';
             } catch {
                 shellCommand = 'sh';
