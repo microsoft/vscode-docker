@@ -4,14 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DockerExtensionExport, IContainersClient } from '@microsoft/container-runtimes';
+import { DockerExtensionExport, IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
 export class DockerExtensionApi implements MementoExplorerExport, DockerExtensionExport {
     readonly #extensionMementos: ExtensionMementos | undefined;
-    readonly #runtimeManager: ContainerRuntimeManager;
+    readonly #containerRuntimeManager: ContainerRuntimeManager;
+    readonly #orchestratorRuntimeManager: OrchestratorRuntimeManager;
 
-    public constructor(ctx: vscode.ExtensionContext, runtimeManager: ContainerRuntimeManager) {
+    public constructor(ctx: vscode.ExtensionContext, runtimeManager: ContainerRuntimeManager, orchestratorRuntimeManager: OrchestratorRuntimeManager) {
         // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
         if (process.env.VSCODE_DOCKER_TEAM === '1') {
             this.#extensionMementos = {
@@ -20,7 +22,8 @@ export class DockerExtensionApi implements MementoExplorerExport, DockerExtensio
             };
         }
 
-        this.#runtimeManager = runtimeManager;
+        this.#containerRuntimeManager = runtimeManager;
+        this.#orchestratorRuntimeManager = orchestratorRuntimeManager;
     }
 
     public get memento(): ExtensionMementos | undefined {
@@ -28,7 +31,11 @@ export class DockerExtensionApi implements MementoExplorerExport, DockerExtensio
     }
 
     public registerContainerRuntimeClient(client: IContainersClient): vscode.Disposable {
-        return this.#runtimeManager.registerContainerRuntimeClient(client);
+        return this.#containerRuntimeManager.registerRuntimeClient(client);
+    }
+
+    public registerContainerOrchestratorClient(client: IContainerOrchestratorClient): vscode.Disposable {
+        return this.#orchestratorRuntimeManager.registerRuntimeClient(client);
     }
 }
 

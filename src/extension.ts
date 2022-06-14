@@ -22,6 +22,7 @@ import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -80,6 +81,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         );
 
         ext.runtimeManager = new ContainerRuntimeManager();
+        ext.orchestratorManager = new OrchestratorRuntimeManager();
 
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
@@ -108,7 +110,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         void vscode.commands.executeCommand('vscode-docker.runtimes.activate');
     });
 
-    return new DockerExtensionApi(ctx, ext.runtimeManager);
+    return new DockerExtensionApi(ctx, ext.runtimeManager, ext.orchestratorManager);
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
