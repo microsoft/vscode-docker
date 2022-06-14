@@ -39,6 +39,14 @@ export class ContextManager {
         return allContexts.find(c => c.current);
     }
 
+    public async isInCloudContext(): Promise<boolean> {
+        const currentContext = await this.getCurrentContext();
+
+        return !!currentContext && // Context must exist
+            !!currentContext.type && // Context must have a type
+            /aci|ecs/i.test(currentContext.type); // Context type must be ACI or ECS
+    }
+
     private tryGetCurrentContext(allContexts: Context[]): Context | undefined {
         if (allContexts.length === 0) {
             return undefined;

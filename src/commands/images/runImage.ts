@@ -27,15 +27,15 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
+    const inspectResult = await ext.defaultShellCR()(ext.containerClient.inspectImages({ images: [node.imageId] }));
 
-    context.telemetry.properties.containerOS = inspectInfo.Os || 'linux';
+    context.telemetry.properties.containerOS = inspectResult?.[0]?.operatingSystem || 'linux';
 
     const terminalCommand = await selectRunCommand(
         context,
         node.fullTag,
         interactive,
-        inspectInfo?.Config?.ExposedPorts
+        inspectResult?.[0]?.ports
     );
 
     await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true, alwaysRunNew: interactive });

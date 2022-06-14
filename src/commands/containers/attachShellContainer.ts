@@ -35,9 +35,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // On Windows containers, always use cmd
         shellCommand = 'cmd';
     } else {
-        const currentContext = await ext.runtimeManager.contextManager.getCurrentContext();
-
-        if (currentContext.type === 'aci') {
+        if (await ext.runtimeManager.contextManager.isInCloudContext()) {
             // If it's ACI we have to do sh, because it's not possible to check if bash is present
             shellCommand = 'sh';
         } else {

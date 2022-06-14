@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { DriverType } from '../../docker/Networks';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { getDockerOSType } from '../../utils/osUtils';
@@ -18,7 +17,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
 
     const osType = await getDockerOSType(context);
 
-    const drivers: { label: DriverType }[] = osType === 'windows'
+    const drivers: { label: string }[] = osType === 'windows'
         ? [
             { label: 'nat' },
             { label: 'transparent' }
@@ -37,5 +36,5 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         }
     );
 
-    await ext.dockerClient.createNetwork(context, { Name: name, Driver: driverSelection.label });
+    await ext.defaultShellCR()(ext.containerClient.createNetwork({ name: name, driver: driverSelection.label }));
 }

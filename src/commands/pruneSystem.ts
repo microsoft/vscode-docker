@@ -17,16 +17,31 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },
         async () => {
-            const containersResult = await ext.dockerClient.pruneContainers(context);
-            const imagesResult = await ext.dockerClient.pruneImages(context);
-            const networksResult = await ext.dockerClient.pruneNetworks(context);
-            const volumesResult = await ext.dockerClient.pruneVolumes(context);
+            const containersResult = await ext.defaultShellCR()(ext.containerClient.pruneContainers({}));
+            const imagesResult = await ext.defaultShellCR()(ext.containerClient.pruneImages({}));
+            const networksResult = await ext.defaultShellCR()(ext.containerClient.pruneNetworks({}));
+            const volumesResult = await ext.defaultShellCR()(ext.containerClient.pruneVolumes({}));
 
-            const mbReclaimed = convertToMB(containersResult.SpaceReclaimed + imagesResult.SpaceReclaimed + volumesResult.SpaceReclaimed);
-            const message = localize('vscode-docker.commands.pruneSystem.removed', 'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.', containersResult.ObjectsDeleted, imagesResult.ObjectsDeleted, networksResult.ObjectsDeleted, volumesResult.ObjectsDeleted, mbReclaimed);
-            // don't wait
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showInformationMessage(message);
+            let message: string;
+            if (containersResult?.containersDeleted?.length && Number.isInteger(containersResult?.spaceReclaimed) &&
+                imagesResult?.imagesDeleted?.length && Number.isInteger(imagesResult?.spaceReclaimed) &&
+                networksResult?.networksDeleted?.length &&
+                volumesResult?.volumesDeleted?.length && Number.isInteger(volumesResult?.spaceReclaimed)) {
+                message = localize(
+                    'vscode-docker.commands.pruneSystem.removed',
+                    'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.',
+                    containersResult.containersDeleted.length,
+                    imagesResult.imagesDeleted.length,
+                    networksResult.networksDeleted.length,
+                    volumesResult.volumesDeleted.length,
+                    convertToMB(containersResult.spaceReclaimed + imagesResult.spaceReclaimed + volumesResult.spaceReclaimed)
+                );
+            } else {
+                message = localize('vscode-docker.commands.pruneSystem.removed2', 'Removed stopped containers, dangling images, unused networks, and unused volumes.');
+            }
+
+            // Don't wait
+            void vscode.window.showInformationMessage(message);
         }
     );
 }
