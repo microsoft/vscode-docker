@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContextItem } from '@microsoft/container-runtimes';
+import { InspectContextsItem, ListContextItem } from '@microsoft/container-runtimes';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 
-type Context = ListContextItem;
+export type Context = ListContextItem;
 
 /**
  * Because changing container contexts can have a few bonus effects (like setting some
@@ -42,9 +42,22 @@ export class ContextManager {
     public async isInCloudContext(): Promise<boolean> {
         const currentContext = await this.getCurrentContext();
 
-        return !!currentContext && // Context must exist
-            !!currentContext.type && // Context must have a type
+        return !!(currentContext?.type) && // Context must exist and have a type
             /aci|ecs/i.test(currentContext.type); // Context type must be ACI or ECS
+    }
+
+    public async useContext(name: string): Promise<void> {
+        await ext.defaultShellCR()(ext.containerClient.useContext({ context: name }));
+        await this.getCurrentContext(); // Reestablish the current context, to cause the change emitter to fire indirectly if the context has actually changed
+    }
+
+    public async removeContext(name: string): Promise<void> {
+        await ext.defaultShellCR()(ext.containerClient.removeContexts({ contexts: [name] }));
+    }
+
+    public async inspectContext(name: string): Promise<InspectContextsItem | undefined> {
+        const result = await ext.defaultShellCR()(ext.containerClient.inspectContexts({ contexts: [name] }));
+        return result?.[0];
     }
 
     private tryGetCurrentContext(allContexts: Context[]): Context | undefined {

@@ -6,12 +6,12 @@
 import * as vscode from 'vscode';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ociClientId } from '../../../constants';
-import { DockerImage } from '../../../docker/Images';
 import { ext } from '../../../extensionVariables';
 import { RequestOptionsLike, httpRequest } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
+import { ListImagesItem } from '@microsoft/container-runtimes';
 
 const noneRegex = /<none>/i;
 
@@ -75,13 +75,13 @@ export class OutdatedImageChecker {
         }
 
         for (const image of images) {
-            image.Outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.Id.toLowerCase());
+            image.Outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.id.toLowerCase());
         }
     }
 
-    private async checkImage(context: IActionContext, registry: ImageRegistry, image: DockerImage): Promise<'latest' | 'outdated' | 'unknown'> {
+    private async checkImage(context: IActionContext, registry: ImageRegistry, image: ListImagesItem): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
-            const [registryAndRepo, tag] = image.Name.split(':');
+            const [registryAndRepo, tag] = [image.registry + '/' + image.name, image.tag];
             // Remove the registry and leading/trailing slashes from the registryAndRepo to get the repo
             const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
 
@@ -94,7 +94,7 @@ export class OutdatedImageChecker {
             const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag);
 
             // 2. Compare it with the current image's value
-            const imageInspectInfo = await ext.dockerClient.inspectImage(context, image.Id);
+            const imageInspectInfo = (await ext.defaultShellCR()(ext.containerClient.inspectImages({ images: [image.id] })))?.[0];
 
             // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date
             //    The logic is reversed so that if something goes wrong, we will err toward calling it up-to-date

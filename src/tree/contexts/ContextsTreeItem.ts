@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext } from '@microsoft/vscode-azext-utils';
-import { DockerContext } from '../../docker/Contexts';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { Context } from '../../runtimes/ContextManager';
 import { getAzActTreeItem, getAzExtAzureUtils } from '../../utils/lazyPackages';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
 import { RegistryApi } from '../registries/all/RegistryApi';
@@ -21,12 +21,12 @@ import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { ContextProperty, contextProperties } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
 
-export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, ContextProperty> {
+export class ContextsTreeItem extends LocalRootTreeItemBase<Context, ContextProperty> {
     public treePrefix: string = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
-    public childType: LocalChildType<DockerContext> = ContextTreeItem;
-    public childGroupType: LocalChildGroupType<DockerContext, ContextProperty> = ContextGroupTreeItem;
+    public childType: LocalChildType<Context> = ContextTreeItem;
+    public childGroupType: LocalChildGroupType<Context, ContextProperty> = ContextGroupTreeItem;
     public createNewLabel: string = localize('vscode-docker.tree.Contexts.createNewLabel', 'Create new ACI context...');
 
     public labelSettingInfo: ITreeSettingInfo<ContextProperty> = {
@@ -48,18 +48,18 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
         return this.groupBySetting === 'None' ? 'context' : 'context group';
     }
 
-    public async getItems(context: IActionContext): Promise<DockerContext[]> {
-        return ext.dockerContextManager.getContexts();
+    public async getItems(actionContext: IActionContext): Promise<Context[]> {
+        return ext.runtimeManager.contextManager.getContexts();
     }
 
-    public getPropertyValue(item: DockerContext, property: ContextProperty): string {
+    public getPropertyValue(item: Context, property: ContextProperty): string {
         switch (property) {
             case 'Name':
-                return item.Name;
+                return item.name;
             case 'Description':
-                return item.Description;
+                return item.description ?? '';
             case 'DockerEndpoint':
-                return item.DockerEndpoint;
+                return item.containerEndpoint ?? '';
             default:
                 // No other properties exist for DockerContext but all case statements must have a default
                 // So return empty string
@@ -128,12 +128,9 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<DockerContext, Conte
         await wizard.execute();
 
         return new ContextTreeItem(this, {
-            Id: wizardContext.contextName,
-            Name: wizardContext.contextName,
-            Current: false,
-            DockerEndpoint: undefined,
-            CreatedTime: undefined,
-            ContextType: 'aci',
+            name: wizardContext.contextName,
+            current: false,
+            type: 'aci',
         });
     }
 }

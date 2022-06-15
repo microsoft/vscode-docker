@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListImagesItem } from "@microsoft/container-runtimes";
 import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
-import { DockerImage } from "../../docker/Images";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
 import { CommonGroupBy, CommonProperty, commonProperties, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
@@ -42,18 +42,18 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Them
     }
 }
 
-export function getImagePropertyValue(item: DockerImage, property: ImageProperty): string {
-    const parsedFullTag = parseFullTag(item.Name);
+export function getImagePropertyValue(item: ListImagesItem, property: ImageProperty): string {
+    const parsedFullTag = parseFullTag(item.name);
     let registry: string | undefined;
     switch (property) {
         case 'FullTag':
             if (parsedFullTag.registry) {
-                return item.Name.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
+                return item.name.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
             } else {
-                return item.Name;
+                return item.name;
             }
         case 'ImageId':
-            return item.Id.replace('sha256:', '').slice(0, 12);
+            return item.id.replace('sha256:', '').slice(0, 12);
         case 'Registry':
             registry = parsedFullTag.registry;
             if (!registry) {

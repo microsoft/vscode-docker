@@ -28,15 +28,16 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt.valueOf();
     }
 
     public get imageId(): string {
-        return this._item.Id;
+        return this._item.id;
     }
 
     public get fullTag(): string {
-        return this._item.Name;
+        // TODO: verify this is the full, FULL tag
+        return this._item.name;
     }
 
     public get label(): string {
@@ -61,6 +62,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get size(): number {
+        // TODO
         return this._item.Size ?? 0;
     }
 
@@ -71,10 +73,10 @@ export class ImageTreeItem extends ToolTipTreeItem {
         // In this case, an image end up with <none> tag need to be deleted using the Id.
         if (ref.endsWith('<none>')) {
             // Image is tagged <none>. Need to delete by ID.
-            ref = this._item.Id;
+            ref = this._item.id;
         }
 
-        return ext.dockerClient.removeImage(context, ref);
+        await ext.defaultShellCR()(ext.containerClient.removeImages({ images: [ref] }));
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {

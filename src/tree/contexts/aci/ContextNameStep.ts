@@ -16,7 +16,7 @@ export class ContextNameStep extends AzureNameStep<IAciWizardContext> {
     }
 
     public async prompt(context: IAciWizardContext): Promise<void> {
-        const currentContextNames = (await ext.dockerContextManager.getContexts()).map(c => c.Name);
+        const currentContextNames = (await ext.runtimeManager.contextManager.getContexts()).map(c => c.name);
         context.contextName = await context.ui.showInputBox({ prompt: localize('vscode-docker.tree.contexts.create.aci.enterContextName', 'Enter context name'), validateInput: (value: string | undefined) => validateContextName(value, currentContextNames) });
 
         const azExtAzureUtils = await getAzExtAzureUtils();
