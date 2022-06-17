@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListNetworkItem } from "@microsoft/container-runtimes";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { builtInNetworks } from "../../constants";
-import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
@@ -16,15 +16,15 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Network$/;
     public static customNetworkRegExp: RegExp = /^customNetwork$/i;
 
-    private readonly _item: DockerNetwork;
+    private readonly _item: ListNetworkItem;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerNetwork) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: ListNetworkItem) {
         super(parent);
         this._item = itemInfo;
     }
 
     public get contextValue(): string {
-        return builtInNetworks.includes(this._item.Name) ? 'defaultNetwork' : 'customNetwork';
+        return builtInNetworks.includes(this._item.name) ? 'defaultNetwork' : 'customNetwork';
     }
 
     public get id(): string {
@@ -32,15 +32,15 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     }
 
     public get networkId(): string {
-        return this._item.Id;
+        return this._item.id;
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt.valueOf();
     }
 
     public get networkName(): string {
-        return this._item.Name;
+        return this._item.name;
     }
 
     public get label(): string {
@@ -56,7 +56,9 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeNetwork(context, this.networkId);
+        await ext.defaultShellCR()(
+            ext.containerClient.removeNetworks({ networks: [this.networkId] })
+        );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {

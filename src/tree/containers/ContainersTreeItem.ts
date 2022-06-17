@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListContainersItem } from "@microsoft/container-runtimes";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { getImagePropertyValue } from "../images/ImageProperties";
@@ -17,7 +17,7 @@ import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
 import { ContainerProperty, containerProperties } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
-export type DockerContainerInfo = DockerContainer & {
+export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;
 };
 
@@ -75,11 +75,11 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
         switch (property) {
             case 'ContainerId':
-                return item.Id.slice(0, 12);
+                return item.id.slice(0, 12);
             case 'ImageId':
                 return item.ImageID.replace('sha256:', '').slice(0, 12);
             case 'ContainerName':
-                return item.Name;
+                return item.name;
             case 'Networks':
                 return networks.join(',');
             case 'Ports':
@@ -160,7 +160,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
 export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Individual Containers');
 
-export function getComposeProjectName(container: DockerContainer): string {
+export function getComposeProjectName(container: ListContainersItem): string {
     if (!container.Labels) {
         return NonComposeGroupName;
     }

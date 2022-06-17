@@ -5,8 +5,6 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DockerOSType } from '../../docker/Common';
-import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { getTreeId } from "../LocalRootTreeItemBase";
@@ -15,6 +13,7 @@ import { ToolTipParentTreeItem } from '../ToolTipTreeItem';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
+import { ContainerOS, ListContainersItem } from '@microsoft/container-runtimes';
 
 /**
  * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.
@@ -30,7 +29,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerInfo;
     private children: AzExtTreeItem[] | undefined;
-    private containerOS: DockerOSType;
+    private containerOS: ContainerOS;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
@@ -44,15 +43,15 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt.valueOf();
     }
 
     public get containerId(): string {
-        return this._item.Id;
+        return this._item.id;
     }
 
     public get containerName(): string {
-        return this._item.Name;
+        return this._item.name;
     }
 
     public get fullTag(): string {
@@ -79,7 +78,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
         return this._item.Ports;
     }
 
-    public get containerItem(): DockerContainer {
+    public get containerItem(): ListContainersItem {
         return this._item;
     }
 
@@ -88,7 +87,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
      */
     public get containerDesc(): { Id: string } {
         return {
-            Id: this._item.Id,
+            Id: this._item.id,
         };
     }
 
@@ -101,7 +100,9 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeContainer(context, this.containerId);
+        await ext.defaultShellCR()(
+            ext.containerClient.removeContainers({ containers: [this.containerId], force: true })
+        );
     }
 
     public hasMoreChildrenImpl(): boolean {

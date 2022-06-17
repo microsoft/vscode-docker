@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListNetworkItem } from "@microsoft/container-runtimes";
 import { ThemeIcon } from "vscode";
-import { DockerNetwork } from "../../docker/Networks";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getCommonGroupIcon } from "../settings/CommonProperties";
 import { NetworkProperty } from "./NetworkProperties";
 
-export class NetworkGroupTreeItem extends LocalGroupTreeItemBase<DockerNetwork, NetworkProperty> {
+export class NetworkGroupTreeItem extends LocalGroupTreeItemBase<ListNetworkItem, NetworkProperty> {
     public static readonly contextValue: string = 'networkGroup';
     public readonly contextValue: string = NetworkGroupTreeItem.contextValue;
     public childTypeLabel: string = 'network';

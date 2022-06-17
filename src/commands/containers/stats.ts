@@ -15,5 +15,7 @@ export async function stats(context: IActionContext): Promise<void> {
     );
 
     // Don't wait
-    void taskCRF.getCommandRunner()(ext.containerClient.statsContainers({ all: true }));
+    void taskCRF.getCommandRunner()(
+        ext.containerClient.statsContainers({ all: true })
+    );
 }

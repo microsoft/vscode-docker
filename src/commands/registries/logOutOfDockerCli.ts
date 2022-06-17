@@ -22,5 +22,7 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
         }
     );
 
-    await taskCRF.getCommandRunner()(ext.containerClient.logout({ registry: creds.registryPath }));
+    await taskCRF.getCommandRunner()(
+        ext.containerClient.logout({ registry: creds.registryPath })
+    );
 }

@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ContainerOS } from '@microsoft/container-runtimes';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DockerOSType } from '../../../docker/Common';
 import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
 import { DockerUri } from '../../../docker/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
@@ -20,7 +20,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
         private readonly fs: vscode.FileSystem,
         private readonly name: string,
         private readonly uri: DockerUri,
-        private readonly containerOSProvider: (context: IActionContext) => Promise<DockerOSType>) {
+        private readonly containerOSProvider: (context: IActionContext) => Promise<ContainerOS>) {
         super(parent);
     }
 

@@ -17,10 +17,18 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },
         async () => {
-            const containersResult = await ext.defaultShellCR()(ext.containerClient.pruneContainers({}));
-            const imagesResult = await ext.defaultShellCR()(ext.containerClient.pruneImages({}));
-            const networksResult = await ext.defaultShellCR()(ext.containerClient.pruneNetworks({}));
-            const volumesResult = await ext.defaultShellCR()(ext.containerClient.pruneVolumes({}));
+            const containersResult = await ext.defaultShellCR()(
+                ext.containerClient.pruneContainers({})
+            );
+            const imagesResult = await ext.defaultShellCR()(
+                ext.containerClient.pruneImages({})
+            );
+            const networksResult = await ext.defaultShellCR()(
+                ext.containerClient.pruneNetworks({})
+            );
+            const volumesResult = await ext.defaultShellCR()(
+                ext.containerClient.pruneVolumes({})
+            );
 
             let message: string;
             if (containersResult?.containersDeleted?.length && Number.isInteger(containersResult?.spaceReclaimed) &&

@@ -62,8 +62,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get size(): number {
-        // TODO
-        return this._item.Size ?? 0;
+        return this._item.size ?? 0;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
@@ -76,7 +75,9 @@ export class ImageTreeItem extends ToolTipTreeItem {
             ref = this._item.id;
         }
 
-        await ext.defaultShellCR()(ext.containerClient.removeImages({ images: [ref] }));
+        await ext.defaultShellCR()(
+            ext.containerClient.removeImages({ images: [ref] })
+        );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {

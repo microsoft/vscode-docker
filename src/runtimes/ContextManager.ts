@@ -21,7 +21,9 @@ export class ContextManager {
     private lastContext: Context | undefined;
 
     public async getContexts(): Promise<Context[]> {
-        const allContexts = await ext.defaultShellCR()(ext.containerClient.listContexts({})) || [];
+        const allContexts = await ext.defaultShellCR()(
+            ext.containerClient.listContexts({})
+        ) || [];
         const currentContext: Context | undefined = this.tryGetCurrentContext(allContexts);
 
         if (currentContext?.name !== this.lastContext?.name ||
@@ -47,16 +49,22 @@ export class ContextManager {
     }
 
     public async useContext(name: string): Promise<void> {
-        await ext.defaultShellCR()(ext.containerClient.useContext({ context: name }));
+        await ext.defaultShellCR()(
+            ext.containerClient.useContext({ context: name })
+        );
         await this.getCurrentContext(); // Reestablish the current context, to cause the change emitter to fire indirectly if the context has actually changed
     }
 
     public async removeContext(name: string): Promise<void> {
-        await ext.defaultShellCR()(ext.containerClient.removeContexts({ contexts: [name] }));
+        await ext.defaultShellCR()(
+            ext.containerClient.removeContexts({ contexts: [name] })
+        );
     }
 
     public async inspectContext(name: string): Promise<InspectContextsItem | undefined> {
-        const result = await ext.defaultShellCR()(ext.containerClient.inspectContexts({ contexts: [name] }));
+        const result = await ext.defaultShellCR()(
+            ext.containerClient.inspectContexts({ contexts: [name] })
+        );
         return result?.[0];
     }
 

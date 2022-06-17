@@ -3,13 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RunContainerBindMount } from '@microsoft/container-runtimes';
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { executeAsTask } from '../../utils/executeAsTask';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { getDockerOSType } from '../../utils/osUtils';
 
 export async function runAzureCliImage(context: IActionContext): Promise<void> {
@@ -22,30 +24,48 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             await vscode.env.openExternal(vscode.Uri.parse('https://docs.docker.com/docker-for-windows/#/switch-between-windows-and-linux-containers'));
         }
     } else {
-        const option: string = process.platform === 'linux' ? '--net=host' : '';
+        const volumes: RunContainerBindMount[] = [];
 
-        // volume map .azure folder so don't have to log in every time
-        const homeDir: string = process.platform === 'win32' ? os.homedir().replace(/\\/g, '/') : os.homedir();
-        let vol: string = '';
-
-        if (await fse.pathExists(`${homeDir}/.azure`)) {
-            vol += ` -v ${homeDir}/.azure:/root/.azure`;
-        }
-
-        if (await fse.pathExists(`${homeDir}/.ssh`)) {
-            vol += ` -v ${homeDir}/.ssh:/root/.ssh`;
-        }
-
-        if (await fse.pathExists(`${homeDir}/.kube`)) {
-            vol += ` -v ${homeDir}/.kube:/root/.kube`;
-        }
+        await addHomedirFolderVolumeIfExists(volumes, '.azure');
+        await addHomedirFolderVolumeIfExists(volumes, '.ssh');
+        await addHomedirFolderVolumeIfExists(volumes, '.kube');
 
         const workspaceFolder = vscode.workspace?.workspaceFolders?.[0];
         if (workspaceFolder) {
-            vol += ` -v ${workspaceFolder.uri.fsPath}:/workspace`;
+            volumes.push({
+                source: workspaceFolder.uri.fsPath,
+                destination: '/workspace',
+                readOnly: false,
+                type: 'bind',
+            });
         }
 
-        // TODO: exe path
-        await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} run ${option} ${vol.trim()} -it --rm mcr.microsoft.com/azure-cli:latest`, 'Azure CLI', { addDockerEnv: true, focus: true });
+        const taskCRF = new TaskCommandRunnerFactory(
+            {
+                taskName: 'Azure CLI',
+                focus: true,
+            }
+        );
+
+        await taskCRF.getCommandRunner()(
+            ext.containerClient.runContainer({
+                image: 'mcr.microsoft.com/azure-cli:latest',
+                removeOnExit: true,
+                mounts: volumes,
+            })
+        );
+    }
+}
+
+async function addHomedirFolderVolumeIfExists(volumes: RunContainerBindMount[], volumeToAdd: '.azure' | '.ssh' | '.kube'): Promise<void> {
+    const dir = path.join(os.homedir(), volumeToAdd);
+
+    if (await fse.pathExists(dir)) {
+        volumes.push({
+            source: dir,
+            destination: path.posix.join('/root', volumeToAdd),
+            readOnly: false,
+            type: 'bind',
+        });
     }
 }

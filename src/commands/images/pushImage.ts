@@ -73,7 +73,9 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         }
     );
 
-    await taskCRF.getCommandRunner()(ext.containerClient.pushImage({ image: finalTag }));
+    await taskCRF.getCommandRunner()(
+        ext.containerClient.pushImage({ image: finalTag })
+    );
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {

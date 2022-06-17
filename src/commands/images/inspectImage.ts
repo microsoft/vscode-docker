@@ -17,6 +17,8 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
         });
     }
 
-    const inspectResult = await ext.defaultShellCR()(ext.containerClient.inspectImages({ images: [node.imageId] }));
+    const inspectResult = await ext.defaultShellCR()(
+        ext.containerClient.inspectImages({ images: [node.imageId] })
+    );
     await openReadOnlyJson(node, inspectResult[0].raw);
 }

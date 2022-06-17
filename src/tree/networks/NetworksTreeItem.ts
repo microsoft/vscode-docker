@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListNetworkItem } from "@microsoft/container-runtimes";
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
-import { DockerNetwork } from "../../docker/Networks";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
@@ -16,12 +16,12 @@ import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
 import { NetworkProperty, networkProperties } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
 
-export class NetworksTreeItem extends LocalRootTreeItemBase<DockerNetwork, NetworkProperty> {
+export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, NetworkProperty> {
     public treePrefix: string = 'networks';
     public label: string = localize('vscode-docker.tree.networks.label', 'Networks');
     public configureExplorerTitle: string = localize('vscode-docker.tree.networks.configure', 'Configure networks explorer');
-    public childType: LocalChildType<DockerNetwork> = NetworkTreeItem;
-    public childGroupType: LocalChildGroupType<DockerNetwork, NetworkProperty> = NetworkGroupTreeItem;
+    public childType: LocalChildType<ListNetworkItem> = NetworkTreeItem;
+    public childGroupType: LocalChildGroupType<ListNetworkItem, NetworkProperty> = NetworkGroupTreeItem;
 
     public labelSettingInfo: ITreeSettingInfo<NetworkProperty> = {
         properties: networkProperties,
@@ -42,27 +42,29 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<DockerNetwork, Netwo
         return this.groupBySetting === 'None' ? 'network' : 'network group';
     }
 
-    public async getItems(context: IActionContext): Promise<DockerNetwork[]> {
+    public async getItems(context: IActionContext): Promise<ListNetworkItem[]> {
         const config = workspace.getConfiguration(configPrefix);
         const showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
-        let networks = await ext.dockerClient.getNetworks(context) || [];
+        let networks = await ext.defaultShellCR()(
+            ext.containerClient.listNetworks({})
+        ) || [];
 
         if (!showBuiltInNetworks) {
-            networks = networks.filter(network => !builtInNetworks.includes(network.Name));
+            networks = networks.filter(network => !builtInNetworks.includes(network.name));
         }
 
         return networks;
     }
 
-    public getPropertyValue(item: DockerNetwork, property: NetworkProperty): string {
+    public getPropertyValue(item: ListNetworkItem, property: NetworkProperty): string {
         switch (property) {
             case 'NetworkDriver':
-                return item.Driver;
+                return item.driver;
             case 'NetworkId':
-                return item.Id.slice(0, 12);
+                return item.id.slice(0, 12);
             case 'NetworkName':
-                return item.Name;
+                return item.name;
             default:
                 return getCommonPropertyValue(item, property);
         }

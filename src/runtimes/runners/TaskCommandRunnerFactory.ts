@@ -23,18 +23,24 @@ export class TaskCommandRunnerFactory implements ICommandRunnerFactory {
     public getCommandRunner(): CommandRunner {
         return async <T>(commandResponseLike: CommandResponseLike<T>) => {
             const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
-            return await executeAsTask(commandResponse.command, commandResponse.args, this.options);
+            return await executeAsTask(this.options, commandResponse.command, commandResponse.args);
         };
     }
 }
 
-async function executeAsTask(command: string, args: vscode.ShellQuotedString[], options: TaskCommandRunnerOptions): Promise<never> {
+async function executeAsTask(options: TaskCommandRunnerOptions, command: string, args?: vscode.ShellQuotedString[]): Promise<never> {
+    const shellExecutionOptions = { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() };
+
+    const shellExecution = args ?
+        new vscode.ShellExecution(command, args, shellExecutionOptions) : // Command is the process, and args contains arguments
+        new vscode.ShellExecution(command, shellExecutionOptions); // Command is the full command line
+
     const task = new vscode.Task(
         { type: 'shell' },
         options.workspaceFolder ?? vscode.TaskScope.Workspace,
         options.taskName,
         'Containers',
-        new vscode.ShellExecution(command, args, { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() }),
+        shellExecution,
         [] // problemMatchers
     );
 

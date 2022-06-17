@@ -23,7 +23,10 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
-    await ext.dockerClient.tagImage(context, node.imageId, newTaggedName);
+    await ext.defaultShellCR()(
+        ext.containerClient.tagImage({ fromImage: node.imageId, toImage: newTaggedName })
+    );
+
     return newTaggedName;
 }
 

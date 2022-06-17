@@ -16,7 +16,9 @@ export async function getDockerOSType(context: IActionContext): Promise<Containe
         // so short-circuit the Docker call entirely.
         return 'linux';
     } else {
-        const info = await ext.defaultShellCR()(ext.containerClient.info({}));
+        const info = await ext.defaultShellCR()(
+            ext.containerClient.info({})
+        );
         return info?.osType || 'linux';
     }
 }

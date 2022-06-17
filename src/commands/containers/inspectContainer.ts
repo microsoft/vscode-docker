@@ -17,6 +17,8 @@ export async function inspectContainer(context: IActionContext, node?: Container
         });
     }
 
-    const inspectInfo = await ext.defaultShellCR()(ext.containerClient.inspectContainers({ containers: [node.containerId] }));
+    const inspectInfo = await ext.defaultShellCR()(
+        ext.containerClient.inspectContainers({ containers: [node.containerId] })
+    );
     await openReadOnlyJson(node, inspectInfo[0].raw);
 }
