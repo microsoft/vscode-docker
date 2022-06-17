@@ -1616,7 +1616,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${config:docker.dockerPath} build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
+                    "default": "${containerCommand} build --pull --rm -f \"${dockerfile}\" -t ${tag} \"${context}\"",
                     "description": "%vscode-docker.config.template.build.description%"
                 },
                 "docker.commands.run": {
@@ -1659,7 +1659,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${config:docker.dockerPath} run --rm -d ${exposedPorts} ${tag}",
+                    "default": "${containerCommand} run --rm -d ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
@@ -1702,7 +1702,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${config:docker.dockerPath} run --rm -it ${exposedPorts} ${tag}",
+                    "default": "${containerCommand} run --rm -it ${exposedPorts} ${tag}",
                     "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
@@ -1745,7 +1745,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${config:docker.dockerPath} exec -it ${containerId} ${shellCommand}",
+                    "default": "${containerCommand} exec -it ${containerId} ${shellCommand}",
                     "description": "%vscode-docker.config.template.attach.description%"
                 },
                 "docker.commands.logs": {
@@ -1788,7 +1788,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${config:docker.dockerPath} logs --tail 1000 -f ${containerId}",
+                    "default": "${containerCommand} logs --tail 1000 -f ${containerId}",
                     "description": "%vscode-docker.config.template.logs.description%"
                 },
                 "docker.commands.composeUp": {
@@ -2395,10 +2395,9 @@
                     "description": "%vscode-docker.config.docker.scaffolding.templatePath%"
                 },
                 "docker.dockerPath": {
-                    "description": "%vscode-docker.config.docker.dockerPath%",
-                    "scope": "machine-overridable",
                     "type": "string",
-                    "default": "docker"
+                    "description": "%vscode-docker.config.docker.dockerPath%",
+                    "scope": "machine-overridable"
                 },
                 "docker.composeCommand": {
                     "type": "string",
