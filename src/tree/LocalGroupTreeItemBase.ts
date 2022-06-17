@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem } from "@microsoft/vscode-azext-utils";
-import { LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
+import { AnyContainerObject, LocalRootTreeItemBase } from "./LocalRootTreeItemBase";
 import { CommonProperty } from "./settings/CommonProperties";
 
-export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
+export abstract class LocalGroupTreeItemBase<TItem extends AnyContainerObject, TProperty extends string | CommonProperty> extends AzExtParentTreeItem {
     public readonly parent: LocalRootTreeItemBase<TItem, TProperty>;
     public readonly group: string;
     private _items: TItem[];
@@ -25,7 +25,7 @@ export abstract class LocalGroupTreeItemBase<TItem extends DockerObject, TProper
     }
 
     public get maxCreatedTime(): number {
-        return Math.max(...this._items.map(i => i.CreatedTime));
+        return Math.max(...this._items.map(i => i.createdAt?.valueOf() ?? 0));
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean): Promise<AzExtTreeItem[]> {

@@ -83,6 +83,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ext.runtimeManager = new ContainerRuntimeManager();
         ext.orchestratorManager = new OrchestratorRuntimeManager();
 
+        // TODO: register clients
+        // TODO: when registering orchestrator client, need to work out `docker-compose` / `docker compose`
+
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
                 'docker',

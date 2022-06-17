@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandResponse } from '@microsoft/container-runtimes';
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { ContextType } from '../docker/Contexts';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -26,20 +26,20 @@ export interface CommandTemplate {
     template: string,
     label: string,
     match?: string,
-    contextTypes?: ContextType[],
+    contextTypes?: string[],
 }
 
-export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<string> {
+export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<CommandResponse<void>> {
     return await selectCommandTemplate(
         context,
         'build',
         [folder.name, dockerfile],
         folder,
-        { 'dockerfile': dockerfile, 'context': buildContext }
+        { 'dockerfile': dockerfile, 'context': buildContext, 'containerCommand': getContainerCommand() }
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: unknown }): Promise<string> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: unknown }): Promise<CommandResponse<void>> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
@@ -52,31 +52,31 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
         interactive ? 'runInteractive' : 'run',
         [fullTag],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString }
+        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': getContainerCommand() }
     );
 }
 
-export async function selectAttachCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string, shellCommand: string): Promise<string> {
+export async function selectAttachCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string, shellCommand: string): Promise<CommandResponse<void>> {
     return await selectCommandTemplate(
         context,
         'attach',
         [containerName, fullTag],
         undefined,
-        { 'containerId': containerId, 'shellCommand': shellCommand }
+        { 'containerId': containerId, 'shellCommand': shellCommand, 'containerCommand': getContainerCommand() }
     );
 }
 
-export async function selectLogsCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string): Promise<string> {
+export async function selectLogsCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string): Promise<CommandResponse<void>> {
     return await selectCommandTemplate(
         context,
         'logs',
         [containerName, fullTag],
         undefined,
-        { 'containerId': containerId }
+        { 'containerId': containerId, 'containerCommand': getContainerCommand() }
     );
 }
 
-export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down' | 'upSubset', configurationFile?: string, detached?: boolean, build?: boolean): Promise<string> {
+export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down' | 'upSubset', configurationFile?: string, detached?: boolean, build?: boolean): Promise<CommandResponse<void>> {
     let template: TemplateCommand;
 
     switch (composeCommand) {
@@ -97,7 +97,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         template,
         [folder.name, configurationFile],
         folder, // TODO: EXE path
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': await ext.dockerContextManager.getComposeCommand(context) }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': getComposeCommand() }
     );
 }
 
@@ -111,9 +111,12 @@ export async function selectCommandTemplate(
     // The following two are overridable for test purposes, but have default values that cover actual usage
     getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`),
     templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o) // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
-): Promise<string> {
+): Promise<CommandResponse<void>> {
     // Get the current context type
-    const currentContextType = await ext.dockerContextManager.getCurrentContextType();
+    let currentContextType = (await ext.runtimeManager.contextManager.getCurrentContext())?.type;
+    if (!currentContextType || currentContextType === 'containerd') { // For backwards compatibility, treat 'containerd' as 'moby'
+        currentContextType = 'moby';
+    }
 
     // Get the configured settings values
     const commandSettings = getCommandSettings();
@@ -165,7 +168,11 @@ export async function selectCommandTemplate(
     actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
     actionContext.telemetry.properties.currentContextType = currentContextType;
 
-    return resolveVariables(selectedTemplate.template, folder, additionalVariables);
+    return {
+        command: resolveVariables(selectedTemplate.template, folder, additionalVariables),
+        args: undefined,
+        parse: () => Promise.resolve(),
+    };
 }
 
 async function quickPickTemplate(templates: CommandTemplate[], templatePicker: TemplatePicker): Promise<CommandTemplate> {
@@ -189,7 +196,7 @@ async function quickPickTemplate(templates: CommandTemplate[], templatePicker: T
     return selection.data;
 }
 
-function getConstrainedTemplates(actionContext: IActionContext, templates: CommandTemplate[], matchContext: string[], currentContextType: ContextType): CommandTemplate[] {
+function getConstrainedTemplates(actionContext: IActionContext, templates: CommandTemplate[], matchContext: string[], currentContextType: string): CommandTemplate[] {
     return templates.filter(template => {
         if (!template.contextTypes && !template.match) {
             // If neither contextTypes nor match is defined, this is an unconstrained template
@@ -208,7 +215,7 @@ function getUnconstrainedTemplates(templates: CommandTemplate[]): CommandTemplat
     });
 }
 
-function isContextTypeConstraintSatisfied(currentContextType: ContextType, templateContextTypes: ContextType[] | undefined): boolean {
+function isContextTypeConstraintSatisfied(currentContextType: string, templateContextTypes: string[] | undefined): boolean {
     if (!templateContextTypes) {
         // If templateContextTypes is undefined or empty, it is automatically satisfied
         return true;
@@ -243,4 +250,14 @@ function toCommandTemplateArray(maybeTemplateArray: CommandTemplate[] | string |
     }
 
     return maybeTemplateArray;
+}
+
+function getContainerCommand(): string {
+    const config = vscode.workspace.getConfiguration('docker');
+    return config.get<string>('dockerPath', ext.containerClient.commandName);
+}
+
+function getComposeCommand(): string {
+    const config = vscode.workspace.getConfiguration('docker');
+    return config.get<string>('composeCommand', ext.orchestratorClient.commandName);
 }

@@ -7,7 +7,6 @@ import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-uti
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { execAsync } from '../../utils/spawnAsync';
 
 // Matches an `up` or `down` and everything after it--so that it can be replaced with `config --services`, to get a service list using all of the files originally part of the compose command
 const composeCommandReplaceRegex = /(\b(up|down)\b).*$/i;
@@ -112,9 +111,6 @@ async function getServiceSubsets(workspaceFolder: vscode.WorkspaceFolder, compos
     try {
         // Start by getting a new command with the exact same files list (replaces the "up ..." or "down ..." with "config --services" or "config --profiles")
         const configCommand = composeCommand.replace(composeCommandReplaceRegex, `config --${type}`);
-
-        // TODO: exe path
-        const { stdout } = await execAsync(configCommand, { cwd: workspaceFolder.uri.fsPath });
 
         // The output of the config command is a list of services / profiles, one per line
         // Split them up and remove empty entries

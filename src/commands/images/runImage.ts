@@ -6,8 +6,8 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { selectRunCommand } from '../selectCommandTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -40,5 +40,12 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         inspectResult?.[0]?.ports
     );
 
-    await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true, alwaysRunNew: interactive });
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: node.fullTag,
+            alwaysRunNew: interactive,
+        }
+    );
+
+    await taskCRF.getCommandRunner()(terminalCommand);
 }

@@ -7,6 +7,7 @@ import { ContainerOS } from '@microsoft/container-runtimes';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
@@ -64,7 +65,11 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         shellCommand
     );
 
-    const terminalTitle = localize('vscode-docker.commands.containers.attachShellContainer.terminalTitle', 'Shell: {0}', node.containerName);
+    const taskCRF = new TaskCommandRunnerFactory({
+        taskName: localize('vscode-docker.commands.containers.attachShellContainer.terminalTitle', 'Shell: {0}', node.containerName),
+        alwaysRunNew: true,
+        focus: true,
+    });
 
-    await executeAsTask(context, terminalCommand, terminalTitle, { addDockerEnv: true, alwaysRunNew: true, focus: true });
+    await taskCRF.getCommandRunner()(terminalCommand);
 }
