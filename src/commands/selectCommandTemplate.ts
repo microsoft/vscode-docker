@@ -8,6 +8,7 @@ import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancel
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
+import { IContextManager } from '../runtimes/ContextManager';
 import { resolveVariables } from '../utils/resolveVariables';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown' | 'composeUpSubset';
@@ -108,12 +109,13 @@ export async function selectCommandTemplate(
     matchContext: string[],
     folder: vscode.WorkspaceFolder | undefined,
     additionalVariables: { [key: string]: string },
-    // The following two are overridable for test purposes, but have default values that cover actual usage
+    // The following three are overridable for test purposes, but have default values that cover actual usage
+    templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o), // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
     getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`),
-    templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o) // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
+    getContextManager: () => IContextManager = () => ext.runtimeManager.contextManager
 ): Promise<CommandResponse<void>> {
     // Get the current context type
-    let currentContextType = (await ext.runtimeManager.contextManager.getCurrentContext())?.type;
+    let currentContextType = (await getContextManager().getCurrentContext())?.type;
     if (!currentContextType || currentContextType === 'containerd') { // For backwards compatibility, treat 'containerd' as 'moby'
         currentContextType = 'moby';
     }

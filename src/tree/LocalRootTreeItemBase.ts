@@ -26,8 +26,8 @@ export type AnyContainerObject =
     ListContainersItem |
     ListImagesItem |
     ListNetworkItem |
-    (ListVolumeItem & { id: undefined }) | // Pretend `ListVolumeItem` has some always-undefined extra properties to keep TS happy
-    (ListContextItem & { id: undefined, createdAt: undefined }); // Pretend `ListContextItem` has some always-undefined extra properties to keep TS happy
+    (ListVolumeItem & { id?: undefined }) | // Pretend `ListVolumeItem` has some always-undefined extra properties to keep TS happy
+    (ListContextItem & { id?: undefined, createdAt?: undefined }); // Pretend `ListContextItem` has some always-undefined extra properties to keep TS happy
 
 export type LocalChildType<T extends AnyContainerObject> = new (parent: AzExtParentTreeItem, item: T) => AzExtTreeItem & { createdTime: number; size?: number };
 export type LocalChildGroupType<TItem extends AnyContainerObject, TProperty extends string | CommonProperty> = new (parent: LocalRootTreeItemBase<TItem, TProperty>, group: string, items: TItem[]) => LocalGroupTreeItemBase<TItem, TProperty>;

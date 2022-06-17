@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ShellCommandRunnerFactory } from '@microsoft/container-runtimes';
 import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { NULL_GUID } from '../../constants';
@@ -10,8 +11,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { CommandLineBuilder } from '../../utils/commandLineBuilder';
-import { execAsync } from '../../utils/spawnAsync';
 
 export async function logInToDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
@@ -39,20 +38,18 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
         };
 
         await vscode.window.withProgress(progressOptions, async () => {
-            // TODO: exe path
-            let command = CommandLineBuilder.create(ext.dockerContextManager.getDockerCommand(context), 'login');
-
-            if (creds.registryPath) {
-                command = command.withQuotedArg(creds.registryPath);
-            }
-
-            command = command
-                .withNamedArg('--username', { value: username, quoting: vscode.ShellQuoting.Strong })
-                .withArg('--password-stdin');
-
             try {
-                // TODO: exe path
-                await execAsync(command.build(), { stdin: password });
+                const shellCRF = new ShellCommandRunnerFactory({
+                    stdInContent: password,
+                });
+
+                await shellCRF.getCommandRunner()(
+                    ext.containerClient.login({
+                        username: username,
+                        passwordStdIn: true,
+                        registry: creds.registryPath,
+                    })
+                );
                 ext.outputChannel.appendLine('Login succeeded.');
             } catch (err) {
                 const error = parseError(err);

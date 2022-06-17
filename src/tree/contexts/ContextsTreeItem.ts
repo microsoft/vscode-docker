@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListContextItem } from '@microsoft/container-runtimes';
 import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { Context } from '../../runtimes/ContextManager';
 import { getAzActTreeItem, getAzExtAzureUtils } from '../../utils/lazyPackages';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
 import { RegistryApi } from '../registries/all/RegistryApi';
@@ -21,12 +21,12 @@ import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { ContextProperty, contextProperties } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
 
-export class ContextsTreeItem extends LocalRootTreeItemBase<Context, ContextProperty> {
+export class ContextsTreeItem extends LocalRootTreeItemBase<ListContextItem, ContextProperty> {
     public treePrefix: string = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
-    public childType: LocalChildType<Context> = ContextTreeItem;
-    public childGroupType: LocalChildGroupType<Context, ContextProperty> = ContextGroupTreeItem;
+    public childType: LocalChildType<ListContextItem> = ContextTreeItem;
+    public childGroupType: LocalChildGroupType<ListContextItem, ContextProperty> = ContextGroupTreeItem;
     public createNewLabel: string = localize('vscode-docker.tree.Contexts.createNewLabel', 'Create new ACI context...');
 
     public labelSettingInfo: ITreeSettingInfo<ContextProperty> = {
@@ -48,11 +48,11 @@ export class ContextsTreeItem extends LocalRootTreeItemBase<Context, ContextProp
         return this.groupBySetting === 'None' ? 'context' : 'context group';
     }
 
-    public async getItems(actionContext: IActionContext): Promise<Context[]> {
+    public async getItems(actionContext: IActionContext): Promise<ListContextItem[]> {
         return ext.runtimeManager.contextManager.getContexts();
     }
 
-    public getPropertyValue(item: Context, property: ContextProperty): string {
+    public getPropertyValue(item: ListContextItem, property: ContextProperty): string {
         switch (property) {
             case 'Name':
                 return item.name;

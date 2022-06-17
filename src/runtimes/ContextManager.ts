@@ -9,6 +9,17 @@ import { ext } from '../extensionVariables';
 
 export type Context = ListContextItem;
 
+// An interface is needed so unit tests can mock this
+export interface IContextManager {
+    onContextChanged: vscode.Event<Context | undefined>;
+    getContexts(): Promise<Context[]>;
+    getCurrentContext(): Promise<Context | undefined>;
+    isInCloudContext(): Promise<boolean>;
+    useContext(name: string): Promise<void>;
+    removeContext(name: string): Promise<void>;
+    inspectContext(name: string): Promise<InspectContextsItem | undefined>;
+}
+
 /**
  * Because changing container contexts can have a few bonus effects (like setting some
  * VSCode contexts for controlling command visibility), route all context querying
@@ -37,8 +48,7 @@ export class ContextManager {
     }
 
     public async getCurrentContext(): Promise<Context | undefined> {
-        const allContexts = await this.getContexts();
-        return allContexts.find(c => c.current);
+        return this.tryGetCurrentContext(await this.getContexts());
     }
 
     public async isInCloudContext(): Promise<boolean> {

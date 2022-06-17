@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { InspectContextsItem } from "@microsoft/container-runtimes";
+import { InspectContextsItem, ListContextItem } from "@microsoft/container-runtimes";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
-import { Context } from "../../runtimes/ContextManager";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
@@ -16,9 +15,9 @@ export class ContextTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Context;/;
     public static removableContextRegExp: RegExp = /^customContext;/i;
 
-    private readonly _item: Context;
+    private readonly _item: ListContextItem;
 
-    public constructor(parent: AzExtParentTreeItem, item: Context) {
+    public constructor(parent: AzExtParentTreeItem, item: ListContextItem) {
         super(parent);
         this._item = item;
     }
@@ -34,8 +33,7 @@ export class ContextTreeItem extends ToolTipTreeItem {
             result = 'customContext;';
         }
 
-        // TODO: Figure out this
-        if (this._item.ContextType === 'aci') {
+        if (this._item.type === 'aci') {
             result += 'aciContext;';
         }
 

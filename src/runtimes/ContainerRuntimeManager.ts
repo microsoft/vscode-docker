@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContextManager } from './ContextManager';
+import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 
 export class ContainerRuntimeManager extends RuntimeManager {
-    public readonly contextManager: ContextManager = new ContextManager();
+    public readonly contextManager: IContextManager = new ContextManager();
     public readonly onContainerRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;
 }

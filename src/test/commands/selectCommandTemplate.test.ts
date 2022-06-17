@@ -6,8 +6,7 @@
 import * as assert from 'assert';
 import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
-import { ContextType, DockerContext, isNewContextType } from '../../docker/Contexts';
-import { ext } from '../../extensionVariables';
+import { Context } from '../../runtimes/ContextManager';
 
 const DefaultPickIndex = 0;
 
@@ -555,9 +554,6 @@ suite("(unit) selectCommandTemplate", () => {
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
-
-        // Quick aside: validate that the context manager thinks an unknown context is new
-        assert.equal(isNewContextType('abc' as ContextType), true, 'Incorrect context type identification');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
         assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
@@ -572,70 +568,54 @@ async function runWithCommandSetting(
     contextType: string,
     matchContext: string[]): Promise<{ command: string, context: IActionContext }> {
 
-    const oldContextManager = ext.dockerContextManager;
-    ext.dockerContextManager = {
-        onContextChanged: undefined,
-        refresh: undefined,
-        getContexts: undefined,
-        inspect: undefined,
-        use: undefined,
-        remove: undefined,
-        isNewCli: undefined,
-
-        // Only getCurrentContext is called by selectCommandTemplate
-        // From it, only Type is used
-        getCurrentContext: async () => {
-            return {
-                ContextType: contextType,
-            } as DockerContext;
-        },
-
-        getCurrentContextType: async () => {
-            return Promise.resolve(contextType as ContextType);
-        },
-
-        getDockerCommand: () => {
-            return 'docker';
-        },
-
-        getComposeCommand: async () => {
-            return Promise.resolve('docker-compose');
-        }
+    const tempContext: IActionContext = {
+        telemetry: { properties: {}, measurements: {}, },
+        errorHandling: { issueProperties: {}, },
+        ui: undefined,
+        valuesToMask: undefined,
     };
 
-    try {
-        const tempContext: IActionContext = {
-            telemetry: { properties: {}, measurements: {}, },
-            errorHandling: { issueProperties: {}, },
-            ui: undefined,
-            valuesToMask: undefined,
-        };
-
-        const picker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
-            if (pickInputs.length === 0) {
-                // selectCommandTemplate asked for user input, but we have none left to give it (fail)
-                assert.fail('Received an unexpected request for input!');
-            }
-
-            return Promise.resolve(items[pickInputs.shift()]);
-        };
-
-        const settingsGetter = () => {
-            return { globalValue: userTemplates, defaultValue: overriddenDefaultTemplates };
-        };
-
-        const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, settingsGetter, picker);
-
-        if (pickInputs.length !== 0) {
-            // selectCommandTemplate never asked for an input we have (fail)
-            assert.fail('Unexpected leftover inputs!');
+    const picker = (items: IAzureQuickPickItem<CommandTemplate>[]) => {
+        if (pickInputs.length === 0) {
+            // selectCommandTemplate asked for user input, but we have none left to give it (fail)
+            assert.fail('Received an unexpected request for input!');
         }
 
+        return Promise.resolve(items[pickInputs.shift()]);
+    };
+
+    const settingsGetter = () => {
+        return { globalValue: userTemplates, defaultValue: overriddenDefaultTemplates };
+    };
+
+    const contextManagerGetter = () => {
         return {
-            command: cmdResult,
-            context: tempContext,
+            onContextChanged: undefined,
+            getContexts: undefined,
+            inspectContext: undefined,
+            useContext: undefined,
+            removeContext: undefined,
+            isInCloudContext: undefined,
+
+            // Only getCurrentContext is called by selectCommandTemplate
+            // From it, only Type is used
+            getCurrentContext: async () => {
+                return {
+                    type: contextType,
+                } as Context;
+            },
         };
-    } finally {
-        ext.dockerContextManager = oldContextManager;
+    };
+
+    const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, picker, settingsGetter, contextManagerGetter);
+
+    if (pickInputs.length !== 0) {
+        // selectCommandTemplate never asked for an input we have (fail)
+        assert.fail('Unexpected leftover inputs!');
     }
+
+    return {
+        command: cmdResult.command,
+        context: tempContext,
+    };
 }
