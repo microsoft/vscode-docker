@@ -332,7 +332,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 
     private getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): AzExtTreeItem[] {
         const parsedError = parseError(error);
-        if (error instanceof Error && isCommandNotSupportedError(error)) {
+        if (isCommandNotSupportedError(error)) {
             return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.contextNotSupported', 'This view is not supported in the current context.'), contextValue: 'contextNotSupported' })];
         } else if (parsedError.isUserCancelledError) {
             return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.changingContexts', 'Changing context...'), contextValue: 'changingContexts' })];
