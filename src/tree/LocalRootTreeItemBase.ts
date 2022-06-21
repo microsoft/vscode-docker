@@ -19,6 +19,7 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSetting
 import { ITreeSettingWizardInfo, ITreeSettingsWizardContext } from "./settings/ITreeSettingsWizardContext";
 import { TreeSettingListStep } from "./settings/TreeSettingListStep";
 import { TreeSettingStep } from "./settings/TreeSettingStep";
+import { DatedDockerImage } from "./images/ImagesTreeItem";
 
 type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 
@@ -408,6 +409,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 }
 
 export function getTreeId(object: AnyContainerObject): string {
-    // TODO: need to trigger refreshes on tree items when they change
-    return `${object.id}${object.name}`;
+    // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
+    // *and* change the ID when the state of the object changes
+    return `${object.id}${object.name}${(object as ListContainersItem).state}${(object as ListContextItem).current}${(object as DatedDockerImage).outdated}`;
 }

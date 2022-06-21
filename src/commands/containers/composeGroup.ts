@@ -3,35 +3,38 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandResponse, CommonOrchestratorCommandOptions, LogsCommandOptions } from '@microsoft/container-runtimes';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { isWindows } from '../../utils/osUtils';
 
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, 'logs', node, '-f --tail 1000');
+    return composeGroup<LogsCommandOptions>(context, ext.orchestratorClient.logs, node, { follow: true, tail: 1000 });
 }
 
 export async function composeGroupStart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, 'start', node);
+    return composeGroup(context, ext.orchestratorClient.start, node);
 }
 
 export async function composeGroupStop(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, 'stop', node);
+    return composeGroup(context, ext.orchestratorClient.stop, node);
 }
 
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, 'restart', node);
+    return composeGroup(context, ext.orchestratorClient.restart, node);
 }
 
 export async function composeGroupDown(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, 'down', node);
+    return composeGroup(context, ext.orchestratorClient.down, node);
 }
 
-async function composeGroup(context: IActionContext, composeCommand: 'logs' | 'start' | 'stop' | 'restart' | 'down', node: ContainerGroupTreeItem, additionalArguments?: string): Promise<void> {
+type AdditionalOptions<TOptions extends CommonOrchestratorCommandOptions> = Omit<TOptions, keyof CommonOrchestratorCommandOptions>;
+
+async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(context: IActionContext, composeCommand: (options: TOptions) => Promise<CommandResponse<unknown>>, node: ContainerGroupTreeItem, additionalOptions?: AdditionalOptions<TOptions>): Promise<void> {
     if (!node) {
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {
@@ -41,22 +44,28 @@ async function composeGroup(context: IActionContext, composeCommand: 'logs' | 's
     }
 
     const workingDirectory = getComposeWorkingDirectory(node);
-    const filesArgument = getComposeFiles(node)?.map(f => isWindows() ? `-f "${f}"` : `-f '${f}'`)?.join(' ');
+    const orchestratorFiles = getComposeFiles(node);
     const projectName = getComposeProjectName(node);
     const envFile = getComposeEnvFile(node);
 
-    if (!workingDirectory || !filesArgument || !projectName) {
+    if (!workingDirectory || !orchestratorFiles || !projectName) {
         context.errorHandling.suppressReportIssue = true;
         throw new Error(localize('vscode-docker.commands.containers.composeGroup.noCompose', 'Unable to determine compose project info for container group \'{0}\'.', node.label));
     }
 
-    const projectNameArgument = isWindows() ? `-p "${projectName}"` : `-p '${projectName}'`;
-    const envFileArgument = envFile ? (isWindows() ? `--env-file "${envFile}"` : `--env-file '${envFile}'`) : '';
+    const options: TOptions = {
+        files: orchestratorFiles,
+        projectName: projectName,
+        environmentFile: envFile,
+        ...additionalOptions,
+    } as TOptions;
 
-    // TODO: exe path
-    const terminalCommand = `${await ext.dockerContextManager.getComposeCommand(context)} ${filesArgument} ${envFileArgument} ${projectNameArgument} ${composeCommand} ${additionalArguments || ''}`;
+    const taskCRF = new TaskCommandRunnerFactory({
+        taskName: ext.orchestratorClient.displayName,
+        cwd: workingDirectory,
+    });
 
-    await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, cwd: workingDirectory, });
+    await taskCRF.getCommandRunner()(composeCommand(options));
 }
 
 function getComposeWorkingDirectory(node: ContainerGroupTreeItem): string | undefined {

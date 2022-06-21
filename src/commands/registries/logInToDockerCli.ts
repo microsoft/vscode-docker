@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ShellCommandRunnerFactory } from '@microsoft/container-runtimes';
+import { ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
 import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
+import * as stream from 'stream';
 import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
@@ -39,8 +40,8 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
 
         await vscode.window.withProgress(progressOptions, async () => {
             try {
-                const shellCRF = new ShellCommandRunnerFactory({
-                    stdInContent: password,
+                const shellCRF = new ShellStreamCommandRunnerFactory({
+                    stdInPipe: stream.Readable.from(password),
                 });
 
                 await shellCRF.getCommandRunner()(

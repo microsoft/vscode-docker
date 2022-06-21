@@ -15,7 +15,7 @@ export type CommonProperty = 'CreatedTime' | 'Size';
 export type CommonGroupBy = 'None';
 export type CommonSortBy = 'CreatedTime' | 'Label' | 'Size';
 
-export const commonProperties: ITreePropertyInfo<CommonProperty>[] = [
+export const commonProperties: ITreePropertyInfo<Exclude<CommonProperty, 'Size'>>[] = [
     { property: 'CreatedTime', exampleValue: '2 hours ago' },
 ];
 

@@ -11,6 +11,8 @@ import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
 
+const DefaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
+
 export class ContextTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Context;/;
     public static removableContextRegExp: RegExp = /^customContext;/i;
@@ -25,7 +27,7 @@ export class ContextTreeItem extends ToolTipTreeItem {
     public get contextValue(): string {
         let result: string;
 
-        if (defaultContextNames.indexOf(this.name) >= 0) {
+        if (DefaultContextNames.indexOf(this.name) >= 0) {
             result = 'defaultContext;';
         } else if (this.current) {
             result = 'currentCustomContext;';

@@ -17,7 +17,7 @@ import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImagePr
 import { ImageTreeItem } from "./ImageTreeItem";
 
 export interface DatedDockerImage extends ListImagesItem {
-    Outdated?: boolean;
+    outdated?: boolean;
 }
 
 export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, ImageProperty> {

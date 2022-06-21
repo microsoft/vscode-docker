@@ -5,9 +5,9 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { ContainerOS } from '@microsoft/container-runtimes';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
-import { DockerOSType } from '../../docker/Common';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
@@ -18,7 +18,6 @@ import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { execAsync } from '../../utils/spawnAsync';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
@@ -119,8 +118,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
-                // TODO: exe path
-                pipeProgram: ext.dockerContextManager.getDockerCommand(context.actionContext),
+                pipeProgram: ext.runtimeManager.getCommand(),
                 /* eslint-disable no-template-curly-in-string */
                 pipeArgs: ['exec', '-i', containerName, '${debuggerCommand}'],
                 pipeCwd: '${workspaceFolder}',
@@ -145,7 +143,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         // If debugger path is not specified, then install the debugger if it doesn't exist in the container
         if (!debuggerPath) {
-            const containerOS = await getDockerOSType(context.actionContext);
+            const containerOS = await getDockerOSType();
             await this.acquireDebuggers(containerOS === 'windows' ? 'Windows' : 'Linux');
             const debuggerDirectory = containerOS === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger';
             debuggerPath = containerOS === 'windows'
@@ -166,8 +164,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             // and processName will be undefined.
             processName: debugConfiguration.processId ? undefined : debugConfiguration.processName || 'dotnet',
             pipeTransport: {
-                // TODO: exe path
-                pipeProgram: ext.dockerContextManager.getDockerCommand(context.actionContext),
+                pipeProgram: ext.runtimeManager.getCommand(),
                 pipeArgs: ['exec', '-i', containerName],
                 // eslint-disable-next-line no-template-curly-in-string
                 pipeCwd: '${workspaceFolder}',
@@ -270,7 +267,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         return pathNormalize(result, platformOS);
     }
 
-    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: DockerOSType): Promise<void> {
+    private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
         if (containerOS === 'windows') {
             const containerInfo = await ext.dockerClient.inspectContainer(context, containerName);
             if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
@@ -298,26 +295,28 @@ export class NetCoreDebugHelper implements DebugHelper {
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
-            const command = CommandLineBuilder
-                // TODO: exe path
-                .create(ext.dockerContextManager.getDockerCommand(context), 'cp')
-                .withQuotedArg(vsDbgInstallBasePath)
-                .withQuotedArg(containerDebuggerPath)
-                .build();
-            await execAsync(command);
+            await ext.defaultShellCR()(
+                ext.containerClient.writeFile({
+                    inputFile: vsDbgInstallBasePath,
+                    path: containerDebuggerPath,
+                })
+            );
         });
     }
 
-    private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: DockerOSType): Promise<boolean> {
-        const command = CommandLineBuilder
-            // TODO: exe path
-            .create(ext.dockerContextManager.getDockerCommand(), 'exec', '-i')
-            .withQuotedArg(containerName)
-            .withArg(containerOS === 'windows' ? 'cmd /C' : '/bin/sh -c')
+    private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: ContainerOS): Promise<boolean> {
+        const containerCommand = CommandLineBuilder
+            .create(containerOS === 'windows' ? 'cmd /C' : '/bin/sh -c')
             .withQuotedArg(containerOS === 'windows' ? `IF EXIST "${debuggerPath}" (echo true) else (echo false)` : `if [ -f ${debuggerPath} ]; then echo true; fi;`)
             .build();
 
-        const { stdout } = await execAsync(command);
+        const stdout = await ext.defaultShellCR()(
+            ext.containerClient.execContainer({
+                container: containerName,
+                command: containerCommand,
+                interactive: true,
+            })
+        );
 
         return /true/ig.test(stdout);
     }

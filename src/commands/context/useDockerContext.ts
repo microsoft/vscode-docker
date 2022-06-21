@@ -16,7 +16,6 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
         node = await ext.contextsTree.showTreeItemPicker<ContextTreeItem>(ContextTreeItem.allContextRegExp, {
             ...actionContext,
             noItemFoundErrorMessage: localize('vscode-docker.commands.contexts.use.noContexts', 'No Docker contexts are available to use'),
-            suppressCreatePick: !(await ext.dockerContextManager.isNewCli()),
         });
         invokedFromCommandPalette = true;
     }
@@ -29,7 +28,7 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
             async () => {
                 // Get a promise for the onContextChangedEvent
                 const contextChangedEventPromise = new Promise<void>((resolve) => {
-                    const disposable = ext.dockerContextManager.onContextChanged(() => {
+                    const disposable = ext.runtimeManager.contextManager.onContextChanged(() => {
                         disposable.dispose();
                         clearTimeout(timer);
 
@@ -47,7 +46,7 @@ export async function useDockerContext(actionContext: IActionContext, node?: Con
                 });
 
                 // Await the `docker context use` command
-                await node.use(actionContext);
+                await node.use();
 
                 // Await the context change event, which will be resolved when the tree refreshes
                 await contextChangedEventPromise;

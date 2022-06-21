@@ -15,7 +15,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
     });
 
-    const osType = await getDockerOSType(context);
+    const osType = await getDockerOSType();
 
     const drivers: { label: string }[] = osType === 'windows'
         ? [

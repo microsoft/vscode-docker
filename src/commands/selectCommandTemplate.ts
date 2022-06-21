@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from '@microsoft/container-runtimes';
+import { CommandResponse, PortBinding } from '@microsoft/container-runtimes';
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
@@ -36,16 +36,14 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
         'build',
         [folder.name, dockerfile],
         folder,
-        { 'dockerfile': dockerfile, 'context': buildContext, 'containerCommand': getContainerCommand() }
+        { 'dockerfile': dockerfile, 'context': buildContext, 'containerCommand': ext.runtimeManager.getCommand() }
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: { [portAndProtocol: string]: unknown }): Promise<CommandResponse<void>> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<CommandResponse<void>> {
     let portsString: string = '';
     if (exposedPorts) {
-        portsString = Object.keys(exposedPorts).reduce((partialPortsString: string, portAndProtocol: string) => {
-            return `${partialPortsString} -p ${portAndProtocol.split('/')[0]}:${portAndProtocol}`;
-        }, portsString);
+        portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
     }
 
     return await selectCommandTemplate(
@@ -53,27 +51,27 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
         interactive ? 'runInteractive' : 'run',
         [fullTag],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': getContainerCommand() }
+        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': ext.runtimeManager.getCommand() }
     );
 }
 
-export async function selectAttachCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string, shellCommand: string): Promise<CommandResponse<void>> {
+export async function selectAttachCommand(context: IActionContext, containerName: string, imageName: string, containerId: string, shellCommand: string): Promise<CommandResponse<void>> {
     return await selectCommandTemplate(
         context,
         'attach',
-        [containerName, fullTag],
+        [containerName, imageName],
         undefined,
-        { 'containerId': containerId, 'shellCommand': shellCommand, 'containerCommand': getContainerCommand() }
+        { 'containerId': containerId, 'shellCommand': shellCommand, 'containerCommand': ext.runtimeManager.getCommand() }
     );
 }
 
-export async function selectLogsCommand(context: IActionContext, containerName: string, fullTag: string, containerId: string): Promise<CommandResponse<void>> {
+export async function selectLogsCommand(context: IActionContext, containerName: string, imageName: string, containerId: string): Promise<CommandResponse<void>> {
     return await selectCommandTemplate(
         context,
         'logs',
-        [containerName, fullTag],
+        [containerName, imageName],
         undefined,
-        { 'containerId': containerId, 'containerCommand': getContainerCommand() }
+        { 'containerId': containerId, 'containerCommand': ext.runtimeManager.getCommand() }
     );
 }
 
@@ -97,8 +95,8 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         context,
         template,
         [folder.name, configurationFile],
-        folder, // TODO: EXE path
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': getComposeCommand() }
+        folder,
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': ext.orchestratorManager.getCommand() }
     );
 }
 
@@ -172,8 +170,7 @@ export async function selectCommandTemplate(
 
     return {
         command: resolveVariables(selectedTemplate.template, folder, additionalVariables),
-        args: undefined,
-        parse: () => Promise.resolve(),
+        args: undefined, // TODO this is wrong
     };
 }
 
@@ -252,14 +249,4 @@ function toCommandTemplateArray(maybeTemplateArray: CommandTemplate[] | string |
     }
 
     return maybeTemplateArray;
-}
-
-function getContainerCommand(): string {
-    const config = vscode.workspace.getConfiguration('docker');
-    return config.get<string>('dockerPath', ext.containerClient.commandName);
-}
-
-function getComposeCommand(): string {
-    const config = vscode.workspace.getConfiguration('docker');
-    return config.get<string>('composeCommand', ext.orchestratorClient.commandName);
 }

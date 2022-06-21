@@ -82,9 +82,9 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     }
 
     const ports = node.ports ?? [];
-    const dupedPossiblePorts = ports.filter(port => port.PublicPort && port.PrivatePort) // Ports must be defined (not falsy)
-        .filter(port => port.Type ?? 'tcp' === 'tcp') // Type must be undefined or tcp
-        .filter(port => port.IP); // IP must be defined (not falsy)
+    const dupedPossiblePorts = ports.filter(port => port.hostPort && port.containerPort) // Ports must be defined (not falsy)
+        .filter(port => port.protocol ?? 'tcp' === 'tcp') // Type must be undefined or tcp
+        .filter(port => port.hostIp); // IP must be defined (not falsy)
 
     // There can be multiple ports that are bound to localhost, so let's remove duplicates by sending to and from a Set
     const browsablePorts: BrowsablePort[] = dedupeBrowsablePorts(dupedPossiblePorts.map(toBrowsablePort));

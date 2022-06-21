@@ -22,7 +22,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
     const terminalCommand = await selectLogsCommand(
         context,
         node.containerName,
-        node.fullTag,
+        node.imageName,
         node.containerId
     );
 

@@ -5,15 +5,16 @@
 
 import { ThemeColor, ThemeIcon } from "vscode";
 import { localize } from "../../localize";
-import { ImageProperty, imageProperties } from "../images/ImageProperties";
+import { commonProperties, CommonProperty } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
-export type ContainerProperty = ImageProperty | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
+export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
 
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
-    ...imageProperties.filter(p => p.property !== 'Size'), // Don't include size as a container property
+    ...commonProperties,
     { property: 'ContainerId', exampleValue: 'fdeab20e859d' },
     { property: 'ContainerName', exampleValue: 'amazing_hoover' },
+    { property: 'Image', exampleValue: 'alpine' },
     { property: 'Networks', exampleValue: 'mybridge_network' },
     { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },

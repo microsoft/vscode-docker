@@ -6,8 +6,8 @@
 import * as vscode from 'vscode';
 import { ContainerOS } from '@microsoft/container-runtimes';
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DockerUri } from '../../../docker/files/DockerUri';
 import { localize } from '../../../localize';
+import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { DirectoryTreeItem } from "./DirectoryTreeItem";
 
 export class FilesTreeItem extends DirectoryTreeItem {

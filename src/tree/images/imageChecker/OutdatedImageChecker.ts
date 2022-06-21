@@ -75,7 +75,7 @@ export class OutdatedImageChecker {
         }
 
         for (const image of images) {
-            image.Outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.id.toLowerCase());
+            image.outdated = this.outdatedImageIds.some(i => i.toLowerCase() === image.id.toLowerCase());
         }
     }
 
@@ -100,7 +100,7 @@ export class OutdatedImageChecker {
 
             // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date
             //    The logic is reversed so that if something goes wrong, we will err toward calling it up-to-date
-            if (imageInspectInfo?.RepoDigests?.every(digest => digest?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0)) {
+            if (imageInspectInfo?.repoDigests?.every(digest => digest?.toLowerCase()?.indexOf(latestImageDigest.toLowerCase()) < 0)) {
                 return 'outdated';
             }
 

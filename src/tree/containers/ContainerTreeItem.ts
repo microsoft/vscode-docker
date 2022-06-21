@@ -13,7 +13,8 @@ import { ToolTipParentTreeItem } from '../ToolTipTreeItem';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
-import { ContainerOS, ListContainersItem } from '@microsoft/container-runtimes';
+import { ContainerOS, ListContainersItem, PortBinding } from '@microsoft/container-runtimes';
+import { getDockerOSType } from '../../utils/osUtils';
 
 /**
  * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.
@@ -54,12 +55,12 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
         return this._item.name;
     }
 
-    public get fullTag(): string {
-        return this._item.Image;
+    public get imageName(): string {
+        return this._item.image;
     }
 
     public get labels(): { [key: string]: string } {
-        return this._item.Labels;
+        return this._item.labels;
     }
 
     public get label(): string {
@@ -71,11 +72,11 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get contextValue(): string {
-        return this._item.State + 'Container';
+        return this._item.state + 'Container';
     }
 
-    public get ports(): DockerPort[] {
-        return this._item.Ports;
+    public get ports(): PortBinding[] {
+        return this._item.ports;
     }
 
     public get containerItem(): ListContainersItem {
@@ -92,10 +93,10 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get iconPath(): vscode.ThemeIcon {
-        if (this._item.Status.includes('(unhealthy)')) {
+        if (this._item.status?.includes('(unhealthy)')) {
             return new vscode.ThemeIcon('warning', new vscode.ThemeColor('problemsWarningIcon.foreground'));
         } else {
-            return getContainerStateIcon(this._item.State);
+            return getContainerStateIcon(this._item.state);
         }
     }
 
@@ -122,7 +123,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
                     this.containerId,
                     async c => {
                         if (this.containerOS === undefined) {
-                            this.containerOS = (await ext.dockerClient.inspectContainer(c, this.containerId)).Platform;
+                            this.containerOS = await getDockerOSType();
                         }
 
                         return this.containerOS;
@@ -149,7 +150,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     private get isRunning(): boolean {
-        return this._item.State.toLowerCase() === 'running';
+        return this._item.state.toLowerCase() === 'running';
     }
 }
 

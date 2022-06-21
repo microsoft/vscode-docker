@@ -45,11 +45,11 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get description(): string | undefined {
-        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.Outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
+        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
     }
 
     public get iconPath(): ThemeIcon {
-        if (this._item.Outdated) {
+        if (this._item.outdated) {
             return new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground'));
         }
 

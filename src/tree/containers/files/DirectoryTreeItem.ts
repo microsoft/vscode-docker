@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 import { ContainerOS } from '@microsoft/container-runtimes';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
-import { DockerUri } from '../../../docker/files/DockerUri';
+import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
 
 export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;

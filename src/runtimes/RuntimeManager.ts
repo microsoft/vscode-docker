@@ -31,4 +31,6 @@ export abstract class RuntimeManager {
     public get runtimeClients(): Array<ClientIdentity> {
         return Array.from(this._runtimeClients.values());
     }
+
+    public abstract getCommand(): string;
 }
