@@ -7,8 +7,10 @@
 // Adapted from: https://github.com/microsoft/vscode/blob/8827cf5a607b6ab7abf45817604bc21883314db7/extensions/debug-server-ready/src/extension.ts
 //
 
+import * as stream from 'stream';
 import * as util from 'util';
 import * as vscode from 'vscode';
+import { ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -80,12 +82,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 }
 
                 const containerPort = Number.parseInt(captureString, 10);
-                const containerInspectInfo = await ext.dockerClient.inspectContainer(context, args.containerName);
-                const hostPort = containerInspectInfo.NetworkSettings.Ports[`${containerPort}/tcp`][0].HostPort;
-
-                if (!hostPort) {
-                    throw new Error(localize('vscode-docker.debug.serverReady.noHostPortA', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
-                }
+                const hostPort = await this.getHostPortForContainerPort(args.containerName, containerPort);
 
                 captureString = util.format(format, hostPort);
             } else {
@@ -98,12 +95,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 }
 
                 const containerProtocol = this.getContainerProtocol(captureString);
-                const containerInspectInfo = await ext.dockerClient.inspectContainer(context, args.containerName);
-                const hostPort = containerInspectInfo.NetworkSettings.Ports[`${containerPort}/tcp`][0].HostPort;
-
-                if (!hostPort) {
-                    throw new Error(localize('vscode-docker.debug.serverReady.noHostPortB', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, args.containerName));
-                }
+                const hostPort = await this.getHostPortForContainerPort(args.containerName, containerPort);
 
                 const s = format.split('%s');
 
@@ -139,6 +131,19 @@ class ServerReadyDetector implements DockerServerReadyDetector {
         }
 
         return undefined;
+    }
+
+    private async getHostPortForContainerPort(containerName: string, containerPort: number): Promise<number> {
+        const containerInspectInfo = (await ext.defaultShellCR()(
+            ext.containerClient.inspectContainers({ containers: [containerName] })
+        ))?.[0];
+        const hostPort = containerInspectInfo?.ports.find(p => p.containerPort === containerPort)?.hostPort;
+
+        if (!hostPort) {
+            throw new Error(localize('vscode-docker.debug.serverReady.noHostPortA', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, containerName));
+        }
+
+        return hostPort;
     }
 
     private openExternalWithUri(session: vscode.DebugSession, uri: string): void {
@@ -185,10 +190,8 @@ interface DockerServerReadyDetector {
     detectPattern(output: string): void;
 }
 
-type LogStream = NodeJS.ReadableStream & { destroy(): void; };
-
 class DockerLogsTracker extends vscode.Disposable {
-    private logStream: LogStream;
+    private logStream: stream.PassThrough;
 
     public constructor(private readonly containerName: string, private readonly detector: DockerServerReadyDetector) {
         super(
@@ -213,11 +216,19 @@ class DockerLogsTracker extends vscode.Disposable {
             context.errorHandling.suppressDisplay = true;
             context.errorHandling.rethrow = false;
 
-            this.logStream = await ext.dockerClient.getContainerLogs(context, this.containerName) as LogStream;
+            this.logStream = new stream.PassThrough();
 
             this.logStream.on('data', (data) => {
                 this.detector.detectPattern(data.toString());
             });
+
+            const shellCRF = new ShellStreamCommandRunnerFactory({
+                stdOutPipe: this.logStream
+            });
+
+            await shellCRF.getCommandRunner()(
+                ext.containerClient.logsForContainer({ container: this.containerName })
+            );
         });
     }
 }

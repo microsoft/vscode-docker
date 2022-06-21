@@ -5,9 +5,9 @@
 
 import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon, TreeItemCollapsibleState } from "vscode";
-import { getImageGroupIcon } from "../images/ImageProperties";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { getCommonGroupIcon } from "../settings/CommonProperties";
 import { ContainerProperty, getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo, NonComposeGroupName } from "./ContainersTreeItem";
 
@@ -44,8 +44,10 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContain
                 return new ThemeIcon('multiple-windows');
             case 'State':
                 return getContainerStateIcon(this.group);
+            case 'Image':
+                return new ThemeIcon('multiple-windows');
             default:
-                return getImageGroupIcon(this.parent.groupBySetting);
+                return getCommonGroupIcon(this.parent.groupBySetting);
         }
     }
 

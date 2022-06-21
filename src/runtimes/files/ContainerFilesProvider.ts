@@ -7,7 +7,6 @@ import * as vscode from 'vscode';
 import { ContainerOS } from '@microsoft/container-runtimes';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { localize } from '../../localize';
-import { DockerApiClient } from '../DockerApiClient';
 import { DirectoryItem, DirectoryItemStat, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem, statWindowsContainerItem } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
 

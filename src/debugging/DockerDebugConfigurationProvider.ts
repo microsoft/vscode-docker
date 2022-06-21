@@ -141,7 +141,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             configuration?.dockerOptions?.containerName && // containerName must be specified
             !(configuration?.subProcessId)) { // Must not have subProcessId, i.e. not a subprocess debug session (which is how Python does hot reload sessions)
             try {
-                await ext.dockerClient.removeContainer(context, configuration.dockerOptions.containerName);
+                await ext.defaultShellCR()(
+                    ext.containerClient.removeContainers({ containers: [configuration.dockerOptions.containerName] })
+                );
             } catch {
                 // Best effort
             }
@@ -151,22 +153,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     private async outputPortsAtDebuggingIfNeeded(context: IActionContext, configuration: ResolvedDebugConfiguration): Promise<void> {
         if (configuration?.dockerOptions?.containerName) {
             try {
-                const inspectInfo = await ext.dockerClient.inspectContainer(context, configuration.dockerOptions.containerName);
+                const inspectInfo = (await ext.defaultShellCR()(
+                    ext.containerClient.inspectContainers({ containers: [configuration.dockerOptions.containerName] })
+                ))?.[0];
                 const portMappings: string[] = [];
 
-                if (inspectInfo?.NetworkSettings?.Ports) {
-                    for (const containerPort of Object.keys(inspectInfo.NetworkSettings.Ports)) {
-                        const mappings = inspectInfo.NetworkSettings.Ports[containerPort];
-
-                        if (mappings) {
-                            for (const mapping of mappings) {
-                                if (mapping?.HostPort) {
-                                    // TODO: if we ever do non-localhost debugging this would need to change
-                                    portMappings.push(`localhost:${mapping.HostPort} => ${containerPort}`);
-                                }
-                            }
-                        }
-                    }
+                for (const binding of inspectInfo?.ports ?? []) {
+                    portMappings.push(`localhost:${binding.hostPort} => ${binding.containerPort}`);
                 }
 
                 if (portMappings.length > 0) {
