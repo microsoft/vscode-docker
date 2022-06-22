@@ -23,12 +23,14 @@ export class TaskCommandRunnerFactory implements ICommandRunnerFactory {
     public getCommandRunner(): CommandRunner {
         return async <T>(commandResponseLike: CommandResponseLike<T>) => {
             const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
-            return await executeAsTask(this.options, commandResponse.command, commandResponse.args);
+            await executeAsTask(this.options, commandResponse.command, commandResponse.args);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return undefined!;
         };
     }
 }
 
-async function executeAsTask(options: TaskCommandRunnerOptions, command: string, args?: vscode.ShellQuotedString[]): Promise<never> {
+async function executeAsTask(options: TaskCommandRunnerOptions, command: string, args?: vscode.ShellQuotedString[]): Promise<void> {
     const shellExecutionOptions = { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() };
 
     const shellExecution = args ?
@@ -58,7 +60,7 @@ async function executeAsTask(options: TaskCommandRunnerOptions, command: string,
 
     const taskExecution = await vscode.tasks.executeTask(task);
 
-    const taskEndPromise = new Promise<never>((resolve, reject) => {
+    const taskEndPromise = new Promise<void>((resolve, reject) => {
         const disposable = vscode.tasks.onDidEndTaskProcess(e => {
             if (e.execution === taskExecution) {
                 disposable.dispose();
@@ -67,7 +69,7 @@ async function executeAsTask(options: TaskCommandRunnerOptions, command: string,
                     reject(e.exitCode);
                 }
 
-                resolve(undefined);
+                resolve();
             }
         });
     });

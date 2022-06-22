@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
 import { addDockerSettingsToEnv } from '../utils/addDockerSettingsToEnv';
 import { CommandLineBuilder } from '../utils/commandLineBuilder';
@@ -17,7 +18,7 @@ const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
 const YELLOW = '33m';
 
-export class DockerPseudoterminal implements Pseudoterminal {
+export class DockerPseudoterminal implements Pseudoterminal, ICommandRunnerFactory {
     private readonly closeEmitter: EventEmitter<number> = new EventEmitter<number>();
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
@@ -52,37 +53,13 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeCommandInTerminal(
-        command: CommandLineBuilder,
-        folder: WorkspaceFolder,
-        rejectOnStderr?: boolean,
-        stdoutBuffer?: Buffer,
-        stderrBuffer?: Buffer,
-        token?: CancellationToken): Promise<void> {
-        const commandLine = resolveVariables(command.build(), folder);
-
-        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
-
-        const newEnv = { ...process.env, ...this.resolvedDefinition.options?.env };
-        addDockerSettingsToEnv(newEnv, process.env);
-        await spawnAsync(
-            commandLine,
-            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
-            (stdout: string) => {
-                this.writeOutput(stdout);
-            },
-            stdoutBuffer,
-            (stderr: string) => {
-                this.writeError(stderr);
-
-                if (rejectOnStderr) {
-                    throw new Error(stderr);
-                }
-            },
-            stderrBuffer,
-            token
-        );
+    public getCommandRunner(): CommandRunner {
+        return async <T>(commandResponseLike: CommandResponseLike<T>) => {
+            const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
+            await this.executeCommandInTerminal(commandResponse,);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return undefined!;
+        };
     }
 
     public writeOutput(message: string): void {
@@ -112,5 +89,38 @@ export class DockerPseudoterminal implements Pseudoterminal {
     private write(message: string, color: string): void {
         message = message.replace(/\r?\n/g, '\r\n'); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
+    }
+
+    private async executeCommandInTerminal(
+        command: CommandResponse<unknown>,
+        folder: WorkspaceFolder,
+        rejectOnStderr?: boolean,
+        stdoutBuffer?: Buffer,
+        stderrBuffer?: Buffer,
+        token?: CancellationToken): Promise<void> {
+        const commandLine = resolveVariables(command.build(), folder);
+
+        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
+        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
+
+        const newEnv = { ...process.env, ...this.resolvedDefinition.options?.env };
+        addDockerSettingsToEnv(newEnv, process.env);
+        await spawnAsync(
+            commandLine,
+            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
+            (stdout: string) => {
+                this.writeOutput(stdout);
+            },
+            stdoutBuffer,
+            (stderr: string) => {
+                this.writeError(stderr);
+
+                if (rejectOnStderr) {
+                    throw new Error(stderr);
+                }
+            },
+            stderrBuffer,
+            token
+        );
     }
 }
