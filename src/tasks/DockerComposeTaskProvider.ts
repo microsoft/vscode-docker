@@ -38,15 +38,17 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
         const commandLine = await this.resolveCommandLine(definition.dockerCompose);
 
-        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
-        await context.terminal.executeCommandInTerminal(
-            commandLine,
-            context.folder,
-            false, // rejectOnStderr
-            undefined, // stdoutBuffer
-            Buffer.alloc(10 * 1024), // stderrBuffer
-            context.cancellationToken
-        );
+        const command =
+
+            // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
+            await context.terminal.executeCommandInTerminal(
+                commandLine,
+                context.folder,
+                false, // rejectOnStderr
+                undefined, // stdoutBuffer
+                Buffer.alloc(10 * 1024), // stderrBuffer
+                context.cancellationToken
+            );
         throwIfCancellationRequested(context);
     }
 
