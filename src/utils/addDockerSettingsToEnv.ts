@@ -4,30 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace } from 'vscode';
-import { configPrefix } from '../constants';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 
-export function addDockerSettingsToEnv(env: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
-    addDockerSettingToEnv("host", 'DOCKER_HOST', env, oldEnv);
-    addDockerSettingToEnv("context", 'DOCKER_CONTEXT', env, oldEnv);
-    addDockerSettingToEnv("certPath", 'DOCKER_CERT_PATH', env, oldEnv);
-    addDockerSettingToEnv("tlsVerify", 'DOCKER_TLS_VERIFY', env, oldEnv);
-    addDockerSettingToEnv("machineName", 'DOCKER_MACHINE_NAME', env, oldEnv);
-}
+export function addDockerSettingsToEnv(newEnv: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
+    const environmentSettings: NodeJS.ProcessEnv = workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
 
-function addDockerSettingToEnv(settingKey: string, envVar: string, env: NodeJS.ProcessEnv, oldEnv: NodeJS.ProcessEnv): void {
-    const value = workspace.getConfiguration(configPrefix).get<string>(settingKey, '');
-
-    const expectedType = "string";
-    const actualType = typeof value;
-    if (expectedType !== actualType) {
-        ext.outputChannel.appendLine(localize('vscode-docker.utils.env.ignoring', 'WARNING: Ignoring setting "{0}.{1}" because type "{2}" does not match expected type "{3}".', configPrefix, settingKey, actualType, expectedType));
-    } else if (value) {
-        if (oldEnv[envVar] && oldEnv[envVar] !== value) {
-            ext.outputChannel.appendLine(localize('vscode-docker.utils.env.overwriting', 'WARNING: Overwriting environment variable "{0}" with VS Code setting "{1}.{2}".', envVar, configPrefix, settingKey));
-        }
-
-        env[envVar] = value;
+    for (const key of Object.keys(environmentSettings)) {
+        ext.outputChannel.appendLine(localize('vscode-docker.utils.env.overwriting', 'WARNING: Overwriting environment variable "{0}" from VS Code setting "docker.environment".', key));
     }
+
+    newEnv = {
+        ...oldEnv,
+        ...environmentSettings,
+    };
 }

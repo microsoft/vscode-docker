@@ -274,7 +274,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 this.tryGetContextFromEnvironment(actionContext) ||
                 this.tryGetContextFromFilesystemClues(actionContext);
 
-            // A result from any of these three implies that there is only one context, or it is fixed by `docker.host` / `DOCKER_HOST`, or `docker.context` / `DOCKER_CONTEXT`
+            // A result from any of these three implies that there is only one context, or it is fixed by `[docker.environment.]DOCKER_HOST`, or `[docker.environment.]DOCKER_CONTEXT`
             // As such, we will lock to the current context
             // Otherwise, unlock in case we were previously locked
             if (fixedContext) {
@@ -314,17 +314,18 @@ export class DockerContextManager implements ContextManager, Disposable {
         const config = workspace.getConfiguration('docker');
         let dockerHost: string | undefined;
         let dockerContext: string | undefined;
+        const environment = config.get('environment', {});
 
-        if ((dockerHost = config.get('host'))) { // Assignment + check is intentional
-            actionContext.telemetry.properties.hostSource = 'docker.host';
+        if ((dockerHost = environment['DOCKER_HOST'])) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'docker.environment.host';
 
             return {
                 ...defaultContext,
                 Current: true,
                 DockerEndpoint: dockerHost,
             } as DockerContext;
-        } else if ((dockerContext = config.get('context'))) { // Assignment + check is intentional
-            actionContext.telemetry.properties.hostSource = 'docker.context';
+        } else if ((dockerContext = environment['DOCKER_CONTEXT'])) { // Assignment + check is intentional
+            actionContext.telemetry.properties.hostSource = 'docker.environment.context';
 
             return dockerContext;
         }
@@ -442,13 +443,13 @@ export class DockerContextManager implements ContextManager, Disposable {
                 // If URL parsing fails, let's catch it and give a better error message to help users from a common mistake
                 actionContext.telemetry.properties.hostProtocol = 'unknown';
                 const message =
-                    localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.host` or environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.');
+                    localize('vscode-docker.docker.contextManager.invalidHostSetting', 'The value provided for the setting `docker.environment.DOCKER_HOST` or environment variable `DOCKER_HOST` is invalid. It must include the protocol, for example, ssh://myuser@mymachine or tcp://1.2.3.4.');
                 const button = localize('vscode-docker.docker.contextManager.openSettings', 'Open Settings');
 
                 void window.showErrorMessage(message, button)
                     .then((result: string) => {
                         if (result === button) {
-                            void commands.executeCommand('workbench.action.openSettings', 'docker.host');
+                            void commands.executeCommand('workbench.action.openSettings', 'docker.environment');
                         }
                     });
 
