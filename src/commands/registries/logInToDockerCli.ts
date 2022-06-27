@@ -47,6 +47,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                 await shellCRF.getCommandRunner()(
                     ext.containerClient.login({
                         username: username,
+                        passwordStdIn: true,
                         registry: creds.registryPath,
                     })
                 );
