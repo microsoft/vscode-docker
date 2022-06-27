@@ -82,24 +82,38 @@ export class ImageTreeItem extends ToolTipTreeItem {
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'image';
-        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, NormalizedSize: getCommonPropertyValue(this._item, 'Size'), ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
+
+        const imageInspection = (await ext.defaultShellCR()(
+            ext.containerClient.inspectImages({ images: [this.imageId] })
+        ))?.[0];
+        const associatedContainers = await ext.defaultShellCR()(
+            ext.containerClient.listContainers({ imageAncestors: [this.imageId] })
+        );
+
+        const handlebarsContext = {
+            ...imageInspection,
+            normalizedName: this.fullTag,
+            normalizedSize: getCommonPropertyValue(this._item, 'Size'),
+            containers: associatedContainers
+        };
+        return resolveTooltipMarkdown(imageTooltipTemplate, handlebarsContext);
     }
 }
 
 const imageTooltipTemplate = `
-### {{ NormalizedName }} ({{ substr Id 7 12 }})
+### {{ normalizedName }} ({{ substr id 7 12 }})
 
 ---
 
 #### Size
-{{ NormalizedSize }}
+{{ normalizedSize }}
 
 ---
 
 #### Associated Containers
-{{#if (nonEmptyObj Containers)}}
-{{#each Containers}}
-  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{#if (nonEmptyArr containers)}}
+{{#each containers}}
+  - {{ this.name }} ({{ substr this.id 0 12 }})
 {{/each}}
 {{else}}
 _None_
@@ -108,9 +122,9 @@ _None_
 ---
 
 #### Exposed Ports
-{{#if (nonEmptyObj Config.ExposedPorts)}}
-{{#each Config.ExposedPorts}}
-  - {{ @key }}
+{{#if (nonEmptyArr ports)}}
+{{#each ports}}
+  - {{ this.containerPort }} {{ this.protocol }}
 {{/each}}
 {{else}}
 _None_

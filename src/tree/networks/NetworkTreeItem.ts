@@ -63,19 +63,31 @@ export class NetworkTreeItem extends ToolTipTreeItem {
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'network';
-        return resolveTooltipMarkdown(networkTooltipTemplate, await ext.dockerClient.inspectNetwork(actionContext, this.networkName));
+
+        const networkInspection = (await ext.defaultShellCR()(
+            ext.containerClient.inspectNetworks({ networks: [this.networkName] })
+        ))?.[0];
+        const associatedContainers = await ext.defaultShellCR()(
+            ext.containerClient.listContainers({ networks: [this.networkName] })
+        );
+
+        const handlebarsContext = {
+            ...networkInspection,
+            containers: associatedContainers
+        };
+        return resolveTooltipMarkdown(networkTooltipTemplate, handlebarsContext);
     }
 }
 
 const networkTooltipTemplate = `
-### {{ Name }}
+### {{ name }}
 
 ---
 
 #### Associated Containers
-{{#if (nonEmptyObj Containers)}}
-{{#each Containers}}
-  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{#if (nonEmptyArr containers)}}
+{{#each containers}}
+  - {{ this.name }} ({{ substr this.id 0 12 }})
 {{/each}}
 {{else}}
 _None_

@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ShellQuotedString } from 'vscode';
 import { PlatformOS } from '../utils/platform';
 import { DockerLabels, TaskDefinitionBase } from './TaskDefinitionBase';
 
@@ -21,11 +20,11 @@ export interface DockerContainerPort {
 export interface DockerContainerVolume {
     localPath: string;
     containerPath: string;
-    permissions?: 'ro' | 'rw' | 'ro,z' | 'rw,z';
+    permissions?: 'ro' | 'rw';
 }
 
 export interface DockerRunOptions {
-    command?: string | ShellQuotedString[];
+    command?: string;
     containerName?: string;
     entrypoint?: string;
     env?: { [key: string]: string };

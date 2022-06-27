@@ -146,7 +146,16 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'container';
-        return resolveTooltipMarkdown(containerTooltipTemplate, { NormalizedName: this.containerName, ...await ext.dockerClient.inspectContainer(actionContext, this.containerId) });
+
+        const containerInspection = (await ext.defaultShellCR()(
+            ext.containerClient.inspectContainers({ containers: [this.containerId] })
+        ))?.[0];
+
+        const handlebarsContext = {
+            ...containerInspection,
+            normalizedName: this.containerName,
+        };
+        return resolveTooltipMarkdown(containerTooltipTemplate, handlebarsContext);
     }
 
     private get isRunning(): boolean {
@@ -155,19 +164,19 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
 }
 
 const containerTooltipTemplate = `
-### {{ NormalizedName }} ({{ substr Id 0 12 }})
+### {{ normalizedName }} ({{ substr id 0 12 }})
 
 ---
 
 #### Image
-{{ Config.Image }} ({{ substr Image 7 12 }})
+{{ imageName }} ({{ substr imageId 7 12 }})
 
 ---
 
 #### Ports
-{{#if (nonEmptyObj NetworkSettings.Ports)}}
-{{#each NetworkSettings.Ports}}
-  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) ➔ {{ @key }}
+{{#if (nonEmptyArr ports)}}
+{{#each ports}}
+  - [{{ this.hostPort }}](http://localhost:{{ this.hostPort }}) ➔ {{ this.containerPort }} {{ this.protocol }}
 {{/each}}
 {{else}}
 _None_
@@ -176,13 +185,13 @@ _None_
 ---
 
 #### Volumes
-{{#if Mounts}}
-{{#each Mounts}}
-{{#if (eq this.Type 'bind')}}
-  - {{ friendlyBindHost this.Source }} ➔ {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
+{{#if (nonEmptyArr mounts)}}
+{{#each mounts}}
+{{#if (eq this.type 'bind')}}
+  - {{ friendlyBindHost this.source }} ➔ {{ this.destination }} (Bind mount, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{#if (eq this.Type 'volume')}}
-  - {{ this.Name }} ➔ {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
+  - {{ this.name }} ➔ {{ this.destination }} (Named volume, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{/each}}
 {{else}}
@@ -192,9 +201,9 @@ _None_
 ---
 
 #### Networks
-{{#if (nonEmptyObj NetworkSettings.Networks)}}
-{{#each NetworkSettings.Networks}}
-  - {{ @key }}
+{{#if (nonEmptyArr networks)}}
+{{#each networks}}
+  - {{ this.name }}
 {{/each}}
 {{else}}
 _None_

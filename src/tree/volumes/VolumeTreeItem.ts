@@ -60,19 +60,31 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'volume';
-        return resolveTooltipMarkdown(volumeTooltipTemplate, await ext.dockerClient.inspectVolume(actionContext, this.volumeName));
+
+        const volumeInspection = (await ext.defaultShellCR()(
+            ext.containerClient.inspectVolumes({ volumes: [this.volumeName] })
+        ))?.[0];
+        const associatedContainers = await ext.defaultShellCR()(
+            ext.containerClient.listContainers({ volumes: [this.volumeName] })
+        );
+
+        const handlebarsContext = {
+            ...volumeInspection,
+            containers: associatedContainers
+        };
+        return resolveTooltipMarkdown(volumeTooltipTemplate, handlebarsContext);
     }
 }
 
 const volumeTooltipTemplate = `
-### {{ Name }}
+### {{ name }}
 
 ---
 
 #### Associated Containers
-{{#if (nonEmptyObj Containers)}}
-{{#each Containers}}
-  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{#if (nonEmptyArr containers)}}
+{{#each containers}}
+  - {{ this.name }} ({{ substr this.id 0 12 }})
 {{/each}}
 {{else}}
 _None_

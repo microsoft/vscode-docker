@@ -5,16 +5,15 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { ContainerOS } from '@microsoft/container-runtimes';
+import { bashQuote, composeArgs, ContainerOS, powershellQuote, quoted, withArg } from '@microsoft/container-runtimes';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
+import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { CommandLineBuilder } from '../../utils/commandLineBuilder';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
-import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
+import { getDockerOSType, isArm64Mac, isWindows } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -308,15 +307,28 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: ContainerOS): Promise<boolean> {
-        const containerCommand = CommandLineBuilder
-            .create(containerOS === 'windows' ? 'cmd /C' : '/bin/sh -c')
-            .withQuotedArg(containerOS === 'windows' ? `IF EXIST "${debuggerPath}" (echo true) else (echo false)` : `if [ -f ${debuggerPath} ]; then echo true; fi;`)
-            .build();
+        let containerCommand: string;
+        let containerCommandArgs: ShellQuotedString[];
+        if (containerOS === 'windows') {
+            containerCommand = 'cmd';
+            containerCommandArgs = composeArgs(
+                withArg('/C'),
+                withArg(quoted(`IF EXIST "${debuggerPath}" (echo true) else (echo false)`))
+            )();
+        } else {
+            containerCommand = '/bin/sh';
+            containerCommandArgs = composeArgs(
+                withArg('-c'),
+                withArg(quoted(`if [ -f ${debuggerPath} ]; then echo true; fi;`))
+            )();
+        }
+
+        const containerCommandArgsQuoted = isWindows() ? powershellQuote(containerCommandArgs) : bashQuote(containerCommandArgs);
 
         const stdout = await ext.defaultShellCR()(
             ext.containerClient.execContainer({
                 container: containerName,
-                command: containerCommand,
+                command: [containerCommand, ...containerCommandArgsQuoted],
                 interactive: true,
             })
         );

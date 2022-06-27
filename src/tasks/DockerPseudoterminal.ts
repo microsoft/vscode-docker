@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
+import { bashQuote, CommandResponse, powershellQuote } from '@microsoft/container-runtimes';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
-import { addDockerSettingsToEnv } from '../utils/addDockerSettingsToEnv';
-import { CommandLineBuilder } from '../utils/commandLineBuilder';
+import { isWindows } from '../utils/osUtils';
 import { resolveVariables } from '../utils/resolveVariables';
-import { spawnAsync } from '../utils/spawnAsync';
+import { execAsync, ExecAsyncOutput } from '../utils/spawnAsync';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -18,7 +17,7 @@ const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
 const YELLOW = '33m';
 
-export class DockerPseudoterminal implements Pseudoterminal, ICommandRunnerFactory {
+export class DockerPseudoterminal implements Pseudoterminal {
     private readonly closeEmitter: EventEmitter<number> = new EventEmitter<number>();
     private readonly writeEmitter: EventEmitter<string> = new EventEmitter<string>();
     private readonly cts: CancellationTokenSource = new CancellationTokenSource();
@@ -53,12 +52,12 @@ export class DockerPseudoterminal implements Pseudoterminal, ICommandRunnerFacto
         this.closeEmitter.fire(code || 0);
     }
 
-    public getCommandRunner(): CommandRunner {
-        return async <T>(commandResponseLike: CommandResponseLike<T>) => {
-            const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
-            await this.executeCommandInTerminal(commandResponse,);
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            return undefined!;
+    public getCommandRunner(options: Omit<ExecuteCommandInTerminalOptions, 'commandResponse'>): (commandResponse: CommandResponse<unknown>) => Promise<ExecAsyncOutput> {
+        return async (commandResponse: CommandResponse<unknown>) => {
+            return await this.executeCommandInTerminal({
+                ...options,
+                commandResponse: commandResponse,
+            });
         };
     }
 
@@ -91,36 +90,39 @@ export class DockerPseudoterminal implements Pseudoterminal, ICommandRunnerFacto
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
 
-    private async executeCommandInTerminal(
-        command: CommandResponse<unknown>,
-        folder: WorkspaceFolder,
-        rejectOnStderr?: boolean,
-        stdoutBuffer?: Buffer,
-        stderrBuffer?: Buffer,
-        token?: CancellationToken): Promise<void> {
-        const commandLine = resolveVariables(command.build(), folder);
+    private async executeCommandInTerminal(options: ExecuteCommandInTerminalOptions): Promise<ExecAsyncOutput> {
+        const quotedArgs = isWindows() ? powershellQuote(options.commandResponse.args) : bashQuote(options.commandResponse.args);
+        const resolvedQuotedArgs = resolveVariables(quotedArgs, options.folder);
+        const commandLine = [options.commandResponse.command, ...resolvedQuotedArgs].join(' ');
 
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
         this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
-        const newEnv = { ...process.env, ...this.resolvedDefinition.options?.env };
-        addDockerSettingsToEnv(newEnv, process.env);
-        await spawnAsync(
+        return await execAsync(
             commandLine,
-            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
-            (stdout: string) => {
-                this.writeOutput(stdout);
+            {
+                cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
+                env: { ...process.env, ...this.resolvedDefinition.options?.env }, // TODO: add new env vars
+                cancellationToken: options.token,
             },
-            stdoutBuffer,
-            (stderr: string) => {
-                this.writeError(stderr);
+            (output: string, err: boolean) => {
+                if (err) {
+                    this.writeError(output);
 
-                if (rejectOnStderr) {
-                    throw new Error(stderr);
+                    if (options.rejectOnStderr) {
+                        throw new Error(output);
+                    }
+                } else {
+                    this.writeOutput(output);
                 }
-            },
-            stderrBuffer,
-            token
+            }
         );
     }
 }
+
+type ExecuteCommandInTerminalOptions = {
+    commandResponse: CommandResponse<unknown>;
+    folder: WorkspaceFolder;
+    rejectOnStderr?: boolean;
+    token?: CancellationToken;
+};
