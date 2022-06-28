@@ -6,11 +6,11 @@
 import * as vscode from 'vscode';
 import { ClientIdentity } from '@microsoft/container-runtimes';
 
-export abstract class RuntimeManager {
-    private readonly _runtimeClients = new Map<string, ClientIdentity>();
-    protected readonly runtimeClientRegisteredEmitter = new vscode.EventEmitter<ClientIdentity>();
+export abstract class RuntimeManager<TClient extends ClientIdentity> {
+    private readonly _runtimeClients = new Map<string, TClient>();
+    protected readonly runtimeClientRegisteredEmitter = new vscode.EventEmitter<TClient>();
 
-    public registerRuntimeClient(client: ClientIdentity): vscode.Disposable {
+    public registerRuntimeClient(client: TClient): vscode.Disposable {
         if (!client || !client.id) {
             throw new Error('Invalid client supplied.');
         }
@@ -28,7 +28,7 @@ export abstract class RuntimeManager {
         });
     }
 
-    public get runtimeClients(): Array<ClientIdentity> {
+    public get runtimeClients(): Array<TClient> {
         return Array.from(this._runtimeClients.values());
     }
 

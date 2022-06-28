@@ -15,6 +15,7 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
+import { getDefaultShellCommandRunner } from './utils/getDefaultShellCommandRunner';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -57,9 +58,9 @@ export namespace ext {
     export let contextsRoot: ContextsTreeItem;
 
     // Container runtime related items
-    export let runtimeManager: ContainerRuntimeManager;
-    export let orchestratorManager: OrchestratorRuntimeManager;
+    export const runtimeManager: ContainerRuntimeManager = new ContainerRuntimeManager();
+    export const orchestratorManager: OrchestratorRuntimeManager = new OrchestratorRuntimeManager();
+    export const defaultShellCR: () => CommandRunner = getDefaultShellCommandRunner();
     export let containerClient: IContainersClient;
     export let orchestratorClient: IContainerOrchestratorClient;
-    export let defaultShellCR: () => CommandRunner;
 }

@@ -3,11 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IContainerOrchestratorClient } from '@microsoft/container-runtimes';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { RuntimeManager } from './RuntimeManager';
 
-export class OrchestratorRuntimeManager extends RuntimeManager {
+export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchestratorClient> {
     public readonly onOrchestratorRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;
 
     public getCommand(): string {

@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DockerClient } from '@microsoft/container-runtimes';
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
@@ -15,14 +16,12 @@ import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider'
 import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
-import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
-import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -80,8 +79,11 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        ext.runtimeManager = new ContainerRuntimeManager();
-        ext.orchestratorManager = new OrchestratorRuntimeManager();
+        // @ts-expect-error TODO: DockerClient does not currently implement all the interface members
+        ext.runtimeManager.registerRuntimeClient(new DockerClient());
+        // @ts-expect-error TODO: DockerComposeClient does not currently exist
+        ext.orchestratorManager.registerRuntimeClient(new DockerComposeClient());
+
 
         // TODO: register clients
         // TODO: when registering orchestrator client, need to work out `docker-compose` / `docker compose`

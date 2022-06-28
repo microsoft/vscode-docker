@@ -3,12 +3,13 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IContainersClient } from '@microsoft/container-runtimes';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 
-export class ContainerRuntimeManager extends RuntimeManager {
+export class ContainerRuntimeManager extends RuntimeManager<IContainersClient> {
     public readonly contextManager: IContextManager = new ContextManager();
     public readonly onContainerRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;
 
