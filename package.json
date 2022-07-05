@@ -2231,12 +2231,12 @@
                     "default": 10,
                     "description": "%vscode-docker.config.docker.truncateMaxLength%"
                 },
-                "docker.environment": {
+                "containers.environment": {
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
                     },
-                    "description": "%vscode-docker.config.docker.environment%",
+                    "description": "%vscode-docker.config.containers.environment%",
                     "scope": "machine-overridable"
                 },
                 "docker.dockerodeOptions": {
@@ -3059,7 +3059,7 @@
                 "docker.commands.logs",
                 "docker.commands.composeUp",
                 "docker.commands.composeDown",
-                "docker.environment",
+                "containers.environment",
                 "docker.dockerodeOptions",
                 "docker.scaffolding.templatePath",
                 "docker.dockerPath",

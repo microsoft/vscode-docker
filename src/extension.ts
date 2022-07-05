@@ -198,13 +198,13 @@ namespace Configuration {
                 });
 
                 // Reset extension environment variables contribution if needed
-                if (e.affectsConfiguration('docker.environment')) {
+                if (e.affectsConfiguration('containers.environment')) {
                     setEnvironmentVariableContributions(ext.context);
                 }
 
                 // These settings will result in a need to change context that doesn't actually change the docker context
                 // So, force a manual refresh so the settings get picked up
-                if (e.affectsConfiguration('docker.environment') ||
+                if (e.affectsConfiguration('containers.environment') ||
                     e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
@@ -217,7 +217,7 @@ namespace Configuration {
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
 
 function setEnvironmentVariableContributions(ctx: vscode.ExtensionContext): void {
-    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
+    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('containers').get<NodeJS.ProcessEnv>('environment', {});
 
     ctx.environmentVariableCollection.clear();
     ctx.environmentVariableCollection.persistent = true;

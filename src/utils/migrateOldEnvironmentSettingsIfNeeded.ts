@@ -17,13 +17,14 @@ const oldSettingsMap = {
 };
 
 export async function migrateOldEnvironmentSettingsIfNeeded(): Promise<void> {
-    const config = vscode.workspace.getConfiguration('docker');
+    const oldConfig = vscode.workspace.getConfiguration('docker');
+    const newConfig = vscode.workspace.getConfiguration('containers');
 
     let alreadyPrompted = false;
     for (const oldSetting of Object.keys(oldSettingsMap)) {
-        const settingValue: string | undefined = config.get<string>(oldSetting);
+        const settingValue: string | undefined = oldConfig.get<string>(oldSetting);
 
-        // If any config target has a value, we'll attempt to migrate all three as necessary
+        // If any config target has a value, we'll attempt to migrate all three config sections as needed
         if (settingValue) {
             // Prompt if we haven't already
             if (!alreadyPrompted) {
@@ -40,62 +41,71 @@ export async function migrateOldEnvironmentSettingsIfNeeded(): Promise<void> {
                 }
             }
 
-            await migrateOldEnvironmentSetting(config, oldSetting);
+            const newSetting = oldSettingsMap[oldSetting];
+            await migrateOldEnvironmentSetting(oldConfig, oldSetting, newConfig, newSetting);
         }
     }
 }
 
-async function migrateOldEnvironmentSetting(config: vscode.WorkspaceConfiguration, oldSetting: string): Promise<void> {
-    const settingInspection = config.inspect<string>(oldSetting);
-    const currentEnvironmentSettings = config.inspect<NodeJS.ProcessEnv>('environment');
+async function migrateOldEnvironmentSetting(oldConfig: vscode.WorkspaceConfiguration, oldSetting: string, newConfig: vscode.WorkspaceConfiguration, newSetting: string): Promise<void> {
+    const oldValueInspection = oldConfig.inspect<string>(oldSetting);
+    const newValueInspection = newConfig.inspect<NodeJS.ProcessEnv>('environment');
 
     // Migrate the global AKA user setting
     await migrateOldEnvironmentSettingForTarget(
-        config,
+        oldConfig,
         oldSetting,
-        settingInspection.globalValue,
-        currentEnvironmentSettings.globalValue,
+        oldValueInspection.globalValue,
+        newConfig,
+        newSetting,
+        newValueInspection.globalValue,
         vscode.ConfigurationTarget.Global
     );
 
     // Migrate the workspace setting
     await migrateOldEnvironmentSettingForTarget(
-        config,
+        oldConfig,
         oldSetting,
-        settingInspection.workspaceValue,
-        currentEnvironmentSettings.workspaceValue,
+        oldValueInspection.workspaceValue,
+        newConfig,
+        newSetting,
+        newValueInspection.workspaceValue,
         vscode.ConfigurationTarget.Workspace
     );
 
     // Migrate the workspace folder setting
     await migrateOldEnvironmentSettingForTarget(
-        config,
+        oldConfig,
         oldSetting,
-        settingInspection.workspaceFolderValue,
-        currentEnvironmentSettings.workspaceFolderValue,
+        oldValueInspection.workspaceFolderValue,
+        newConfig,
+        newSetting,
+        newValueInspection.workspaceFolderValue,
         vscode.ConfigurationTarget.WorkspaceFolder
     );
 }
 
 async function migrateOldEnvironmentSettingForTarget(
-    config: vscode.WorkspaceConfiguration,
+    oldConfig: vscode.WorkspaceConfiguration,
     oldSetting: string,
-    oldValueForTarget: string | undefined,
-    currentEnvValue: NodeJS.ProcessEnv | undefined,
+    oldValue: string | undefined,
+    newConfig: vscode.WorkspaceConfiguration,
+    newSetting: string,
+    newValue: NodeJS.ProcessEnv | undefined,
     target: vscode.ConfigurationTarget
 ): Promise<void> {
     // If no value was set in this particular target, skip
-    if (!oldValueForTarget) {
+    if (!oldValue) {
         return;
     }
 
     // Remove the old setting from this target
-    await config.update(oldSetting, undefined, target);
+    await oldConfig.update(oldSetting, undefined, target);
 
     // Append the old value to the current environment object for this target
-    const newValue = cloneObject(currentEnvValue ?? {});
-    newValue[oldSettingsMap[oldSetting]] = oldValueForTarget;
+    newValue = cloneObject(newValue ?? {});
+    newValue[newSetting] = oldValue;
 
     // Update the new setting for this target
-    await config.update('environment', newValue, target);
+    await newConfig.update('environment', newValue, target);
 }
