@@ -1,3 +1,7 @@
+## 1.22.1 - 30 June 2022
+### Fixed
+* Fixed a crash that could occur with certain Dockerfiles. [#3450](https://github.com/microsoft/vscode-docker/issues/3450)
+
 ## 1.22.0 - 18 April 2022
 ### Added
 * Added a setting, `docker.composeCommand`, to allow configuring the command used for Compose operations. If unset, the extension will attempt to automatically detect whether to use `docker compose` or `docker-compose`. [#2977](https://github.com/microsoft/vscode-docker/issues/2977)
