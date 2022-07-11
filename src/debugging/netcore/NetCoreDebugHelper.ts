@@ -291,16 +291,15 @@ export class NetCoreDebugHelper implements DebugHelper {
             await this.acquireDebuggers('Linux');
         }
 
-        const containerDebuggerPath = `${containerName}:${containerDebuggerDirectory}`;
-
         await window.withProgress({
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
             await ext.defaultShellCR()(
                 ext.containerClient.writeFile({
+                    container: containerName,
                     inputFile: vsDbgInstallBasePath,
-                    path: containerDebuggerPath,
+                    path: containerDebuggerDirectory,
                 })
             );
         });

@@ -57,4 +57,16 @@ declare module "tar" {
     export const ReadEntry: ReadEntryClass;
 
     //#endregion ReadEntry
+
+    //#region Create
+
+    export interface CreateOptions {
+        cwd?: string;
+    }
+
+    export function create(options: CreateOptions, fileList: string[]): NodeJS.ReadableStream;
+
+    export const c: typeof create;
+
+    //#endregion
 }

@@ -3,35 +3,26 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContainerOS } from '@microsoft/container-runtimes';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../localize';
-import { DirectoryItem, DirectoryItemStat, DockerContainerExecutor, listLinuxContainerDirectory, listWindowsContainerDirectory, statLinuxContainerItem, statWindowsContainerItem } from './ContainerFilesUtils';
 import { DockerUri } from './DockerUri';
+import { getDockerOSType } from '../../utils/osUtils';
+import { AccumulatorStream, CommandNotSupportedError, ListFilesItem, ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
+import { localize } from '../../localize';
+import { ext } from '../../extensionVariables';
+import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
 
-class MethodNotImplementedError extends Error {
+class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
         super(localize('docker.files.containerFilesProvider.methodNotImplemented', 'Method not implemented.'));
-    }
-}
-
-class UnrecognizedContainerOSError extends Error {
-    public constructor() {
-        super(localize('docker.files.containerFilesProvider.unrecognizedContainerOS', 'Unrecognized container OS.'));
-    }
-}
-
-class UnsupportedServerOSError extends Error {
-    public constructor() {
-        super(localize('docker.files.containerFilesProvider.supportedServerOS', 'This operation is not supported on this Docker host.'));
     }
 }
 
 export class ContainerFilesProvider extends vscode.Disposable implements vscode.FileSystemProvider {
     private readonly changeEmitter: vscode.EventEmitter<vscode.FileChangeEvent[]> = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
 
-    public constructor(private readonly dockerClientProvider: () => DockerApiClient) {
+    public constructor() {
         super(() => {
             this.changeEmitter.dispose();
         });
@@ -54,45 +45,12 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         const method = async (): Promise<vscode.FileStat> => {
             const dockerUri = DockerUri.parse(uri);
 
-            const executor: DockerContainerExecutor =
-                async (commands, user) => {
-                    const { stdout } = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
-
-                    return stdout;
-                };
-
-            const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
-
-            let statItem: DirectoryItemStat;
-
-            switch (containerOS) {
-                case 'linux':
-
-                    statItem = await statLinuxContainerItem(executor, dockerUri.path);
-
-                    break;
-
-                case 'windows':
-
-                    statItem = await statWindowsContainerItem(executor, dockerUri.windowsPath, dockerUri.options.fileType);
-
-                    break;
-
-                default:
-
-                    throw new UnrecognizedContainerOSError();
-            }
-
-            if (statItem) {
-                return {
-                    ctime: statItem.ctime,
-                    mtime: statItem.mtime,
-                    size: statItem.size,
-                    type: statItem.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File
-                };
-            }
-
-            throw vscode.FileSystemError.FileNotFound(uri);
+            return {
+                ctime: dockerUri.options.ctime,
+                mtime: dockerUri.options.mtime,
+                size: dockerUri.options.size,
+                type: dockerUri.options.fileType === 'file' ? vscode.FileType.File : vscode.FileType.Directory,
+            };
         };
 
         return method();
@@ -101,35 +59,15 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     public readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
         const method = async (): Promise<[string, vscode.FileType][]> => {
             const dockerUri = DockerUri.parse(uri);
+            const containerOS = dockerUri.options.containerOS || await getDockerOSType();
 
-            const executor: DockerContainerExecutor =
-                async (commands, user) => {
-                    const { stdout } = await this.dockerClientProvider().execInContainer(/* context: */ undefined, dockerUri.containerId, commands, { user });
-
-                    return stdout;
-                };
-
-            const containerOS = dockerUri.options?.containerOS ?? await this.getContainerOS(dockerUri.containerId);
-
-            let items: DirectoryItem[];
-
-            switch (containerOS) {
-                case 'linux':
-
-                    items = await listLinuxContainerDirectory(executor, dockerUri.path);
-
-                    break;
-
-                case 'windows':
-
-                    items = await listWindowsContainerDirectory(executor, dockerUri.windowsPath);
-
-                    break;
-
-                default:
-
-                    throw new UnrecognizedContainerOSError();
-            }
+            const items: ListFilesItem[] = await ext.defaultShellCR()(
+                ext.containerClient.listFiles({
+                    container: dockerUri.containerId,
+                    path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                    operatingSystem: containerOS,
+                })
+            );
 
             return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File]);
         };
@@ -145,24 +83,22 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         const method =
             async (): Promise<Uint8Array> => {
                 const dockerUri = DockerUri.parse(uri);
+                const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-                let serverOS = dockerUri.options?.serverOS;
+                const accumulator = new AccumulatorStream();
+                const scrf = new ShellStreamCommandRunnerFactory({
+                    stdOutPipe: tarUnpackStream(accumulator),
+                });
 
-                if (serverOS === undefined) {
-                    const version = await this.dockerClientProvider().version(undefined);
+                await scrf.getCommandRunner()(
+                    ext.containerClient.readFile({
+                        container: dockerUri.containerId,
+                        path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                        operatingSystem: containerOS,
+                    })
+                );
 
-                    serverOS = version.Os;
-                }
-
-                switch (serverOS) {
-                    case 'linux':
-
-                        return await this.readFileViaCopy(dockerUri);
-
-                    default:
-
-                        return await this.readFileViaExec(dockerUri);
-                }
+                return await accumulator.getBytes();
             };
 
         return method();
@@ -172,24 +108,19 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         const method =
             async (): Promise<void> => {
                 const dockerUri = DockerUri.parse(uri);
+                const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-                let serverOS = dockerUri.options?.serverOS;
+                const scrf = new ShellStreamCommandRunnerFactory({
+                    stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
+                });
 
-                if (serverOS === undefined) {
-                    const version = await this.dockerClientProvider().version(undefined);
-
-                    serverOS = version.Os;
-                }
-
-                switch (serverOS) {
-                    case 'linux':
-
-                        return await this.writeFileViaCopy(dockerUri, content);
-
-                    default:
-
-                        throw new UnsupportedServerOSError();
-                }
+                await scrf.getCommandRunner()(
+                    ext.containerClient.writeFile({
+                        container: dockerUri.containerId,
+                        path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                        operatingSystem: containerOS,
+                    })
+                );
             };
 
         return callWithTelemetryAndErrorHandling(
@@ -212,73 +143,5 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
     public copy?(source: vscode.Uri, destination: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
         throw new MethodNotImplementedError();
-    }
-
-    private async getContainerOS(id: string): Promise<ContainerOS | undefined> {
-        const result = await this.dockerClientProvider().inspectContainer(/* context */ undefined, id);
-
-        return result.Platform;
-    }
-
-    private async readFileViaCopy(dockerUri: DockerUri): Promise<Uint8Array> {
-        let containerOS = dockerUri.options?.containerOS;
-
-        if (containerOS === undefined) {
-            containerOS = await this.getContainerOS(dockerUri.containerId);
-        }
-
-        const buffer = await this.dockerClientProvider().getContainerFile(
-            undefined, // context
-            dockerUri.containerId,
-            containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path);
-
-        return Uint8Array.from(buffer);
-    }
-
-    private async readFileViaExec(dockerUri: DockerUri): Promise<Uint8Array> {
-        let containerOS = dockerUri.options?.containerOS;
-
-        if (containerOS === undefined) {
-            containerOS = await this.getContainerOS(dockerUri.containerId);
-        }
-
-        let command: string[];
-
-        switch (containerOS) {
-            case 'linux':
-
-                command = ['/bin/sh', '-c', `"cat '${dockerUri.path}'"`];
-
-                break;
-
-            case 'windows':
-
-                command = ['cmd', '/C', `type "${dockerUri.windowsPath}"`];
-
-                break;
-
-            default:
-
-                throw new UnrecognizedContainerOSError();
-        }
-
-        const { stdout } = await this.dockerClientProvider().execInContainer(/* context */ undefined, dockerUri.containerId, command);
-        const buffer = Buffer.from(stdout, 'utf8');
-
-        return Uint8Array.from(buffer);
-    }
-
-    private async writeFileViaCopy(dockerUri: DockerUri, content: Uint8Array): Promise<void> {
-        let containerOS = dockerUri.options?.containerOS;
-
-        if (containerOS === undefined) {
-            containerOS = await this.getContainerOS(dockerUri.containerId);
-        }
-
-        await this.dockerClientProvider().putContainerFile(
-            undefined, // context
-            dockerUri.containerId,
-            containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
-            Buffer.from(content));
     }
 }

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerClient } from '@microsoft/container-runtimes';
+import { DockerClient, DockerComposeClient } from '@microsoft/container-runtimes';
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
@@ -79,9 +79,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        // @ts-expect-error TODO: DockerClient does not currently implement all the interface members
         ext.runtimeManager.registerRuntimeClient(new DockerClient());
-        // @ts-expect-error TODO: DockerComposeClient does not currently exist
         ext.orchestratorManager.registerRuntimeClient(new DockerComposeClient());
 
 
@@ -91,7 +89,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
                 'docker',
-                new ContainerFilesProvider(() => ext.dockerClient),
+                new ContainerFilesProvider(),
                 {
                     // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
                     isCaseSensitive: true,
@@ -163,7 +161,7 @@ namespace Configuration {
                     e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
-                    await ext.dockerContextManager.refresh();
+                    // TODO await ext.dockerContextManager.refresh();
                 }
             }
         ));

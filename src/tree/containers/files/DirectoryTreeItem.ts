@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ContainerOS } from '@microsoft/container-runtimes';
+import { ContainerOS, ListFilesItem } from '@microsoft/container-runtimes';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
 import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
+import { localize } from '../../../localize';
 
-export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;
+export type DirectoryItemProvider = (path: string | undefined) => Promise<ListFilesItem[]>;
 
 export class DirectoryTreeItem extends AzExtParentTreeItem {
     private children: AzExtTreeItem[] | undefined;
@@ -78,7 +78,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
                 return new FileTreeItem(this, name, itemUri.with({ fileType: 'file' }));
 
             default:
-                throw new UnrecognizedDirectoryItemTypeError();
+                throw new Error(localize('vscode-docker.files.unrecognizedDirectoryItemType', 'Unrecognized directory item type.'));
         }
     }
 
