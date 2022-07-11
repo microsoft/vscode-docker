@@ -32,10 +32,6 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
         return !!this.children;
     }
 
-    public get iconPath(): vscode.ThemeIcon {
-        return new vscode.ThemeIcon('folder');
-    }
-
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
         if (clearCache) {
             this.children = undefined;
