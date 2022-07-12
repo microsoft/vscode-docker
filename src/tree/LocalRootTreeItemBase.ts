@@ -411,5 +411,5 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 export function getTreeId(object: AnyContainerObject): string {
     // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
     // *and* change the ID when the state of the object changes
-    return `${object.id}${object.name}${(object as ListContainersItem).state}${(object as ListContextItem).current}${(object as DatedDockerImage).outdated}`;
+    return `${object.id}${(object as ListImagesItem).image || object.name}${(object as ListContainersItem).state}${(object as ListContextItem).current}${(object as DatedDockerImage).outdated}`;
 }

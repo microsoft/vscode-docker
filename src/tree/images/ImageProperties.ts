@@ -43,14 +43,14 @@ export function getImageGroupIcon(property: ImageProperty | CommonGroupBy): Them
 }
 
 export function getImagePropertyValue(item: ListImagesItem, property: ImageProperty): string {
-    const parsedFullTag = parseFullTag(item.name);
+    const parsedFullTag = parseFullTag(item.image);
     let registry: string | undefined;
     switch (property) {
         case 'FullTag':
             if (parsedFullTag.registry) {
-                return item.name.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
+                return item.image.replace(parsedFullTag.registry, truncateRegistry(parsedFullTag.registry));
             } else {
-                return item.name;
+                return item.image;
             }
         case 'ImageId':
             return item.id.replace('sha256:', '').slice(0, 12);

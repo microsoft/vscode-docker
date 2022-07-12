@@ -36,8 +36,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get fullTag(): string {
-        // TODO: verify this is the full, FULL tag
-        return this._item.name;
+        return this._item.image;
     }
 
     public get label(): string {

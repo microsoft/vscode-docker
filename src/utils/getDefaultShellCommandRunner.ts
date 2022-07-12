@@ -19,6 +19,6 @@ export function getDefaultShellCommandRunner(): () => CommandRunner {
         },
     });
 
-    // Return the `getCommandRunner` method
-    return factory.getCommandRunner;
+    // Return the `getCommandRunner` method, bound to the factory
+    return factory.getCommandRunner.bind(factory);
 }
