@@ -102,7 +102,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
             commandLine,
             {
                 cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
-                env: { ...process.env, ...this.resolvedDefinition.options?.env }, // TODO: add new env vars
+                env: { ...process.env, ...this.resolvedDefinition.options?.env }, // TODO: runtimes: add new env vars
                 cancellationToken: options.token,
             },
             (output: string, err: boolean) => {

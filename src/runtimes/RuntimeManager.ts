@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ClientIdentity } from '@microsoft/container-runtimes';
+import { ClientIdentity, DockerClient, DockerComposeClient } from '@microsoft/container-runtimes';
 import { TimeoutPromiseSource } from '../utils/promiseUtils';
 
 const ClientRegistrationTimeout = 500;
@@ -35,7 +35,8 @@ export abstract class RuntimeManager<TClient extends ClientIdentity> extends vsc
         const tps = new TimeoutPromiseSource(ClientRegistrationTimeout);
         const clientRegistrationPromise = new Promise<TClient>((resolve) => {
             const disposable = this.runtimeClientRegisteredEmitter.event(client => {
-                if (client.id === clientId) {
+                // if (client.id === clientId) {
+                if (client.id === DockerClient.ClientId || client.id === DockerComposeClient.ClientId) {
                     disposable.dispose();
                     resolve(client);
                 }

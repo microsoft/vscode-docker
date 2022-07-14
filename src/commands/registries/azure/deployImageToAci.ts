@@ -41,7 +41,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
 
     // addImageTaggingTelemetry(context, node.fullTag, '');
 
-    // // TODO: exe path
+    // // TODO: runtimes
     // const command = `${ext.dockerContextManager.getDockerCommand(context)} --context ${aciContext.name} run -d ${portsArg} ${node.fullTag}`;
     // const title = localize('vscode-docker.commands.registries.deployImageToAci.deploy', 'Deploy to ACI');
     // const options = {
@@ -52,7 +52,7 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
     //     await executeAsTask(context, command, title, { ...options, rejectOnError: true });
     // } catch {
     //     // If it fails, try logging in and make one more attempt
-    //     // TODO: exe path
+    //     // TODO: runtimes
     //     await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} login azure --cloud-name ${await promptForAciCloud(context)}`, title, options);
     //     await executeAsTask(context, command, title, options);
     // }
@@ -63,11 +63,11 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
 //         const result: number[] = [];
 
 //         // 1. Pull the image to the default context
-//         // TODO: exe path
+//         // TODO: runtimes
 //         await execAsync(`${ext.dockerContextManager.getDockerCommand(context)} --context default pull ${fullTag}`);
 
 //         // 2. Inspect it in the default context to find out the ports to map
-//         // TODO: exe path
+//         // TODO: runtimes
 //         const { stdout } = await execAsync(`${ext.dockerContextManager.getDockerCommand(context)} --context default inspect ${fullTag} --format="{{ json .Config.ExposedPorts }}"`);
 
 //         try {
@@ -105,10 +105,6 @@ export async function deployImageToAci(context: IActionContext, node?: RemoteTag
 //         {
 //             label: localize('vscode-docker.azureUtils.usGovtCloud', 'Azure US Government'),
 //             data: 'AzureUSGovernment',
-//         },
-//         {
-//             label: localize('vscode-docker.azureUtils.germanCloud', 'Azure Germany'), // TODO: AzureGermanCloud is closing in October 2021, remove this then
-//             data: 'AzureGermanCloud',
 //         },
 //         {
 //             label: localize('vscode-docker.azureUtils.customCloud', 'Azure Custom Cloud (specify)...'),

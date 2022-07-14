@@ -92,7 +92,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
     protected async install(context: IActionContext, fileName: string, cmd: string): Promise<void> {
         try {
             ext.outputChannel.appendLine(localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Executing command {0}', cmd));
-            // TODO: exe path
+            // TODO: runtimes
             await execAsync(cmd);
         } finally {
             if (await fse.pathExists(fileName)) {

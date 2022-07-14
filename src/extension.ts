@@ -91,8 +91,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             ext.orchestratorManager.registerRuntimeClient(new DockerComposeClient())
         );
 
-        // TODO: when registering runtime client, need to work out `docker` / custom path
-        // TODO: when registering orchestrator client, need to work out `docker-compose` / `docker compose`
+        // TODO: runtimes: when registering runtime client, need to work out `docker` / custom path
+        // TODO: runtimes: when registering orchestrator client, need to work out `docker-compose` / `docker compose`
 
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
@@ -169,7 +169,7 @@ namespace Configuration {
                     e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
-                    // TODO await ext.dockerContextManager.refresh();
+                    // TODO: runtimes: await ext.dockerContextManager.refresh();
                 }
             }
         ));

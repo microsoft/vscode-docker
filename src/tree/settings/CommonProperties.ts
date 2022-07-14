@@ -29,7 +29,7 @@ export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
     { property: 'Label', description: localize('vscode-docker.tree.settings.label', 'Sort alphabetically by label') }
 ];
 
-// TODO: this is no good
+// TODO: runtimes: this is no good
 export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
     switch (property) {
         case 'CreatedTime':
