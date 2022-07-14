@@ -90,20 +90,24 @@ export class ContextTreeItem extends ToolTipTreeItem {
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'context';
-        return resolveTooltipMarkdown(contextTooltipTemplate, await this.inspect());
+        const contextInspection = await this.inspect();
+        const handlebarsContext = {
+            ...contextInspection,
+            containerEndpoint: this._item.containerEndpoint
+        };
+        return resolveTooltipMarkdown(contextTooltipTemplate, handlebarsContext);
     }
 }
 
-// TODO: unlikely this will work
 const contextTooltipTemplate = `
-### {{ Name }}
+### {{ name }}
 
 ---
 
 #### Docker Host Endpoint
-{{#if Endpoints.docker.Host}}
-{{ Endpoints.docker.Host }}
+{{#if containerEndpoint}}
+{{ containerEndpoint }}
 {{else}}
-_{{ Metadata.Type }}_
+_{{ type }}_
 {{/if}}
 `;
