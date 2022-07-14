@@ -53,9 +53,10 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
+        const client = await ext.runtimeManager.getClient();
 
         const options = definition.dockerRun;
-        const command = await ext.containerClient.runContainer({
+        const command = await client.runContainer({
             detached: true,
             publishAllPorts: options.portsPublishAll || (options.portsPublishAll === undefined && (options.ports === undefined || options.ports.length < 1)),
             name: options.containerName,

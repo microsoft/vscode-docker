@@ -27,8 +27,8 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         });
     }
 
-    const inspectResult = await ext.defaultShellCR()(
-        ext.containerClient.inspectImages({ images: [node.imageId] })
+    const inspectResult = await ext.runWithDefaultShell(client =>
+        client.inspectImages({ images: [node.imageId] })
     );
 
     context.telemetry.properties.containerOS = inspectResult?.[0]?.operatingSystem || 'linux';

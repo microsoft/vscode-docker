@@ -31,11 +31,12 @@ export async function pullImageFromRepository(context: IActionContext, node?: Re
 async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
     await logInToDockerCli(context, node);
 
+    const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory({
-        taskName: ext.containerClient.displayName,
+        taskName: client.displayName,
     });
 
     await taskCRF.getCommandRunner()(
-        ext.containerClient.pullImage({ image: `${node.baseImagePath}/${imageRequest}` })
+        client.pullImage({ image: `${node.baseImagePath}/${imageRequest}` })
     );
 }

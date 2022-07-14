@@ -46,8 +46,8 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, Net
         const config = workspace.getConfiguration(configPrefix);
         const showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
-        let networks = await ext.defaultShellCR()(
-            ext.containerClient.listNetworks({})
+        let networks = await ext.runWithDefaultShell(client =>
+            client.listNetworks({})
         ) || [];
 
         if (!showBuiltInNetworks) {

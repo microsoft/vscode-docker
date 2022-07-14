@@ -268,8 +268,8 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
         if (containerOS === 'windows') {
-            const inspectInfo = (await ext.defaultShellCR()(
-                ext.containerClient.inspectContainers({ containers: [containerName] })
+            const inspectInfo = (await ext.runWithDefaultShell(client =>
+                client.inspectContainers({ containers: [containerName] })
             ))?.[0];
             const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
             if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
@@ -295,8 +295,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
-            await ext.defaultShellCR()(
-                ext.containerClient.writeFile({
+            await ext.runWithDefaultShell(client =>
+                client.writeFile({
                     container: containerName,
                     inputFile: vsDbgInstallBasePath,
                     path: containerDebuggerDirectory,
@@ -324,8 +324,8 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const containerCommandArgsQuoted = isWindows() ? powershellQuote(containerCommandArgs) : bashQuote(containerCommandArgs);
 
-        const stdout = await ext.defaultShellCR()(
-            ext.containerClient.execContainer({
+        const stdout = await ext.runWithDefaultShell(client =>
+            client.execContainer({
                 container: containerName,
                 command: [containerCommand, ...containerCommandArgsQuoted],
                 interactive: true,

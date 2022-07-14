@@ -23,8 +23,8 @@ export async function stopContainer(context: IActionContext, node?: ContainerTre
     const references = await confirmAllAffectedContainers(context, nodes);
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.stop.stopping', 'Stopping Container(s)...') }, async () => {
-        await ext.defaultShellCR()(
-            ext.containerClient.stopContainers({ container: references })
+        await ext.runWithDefaultShell(client =>
+            client.stopContainers({ container: references })
         );
     });
 }

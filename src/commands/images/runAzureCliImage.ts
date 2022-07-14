@@ -40,6 +40,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
             });
         }
 
+        const client = await ext.runtimeManager.getClient();
         const taskCRF = new TaskCommandRunnerFactory(
             {
                 taskName: 'Azure CLI',
@@ -48,7 +49,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
         );
 
         await taskCRF.getCommandRunner()(
-            ext.containerClient.runContainer({
+            client.runContainer({
                 image: 'mcr.microsoft.com/azure-cli:latest',
                 removeOnExit: true,
                 mounts: volumes,

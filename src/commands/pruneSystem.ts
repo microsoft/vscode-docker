@@ -17,17 +17,17 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.pruneSystem.pruning', 'Pruning system...') },
         async () => {
-            const containersResult = await ext.defaultShellCR()(
-                ext.containerClient.pruneContainers({})
+            const containersResult = await ext.runWithDefaultShell(client =>
+                client.pruneContainers({})
             );
-            const imagesResult = await ext.defaultShellCR()(
-                ext.containerClient.pruneImages({})
+            const imagesResult = await ext.runWithDefaultShell(client =>
+                client.pruneImages({})
             );
-            const networksResult = await ext.defaultShellCR()(
-                ext.containerClient.pruneNetworks({})
+            const networksResult = await ext.runWithDefaultShell(client =>
+                client.pruneNetworks({})
             );
-            const volumesResult = await ext.defaultShellCR()(
-                ext.containerClient.pruneVolumes({})
+            const volumesResult = await ext.runWithDefaultShell(client =>
+                client.pruneVolumes({})
             );
 
             let message: string;

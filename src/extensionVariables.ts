@@ -5,7 +5,6 @@
 
 import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
 import { ExtensionContext, TreeView } from 'vscode';
-import { CommandRunner, IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
@@ -15,7 +14,7 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { getDefaultShellCommandRunner } from './utils/getDefaultShellCommandRunner';
+import { runOrchestratorWithDefaultShellInternal, runWithDefaultShellInternal } from './utils/runWithDefaultShell';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -58,9 +57,8 @@ export namespace ext {
     export let contextsRoot: ContextsTreeItem;
 
     // Container runtime related items
-    export const runtimeManager: ContainerRuntimeManager = new ContainerRuntimeManager();
-    export const orchestratorManager: OrchestratorRuntimeManager = new OrchestratorRuntimeManager();
-    export const defaultShellCR: () => CommandRunner = getDefaultShellCommandRunner();
-    export let containerClient: IContainersClient;
-    export let orchestratorClient: IContainerOrchestratorClient;
+    export let runtimeManager: ContainerRuntimeManager;
+    export let orchestratorManager: OrchestratorRuntimeManager;
+    export const runWithDefaultShell = runWithDefaultShellInternal;
+    export const runOrchestratorWithDefaultShell = runOrchestratorWithDefaultShellInternal;
 }

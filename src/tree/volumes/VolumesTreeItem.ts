@@ -41,8 +41,8 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, Volum
     }
 
     public async getItems(context: IActionContext): Promise<ListVolumeItem[]> {
-        return ext.defaultShellCR()(
-            ext.containerClient.listVolumes({})
+        return ext.runWithDefaultShell(client =>
+            client.listVolumes({})
         );
     }
 

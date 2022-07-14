@@ -36,7 +36,7 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
         'build',
         [folder.name, dockerfile],
         folder,
-        { 'dockerfile': dockerfile, 'context': buildContext, 'containerCommand': ext.runtimeManager.getCommand() }
+        { 'dockerfile': dockerfile, 'context': buildContext, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
@@ -51,7 +51,7 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
         interactive ? 'runInteractive' : 'run',
         [fullTag],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': ext.runtimeManager.getCommand() }
+        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
@@ -61,7 +61,7 @@ export async function selectAttachCommand(context: IActionContext, containerName
         'attach',
         [containerName, imageName],
         undefined,
-        { 'containerId': containerId, 'shellCommand': shellCommand, 'containerCommand': ext.runtimeManager.getCommand() }
+        { 'containerId': containerId, 'shellCommand': shellCommand, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
@@ -71,7 +71,7 @@ export async function selectLogsCommand(context: IActionContext, containerName: 
         'logs',
         [containerName, imageName],
         undefined,
-        { 'containerId': containerId, 'containerCommand': ext.runtimeManager.getCommand() }
+        { 'containerId': containerId, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
@@ -96,7 +96,7 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
         template,
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': ext.orchestratorManager.getCommand() }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': await ext.orchestratorManager.getCommand() }
     );
 }
 

@@ -17,8 +17,8 @@ export async function pruneImages(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.images.pruning', 'Pruning images...') },
         async () => {
-            const result = await ext.defaultShellCR()(
-                ext.containerClient.pruneImages({})
+            const result = await ext.runWithDefaultShell(client =>
+                client.pruneImages({})
             );
 
             let message: string;

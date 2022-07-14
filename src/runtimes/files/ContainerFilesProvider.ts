@@ -61,15 +61,15 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
             const dockerUri = DockerUri.parse(uri);
             const containerOS = dockerUri.options.containerOS || await getDockerOSType();
 
-            const items: ListFilesItem[] = await ext.defaultShellCR()(
-                ext.containerClient.listFiles({
+            const items: ListFilesItem[] = await ext.runWithDefaultShell(client =>
+                client.listFiles({
                     container: dockerUri.containerId,
                     path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                     operatingSystem: containerOS,
                 })
             );
 
-            return items.map(item => [item.name, item.type === 'directory' ? vscode.FileType.Directory : vscode.FileType.File]);
+            return items.map(item => [item.name, item.type]);
         };
 
         return method();
@@ -86,12 +86,13 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
                 const accumulator = new AccumulatorStream();
+                const client = await ext.runtimeManager.getClient();
                 const scrf = new ShellStreamCommandRunnerFactory({
-                    stdOutPipe: tarUnpackStream(accumulator),
+                    stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
                 });
 
                 await scrf.getCommandRunner()(
-                    ext.containerClient.readFile({
+                    client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
@@ -110,12 +111,13 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const dockerUri = DockerUri.parse(uri);
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
+                const client = await ext.runtimeManager.getClient();
                 const scrf = new ShellStreamCommandRunnerFactory({
                     stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
                 });
 
                 await scrf.getCommandRunner()(
-                    ext.containerClient.writeFile({
+                    client.writeFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,

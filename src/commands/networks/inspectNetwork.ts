@@ -17,8 +17,8 @@ export async function inspectNetwork(context: IActionContext, node?: NetworkTree
         });
     }
 
-    const inspectResult = await ext.defaultShellCR()(
-        ext.containerClient.inspectNetworks({ networks: [node.networkId] })
+    const inspectResult = await ext.runWithDefaultShell(client =>
+        client.inspectNetworks({ networks: [node.networkId] })
     );
     await openReadOnlyJson(node, inspectResult[0].raw);
 }

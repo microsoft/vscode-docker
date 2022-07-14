@@ -67,6 +67,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
     addImageTaggingTelemetry(context, finalTag, '');
 
+    const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory(
         {
             taskName: finalTag
@@ -74,7 +75,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     );
 
     await taskCRF.getCommandRunner()(
-        ext.containerClient.pushImage({ image: finalTag })
+        client.pushImage({ image: finalTag })
     );
 }
 

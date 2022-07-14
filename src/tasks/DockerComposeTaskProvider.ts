@@ -36,10 +36,12 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerCompose);
 
+        const client = await ext.orchestratorManager.getClient();
+
         const options = definition.dockerCompose;
         let command: CommandResponse<void>;
         if (definition.dockerCompose.up) {
-            command = await ext.orchestratorClient.up({
+            command = await client.up({
                 files: options.files,
                 environmentFile: options.envFile,
                 profiles: options.up.profiles,
@@ -51,7 +53,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 services: options.up.services,
             });
         } else {
-            command = await ext.orchestratorClient.down({
+            command = await client.down({
                 files: options.files,
                 environmentFile: options.envFile,
                 projectName: options.projectName,

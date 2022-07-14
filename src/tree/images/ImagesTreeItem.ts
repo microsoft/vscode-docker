@@ -61,8 +61,8 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
         const includeDangling = ext.context.globalState.get(danglingImagesMementoKey, false);
 
-        const result = await ext.defaultShellCR()(
-            ext.containerClient.listImages({ dangling: includeDangling })
+        const result = await ext.runWithDefaultShell(client =>
+            client.listImages({ dangling: includeDangling })
         );
         this.outdatedImageChecker.markOutdatedImages(result);
 

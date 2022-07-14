@@ -16,6 +16,7 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
 
     const creds = await node.getDockerCliCredentials();
 
+    const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory(
         {
             taskName: 'Docker'
@@ -23,6 +24,6 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
     );
 
     await taskCRF.getCommandRunner()(
-        ext.containerClient.logout({ registry: creds.registryPath })
+        client.logout({ registry: creds.registryPath })
     );
 }

@@ -5,10 +5,44 @@
 
 import * as vscode from 'vscode';
 import { ClientIdentity } from '@microsoft/container-runtimes';
+import { TimeoutPromiseSource } from '../utils/promiseUtils';
 
-export abstract class RuntimeManager<TClient extends ClientIdentity> {
+const ClientRegistrationTimeout = 500;
+
+export abstract class RuntimeManager<TClient extends ClientIdentity> extends vscode.Disposable {
     private readonly _runtimeClients = new Map<string, TClient>();
     protected readonly runtimeClientRegisteredEmitter = new vscode.EventEmitter<TClient>();
+
+    private currentClientPromise: Promise<TClient>;
+
+    protected constructor(clientSettingName: string) {
+        const disposables = vscode.Disposable.from(
+            vscode.workspace.onDidChangeConfiguration(cce => {
+                if (cce.affectsConfiguration(`docker.${clientSettingName}`)) {
+                    this.initClientPromise(vscode.workspace.getConfiguration('docker').get<string>(clientSettingName));
+                }
+            })
+        ).dispose();
+
+        super(() => {
+            disposables.dispose();
+        });
+
+        this.initClientPromise(clientSettingName);
+    }
+
+    public initClientPromise(clientId: string): void {
+        const tps = new TimeoutPromiseSource(ClientRegistrationTimeout);
+        const clientRegistrationPromise = new Promise<TClient>((resolve) => {
+            const disposable = this.runtimeClientRegisteredEmitter.event(client => {
+                if (client.id === clientId) {
+                    disposable.dispose();
+                    resolve(client);
+                }
+            });
+        });
+        this.currentClientPromise = Promise.race<TClient>([clientRegistrationPromise, tps.promise]);
+    }
 
     public registerRuntimeClient(client: TClient): vscode.Disposable {
         if (!client || !client.id) {
@@ -32,5 +66,9 @@ export abstract class RuntimeManager<TClient extends ClientIdentity> {
         return Array.from(this._runtimeClients.values());
     }
 
-    public abstract getCommand(): string;
+    public async getClient(): Promise<TClient> {
+        return this.currentClientPromise;
+    }
+
+    public abstract getCommand(): Promise<string>;
 }

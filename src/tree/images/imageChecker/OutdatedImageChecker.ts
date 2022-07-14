@@ -94,8 +94,8 @@ export class OutdatedImageChecker {
             const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag);
 
             // 2. Compare it with the current image's value
-            const imageInspectInfo = (await ext.defaultShellCR()(
-                ext.containerClient.inspectImages({ images: [image.id] })
+            const imageInspectInfo = (await ext.runWithDefaultShell(client =>
+                client.inspectImages({ images: [image.id] })
             ))?.[0];
 
             // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date

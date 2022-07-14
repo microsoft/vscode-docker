@@ -74,19 +74,19 @@ export class ImageTreeItem extends ToolTipTreeItem {
             ref = this._item.id;
         }
 
-        await ext.defaultShellCR()(
-            ext.containerClient.removeImages({ images: [ref] })
+        await ext.runWithDefaultShell(client =>
+            client.removeImages({ images: [ref] })
         );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'image';
 
-        const imageInspection = (await ext.defaultShellCR()(
-            ext.containerClient.inspectImages({ images: [this.imageId] })
+        const imageInspection = (await ext.runWithDefaultShell(client =>
+            client.inspectImages({ images: [this.imageId] })
         ))?.[0];
-        const associatedContainers = await ext.defaultShellCR()(
-            ext.containerClient.listContainers({ imageAncestors: [this.imageId] })
+        const associatedContainers = await ext.runWithDefaultShell(client =>
+            client.listContainers({ imageAncestors: [this.imageId] })
         );
 
         const handlebarsContext = {

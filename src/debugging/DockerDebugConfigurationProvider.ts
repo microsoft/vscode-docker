@@ -141,8 +141,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             configuration?.dockerOptions?.containerName && // containerName must be specified
             !(configuration?.subProcessId)) { // Must not have subProcessId, i.e. not a subprocess debug session (which is how Python does hot reload sessions)
             try {
-                await ext.defaultShellCR()(
-                    ext.containerClient.removeContainers({ containers: [configuration.dockerOptions.containerName] })
+                await ext.runWithDefaultShell(client =>
+                    client.removeContainers({ containers: [configuration.dockerOptions.containerName] })
                 );
             } catch {
                 // Best effort
@@ -153,8 +153,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     private async outputPortsAtDebuggingIfNeeded(context: IActionContext, configuration: ResolvedDebugConfiguration): Promise<void> {
         if (configuration?.dockerOptions?.containerName) {
             try {
-                const inspectInfo = (await ext.defaultShellCR()(
-                    ext.containerClient.inspectContainers({ containers: [configuration.dockerOptions.containerName] })
+                const inspectInfo = (await ext.runWithDefaultShell(client =>
+                    client.inspectContainers({ containers: [configuration.dockerOptions.containerName] })
                 ))?.[0];
                 const portMappings: string[] = [];
 

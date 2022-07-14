@@ -5,14 +5,17 @@
 
 import { IContainerOrchestratorClient } from '@microsoft/container-runtimes';
 import * as vscode from 'vscode';
-import { ext } from '../extensionVariables';
 import { RuntimeManager } from './RuntimeManager';
 
 export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchestratorClient> {
     public readonly onOrchestratorRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;
 
-    public getCommand(): string {
+    public constructor() {
+        super('orchestratorClient');
+    }
+
+    public async getCommand(): Promise<string> {
         const config = vscode.workspace.getConfiguration('docker');
-        return config.get<string>('composeCommand', ext.orchestratorClient.commandName);
+        return config.get<string>('composeCommand', (await this.getClient()).commandName);
     }
 }

@@ -15,8 +15,8 @@ export async function getDockerOSType(): Promise<ContainerOS> {
         // so short-circuit the Docker call entirely.
         return 'linux';
     } else {
-        const info = await ext.defaultShellCR()(
-            ext.containerClient.info({})
+        const info = await ext.runWithDefaultShell(client =>
+            client.info({})
         );
         return info?.osType || 'linux';
     }

@@ -56,19 +56,19 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await ext.defaultShellCR()(
-            ext.containerClient.removeNetworks({ networks: [this.networkId] })
+        await ext.runWithDefaultShell(client =>
+            client.removeNetworks({ networks: [this.networkId] })
         );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'network';
 
-        const networkInspection = (await ext.defaultShellCR()(
-            ext.containerClient.inspectNetworks({ networks: [this.networkName] })
+        const networkInspection = (await ext.runWithDefaultShell(client =>
+            client.inspectNetworks({ networks: [this.networkName] })
         ))?.[0];
-        const associatedContainers = await ext.defaultShellCR()(
-            ext.containerClient.listContainers({ networks: [this.networkName] })
+        const associatedContainers = await ext.runWithDefaultShell(client =>
+            client.listContainers({ networks: [this.networkName] })
         );
 
         const handlebarsContext = {

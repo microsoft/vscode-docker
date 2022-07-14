@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, CommonOrchestratorCommandOptions, LogsCommandOptions } from '@microsoft/container-runtimes';
+import { CommandResponse, CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions } from '@microsoft/container-runtimes';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
@@ -13,28 +13,33 @@ import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTree
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup<LogsCommandOptions>(context, ext.orchestratorClient.logs, node, { follow: true, tail: 1000 });
+    return composeGroup<LogsCommandOptions>(context, client => client.logs, node, { follow: true, tail: 1000 });
 }
 
 export async function composeGroupStart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, ext.orchestratorClient.start, node);
+    return composeGroup(context, client => client.start, node);
 }
 
 export async function composeGroupStop(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, ext.orchestratorClient.stop, node);
+    return composeGroup(context, client => client.stop, node);
 }
 
 export async function composeGroupRestart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, ext.orchestratorClient.restart, node);
+    return composeGroup(context, client => client.restart, node);
 }
 
 export async function composeGroupDown(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup(context, ext.orchestratorClient.down, node);
+    return composeGroup(context, client => client.down, node);
 }
 
 type AdditionalOptions<TOptions extends CommonOrchestratorCommandOptions> = Omit<TOptions, keyof CommonOrchestratorCommandOptions>;
 
-async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(context: IActionContext, composeCommand: (options: TOptions) => Promise<CommandResponse<unknown>>, node: ContainerGroupTreeItem, additionalOptions?: AdditionalOptions<TOptions>): Promise<void> {
+async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(
+    context: IActionContext,
+    composeCommandCallback: (client: IContainerOrchestratorClient) => (options: TOptions) => Promise<CommandResponse<unknown>>,
+    node: ContainerGroupTreeItem,
+    additionalOptions?: AdditionalOptions<TOptions>
+): Promise<void> {
     if (!node) {
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {
@@ -60,12 +65,13 @@ async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(c
         ...additionalOptions,
     } as TOptions;
 
+    const client = await ext.orchestratorManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory({
-        taskName: ext.orchestratorClient.displayName,
+        taskName: client.displayName,
         cwd: workingDirectory,
     });
 
-    await taskCRF.getCommandRunner()(composeCommand(options));
+    await taskCRF.getCommandRunner()(composeCommandCallback(client)(options));
 }
 
 function getComposeWorkingDirectory(node: ContainerGroupTreeItem): string | undefined {

@@ -144,8 +144,8 @@ export class PythonDebugHelper implements DebugHelper {
         }
 
         // For Docker Desktop on WSL or Linux, we also use 'localhost'
-        const dockerInfo = await ext.defaultShellCR()(
-            ext.containerClient.info()
+        const dockerInfo = await ext.runWithDefaultShell(client =>
+            client.info()
         );
 
         if (/Docker Desktop/i.test(dockerInfo.operatingSystem)) {
@@ -154,8 +154,8 @@ export class PythonDebugHelper implements DebugHelper {
 
         // For other Docker setups on WSL or Linux, 'host.docker.internal' doesn't work, so we ask debugpy to listen
         // on the bridge network's ip address (predefined network).
-        const networkInspection = (await ext.defaultShellCR()(
-            ext.containerClient.inspectNetworks({ networks: ['bridge'] })
+        const networkInspection = (await ext.runWithDefaultShell(client =>
+            client.inspectNetworks({ networks: ['bridge'] })
         ))?.[0];
 
         return networkInspection?.ipam?.config?.[0].gateway;

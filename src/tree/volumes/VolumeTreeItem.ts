@@ -53,19 +53,19 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await ext.defaultShellCR()(
-            ext.containerClient.removeVolumes({ volumes: [this.volumeName] })
+        await ext.runWithDefaultShell(client =>
+            client.removeVolumes({ volumes: [this.volumeName] })
         );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'volume';
 
-        const volumeInspection = (await ext.defaultShellCR()(
-            ext.containerClient.inspectVolumes({ volumes: [this.volumeName] })
+        const volumeInspection = (await ext.runWithDefaultShell(client =>
+            client.inspectVolumes({ volumes: [this.volumeName] })
         ))?.[0];
-        const associatedContainers = await ext.defaultShellCR()(
-            ext.containerClient.listContainers({ volumes: [this.volumeName] })
+        const associatedContainers = await ext.runWithDefaultShell(client =>
+            client.listContainers({ volumes: [this.volumeName] })
         );
 
         const handlebarsContext = {

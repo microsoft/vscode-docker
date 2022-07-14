@@ -23,8 +23,8 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     let shellCommand: string;
     let osType: ContainerOS;
     try {
-        const inspectResults = await ext.defaultShellCR()(
-            ext.containerClient.inspectContainers({ containers: [node.containerId] })
+        const inspectResults = await ext.runWithDefaultShell(client =>
+            client.inspectContainers({ containers: [node.containerId] })
         );
         osType = inspectResults?.[0]?.operatingSystem || 'linux';
     } catch {
@@ -46,9 +46,8 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
             // If so use it, otherwise use sh
             try {
                 // If this succeeds, bash is present (exit code 0)
-                // TODO: Exec will not throw if it fails
-                await ext.defaultShellCR()(
-                    ext.containerClient.execContainer({ container: node.containerId, interactive: true, command: `sh -c "which bash"` })
+                await ext.runWithDefaultShell(client =>
+                    client.execContainer({ container: node.containerId, interactive: true, command: `sh -c "which bash"` })
                 );
                 shellCommand = 'bash';
             } catch {

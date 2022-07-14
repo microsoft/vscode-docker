@@ -21,6 +21,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
 
     let noneTagWarningShown = false;
 
+    const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory(
         {
             taskName: localize('vscode-docker.commands.images.pull.terminalTitle', 'Pull images')
@@ -40,7 +41,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         }
 
         await taskCRF.getCommandRunner()(
-            ext.containerClient.pullImage({ image: n.fullTag })
+            client.pullImage({ image: n.fullTag })
         );
     }
 }

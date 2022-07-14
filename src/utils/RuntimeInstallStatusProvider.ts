@@ -28,8 +28,8 @@ class RuntimeInstallStatusProvider {
 
     public async isRuntimeInstalledRealTimeCheck(): Promise<boolean> {
         try {
-            await ext.defaultShellCR()(
-                ext.containerClient.version({})
+            await ext.runWithDefaultShell(client =>
+                client.version({})
             );
             return true; // As long as the version command did't throw exception, assume it is installed.
         } catch (error) {

@@ -40,12 +40,13 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
 
         await vscode.window.withProgress(progressOptions, async () => {
             try {
+                const client = await ext.runtimeManager.getClient();
                 const shellCRF = new ShellStreamCommandRunnerFactory({
                     stdInPipe: stream.Readable.from(password),
                 });
 
                 await shellCRF.getCommandRunner()(
-                    ext.containerClient.login({
+                    client.login({
                         username: username,
                         passwordStdIn: true,
                         registry: creds.registryPath,

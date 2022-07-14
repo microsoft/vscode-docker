@@ -22,6 +22,8 @@ import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -79,11 +81,17 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        ext.runtimeManager.registerRuntimeClient(new DockerClient());
-        ext.orchestratorManager.registerRuntimeClient(new DockerComposeClient());
+        ctx.subscriptions.push(
+            ext.runtimeManager = new ContainerRuntimeManager(),
+            ext.orchestratorManager = new OrchestratorRuntimeManager()
+        );
 
+        ctx.subscriptions.push(
+            ext.runtimeManager.registerRuntimeClient(new DockerClient()),
+            ext.orchestratorManager.registerRuntimeClient(new DockerComposeClient())
+        );
 
-        // TODO: register clients
+        // TODO: when registering runtime client, need to work out `docker` / custom path
         // TODO: when registering orchestrator client, need to work out `docker-compose` / `docker compose`
 
         ctx.subscriptions.push(

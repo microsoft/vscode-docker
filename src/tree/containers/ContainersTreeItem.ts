@@ -55,8 +55,8 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
     }
 
     public async getItems(context: IActionContext): Promise<DockerContainerInfo[]> {
-        const rawResults = await ext.defaultShellCR()(
-            ext.containerClient.listContainers({ all: true })
+        const rawResults = await ext.runWithDefaultShell(client =>
+            client.listContainers({ all: true })
         );
 
         // NOTE: We *know* that ACI doesn't currently support showing files, but we'll give the benefit of the doubt to any other context type.

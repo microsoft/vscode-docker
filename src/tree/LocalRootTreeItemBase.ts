@@ -155,7 +155,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
             }
 
             this.showDockerInstallNotificationIfNeeded();
-            return this.getDockerErrorTreeItems(context, error, this._currentDockerStatus === 'Installed');
+            return await this.getDockerErrorTreeItems(context, error, this._currentDockerStatus === 'Installed');
         }
 
         if (this._currentItems.length === 0) {
@@ -331,7 +331,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
         }
     }
 
-    private getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): AzExtTreeItem[] {
+    private async getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): Promise<AzExtTreeItem[]> {
         const parsedError = parseError(error);
         if (isCommandNotSupportedError(error)) {
             return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.contextNotSupported', 'This view is not supported in the current context.'), contextValue: 'contextNotSupported' })];
@@ -341,11 +341,11 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 
         const result: AzExtTreeItem[] = dockerInstalled
             ? [
-                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is {0} running?', ext.containerClient.displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) }),
+                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is {0} running?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) }),
                 new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunningError', '  Error: {0}', parsedError.message), contextValue: 'connectionError' }),
                 new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
             ]
-            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is {0} installed?', ext.containerClient.displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) })];
+            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is {0} installed?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) })];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
