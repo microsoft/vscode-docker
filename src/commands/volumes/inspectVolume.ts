@@ -17,5 +17,5 @@ export async function inspectVolume(context: IActionContext, node?: VolumeTreeIt
     const inspectResult = await ext.runWithDefaultShell(client =>
         client.inspectVolumes({ volumes: [node.volumeName] })
     );
-    await openReadOnlyJson(node, inspectResult[0].raw);
+    await openReadOnlyJson(node, JSON.parse(inspectResult[0].raw));
 }

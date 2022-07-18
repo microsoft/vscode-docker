@@ -18,5 +18,5 @@ export async function inspectDockerContext(actionContext: IActionContext, node?:
     }
 
     const inspectResult = await node.inspect();
-    await openReadOnlyJson(node, inspectResult);
+    await openReadOnlyJson(node, JSON.parse(inspectResult.raw));
 }
