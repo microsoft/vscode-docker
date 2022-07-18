@@ -7,7 +7,7 @@ import { bashQuote, CommandResponse, powershellQuote } from '@microsoft/containe
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
 import { isWindows } from '../utils/osUtils';
 import { resolveVariables } from '../utils/resolveVariables';
-import { execAsync, ExecAsyncOutput } from '../utils/spawnAsync';
+import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';

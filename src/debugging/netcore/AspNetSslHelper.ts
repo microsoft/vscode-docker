@@ -11,7 +11,7 @@ import { isMac, isWindows } from '../../utils/osUtils';
 import { MessageItem } from 'vscode';
 import { localize } from '../../localize';
 import { cryptoUtils } from '../../utils/cryptoUtils';
-import { execAsync } from '../../utils/spawnAsync';
+import { execAsync } from '../../utils/execAsync';
 import { PlatformOS } from '../../utils/platform';
 
 const knownConfiguredProjects = new Set<string>();

@@ -12,7 +12,7 @@ import { TaskCommandRunnerFactory } from '../runtimes/runners/TaskCommandRunnerF
 import { runtimeInstallStatusProvider } from '../utils/RuntimeInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
 import { getTempFileName, isArm64Mac, isLinux } from '../utils/osUtils';
-import { execAsync } from '../utils/spawnAsync';
+import { execAsync } from '../utils/execAsync';
 
 export abstract class DockerInstallerBase {
     protected abstract downloadUrl: string;
