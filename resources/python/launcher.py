@@ -4,7 +4,7 @@
 # This acts as a simple launcher for debugpy that only redirects the args to the actual launcher inside the container
 import os, sys
 
-dockerExePath = sys.argv[-2] # Docker EXE path is the second-to-last arg
+containerExePath = sys.argv[-2] # Container EXE path is the second-to-last arg
 containerId = sys.argv[-1] # Container id is the last arg
 args = sys.argv[1:-2] # The remaining args will be given to the launcher
 
@@ -14,8 +14,7 @@ adapterHost = args[0]
 if adapterHost.isnumeric():
     args[0] = 'host.docker.internal:' + adapterHost
 
-# TODO: runtimes
-dockerExecArgs = [dockerExePath, 'exec', '-d', containerId, 'python3', '/debugpy/launcher'] + args
+dockerExecArgs = [containerExePath, 'exec', '-d', containerId, 'python3', '/debugpy/launcher'] + args
 
 command = ' '.join(dockerExecArgs)
 

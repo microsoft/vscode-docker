@@ -78,7 +78,7 @@ export class PythonDebugHelper implements DebugHelper {
                 },
                 true);
 
-        const args = [...(debugConfiguration.python.args || pythonRunTaskOptions.args || []), ext.runtimeManager.getCommand(), containerName];
+        const args = [...(debugConfiguration.python.args || pythonRunTaskOptions.args || []), await ext.runtimeManager.getCommand(), containerName];
         const launcherPath = path.join(ext.context.asAbsolutePath('resources'), 'python', 'launcher.py');
 
         return {
