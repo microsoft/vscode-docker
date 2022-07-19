@@ -117,7 +117,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 removeContainerAfterDebug: debugConfiguration.removeContainerAfterDebug
             },
             pipeTransport: {
-                pipeProgram: ext.runtimeManager.getCommand(),
+                pipeProgram: await ext.runtimeManager.getCommand(),
                 /* eslint-disable no-template-curly-in-string */
                 pipeArgs: ['exec', '-i', containerName, '${debuggerCommand}'],
                 pipeCwd: '${workspaceFolder}',
@@ -163,7 +163,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             // and processName will be undefined.
             processName: debugConfiguration.processId ? undefined : debugConfiguration.processName || 'dotnet',
             pipeTransport: {
-                pipeProgram: ext.runtimeManager.getCommand(),
+                pipeProgram: await ext.runtimeManager.getCommand(),
                 pipeArgs: ['exec', '-i', containerName],
                 // eslint-disable-next-line no-template-curly-in-string
                 pipeCwd: '${workspaceFolder}',
