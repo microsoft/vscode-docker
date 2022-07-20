@@ -2231,39 +2231,17 @@
                     "default": 10,
                     "description": "%vscode-docker.config.docker.truncateMaxLength%"
                 },
+                "containers.environment": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "%vscode-docker.config.containers.environment%",
+                    "scope": "machine-overridable"
+                },
                 "docker.dockerodeOptions": {
                     "type": "object",
                     "description": "%vscode-docker.config.docker.dockerodeOptions%"
-                },
-                "docker.host": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.host%",
-                    "scope": "machine-overridable"
-                },
-                "docker.context": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.context%",
-                    "scope": "machine-overridable"
-                },
-                "docker.certPath": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.certPath%",
-                    "scope": "machine-overridable"
-                },
-                "docker.tlsVerify": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.tlsVerify%",
-                    "scope": "machine-overridable"
-                },
-                "docker.machineName": {
-                    "type": "string",
-                    "default": "",
-                    "description": "%vscode-docker.config.docker.machineName%",
-                    "scope": "machine-overridable"
                 },
                 "docker.languageserver.diagnostics.deprecatedMaintainer": {
                     "scope": "resource",
@@ -3081,14 +3059,11 @@
                 "docker.commands.logs",
                 "docker.commands.composeUp",
                 "docker.commands.composeDown",
+                "containers.environment",
                 "docker.dockerodeOptions",
-                "docker.host",
-                "docker.context",
-                "docker.certPath",
-                "docker.tlsVerify",
-                "docker.machineName",
                 "docker.scaffolding.templatePath",
-                "docker.dockerPath"
+                "docker.dockerPath",
+                "docker.composeCommand"
             ]
         }
     },
