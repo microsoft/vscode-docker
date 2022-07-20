@@ -22,6 +22,7 @@ import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
+import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
@@ -57,6 +58,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.errorHandling.rethrow = true;
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
+
+        // Set up environment variables
+        setEnvironmentVariableContributions(ctx);
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -121,6 +125,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         void vscode.commands.executeCommand('vscode-docker.runtimes.activate');
     });
 
+    // If this call results in changes to the values, the settings listener set up below will automatically re-update
+    void migrateOldEnvironmentSettingsIfNeeded();
+
     return new DockerExtensionApi(ctx, ext.runtimeManager, ext.orchestratorManager);
 }
 
@@ -159,13 +166,14 @@ namespace Configuration {
                     settings: null
                 });
 
+                // Reset extension environment variables contribution if needed
+                if (e.affectsConfiguration('containers.environment')) {
+                    setEnvironmentVariableContributions(ext.context);
+                }
+
                 // These settings will result in a need to change context that doesn't actually change the docker context
                 // So, force a manual refresh so the settings get picked up
-                if (e.affectsConfiguration('docker.host') ||
-                    e.affectsConfiguration('docker.context') ||
-                    e.affectsConfiguration('docker.certPath') ||
-                    e.affectsConfiguration('docker.tlsVerify') ||
-                    e.affectsConfiguration('docker.machineName') ||
+                if (e.affectsConfiguration('containers.environment') ||
                     e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
@@ -176,6 +184,17 @@ namespace Configuration {
     }
 }
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
+
+function setEnvironmentVariableContributions(ctx: vscode.ExtensionContext): void {
+    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('containers').get<NodeJS.ProcessEnv>('environment', {});
+
+    ctx.environmentVariableCollection.clear();
+    ctx.environmentVariableCollection.persistent = true;
+
+    for (const key of Object.keys(settingValue)) {
+        ctx.environmentVariableCollection.replace(key, settingValue[key]);
+    }
+}
 
 function activateDockerfileLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
