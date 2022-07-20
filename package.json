@@ -2242,10 +2242,6 @@
                     "description": "%vscode-docker.config.containers.environment%",
                     "scope": "machine-overridable"
                 },
-                "docker.dockerodeOptions": {
-                    "type": "object",
-                    "description": "%vscode-docker.config.docker.dockerodeOptions%"
-                },
                 "docker.languageserver.diagnostics.deprecatedMaintainer": {
                     "scope": "resource",
                     "type": "string",
@@ -3071,7 +3067,6 @@
                 "docker.commands.composeUp",
                 "docker.commands.composeDown",
                 "containers.environment",
-                "docker.dockerodeOptions",
                 "docker.scaffolding.templatePath",
                 "docker.dockerPath",
                 "docker.composeCommand"

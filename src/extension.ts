@@ -174,7 +174,6 @@ namespace Configuration {
                 // These settings will result in a need to change context that doesn't actually change the docker context
                 // So, force a manual refresh so the settings get picked up
                 if (e.affectsConfiguration('containers.environment') ||
-                    e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
                     // TODO: runtimes: await ext.dockerContextManager.refresh();
