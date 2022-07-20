@@ -11,7 +11,7 @@ import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { getArmAppSvc, getArmAuth, getArmContainerRegistry, getAzExtAzureUtils } from "../../../utils/lazyPackages";
+import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreateStep
@@ -26,12 +26,12 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         progress.report({ message: message });
 
         const azExtAzureUtils = await getAzExtAzureUtils();
+        const vscAzureAppService = await getAzExtAppService();
         const armAuth = await getArmAuth();
         const armContainerRegistry = await getArmContainerRegistry();
-        const armAppService = await getArmAppSvc();
         const authClient = azExtAzureUtils.createAzureClient(context, armAuth.AuthorizationManagementClient);
         const crmClient = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
-        const appSvcClient = azExtAzureUtils.createAzureClient(context, armAppService.WebSiteManagementClient);
+        const appSvcClient = await vscAzureAppService.createWebSiteClient(context);
 
         // If we're in `execute`, then `shouldExecute` passed and `this.tagTreeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
         const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as AzureRegistryTreeItem;
