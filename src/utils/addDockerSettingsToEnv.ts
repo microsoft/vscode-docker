@@ -11,7 +11,7 @@ export function addDockerSettingsToEnv(newEnv: NodeJS.ProcessEnv, oldEnv: NodeJS
     const environmentSettings: NodeJS.ProcessEnv = workspace.getConfiguration('containers').get<NodeJS.ProcessEnv>('environment', {});
 
     for (const key of Object.keys(environmentSettings)) {
-        ext.outputChannel.appendLine(localize('vscode-docker.utils.env.overwriting', 'WARNING: Overwriting environment variable "{0}" from VS Code setting "docker.environment".', key));
+        ext.outputChannel.appendLine(localize('vscode-docker.utils.env.overwriting', 'WARNING: Overwriting environment variable "{0}" from VS Code setting "containers.environment".', key));
         newEnv[key] = environmentSettings[key];
     }
 }
