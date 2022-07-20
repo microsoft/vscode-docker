@@ -5,10 +5,6 @@
 
 import { ext } from '../extensionVariables';
 
-export async function getArmAppSvc(): Promise<typeof import('@azure/arm-appservice')> {
-    return await import('@azure/arm-appservice');
-}
-
 export async function getArmAuth(): Promise<typeof import('@azure/arm-authorization')> {
     return await import('@azure/arm-authorization');
 }

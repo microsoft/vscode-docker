@@ -17,7 +17,7 @@ import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/docker
 import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { getArmAppSvc, getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
@@ -35,12 +35,12 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         const siteConfig = await this.getNewSiteConfig(context);
 
         const azExtAzureUtils = await getAzExtAzureUtils();
+        const vscAzureAppService = await getAzExtAppService();
 
         const location: AzExtLocation = await azExtAzureUtils.LocationListStep.getLocation(context);
         const locationName: string = nonNullProp(location, 'name');
 
-        const armAppService = await getArmAppSvc();
-        const client: WebSiteManagementClient = azExtAzureUtils.createAzureClient(context, armAppService.WebSiteManagementClient);
+        const client: WebSiteManagementClient = await vscAzureAppService.createWebSiteClient(context);
         const siteEnvelope: Site = {
             name: context.newSiteName,
             location: locationName,
