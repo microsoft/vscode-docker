@@ -47,7 +47,12 @@ export async function migrateOldEnvironmentSettingsIfNeeded(): Promise<void> {
     }
 }
 
-async function migrateOldEnvironmentSetting(oldConfig: vscode.WorkspaceConfiguration, oldSetting: string, newConfig: vscode.WorkspaceConfiguration, newSetting: string): Promise<void> {
+async function migrateOldEnvironmentSetting(
+    oldConfig: vscode.WorkspaceConfiguration,
+    oldSetting: string,
+    newConfig: vscode.WorkspaceConfiguration,
+    newSetting: string
+): Promise<void> {
     const oldValueInspection = oldConfig.inspect<string>(oldSetting);
     const newValueInspection = newConfig.inspect<NodeJS.ProcessEnv>('environment');
 
