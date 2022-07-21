@@ -275,7 +275,6 @@
     "vscode-docker.commands.registries.pullImage": "Pull Image",
     "vscode-docker.commands.registries.pullRepository": "Pull Repository",
     "vscode-docker.commands.registries.refresh": "Refresh",
-    "vscode-docker.commands.runtimes.activate": "Activate container runtime extensions",
     "vscode-docker.commands.volumes.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.volumes.inspect": "Inspect",
     "vscode-docker.commands.volumes.prune": "Prune...",
