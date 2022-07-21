@@ -119,7 +119,6 @@
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
         "onCommand:vscode-docker.contexts.create.aci",
-        "onCommand:vscode-docker.runtimes.activate",
         "onTaskType:docker-build",
         "onTaskType:docker-run",
         "onTaskType:docker-compose",
@@ -234,10 +233,6 @@
                 },
                 {
                     "command": "vscode-docker.images.hideDangling",
-                    "when": "never"
-                },
-                {
-                    "command": "vscode-docker.runtimes.activate",
                     "when": "never"
                 }
             ],
@@ -2380,11 +2375,6 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.enableDockerComposeLanguageService%"
-                },
-                "containers.runtimeProvider": {
-                    "type": "string",
-                    "description": "Which runtime provider to use",
-                    "scope": "machine-overridable"
                 }
             }
         },
@@ -2870,10 +2860,6 @@
                 "title": "%vscode-docker.commands.contexts.create.aci%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(add)"
-            },
-            {
-                "command": "vscode-docker.runtimes.activate",
-                "title": "%vscode-docker.commands.runtimes.activate%"
             }
         ],
         "views": {

@@ -121,9 +121,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateComposeLanguageClient(ctx);
 
         registerListeners();
-
-        // Activate alternate runtime providers
-        void vscode.commands.executeCommand('vscode-docker.runtimes.activate');
     });
 
     // If this call results in changes to the values, the settings listener set up below will automatically re-update
