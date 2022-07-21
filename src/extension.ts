@@ -34,7 +34,8 @@ export interface ComposeVersionKeys {
     v2: KeyInfo;
 }
 
-let client: LanguageClient;
+let dockerfileLanguageClient: LanguageClient;
+let composeLanguageClient: LanguageClient;
 
 const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
@@ -135,6 +136,11 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
     await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         AzureAccountExtensionListener.dispose();
+
+        await Promise.all([
+            dockerfileLanguageClient.stop(),
+            composeLanguageClient.stop(),
+        ]);
     });
 }
 
@@ -148,7 +154,7 @@ namespace Configuration {
             if (item.scopeUri) {
                 config = vscode.workspace.getConfiguration(
                     item.section,
-                    client.protocol2CodeConverter.asUri(item.scopeUri)
+                    dockerfileLanguageClient.protocol2CodeConverter.asUri(item.scopeUri)
                 );
             } else {
                 config = vscode.workspace.getConfiguration(item.section);
@@ -162,7 +168,7 @@ namespace Configuration {
         ctx.subscriptions.push(vscode.workspace.onDidChangeConfiguration(
             async (e: vscode.ConfigurationChangeEvent) => {
                 // notify the language server that settings have change
-                client.sendNotification(DidChangeConfigurationNotification.type, {
+                void dockerfileLanguageClient.sendNotification(DidChangeConfigurationNotification.type, {
                     settings: null
                 });
 
@@ -237,19 +243,17 @@ function activateDockerfileLanguageClient(ctx: vscode.ExtensionContext): void {
             middleware: middleware
         };
 
-        client = new LanguageClient(
+        dockerfileLanguageClient = new LanguageClient(
             "dockerfile-langserver",
             "Dockerfile Language Server",
             serverOptions,
             clientOptions
         );
-        client.registerProposedFeatures();
-        void client.onReady().then(() => {
-            // attach the VS Code settings listener
-            Configuration.initialize(ctx);
-        });
+        dockerfileLanguageClient.registerProposedFeatures();
 
-        ctx.subscriptions.push(client.start());
+        ctx.subscriptions.push(dockerfileLanguageClient);
+        await dockerfileLanguageClient.start();
+        Configuration.initialize(ctx);
     });
 }
 
@@ -291,16 +295,16 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
             documentSelector: [{ language: 'dockercompose' }]
         };
 
-        client = new LanguageClient(
+        composeLanguageClient = new LanguageClient(
             "compose-language-service",
             "Docker Compose Language Server",
             serverOptions,
             clientOptions
         );
-        client.registerProposedFeatures();
-        client.registerFeature(new DocumentSettingsClientFeature(client));
+        composeLanguageClient.registerProposedFeatures();
+        composeLanguageClient.registerFeature(new DocumentSettingsClientFeature(composeLanguageClient));
 
-        registerEvent('compose-langserver-event', client.onTelemetry, (context: IActionContext, evtArgs: TelemetryEvent) => {
+        registerEvent('compose-langserver-event', composeLanguageClient.onTelemetry, (context: IActionContext, evtArgs: TelemetryEvent) => {
             context.telemetry.properties.langServerEventName = evtArgs.eventName;
             context.telemetry.suppressAll = evtArgs.suppressAll;
             context.telemetry.suppressIfSuccessful = evtArgs.suppressIfSuccessful;
@@ -309,6 +313,7 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
             Object.assign(context.telemetry.properties, evtArgs.properties);
         });
 
-        ctx.subscriptions.push(client.start());
+        ctx.subscriptions.push(composeLanguageClient);
+        await composeLanguageClient.start();
     });
 }

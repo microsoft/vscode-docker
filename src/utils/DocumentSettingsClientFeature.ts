@@ -6,7 +6,7 @@
 // Largely copied from https://github.com/microsoft/compose-language-service/blob/main/src/test/clientExtension/DocumentSettingsClientFeature.ts
 
 import * as vscode from 'vscode';
-import { ClientCapabilities, StaticFeature } from 'vscode-languageclient';
+import { ClientCapabilities, FeatureState, StaticFeature } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
 import { DocumentSettings, DocumentSettingsNotification, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
 
@@ -18,6 +18,12 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
     private disposables: vscode.Disposable[] = [];
 
     public constructor(private readonly client: LanguageClient) { }
+
+    public getState(): FeatureState {
+        return {
+            kind: 'static'
+        };
+    }
 
     public fillClientCapabilities(capabilities: ClientCapabilities): void {
         const documentSettings = {
@@ -52,14 +58,14 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
 
         this.disposables.push(
             vscode.window.onDidChangeTextEditorOptions(
-                (e: vscode.TextEditorOptionsChangeEvent) => {
+                async (e: vscode.TextEditorOptionsChangeEvent) => {
                     const params: DocumentSettingsNotificationParams = {
                         textDocument: { uri: e.textEditor.document.uri.toString() },
                         eol: e.textEditor.document.eol,
                         tabSize: Number(e.options.tabSize),
                     };
 
-                    this.client.sendNotification(DocumentSettingsNotification.method, params);
+                    await this.client.sendNotification(DocumentSettingsNotification.method, params);
                 }
             )
         );
