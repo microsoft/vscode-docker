@@ -208,10 +208,4 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));
-
-    registerCommand('vscode-docker.runtimes.activate', (context: IActionContext) => {
-        // Noop, just need to register the command so other runtime providers can activate
-        context.telemetry.suppressAll = true;
-        context.errorHandling.suppressDisplay = true;
-    });
 }
