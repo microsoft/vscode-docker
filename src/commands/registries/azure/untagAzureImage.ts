@@ -20,7 +20,7 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
         });
     }
 
-    const confirmUntag: string = localize('vscode-docker.commands.registries.azure.untag.confirm', 'Are you sure you want to untag "{0}"? This does not delete the manifest referenced by the tag.', node.repoNameAndTag);
+    const confirmUntag: string = localize('vscode-docker.commands.registries.azure.untag.confirm', 'Are you sure you want to untag image "{0}"? This does not delete the manifest referenced by the tag.', node.repoNameAndTag);
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage(confirmUntag, { modal: true }, { title: "Untag" });
 
