@@ -11,9 +11,5 @@ export namespace cryptoUtils {
         const buffer: Buffer = crypto.randomBytes(Math.ceil(length / 2));
         return buffer.toString('hex').slice(0, length);
     }
-
-    export function hashString(input: string): string {
-        return crypto.createHash('sha256').update(input, 'utf8').digest('hex');
-    }
 }
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
