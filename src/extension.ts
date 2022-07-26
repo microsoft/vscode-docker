@@ -214,7 +214,7 @@ function configureDockerClients(dockerClient: DockerClient, composeClient: Docke
 
 //#region Language services
 
-/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */
+/* eslint-disable @typescript-eslint/no-namespace */
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         const result: vscode.WorkspaceConfiguration[] = [];
@@ -245,7 +245,7 @@ namespace Configuration {
         ));
     }
 }
-/* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
+/* eslint-enable @typescript-eslint/no-namespace */
 
 function activateDockerfileLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
