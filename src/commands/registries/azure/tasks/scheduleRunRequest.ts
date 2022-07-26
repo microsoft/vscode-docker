@@ -9,12 +9,11 @@ import * as path from 'path';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
 import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
+import { IActionContext, IAzureQuickPickItem, nonNullProp } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../../extensionVariables';
 import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
-import { nonNullProp } from "../../../../utils/nonNull";
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';

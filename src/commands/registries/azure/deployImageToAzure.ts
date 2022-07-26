@@ -5,7 +5,7 @@
 
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext } from "@microsoft/vscode-azext-utils";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { Uri, env, window } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -14,7 +14,6 @@ import { azureRegistryProviderId } from '../../../tree/registries/azure/azureReg
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { getAzActTreeItem, getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
-import { nonNullProp } from "../../../utils/nonNull";
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';

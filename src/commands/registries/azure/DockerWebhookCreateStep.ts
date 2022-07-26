@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { Webhook, WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
+import { AzureWizardExecuteStep, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
@@ -15,7 +15,6 @@ import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRep
 import { DockerHubRepositoryTreeItem } from '../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { cryptoUtils } from '../../../utils/cryptoUtils';
-import { nonNullProp } from "../../../utils/nonNull";
 import { getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {

@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient, Registry, RegistryListCredentialsResult } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeItem, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { URL } from "url";
 import { getResourceGroupFromId } from "../../../utils/azureUtils";
 import { getArmContainerRegistry, getAzExtAzureUtils } from "../../../utils/lazyPackages";
-import { nonNullProp } from "../../../utils/nonNull";
 import { getIconPath } from "../../getThemedIconPath";
 import { IAzureOAuthContext, azureOAuthProvider } from "../auth/AzureOAuthProvider";
 import { DockerV2RegistryTreeItemBase } from "../dockerV2/DockerV2RegistryTreeItemBase";
