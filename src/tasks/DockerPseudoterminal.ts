@@ -12,6 +12,7 @@ import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskPro
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
+import { withDockerEnvSettings } from '../utils/withDockerEnvSettings';
 
 const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
@@ -102,7 +103,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
             commandLine,
             {
                 cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
-                env: { ...process.env, ...this.resolvedDefinition.options?.env }, // TODO: runtimes: add new env vars
+                env: withDockerEnvSettings({ ...process.env, ...this.resolvedDefinition.options?.env }),
                 cancellationToken: options.token,
             },
             (output: string, err: boolean) => {

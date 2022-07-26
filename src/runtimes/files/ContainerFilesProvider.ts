@@ -8,10 +8,11 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { DockerUri } from './DockerUri';
 import { getDockerOSType } from '../../utils/osUtils';
-import { AccumulatorStream, CommandNotSupportedError, ListFilesItem, ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
+import { AccumulatorStream, CommandNotSupportedError, ListFilesItem } from '@microsoft/container-runtimes';
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
+import { DefaultEnvShellStreamCommandRunnerFactory } from '../runners/DefaultEnvShellStreamingCommandRunner';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
@@ -87,7 +88,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
                 const accumulator = new AccumulatorStream();
                 const client = await ext.runtimeManager.getClient();
-                const scrf = new ShellStreamCommandRunnerFactory({
+                const scrf = new DefaultEnvShellStreamCommandRunnerFactory({
                     stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
                 });
 
@@ -112,7 +113,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
                 const client = await ext.runtimeManager.getClient();
-                const scrf = new ShellStreamCommandRunnerFactory({
+                const scrf = new DefaultEnvShellStreamCommandRunnerFactory({
                     stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
                 });
 

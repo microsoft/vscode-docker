@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
 import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import * as stream from 'stream';
@@ -12,6 +11,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { DefaultEnvShellStreamCommandRunnerFactory } from '../../runtimes/runners/DefaultEnvShellStreamingCommandRunner';
 
 export async function logInToDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
@@ -41,7 +41,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
         await vscode.window.withProgress(progressOptions, async () => {
             try {
                 const client = await ext.runtimeManager.getClient();
-                const shellCRF = new ShellStreamCommandRunnerFactory({
+                const shellCRF = new DefaultEnvShellStreamCommandRunnerFactory({
                     stdInPipe: stream.Readable.from(password),
                 });
 

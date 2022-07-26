@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, ShellStreamCommandRunnerFactory } from '@microsoft/container-runtimes';
-import * as vscode from 'vscode';
-import { ext } from '../extensionVariables';
-import { RuntimeManager } from '../runtimes/RuntimeManager';
+import { ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
+import { ext } from '../../extensionVariables';
+import { DefaultEnvShellStreamCommandRunnerFactory } from './DefaultEnvShellStreamingCommandRunner';
+import { RuntimeManager } from '../RuntimeManager';
 
 type ClientCallback<TClient, T> = (client: TClient) => CommandResponseLike<T>;
 
@@ -28,17 +28,9 @@ async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T>,
     runtimeManager: RuntimeManager<TClient>
 ): Promise<T> {
-    // Get environment settings
-    const config = vscode.workspace.getConfiguration('docker');
-    const environmentSettings = config.get<NodeJS.ProcessEnv>('environment', {});
-
-    // Get a `ShellStreamCommandRunnerFactory`
-    const factory = new ShellStreamCommandRunnerFactory({
+    // Get a `DefaultEnvShellStreamCommandRunnerFactory`
+    const factory = new DefaultEnvShellStreamCommandRunnerFactory({
         strict: true,
-        env: {
-            ...process.env,
-            ...environmentSettings,
-        },
     });
 
     // Get the active client

@@ -13,7 +13,7 @@ export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchest
         super('orchestratorClient');
     }
 
-    // TODO: runtimes: temporarily just return the Docker client, always
+    // TODO: runtimes: temporarily just return the Docker Compose client, always
     public getClient(): Promise<IContainerOrchestratorClient> {
         return Promise.resolve(this.runtimeClients.find(isDockerComposeClient));
     }

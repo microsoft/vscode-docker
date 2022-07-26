@@ -14,6 +14,7 @@ interface TaskCommandRunnerOptions {
     alwaysRunNew?: boolean;
     rejectOnError?: boolean;
     focus?: boolean;
+    env?: never; // Environment is not needed and should not be used, because VSCode adds it already (due to using `ExtensionContext.environmentVariableCollection`)
 }
 
 export class TaskCommandRunnerFactory implements ICommandRunnerFactory {

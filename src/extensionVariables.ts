@@ -14,7 +14,7 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { runOrchestratorWithDefaultShellInternal, runWithDefaultShellInternal } from './utils/runWithDefaultShell';
+import { runOrchestratorWithDefaultShellInternal, runWithDefaultShellInternal } from './runtimes/runners/runWithDefaultShell';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
