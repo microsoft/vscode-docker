@@ -6,7 +6,7 @@
 import type { WebSiteManagementClient, Site, SiteConfig, NameValuePair } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { CustomLocation } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
-import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
+import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
 import { Progress } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { localize } from "../../../localize";
@@ -18,7 +18,6 @@ import { getRegistryPassword } from '../../../tree/registries/registryPasswords'
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
-import { nonNullProp, nonNullValueAndProp } from "../../../utils/nonNull";
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
 export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceContainerWizardContext> {

@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { RequestLike, bearerAuthHeader } from "../../../utils/httpRequest";
-import { nonNullProp } from "../../../utils/nonNull";
 import { registryRequest } from "../../../utils/registryRequestUtils";
 import { getThemedIconPath } from "../../getThemedIconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
