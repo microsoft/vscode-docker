@@ -29,15 +29,12 @@ export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
     { property: 'Label', description: localize('vscode-docker.tree.settings.label', 'Sort alphabetically by label') }
 ];
 
-// TODO: runtimes: this is no good
 export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
     switch (property) {
         case 'CreatedTime':
-            return !!item?.createdAt ? dayjs(item?.createdAt).fromNow() : '';
+            return !!(item?.createdAt) ? dayjs(item.createdAt).fromNow() : '';
         case 'Size':
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-case-declarations
-            const size: number = item.size ?? 0;
-            return `${Math.round(size / (1024 * 1024))} MB`;
+            return Number.isInteger(item?.size) ? `${Math.round(item.size / (1024 * 1024))} MB` : '';
         default:
             throw new RangeError(localize('vscode-docker.tree.settings.unexpected1', 'Unexpected property "{0}".', property));
     }
