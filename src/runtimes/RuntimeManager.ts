@@ -4,32 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ClientIdentity, DockerClient, DockerComposeClient } from '@microsoft/container-runtimes';
-// import { TimeoutPromiseSource } from '../utils/promiseUtils';
-
-// const ClientRegistrationTimeout = 500;
+import { ClientIdentity } from '@microsoft/container-runtimes';
 
 export abstract class RuntimeManager<TClient extends ClientIdentity> extends vscode.Disposable {
     private readonly _runtimeClients = new Map<string, TClient>();
     protected readonly runtimeClientRegisteredEmitter = new vscode.EventEmitter<TClient>();
 
-    private currentClientPromise: Promise<TClient>;
-
     protected constructor(clientSettingName: string) {
         super(() => { /* Do nothing */ });
-        // const disposables = vscode.Disposable.from(
-        //     vscode.workspace.onDidChangeConfiguration(cce => {
-        //         if (cce.affectsConfiguration(`docker.${clientSettingName}`)) {
-        //             this.initClientPromise(vscode.workspace.getConfiguration('docker').get<string>(clientSettingName));
-        //         }
-        //     })
-        // );
-
-        // super(() => {
-        //     disposables.dispose();
-        // });
-
-        //this.initClientPromise(vscode.workspace.getConfiguration('docker').get<string>(clientSettingName));
     }
 
     public registerRuntimeClient(client: TClient): vscode.Disposable {
@@ -54,24 +36,10 @@ export abstract class RuntimeManager<TClient extends ClientIdentity> extends vsc
         return Array.from(this._runtimeClients.values());
     }
 
-    public async getClient(): Promise<TClient> {
-        //return this.currentClientPromise;
-        return this._runtimeClients.get(DockerClient.ClientId) || this._runtimeClients.get(DockerComposeClient.ClientId);
+    // TODO: runtimes: implement this instead of deferring to individual managers
+    public abstract getClient(): Promise<TClient>;
+
+    public async getCommand(): Promise<string> {
+        return (await this.getClient()).commandName;
     }
-
-    public abstract getCommand(): Promise<string>;
-
-    // private initClientPromise(clientId: string): void {
-    //     const tps = new TimeoutPromiseSource(ClientRegistrationTimeout);
-    //     const clientRegistrationPromise = new Promise<TClient>((resolve) => {
-    //         const disposable = this.runtimeClientRegisteredEmitter.event(client => {
-    //             // if (client.id === clientId) {
-    //             if (client.id === DockerClient.ClientId || client.id === DockerComposeClient.ClientId) {
-    //                 disposable.dispose();
-    //                 resolve(client);
-    //             }
-    //         });
-    //     });
-    //     this.currentClientPromise = Promise.race<TClient>([clientRegistrationPromise, tps.promise]);
-    // }
 }

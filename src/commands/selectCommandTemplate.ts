@@ -9,6 +9,7 @@ import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { IContextManager } from '../runtimes/ContextManager';
+import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
 import { resolveVariables } from '../utils/resolveVariables';
 
 type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 'composeUp' | 'composeDown' | 'composeUpSubset';
@@ -91,12 +92,23 @@ export async function selectComposeCommand(context: IActionContext, folder: vsco
             break;
     }
 
+    // Docker Compose needs a little special handling, because the command can either be `docker-compose` (compose v1)
+    // or `docker` + first argument `compose` (compose v2)
+    // Command customization wants the answer to that as one string
+    let fullComposeCommand: string;
+    const orchestratorClient = await ext.orchestratorManager.getClient();
+    if (isDockerComposeClient(orchestratorClient) && orchestratorClient.composeV2) {
+        fullComposeCommand = `${orchestratorClient.commandName} compose`;
+    } else {
+        fullComposeCommand = orchestratorClient.commandName;
+    }
+
     return await selectCommandTemplate(
         context,
         template,
         [folder.name, configurationFile],
         folder,
-        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': await ext.orchestratorManager.getCommand() }
+        { 'configurationFile': configurationFile ? `-f "${configurationFile}"` : '', 'detached': detached ? '-d' : '', 'build': build ? '--build' : '', 'composeCommand': fullComposeCommand }
     );
 }
 

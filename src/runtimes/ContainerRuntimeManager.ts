@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IContainersClient } from '@microsoft/container-runtimes';
-import * as vscode from 'vscode';
+import { DockerClient, IContainersClient } from '@microsoft/container-runtimes';
 import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 
@@ -16,8 +15,12 @@ export class ContainerRuntimeManager extends RuntimeManager<IContainersClient> {
         super('containerClient');
     }
 
-    public async getCommand(): Promise<string> {
-        const config = vscode.workspace.getConfiguration('docker');
-        return config.get<string>('dockerPath', (await this.getClient()).commandName);
+    // TODO: runtimes: temporarily just return the Docker client, always
+    public getClient(): Promise<IContainersClient> {
+        return Promise.resolve(this.runtimeClients.find(isDockerClient));
     }
+}
+
+function isDockerClient(maybeDockerClient: IContainersClient): maybeDockerClient is DockerClient {
+    return maybeDockerClient.id === DockerClient.ClientId;
 }

@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IContainerOrchestratorClient } from '@microsoft/container-runtimes';
-import * as vscode from 'vscode';
+import { DockerComposeClient, IContainerOrchestratorClient } from '@microsoft/container-runtimes';
 import { RuntimeManager } from './RuntimeManager';
 
 export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchestratorClient> {
@@ -14,8 +13,12 @@ export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchest
         super('orchestratorClient');
     }
 
-    public async getCommand(): Promise<string> {
-        const config = vscode.workspace.getConfiguration('docker');
-        return config.get<string>('composeCommand', (await this.getClient()).commandName);
+    // TODO: runtimes: temporarily just return the Docker client, always
+    public getClient(): Promise<IContainerOrchestratorClient> {
+        return Promise.resolve(this.runtimeClients.find(isDockerComposeClient));
     }
+}
+
+export function isDockerComposeClient(maybeComposeClient: IContainerOrchestratorClient): maybeComposeClient is DockerComposeClient {
+    return maybeComposeClient.id === DockerComposeClient.ClientId;
 }
