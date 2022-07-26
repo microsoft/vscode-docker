@@ -101,7 +101,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             return {
                 source: v.localPath,
                 destination: v.containerPath,
-                readOnly: v.permissions === 'ro', // TODO: runtimes: is RW the right default?
+                readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
                 type: 'bind',
             };
         });

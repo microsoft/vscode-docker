@@ -180,7 +180,7 @@ export async function selectCommandTemplate(
     actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
     actionContext.telemetry.properties.currentContextType = currentContextType;
 
-    // TODO: runtimes: This is not really ideal (putting the full command line into `command` instead of `command` + `args`), but parsing a string into a command like that is really hard
+    // TODO: runtimes: This is not really ideal (putting the full command line into `command` instead of `command` + `args`), but parsing a string into a command + args like that is really hard
     // Fortunately, `TaskCommandRunnerFactory` does not really care
     return {
         command: resolveVariables(selectedTemplate.template, folder, additionalVariables),
