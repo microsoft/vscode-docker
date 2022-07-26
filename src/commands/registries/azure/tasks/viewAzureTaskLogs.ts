@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, openReadOnlyContent } from "@microsoft/vscode-azext-utils";
+import { IActionContext, nonNullProp, openReadOnlyContent } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
 import { AzureTaskRunTreeItem } from "../../../../tree/registries/azure/AzureTaskRunTreeItem";
 import { getStorageBlob } from "../../../../utils/lazyPackages";
-import { nonNullProp } from "../../../../utils/nonNull";
 import { bufferToString } from "../../../../utils/execAsync";
 
 export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTaskRunTreeItem): Promise<void> {

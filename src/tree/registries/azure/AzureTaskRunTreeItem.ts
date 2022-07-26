@@ -6,9 +6,8 @@
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import type { Run as AcrRun, ImageDescriptor } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
+import { AzExtTreeItem, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { ThemeColor, ThemeIcon } from "vscode";
-import { nonNullProp } from "../../../utils/nonNull";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
 dayjs.extend(relativeTime);

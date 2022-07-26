@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, parseError } from "@microsoft/vscode-azext-utils";
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext, nonNullProp, parseError } from "@microsoft/vscode-azext-utils";
 import { PAGE_SIZE } from "../../../constants";
 import { ext } from "../../../extensionVariables";
 import { RequestLike } from "../../../utils/httpRequest";
-import { nonNullProp } from "../../../utils/nonNull";
 import { getNextLinkFromHeaders, registryRequest } from "../../../utils/registryRequestUtils";
 import { getIconPath } from "../../getThemedIconPath";
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";

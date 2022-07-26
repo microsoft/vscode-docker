@@ -3,14 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import * as vscode from "vscode";
 import { ext } from "../../extensionVariables";
 import { localize } from "../../localize";
 import { AzureTaskRunTreeItem } from "../../tree/registries/azure/AzureTaskRunTreeItem";
 import { DockerV2TagTreeItem } from "../../tree/registries/dockerV2/DockerV2TagTreeItem";
 import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
-import { nonNullProp } from "../../utils/nonNull";
 
 export async function copyRemoteImageDigest(context: IActionContext, node?: DockerV2TagTreeItem | AzureTaskRunTreeItem): Promise<void> {
     if (!node) {

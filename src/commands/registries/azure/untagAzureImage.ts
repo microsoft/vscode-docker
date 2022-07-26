@@ -20,11 +20,11 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
         });
     }
 
-    const confirmUntag: string = localize('vscode-docker.commands.registries.azure.untag.confirm', 'Are you sure you want to untag "{0}"? This does not delete the manifest referenced by the tag.', node.repoNameAndTag);
+    const confirmUntag: string = localize('vscode-docker.commands.registries.azure.untag.confirm', 'Are you sure you want to untag image "{0}"? This does not delete the manifest referenced by the tag.', node.repoNameAndTag);
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage(confirmUntag, { modal: true }, { title: "Untag" });
 
-    const untagging = localize('vscode-docker.commands.registries.azure.untag.untagging', 'Untagging "{0}"...', node.repoNameAndTag);
+    const untagging = localize('vscode-docker.commands.registries.azure.untag.untagging', 'Untagging image "{0}"...', node.repoNameAndTag);
     const repoTI = node.parent;
     await window.withProgress({ location: ProgressLocation.Notification, title: untagging }, async () => {
         await registryRequest(repoTI, 'DELETE', `v2/_acr/${repoTI.repoName}/tags/${node.tag}`);
@@ -33,5 +33,5 @@ export async function untagAzureImage(context: IActionContext, node?: RemoteTagT
 
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(localize('vscode-docker.commands.registries.azure.untag.untagged', 'Successfully untagged "{0}".', node.repoNameAndTag));
+    window.showInformationMessage(localize('vscode-docker.commands.registries.azure.untag.untagged', 'Successfully untagged image "{0}".', node.repoNameAndTag));
 }
