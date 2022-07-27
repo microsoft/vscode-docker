@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesItem } from "@microsoft/container-runtimes";
+import { CommandNotSupportedError, ListImagesItem } from "@microsoft/container-runtimes";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { ext } from "../../extensionVariables";
@@ -59,6 +59,10 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     }
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
+        if (await ext.runtimeManager.contextManager.isInCloudContext()) {
+            throw new CommandNotSupportedError(localize('vscode-docker.tree.images.unsupported', 'Images cannot be listed in cloud contexts.'));
+        }
+
         const includeDangling = ext.context.globalState.get(danglingImagesMementoKey, false);
 
         const result = await ext.runWithDefaultShell(client =>

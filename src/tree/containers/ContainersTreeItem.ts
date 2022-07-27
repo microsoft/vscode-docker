@@ -55,6 +55,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
     }
 
     public async getItems(context: IActionContext): Promise<DockerContainerInfo[]> {
+        // TODO: runtimes: ACI does not support "docker container ls", have to use "docker ps"
         const rawResults = await ext.runWithDefaultShell(client =>
             client.listContainers({ all: true })
         );

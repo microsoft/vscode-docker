@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListNetworkItem } from "@microsoft/container-runtimes";
+import { CommandNotSupportedError, ListNetworkItem } from "@microsoft/container-runtimes";
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
@@ -43,6 +43,10 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, Net
     }
 
     public async getItems(context: IActionContext): Promise<ListNetworkItem[]> {
+        if (await ext.runtimeManager.contextManager.isInCloudContext()) {
+            throw new CommandNotSupportedError(localize('vscode-docker.tree.networks.unsupported', 'Networks cannot be listed in cloud contexts.'));
+        }
+
         const config = workspace.getConfiguration(configPrefix);
         const showBuiltInNetworks: boolean = config.get<boolean>('networks.showBuiltInNetworks');
 
