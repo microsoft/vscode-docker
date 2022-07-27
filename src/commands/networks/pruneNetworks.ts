@@ -24,7 +24,7 @@ export async function pruneNetworks(context: IActionContext): Promise<void> {
             if (result?.networksDeleted?.length) {
                 message = localize('vscode-docker.commands.networks.prune.removed', 'Removed {0} unused networks(s).', result.networksDeleted.length);
             } else {
-                message = localize('vscode-docker.commands.networks.prune.removed2', 'Removed dangling networks.');
+                message = localize('vscode-docker.commands.networks.prune.removed2', 'Removed unused networks.');
             }
 
             // Don't wait

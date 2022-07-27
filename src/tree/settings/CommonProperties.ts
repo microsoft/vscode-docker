@@ -7,6 +7,7 @@ import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { ThemeIcon } from 'vscode';
 import { localize } from '../../localize';
+import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
 dayjs.extend(relativeTime);
@@ -34,7 +35,7 @@ export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }
         case 'CreatedTime':
             return !!(item?.createdAt) ? dayjs(item.createdAt).fromNow() : '';
         case 'Size':
-            return Number.isInteger(item?.size) ? `${Math.round(item.size / (1024 * 1024))} MB` : '';
+            return Number.isInteger(item?.size) ? `${convertToMB(item.size)} MB` : '';
         default:
             throw new RangeError(localize('vscode-docker.tree.settings.unexpected1', 'Unexpected property "{0}".', property));
     }

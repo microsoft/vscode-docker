@@ -119,7 +119,6 @@ export class MacDockerInstaller extends DockerInstallerBase {
         await taskCRF.getCommandRunner()({
             command: command,
             args: undefined,
-            parse: () => Promise.resolve(),
         });
     }
 }
