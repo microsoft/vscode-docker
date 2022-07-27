@@ -12,7 +12,7 @@ import { AccumulatorStream, CommandNotSupportedError, ListFilesItem } from '@mic
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
-import { DefaultEnvShellStreamCommandRunnerFactory } from '../runners/DefaultEnvShellStreamingCommandRunner';
+import { runWithDefaultShell } from '../runners/runWithDefaultShell';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
@@ -87,17 +87,17 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
                 const accumulator = new AccumulatorStream();
-                const client = await ext.runtimeManager.getClient();
-                const scrf = new DefaultEnvShellStreamCommandRunnerFactory({
-                    stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
-                });
 
-                await scrf.getCommandRunner()(
-                    client.readFile({
+                await runWithDefaultShell(
+                    client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
-                    })
+                    }),
+                    ext.runtimeManager,
+                    {
+                        stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
+                    }
                 );
 
                 return await accumulator.getBytes();
@@ -112,17 +112,16 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const dockerUri = DockerUri.parse(uri);
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-                const client = await ext.runtimeManager.getClient();
-                const scrf = new DefaultEnvShellStreamCommandRunnerFactory({
-                    stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
-                });
-
-                await scrf.getCommandRunner()(
-                    client.writeFile({
+                await runWithDefaultShell(
+                    client => client.writeFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
-                    })
+                    }),
+                    ext.runtimeManager,
+                    {
+                        stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
+                    }
                 );
             };
 

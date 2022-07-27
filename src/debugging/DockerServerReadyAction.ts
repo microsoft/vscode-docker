@@ -14,7 +14,7 @@ import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vs
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { ResolvedDebugConfiguration } from './DebugHelper';
-import { DefaultEnvShellStreamCommandRunnerFactory } from '../runtimes/runners/DefaultEnvShellStreamingCommandRunner';
+import { runWithDefaultShell } from '../runtimes/runners/runWithDefaultShell';
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
 const URI_FORMAT = 'http://localhost:%s';
@@ -222,13 +222,12 @@ class DockerLogsTracker extends vscode.Disposable {
                 this.detector.detectPattern(data.toString());
             });
 
-            const client = await ext.runtimeManager.getClient();
-            const shellCRF = new DefaultEnvShellStreamCommandRunnerFactory({
-                stdOutPipe: this.logStream,
-            });
-
-            await shellCRF.getCommandRunner()(
-                client.logsForContainer({ container: this.containerName })
+            await runWithDefaultShell(
+                client => client.logsForContainer({ container: this.containerName }),
+                ext.runtimeManager,
+                {
+                    stdOutPipe: this.logStream,
+                }
             );
         });
     }

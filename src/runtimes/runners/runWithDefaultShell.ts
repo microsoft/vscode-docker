@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
+import { AccumulatorStream, ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, isChildProcessError, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions } from '@microsoft/container-runtimes';
 import { ext } from '../../extensionVariables';
-import { DefaultEnvShellStreamCommandRunnerFactory } from './DefaultEnvShellStreamingCommandRunner';
 import { RuntimeManager } from '../RuntimeManager';
+import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
 
 type ClientCallback<TClient, T> = (client: TClient) => CommandResponseLike<T>;
 
@@ -24,19 +24,48 @@ export async function runOrchestratorWithDefaultShellInternal<T>(callback: Clien
     );
 }
 
-async function runWithDefaultShell<TClient extends ClientIdentity, T>(
+// 'strict', 'stdErrPipe', and 'env' are set by this function and thus should not be included as arguments to the additional options
+type DefaultEnvShellStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'strict' | 'stdErrPipe' | 'env'>;
+
+export async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T>,
-    runtimeManager: RuntimeManager<TClient>
+    runtimeManager: RuntimeManager<TClient>,
+    additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions
 ): Promise<T> {
+    const errAccumulator = new AccumulatorStream();
+
     // Get a `DefaultEnvShellStreamCommandRunnerFactory`
     const factory = new DefaultEnvShellStreamCommandRunnerFactory({
+        ...additionalOptions,
         strict: true,
+        stdErrPipe: errAccumulator,
     });
 
     // Get the active client
     const client: TClient = await runtimeManager.getClient();
 
-    return factory.getCommandRunner()(
-        callback(client)
-    );
+    try {
+        return await factory.getCommandRunner()(
+            callback(client)
+        );
+    } catch (err) {
+        if (isChildProcessError(err)) {
+            // If this is a child process error, alter the message to be the stderr output, if it isn't falsy
+            const stdErr = await errAccumulator.getString();
+            err.message = stdErr || err.message;
+        }
+
+        throw err;
+    } finally {
+        errAccumulator.destroy();
+    }
+}
+
+class DefaultEnvShellStreamCommandRunnerFactory<TOptions extends DefaultEnvShellStreamCommandRunnerOptions> extends ShellStreamCommandRunnerFactory<ShellStreamCommandRunnerOptions> {
+    public constructor(options: TOptions) {
+        super({
+            ...options,
+            env: withDockerEnvSettings(process.env),
+        });
+    }
 }
