@@ -9,6 +9,7 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
+import { getDockerOSType } from '../../utils/osUtils';
 import { selectAttachCommand } from '../selectCommandTemplate';
 
 export async function attachShellContainer(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
@@ -20,20 +21,10 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         });
     }
 
-    let shellCommand: string;
-    let osType: ContainerOS;
-    try {
-        const inspectResults = await ext.runWithDefaultShell(client =>
-            client.inspectContainers({ containers: [node.containerId] })
-        );
-        osType = inspectResults?.[0]?.operatingSystem || 'linux';
-    } catch {
-        // Assume Linux if the above fails
-        osType = 'linux';
-    }
-
+    const osType: ContainerOS = await getDockerOSType();
     context.telemetry.properties.dockerOSType = osType;
 
+    let shellCommand: string;
     if (osType === 'windows') {
         // On Windows containers, always use cmd
         shellCommand = 'cmd';
