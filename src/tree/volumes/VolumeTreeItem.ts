@@ -33,7 +33,7 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
     }
 
     public get createdTime(): number {
-        return this._item.createdAt.valueOf();
+        return this._item.createdAt?.valueOf() || 0;
     }
 
     public get volumeName(): string {
