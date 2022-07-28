@@ -142,7 +142,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             !(configuration?.subProcessId)) { // Must not have subProcessId, i.e. not a subprocess debug session (which is how Python does hot reload sessions)
             try {
                 await ext.runWithDefaultShell(client =>
-                    client.removeContainers({ containers: [configuration.dockerOptions.containerName] })
+                    client.removeContainers({ containers: [configuration.dockerOptions.containerName], force: true })
                 );
             } catch {
                 // Best effort

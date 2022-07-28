@@ -192,13 +192,12 @@ interface DockerServerReadyDetector {
 
 class DockerLogsTracker extends vscode.Disposable {
     private logStream: stream.PassThrough;
+    private readonly cts = new vscode.CancellationTokenSource();
 
     public constructor(private readonly containerName: string, private readonly detector: DockerServerReadyDetector) {
         super(
             () => {
-                if (this.logStream) {
-                    this.logStream.destroy();
-                }
+                this.cts.cancel();
             });
 
         if (!this.detector) {
@@ -222,11 +221,22 @@ class DockerLogsTracker extends vscode.Disposable {
                 this.detector.detectPattern(data.toString());
             });
 
-            await runWithDefaultShell(
-                client => client.logsForContainer({ container: this.containerName }),
+            // Don't wait
+            void runWithDefaultShell(
+                client => client.logsForContainer({ container: this.containerName, follow: true }),
                 ext.runtimeManager,
                 {
+                    cancellationToken: this.cts.token,
                     stdOutPipe: this.logStream,
+                }
+            ).then(
+                () => {
+                    // Do nothing on fulfilled
+                },
+                () => {
+                    // Do nothing on reject
+                    // Needed because the usual termination path is for a cancellation error to be thrown,
+                    // Because disposal of this object cancels the token and thus the process
                 }
             );
         });
