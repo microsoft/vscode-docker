@@ -81,9 +81,8 @@ export class OutdatedImageChecker {
 
     private async checkImage(context: IActionContext, registry: ImageRegistry, image: ListImagesItem): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
-            const [registryAndRepo, tag] = [image.registry + '/' + image.name, image.tag];
-            // Remove the registry and leading/trailing slashes from the registryAndRepo to get the repo
-            const repo = registryAndRepo.replace(registry.registryMatch, '').replace(/^\/|\/$/, '');
+            const repo = image.name;
+            const tag = image.tag;
 
             if (noneRegex.test(repo) || noneRegex.test(tag)) {
                 return 'unknown';
