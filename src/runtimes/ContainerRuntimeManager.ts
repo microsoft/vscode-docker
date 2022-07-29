@@ -8,11 +8,20 @@ import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 
 export class ContainerRuntimeManager extends RuntimeManager<IContainersClient> {
-    public readonly contextManager: IContextManager = new ContextManager();
+    private readonly _contextManager = new ContextManager();
     public readonly onContainerRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;
 
     public constructor() {
         super('containerClient');
+    }
+
+    public override dispose(): void {
+        this._contextManager.dispose();
+        super.dispose();
+    }
+
+    public get contextManager(): IContextManager {
+        return this._contextManager;
     }
 
     // TODO: runtimes: temporarily just return the Docker client, always

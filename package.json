@@ -160,14 +160,6 @@
                     "when": "never"
                 },
                 {
-                    "command": "vscode-docker.contexts.create.aci",
-                    "when": "vscode-docker:newCliPresent"
-                },
-                {
-                    "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "vscode-docker:newCliPresent"
-                },
-                {
                     "command": "vscode-docker.containers.composeGroup.logs",
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
@@ -178,10 +170,6 @@
                 {
                     "command": "vscode-docker.containers.composeGroup.down",
                     "when": "never"
-                },
-                {
-                    "command": "vscode-docker.contexts.use",
-                    "when": "!vscode-docker:contextLocked"
                 },
                 {
                     "command": "vscode-docker.compose.down",
@@ -403,7 +391,7 @@
                 },
                 {
                     "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts && vscode-docker:newCliPresent && isAzureAccountInstalled",
+                    "when": "view == vscode-docker.views.dockerContexts && isAzureAccountInstalled",
                     "group": "navigation@1"
                 },
                 {
@@ -605,7 +593,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && vscode-docker:newCliPresent && isAzureAccountInstalled",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
                     "group": "regs_tag_1_general@5"
                 },
                 {
@@ -695,12 +683,12 @@
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i && !vscode-docker:contextLocked",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "contexts_1_general@2"
                 },
                 {
                     "command": "vscode-docker.contexts.use",
-                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i && !vscode-docker:contextLocked",
+                    "when": "view == vscode-docker.views.dockerContexts && viewItem =~ /Context/i",
                     "group": "inline"
                 },
                 {

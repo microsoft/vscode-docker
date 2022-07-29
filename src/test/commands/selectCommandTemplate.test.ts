@@ -6,7 +6,7 @@
 import * as assert from 'assert';
 import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
-import { Context } from '../../runtimes/ContextManager';
+import { ListContextItem } from '@microsoft/container-runtimes';
 
 const DefaultPickIndex = 0;
 
@@ -602,7 +602,7 @@ async function runWithCommandSetting(
             getCurrentContext: async () => {
                 return {
                     type: contextType,
-                } as Context;
+                } as ListContextItem;
             },
         };
     };

@@ -7,13 +7,11 @@ import { InspectContextsItem, ListContextItem } from '@microsoft/container-runti
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 
-export type Context = ListContextItem;
-
 // An interface is needed so unit tests can mock this
 export interface IContextManager {
-    onContextChanged: vscode.Event<Context | undefined>;
-    getContexts(): Promise<Context[]>;
-    getCurrentContext(): Promise<Context | undefined>;
+    onContextChanged: vscode.Event<ListContextItem | undefined>;
+    getContexts(): Promise<ListContextItem[]>;
+    getCurrentContext(): Promise<ListContextItem | undefined>;
     isInCloudContext(): Promise<boolean>;
     useContext(name: string): Promise<void>;
     removeContext(name: string): Promise<void>;
@@ -25,17 +23,27 @@ export interface IContextManager {
  * VSCode contexts for controlling command visibility), route all context querying
  * through a single point
  */
-export class ContextManager {
-    private readonly onContextChangedEmitter = new vscode.EventEmitter<Context | undefined>();
+export class ContextManager implements IContextManager, vscode.Disposable {
+    private readonly onContextChangedEmitter = new vscode.EventEmitter<ListContextItem | undefined>();
     public readonly onContextChanged = this.onContextChangedEmitter.event;
 
-    private lastContext: Context | undefined;
+    private readonly onContextChangedDisposable: vscode.Disposable;
 
-    public async getContexts(): Promise<Context[]> {
+    private lastContext: ListContextItem | undefined;
+
+    public constructor() {
+        this.onContextChangedDisposable = this.onContextChanged((context: ListContextItem) => this.updateVSCodeContexts(context));
+    }
+
+    public dispose(): void {
+        this.onContextChangedDisposable.dispose();
+    }
+
+    public async getContexts(): Promise<ListContextItem[]> {
         const allContexts = await ext.runWithDefaultShell(client =>
             client.listContexts({})
         ) || [];
-        const currentContext: Context | undefined = this.tryGetCurrentContext(allContexts);
+        const currentContext: ListContextItem | undefined = this.tryGetCurrentContext(allContexts);
 
         if (currentContext?.name !== this.lastContext?.name ||
             currentContext?.type !== this.lastContext?.type) {
@@ -47,15 +55,13 @@ export class ContextManager {
         return allContexts;
     }
 
-    public async getCurrentContext(): Promise<Context | undefined> {
+    public async getCurrentContext(): Promise<ListContextItem | undefined> {
         return this.tryGetCurrentContext(await this.getContexts());
     }
 
     public async isInCloudContext(): Promise<boolean> {
         const currentContext = await this.getCurrentContext();
-
-        return !!(currentContext?.type) && // Context must exist and have a type
-            /aci|ecs/i.test(currentContext.type); // Context type must be ACI or ECS
+        return currentContext?.type === 'aci' || currentContext?.type === 'ecs';
     }
 
     public async useContext(name: string): Promise<void> {
@@ -78,7 +84,14 @@ export class ContextManager {
         return result?.[0];
     }
 
-    private tryGetCurrentContext(allContexts: Context[]): Context | undefined {
+    // TODO: runtimes: do we even want to do this anymore?
+    private updateVSCodeContexts(context: ListContextItem | undefined): void {
+        // Don't wait for any of them
+        void vscode.commands.executeCommand('setContext', 'vscode-docker:newSdkContext', context?.type === 'aci' || context?.type === 'ecs');
+        void vscode.commands.executeCommand('setContext', 'vscode-docker:aciContext', context?.type === 'aci');
+    }
+
+    private tryGetCurrentContext(allContexts: ListContextItem[]): ListContextItem | undefined {
         if (allContexts.length === 0) {
             return undefined;
         } else if (allContexts.length === 1) {
