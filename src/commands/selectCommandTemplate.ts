@@ -185,7 +185,6 @@ export async function selectCommandTemplate(
     return {
         command: resolveVariables(selectedTemplate.template, folder, additionalVariables),
         args: undefined,
-        parse: undefined,
     };
 }
 
