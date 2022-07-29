@@ -44,6 +44,7 @@ export function tarPackStream(source: Buffer, sourceFileName: string): NodeJS.Re
     const sourceStream = stream.Readable.from(source);
     sourceStream.pipe(readEntry);
     tarPack.add(readEntry);
+    tarPack.end();
 
     return tarPack;
 }

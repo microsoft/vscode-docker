@@ -111,11 +111,14 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
             async (): Promise<void> => {
                 const dockerUri = DockerUri.parse(uri);
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
+                const destDirectory = containerOS === 'windows' ?
+                    path.win32.dirname(dockerUri.windowsPath) :
+                    path.posix.dirname(dockerUri.path);
 
                 await runWithDefaultShell(
                     client => client.writeFile({
                         container: dockerUri.containerId,
-                        path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                        path: destDirectory,
                         operatingSystem: containerOS,
                     }),
                     ext.runtimeManager,
