@@ -60,9 +60,11 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             client.listContainers({ all: true })
         );
 
+        // TODO: runtimes
         // NOTE: We *know* that ACI doesn't currently support showing files, but we'll give the benefit of the doubt to any other context type.
-        const contextType = (await ext.runtimeManager.contextManager.getCurrentContext())?.type;
-        const showFiles = contextType !== 'aci';
+        // const contextType = (await ext.runtimeManager.contextManager.getCurrentContext())?.type;
+        // const showFiles = contextType !== 'aci';
+        const showFiles = true;
 
         const results = rawResults.map(result => ({ showFiles, ...result }));
 
