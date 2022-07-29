@@ -87,7 +87,6 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
     const pickChoices: IAzureQuickPickItem<string>[] = allChoices.map(s => ({
         label: s,
         data: s,
-        picked: previousChoices.some(p => p === s),
     }));
 
     const chosenSubsets = await context.ui.showQuickPick(
@@ -95,6 +94,7 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
         {
             canPickMany: true,
             placeHolder: label,
+            isPickSelected: (pick) => previousChoices.some(previous => (pick as IAzureQuickPickItem<string>).data === previous),
         }
     );
 
