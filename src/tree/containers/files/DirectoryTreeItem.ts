@@ -71,7 +71,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
 
             case vscode.FileType.File:
 
-                return new FileTreeItem(this, name, itemUri.with({ fileType: 'file' }));
+                return new FileTreeItem(this, name, itemUri.with({ fileType: vscode.FileType.File }));
 
             default:
                 throw new Error(localize('vscode-docker.files.unrecognizedDirectoryItemType', 'Unrecognized directory item type.'));

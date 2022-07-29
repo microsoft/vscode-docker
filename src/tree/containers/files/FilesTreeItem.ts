@@ -16,7 +16,7 @@ export class FilesTreeItem extends DirectoryTreeItem {
             parent,
             fs,
             localize('vscode-docker.tree.containers.files.filesTitle', 'Files'),
-            DockerUri.create(containerId, '/', { fileType: 'directory', ctime: 0, mtime: 0, size: 0 }),
+            DockerUri.create(containerId, '/', { fileType: vscode.FileType.Directory, ctime: 0, mtime: 0, size: 0 }),
             containerOSProvider);
     }
 

@@ -7,11 +7,9 @@ import { ContainerOS } from '@microsoft/container-runtimes';
 import * as corepath from 'path';
 import * as vscode from 'vscode';
 
-export type FileItemType = 'file' | 'directory';
-
 export type DockerUriQuery = {
     containerOS?: ContainerOS;
-    fileType?: FileItemType;
+    fileType?: vscode.FileType;
     ctime?: number;
     mtime?: number;
     size?: number;
@@ -85,7 +83,7 @@ function queryToURLSearchParams(query: DockerUriQuery): URLSearchParams {
 function queryFromURLSearchParams(queryParams: URLSearchParams): DockerUriQuery {
     return {
         containerOS: queryParams.get('containerOS') as ContainerOS || 'linux',
-        fileType: queryParams.get('fileType') as FileItemType || 'file',
+        fileType: Number.parseInt(queryParams.get('fileType')) as vscode.FileType || vscode.FileType.File,
         ctime: Number.parseInt(queryParams.get('ctime')) || 0,
         mtime: Number.parseInt(queryParams.get('mtime')) || 0,
         size: Number.parseInt(queryParams.get('mtime')) || 0,

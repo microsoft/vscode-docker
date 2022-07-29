@@ -50,7 +50,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 ctime: dockerUri.options.ctime,
                 mtime: dockerUri.options.mtime,
                 size: dockerUri.options.size,
-                type: dockerUri.options.fileType === 'file' ? vscode.FileType.File : vscode.FileType.Directory,
+                type: dockerUri.options.fileType,
             };
         };
 
