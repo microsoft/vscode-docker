@@ -42,7 +42,7 @@ export async function inferCommand(nodePackage: NodePackage | undefined, inspect
                 if (result) {
                     const capturedString = result[1];
 
-                    return ['node', inspectArgWithPort, startScript.slice(result.index + capturedString.length)];
+                    return ['node', inspectArgWithPort, startScript.slice(result.index + capturedString.length).trim()];
                 }
             }
         }
