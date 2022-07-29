@@ -235,8 +235,13 @@ class DockerLogsTracker extends vscode.Disposable {
                 },
                 () => {
                     // Do nothing on reject
-                    // Needed because the usual termination path is for a cancellation error to be thrown,
-                    // because disposal of this object cancels the token and thus the process
+                    //
+                    // The usual termination path is for `runWithDefaultShell` to throw a `CancellationError`,
+                    // because when this `DockerLogsTracker` object is disposed, cancellation of the process
+                    // is triggered.
+                    //
+                    // If we do not eat that `CancellationError` here, it bubbles up to the extension host process
+                    // where it will be eaten, but ugly warnings show in a few places
                 }
             );
         });
