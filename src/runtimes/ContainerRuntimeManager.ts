@@ -24,7 +24,7 @@ export class ContainerRuntimeManager extends RuntimeManager<IContainersClient> {
         return this._contextManager;
     }
 
-    // TODO: runtimes: temporarily just return the Docker client, always
+    // TODO: runtimes: alt: temporarily just return the Docker client, always
     public getClient(): Promise<IContainersClient> {
         return Promise.resolve(this.runtimeClients.find(isDockerClient));
     }

@@ -43,7 +43,7 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, Net
     }
 
     public async getItems(context: IActionContext): Promise<ListNetworkItem[]> {
-        // TODO: runtimes
+        // TODO: runtimes: ACI
         // if (await ext.runtimeManager.contextManager.isInCloudContext()) {
         //     throw new CommandNotSupportedError(localize('vscode-docker.tree.networks.unsupported', 'Networks cannot be listed in cloud contexts.'));
         // }

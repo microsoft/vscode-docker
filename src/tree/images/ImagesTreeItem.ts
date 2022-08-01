@@ -59,7 +59,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
     }
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
-        // TODO: runtimes
+        // TODO: runtimes: ACI
         // if (await ext.runtimeManager.contextManager.isInCloudContext()) {
         //     throw new CommandNotSupportedError(localize('vscode-docker.tree.images.unsupported', 'Images cannot be listed in cloud contexts.'));
         // }

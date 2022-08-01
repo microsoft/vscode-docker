@@ -84,7 +84,7 @@ export class ContextManager implements IContextManager, vscode.Disposable {
         return result?.[0];
     }
 
-    // TODO: runtimes: do we even want to do this anymore?
+    // TODO: runtimes: ACI: do we even want to do this anymore?
     private updateVSCodeContexts(context: ListContextItem | undefined): void {
         // Don't wait for any of them
         void vscode.commands.executeCommand('setContext', 'vscode-docker:newSdkContext', context?.type === 'aci' || context?.type === 'ecs');

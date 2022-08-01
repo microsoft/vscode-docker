@@ -36,7 +36,7 @@ export abstract class RuntimeManager<TClient extends ClientIdentity> extends vsc
         return Array.from(this._runtimeClients.values());
     }
 
-    // TODO: runtimes: implement this instead of deferring to individual managers
+    // TODO: runtimes: alt: implement this instead of deferring to individual managers
     public abstract getClient(): Promise<TClient>;
 
     public async getCommand(): Promise<string> {
