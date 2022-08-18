@@ -1128,6 +1128,11 @@
                                 "type": "string",
                                 "description": "%vscode-docker.tasks.docker-run.dockerRun.containerName%"
                             },
+                            "detached": {
+                                "type": "boolean",
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.detached%",
+                                "default": true
+                            },
                             "env": {
                                 "type": "object",
                                 "description": "%vscode-docker.tasks.docker-run.dockerRun.env%",

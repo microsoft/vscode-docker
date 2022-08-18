@@ -65,6 +65,7 @@
     "vscode-docker.tasks.docker-run.dockerRun.description": "Options for running the Docker container used for debugging. Learn more at https://aka.ms/vscode-docker-run-task",
     "vscode-docker.tasks.docker-run.dockerRun.command": "The command to run upon starting the container.",
     "vscode-docker.tasks.docker-run.dockerRun.containerName": "Name of the container used for debugging.",
+    "vscode-docker.tasks.docker-run.dockerRun.detached": "Whether or not to run detached.",
     "vscode-docker.tasks.docker-run.dockerRun.env": "Environment variables applied to the Docker container used for debugging.",
     "vscode-docker.tasks.docker-run.dockerRun.envFiles": "Files of environment variables read in and applied to the Docker container used for debugging.",
     "vscode-docker.tasks.docker-run.dockerRun.image": "The image to run.",
