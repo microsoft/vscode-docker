@@ -223,7 +223,7 @@ namespace Configuration {
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
 
 function setEnvironmentVariableContributions(ctx: vscode.ExtensionContext): void {
-    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('containers').get<NodeJS.ProcessEnv>('environment', {});
+    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
 
     ctx.environmentVariableCollection.clear();
     ctx.environmentVariableCollection.persistent = true;

@@ -311,13 +311,13 @@ export class DockerContextManager implements ContextManager, Disposable {
     }
 
     private tryGetContextFromSettings(actionContext: IActionContext): DockerContext | undefined | string {
-        const config = workspace.getConfiguration('containers');
+        const config = workspace.getConfiguration('docker');
         let dockerHost: string | undefined;
         let dockerContext: string | undefined;
         const environment = config.get('environment', {});
 
         if ((dockerHost = environment['DOCKER_HOST'])) { // Assignment + check is intentional
-            actionContext.telemetry.properties.hostSource = 'containers.environment.host';
+            actionContext.telemetry.properties.hostSource = 'docker.environment.host';
 
             return {
                 ...defaultContext,
@@ -325,7 +325,7 @@ export class DockerContextManager implements ContextManager, Disposable {
                 DockerEndpoint: dockerHost,
             } as DockerContext;
         } else if ((dockerContext = environment['DOCKER_CONTEXT'])) { // Assignment + check is intentional
-            actionContext.telemetry.properties.hostSource = 'containers.environment.context';
+            actionContext.telemetry.properties.hostSource = 'docker.environment.context';
 
             return dockerContext;
         }
