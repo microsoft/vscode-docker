@@ -204,13 +204,13 @@ namespace Configuration {
                 });
 
                 // Reset extension environment variables contribution if needed
-                if (e.affectsConfiguration('containers.environment')) {
+                if (e.affectsConfiguration('docker.environment')) {
                     setEnvironmentVariableContributions(ext.context);
                 }
 
                 // These settings will result in a need to change context that doesn't actually change the docker context
                 // So, force a manual refresh so the settings get picked up
-                if (e.affectsConfiguration('containers.environment') ||
+                if (e.affectsConfiguration('docker.environment') ||
                     e.affectsConfiguration('docker.dockerodeOptions') ||
                     e.affectsConfiguration('docker.dockerPath') ||
                     e.affectsConfiguration('docker.composeCommand')) {
