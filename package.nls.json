@@ -177,7 +177,7 @@
     "vscode-docker.config.docker.imageBuildContextPath": "Build context PATH to pass to Docker build command.",
     "vscode-docker.config.docker.truncateLongRegistryPaths": "Set to true to truncate long image and container registry paths in Docker view",
     "vscode-docker.config.docker.truncateMaxLength": "Maximum length of a registry paths displayed in Docker view, including ellipsis. The truncateLongRegistryPaths setting must be set to true for truncateMaxLength setting to be effective.",
-    "vscode-docker.config.containers.environment": "Environment variables that will be applied to all VS Code terminals and to all background processes started by the Docker extension. Use for variables like `DOCKER_HOST`, etc.",
+    "vscode-docker.config.docker.environment": "Environment variables that will be applied to all VS Code terminals and to all background processes started by the Docker extension. Use for variables like `DOCKER_HOST`, etc.",
     "vscode-docker.config.docker.languageserver.diagnostics.deprecatedMaintainer": "Controls the diagnostic severity for the deprecated MAINTAINER instruction",
     "vscode-docker.config.docker.languageserver.diagnostics.emptyContinuationLine": "Controls the diagnostic severity for flagging empty continuation lines found in instructions that span multiple lines",
     "vscode-docker.config.docker.languageserver.diagnostics.directiveCasing": "Controls the diagnostic severity for parser directives that are not written in lowercase",
