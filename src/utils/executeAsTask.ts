@@ -24,7 +24,7 @@ export async function executeAsTask(context: IActionContext, command: string, na
     if (options.addDockerEnv) {
         // We don't need to merge process.env into newEnv, since ShellExecution does that automatically via ShellExecutionOptions
         newEnv = {};
-        addDockerSettingsToEnv(newEnv, process.env);
+        addDockerSettingsToEnv(newEnv);
     }
 
     const task = new vscode.Task(

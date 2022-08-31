@@ -56,7 +56,7 @@ export function refreshDockerode(currentContext: DockerContext): Dockerode {
 
     if (currentContext.Name === 'default') {
         // If the current context is default, just make use of addDockerSettingsToEnv + the current environment
-        addDockerSettingsToEnv(newEnv, oldEnv);
+        addDockerSettingsToEnv(newEnv);
     } else {
         // Otherwise get the host from the Docker context
         newEnv.DOCKER_HOST = currentContext.DockerEndpoint;

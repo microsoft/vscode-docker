@@ -86,7 +86,7 @@ export class DockerodeApiClient extends ContextChangeCancelClient implements Doc
 
             // Copy the Docker environment settings in
             const newEnv: NodeJS.ProcessEnv = cloneObject(process.env);
-            addDockerSettingsToEnv(newEnv, process.env);
+            addDockerSettingsToEnv(newEnv);
 
             const { stdout, stderr } = await execStreamAsync(dockerCommand, { env: newEnv }, token);
 

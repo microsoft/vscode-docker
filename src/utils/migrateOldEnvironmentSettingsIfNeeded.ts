@@ -18,7 +18,7 @@ const oldSettingsMap = {
 
 export async function migrateOldEnvironmentSettingsIfNeeded(): Promise<void> {
     const oldConfig = vscode.workspace.getConfiguration('docker');
-    const newConfig = vscode.workspace.getConfiguration('containers');
+    const newConfig = oldConfig;
 
     let alreadyPrompted = false;
     for (const oldSetting of Object.keys(oldSettingsMap)) {
