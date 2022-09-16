@@ -75,7 +75,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     );
 
     await taskCRF.getCommandRunner()(
-        client.pushImage({ image: finalTag })
+        client.pushImage({ imageRef: finalTag })
     );
 }
 

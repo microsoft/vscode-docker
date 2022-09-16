@@ -22,8 +22,8 @@ export async function pruneImages(context: IActionContext): Promise<void> {
             );
 
             let message: string;
-            if (result?.imagesDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
-                message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imagesDeleted.length, convertToMB(result.spaceReclaimed));
+            if (result?.imageRefsDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
+                message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
             } else {
                 message = localize('vscode-docker.commands.images.prune.removed2', 'Removed dangling images.');
             }

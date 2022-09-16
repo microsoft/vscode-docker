@@ -71,7 +71,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             entrypoint: options.entrypoint,
             removeOnExit: options.remove,
             customOptions: options.customOptions,
-            image: options.image,
+            imageRef: options.image,
             command: options.command,
         });
 

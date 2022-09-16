@@ -13,8 +13,6 @@ import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
 import { ListImagesItem } from '@microsoft/container-runtimes';
 
-const noneRegex = /<none>/i;
-
 export class OutdatedImageChecker {
     private shouldLoad: boolean;
     private readonly outdatedImageIds: string[] = [];
@@ -81,20 +79,19 @@ export class OutdatedImageChecker {
 
     private async checkImage(context: IActionContext, registry: ImageRegistry, image: ListImagesItem): Promise<'latest' | 'outdated' | 'unknown'> {
         try {
-            const repo = image.name;
-            const tag = image.tag;
+            const imageNameInfo = image.image;
 
-            if (noneRegex.test(repo) || noneRegex.test(tag)) {
+            if (!imageNameInfo.image || !imageNameInfo.tag) {
                 return 'unknown';
             }
 
             // 0. If there's a method to sign the request, it will be called on the registry
             // 1. Get the latest image digest ID from the manifest
-            const latestImageDigest = await this.getLatestImageDigest(registry, repo, tag);
+            const latestImageDigest = await this.getLatestImageDigest(registry, imageNameInfo.image, imageNameInfo.tag);
 
             // 2. Compare it with the current image's value
             const imageInspectInfo = (await ext.runWithDefaultShell(client =>
-                client.inspectImages({ images: [image.id] })
+                client.inspectImages({ imageRefs: [image.id] })
             ))?.[0];
 
             // 3. If some local digest matches the most up-to-date digest, then what we have is up-to-date

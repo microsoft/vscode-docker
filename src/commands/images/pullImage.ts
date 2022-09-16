@@ -41,7 +41,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         }
 
         await taskCRF.getCommandRunner()(
-            client.pullImage({ image: n.fullTag })
+            client.pullImage({ imageRef: n.fullTag })
         );
     }
 }

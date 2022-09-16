@@ -11,6 +11,7 @@ import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
+import { getImagePropertyValue } from "./ImageProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageTreeItem extends ToolTipTreeItem {
@@ -36,7 +37,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get fullTag(): string {
-        return this._item.image;
+        return getImagePropertyValue(this._item, 'FullTag');
     }
 
     public get label(): string {
@@ -75,7 +76,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
         }
 
         await ext.runWithDefaultShell(client =>
-            client.removeImages({ images: [ref] })
+            client.removeImages({ imageRefs: [ref] })
         );
     }
 
@@ -83,7 +84,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
         actionContext.telemetry.properties.tooltipType = 'image';
 
         const imageInspection = (await ext.runWithDefaultShell(client =>
-            client.inspectImages({ images: [this.imageId] })
+            client.inspectImages({ imageRefs: [this.imageId] })
         ))?.[0];
         const associatedContainers = await ext.runWithDefaultShell(client =>
             client.listContainers({ imageAncestors: [this.imageId] })

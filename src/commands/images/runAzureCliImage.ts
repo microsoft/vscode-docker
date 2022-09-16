@@ -50,7 +50,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
 
         await taskCRF.getCommandRunner()(
             client.runContainer({
-                image: 'mcr.microsoft.com/azure-cli:latest',
+                imageRef: 'mcr.microsoft.com/azure-cli:latest',
                 removeOnExit: true,
                 mounts: volumes,
             })

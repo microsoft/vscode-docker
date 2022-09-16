@@ -10,10 +10,10 @@ import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
-import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
+import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { ContainerProperty, containerProperties } from "./ContainerProperties";
+import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = ListContainersItem & {
@@ -73,34 +73,6 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
         return results;
     }
 
-    public getPropertyValue(item: DockerContainerInfo, property: ContainerProperty): string {
-        const networks = item.networks?.length > 0 ? item.networks : ['<none>'];
-        const ports = item.ports?.length > 0 ? item.ports.map(p => p.hostPort) : ['<none>'];
-
-        switch (property) {
-            case 'ContainerId':
-                return item.id.slice(0, 12);
-            case 'ContainerName':
-                return item.name;
-            case 'Networks':
-                return networks.join(',');
-            case 'Ports':
-                return ports.join(',');
-            case 'State':
-                return item.state;
-            case 'Status':
-                // The rapidly-refreshing status during a container's first minute causes a lot of problems with excessive refreshing
-                // This normalizes things like "10 seconds" to "Less than a minute", meaning the refreshes don't happen constantly
-                return item.status?.replace(/\d+ seconds?/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
-            case 'Compose Project Name':
-                return getComposeProjectName(item);
-            case 'Image':
-                return item.image;
-            default:
-                return getCommonPropertyValue(item, property);
-        }
-    }
-
     public compareChildrenImpl(ti1: ContainerTreeItem, ti2: ContainerTreeItem): number {
         // Override the sorting behavior to keep the non compose group at the bottom when
         // grouped by compose project name.
@@ -117,6 +89,10 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             }
         }
         return super.compareChildrenImpl(ti1, ti2);
+    }
+
+    public getPropertyValue(item: ListContainersItem, property: ContainerProperty): string {
+        return getContainerPropertyValue(item, property);
     }
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
@@ -159,23 +135,5 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             this.newContainerUser = false;
             await ext.context.globalState.update('vscode-docker.container.newContainerUser', false);
         }
-    }
-}
-
-export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Individual Containers');
-
-export function getComposeProjectName(container: ListContainersItem): string {
-    if (!container.labels) {
-        return NonComposeGroupName;
-    }
-
-    const labels = Object.keys(container.labels)
-        .map(label => ({ label: label, value: container.labels[label] }));
-
-    const composeProject = labels.find(l => l.label === 'com.docker.compose.project');
-    if (composeProject) {
-        return composeProject.value;
-    } else {
-        return NonComposeGroupName;
     }
 }

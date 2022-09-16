@@ -6,7 +6,7 @@
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { NonComposeGroupName, getComposeProjectName } from '../../tree/containers/ContainersTreeItem';
+import { getComposeProjectName, NonComposeGroupName } from '../../tree/containers/ContainerProperties';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function confirmAllAffectedContainers(context: IActionContext, nodes: ContainerTreeItem[]): Promise<string[]> {

@@ -243,7 +243,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             let userName: string | undefined;
             try {
                 const imageInspection = (await ext.runWithDefaultShell(client =>
-                    client.inspectImages({ images: [runOptions.image] })
+                    client.inspectImages({ imageRefs: [runOptions.image] })
                 ))?.[0];
                 userName = imageInspection?.user;
             } catch {

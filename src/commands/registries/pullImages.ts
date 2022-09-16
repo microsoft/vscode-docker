@@ -37,6 +37,6 @@ async function pullImages(context: IActionContext, node: RegistryTreeItemBase, i
     });
 
     await taskCRF.getCommandRunner()(
-        client.pullImage({ image: `${node.baseImagePath}/${imageRequest}` })
+        client.pullImage({ imageRef: `${node.baseImagePath}/${imageRequest}` })
     );
 }
