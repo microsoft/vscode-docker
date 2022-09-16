@@ -145,7 +145,7 @@ export class PythonDebugHelper implements DebugHelper {
 
         // For Docker Desktop on WSL or Linux, we also use 'localhost'
         const dockerInfo = await ext.runWithDefaultShell(client =>
-            client.info()
+            client.info({})
         );
 
         if (/Docker Desktop/i.test(dockerInfo.operatingSystem)) {

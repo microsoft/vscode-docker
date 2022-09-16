@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { bashQuote, composeArgs, ContainerOS, powershellQuote, quoted, withArg } from '@microsoft/container-runtimes';
+import { composeArgs, ContainerOS, Shell, withArg, withQuotedArg } from '@microsoft/container-runtimes';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -13,7 +13,7 @@ import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
-import { getDockerOSType, isArm64Mac, isWindows } from '../../utils/osUtils';
+import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -312,17 +312,17 @@ export class NetCoreDebugHelper implements DebugHelper {
             containerCommand = 'cmd';
             containerCommandArgs = composeArgs(
                 withArg('/C'),
-                withArg(quoted(`IF EXIST "${debuggerPath}" (echo true) else (echo false)`))
+                withQuotedArg(`IF EXIST "${debuggerPath}" (echo true) else (echo false)`)
             )();
         } else {
             containerCommand = '/bin/sh';
             containerCommandArgs = composeArgs(
                 withArg('-c'),
-                withArg(quoted(`if [ -f ${debuggerPath} ]; then echo true; fi;`))
+                withQuotedArg(`if [ -f ${debuggerPath} ]; then echo true; fi;`)
             )();
         }
 
-        const containerCommandArgsQuoted = isWindows() ? powershellQuote(containerCommandArgs) : bashQuote(containerCommandArgs);
+        const containerCommandArgsQuoted = Shell.getShellOrDefault().quote(containerCommandArgs);
 
         const stdout = await ext.runWithDefaultShell(client =>
             client.execContainer({

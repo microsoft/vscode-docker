@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { bashQuote, CommandResponse, powershellQuote } from '@microsoft/container-runtimes';
+import { CommandResponse, Shell } from '@microsoft/container-runtimes';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
-import { isWindows } from '../utils/osUtils';
 import { resolveVariables } from '../utils/resolveVariables';
 import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
@@ -92,7 +91,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
     }
 
     private async executeCommandInTerminal(options: ExecuteCommandInTerminalOptions): Promise<ExecAsyncOutput> {
-        const quotedArgs = isWindows() ? powershellQuote(options.commandResponse.args) : bashQuote(options.commandResponse.args);
+        const quotedArgs = Shell.getShellOrDefault().quote(options.commandResponse.args);
         const resolvedQuotedArgs = resolveVariables(quotedArgs, options.folder);
         const commandLine = [options.commandResponse.command, ...resolvedQuotedArgs].join(' ');
 

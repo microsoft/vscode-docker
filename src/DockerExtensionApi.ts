@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { DockerExtensionExport, IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
+import { /* DockerExtensionExport, */ IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
-export class DockerExtensionApi implements MementoExplorerExport, DockerExtensionExport {
+export class DockerExtensionApi implements MementoExplorerExport /*, DockerExtensionExport */ {
     readonly #extensionMementos: ExtensionMementos | undefined;
     readonly #containerRuntimeManager: ContainerRuntimeManager;
     readonly #orchestratorRuntimeManager: OrchestratorRuntimeManager;
