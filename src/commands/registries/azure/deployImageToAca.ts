@@ -79,6 +79,7 @@ async function openAcaInstallPageAndWait(context: IActionContext): Promise<void>
 
     await vscode.commands.executeCommand('extension.open', acaExtensionId);
 
+    // TODO: time out and reject after a minute or so?
     return new Promise((resolve) => {
         const subscription = vscode.extensions.onDidChange(() => {
             if (isAcaExtensionInstalled()) {
