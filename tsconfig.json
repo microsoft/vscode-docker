@@ -18,6 +18,7 @@
         "noImplicitAny": false, // TODO
         "noImplicitOverride": false, // TODO
         "strictNullChecks": false, // TODO
+        "resolveJsonModule": true
     },
     "exclude": [
         "node_modules",
