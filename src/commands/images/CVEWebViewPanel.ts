@@ -8,7 +8,6 @@ export function activate(context: vscode.ExtensionContext) {
 	);
 }
 
-
 export class CVEWebViewPanel {
 
 	public static readonly viewType = 'catCodicons';
@@ -38,19 +37,21 @@ export class CVEWebViewPanel {
 		<th scope="col">Vulnerable Range</th>
 	  </tr>
 	  </thead><tbody>`;
-
-		const values = results.map(result => {
-			// debugger; // eslint-disable-line no-debugger
-			return `<tr>
-			<td>${result?.purl}</td>
-			<td>${result?.nist_cve?.description}</td>
-			<td>${result?.source}</td>
-			<td>${result?.source_id}</td>
-			<td>${result?.vulnerable_range}</td>
-			</tr>
-			`;
-		}).join(" ");
-		resultTable += values;
+		if (results && results.length) {
+			const values = results.map(result => {
+				// debugger; // eslint-disable-line no-debugger
+				return `<tr>
+				<td>${result?.purl}</td>
+				<td>${result?.nist_cve?.description}</td>
+				<td>${result?.source}</td>
+				<td>${result?.source_id}</td>
+				<td>${result?.vulnerable_range}</td>
+				</tr>`;
+			}).join(" ");
+			resultTable += values;
+		} else {
+			resultTable += '<tr><td colspan="5">No vulnerabilities</td></tr>';
+		}
 		resultTable += "</tbody></table>";
 		// Get resource paths
 		// const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'styles.css'));
@@ -66,9 +67,13 @@ export class CVEWebViewPanel {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
 				<title>Scan Results</title>
 			</head>
-			<body class="bg-dark">
+			<body class="bg-dark" style="padding-top:10px">
+				<div class="container bg-dark" style="border-bottom:1px solid #3c3c3c;">
+					<a style="margin-top:10px" href="https://atomist.com/product/container-vulnerability-scanning" target="_blank" class="float-end"">Learn more</a>
+					<h1 style="color:white;">Vulnerability scanning</h1>
+					<h2 style="color:white;">${imageName}</h2>
+				</div>
 				<div class="container bg-dark">
-					<h1 style="color:white;">${imageName}</h1>
 					<div id="icons">
 						${resultTable}
 					</div>
