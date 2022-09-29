@@ -17413,6 +17413,59 @@
           }
         ]
       }
+    },
+    {
+      "purl": "pkg:deb/ubuntu/gnupg2@2.2.27-3ubuntu2.1?os_distro=jammy\u0026os_name=ubuntu\u0026os_version=22.04",
+      "source": "ubuntu",
+      "source_id": "CVE-2022-3219",
+      "vulnerable_range": "\u003e=0",
+      "fixed_by": "not fixed",
+      "vendor_advisory": {
+        "source": "ubuntu",
+        "source_id": "CVE-2022-3219",
+        "references": [
+          {
+            "source": "atomist",
+            "scores": [
+              {
+                "type": "atm_severity",
+                "value": "LOW"
+              }
+            ]
+          },
+          {
+            "source": "ubuntu",
+            "scores": [
+              {
+                "type": "severity",
+                "value": "LOW"
+              }
+            ]
+          }
+        ],
+        "urls": [
+          {
+            "name": "redhat",
+            "value": "https://access.redhat.com/security/cve/CVE-2022-3219"
+          },
+          {
+            "name": "marc",
+            "value": "https://marc.info/?l=oss-security\u0026m=165696590211434\u0026w=4"
+          },
+          {
+            "name": "gnupg",
+            "value": "https://dev.gnupg.org/T5993"
+          },
+          {
+            "name": "mitre",
+            "value": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-3219"
+          },
+          {
+            "name": "ubuntu",
+            "value": "http://people.ubuntu.com/~ubuntu-security/cve/CVE-2022-3219"
+          }
+        ]
+      }
     }
   ],
   "descriptor": {
