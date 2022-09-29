@@ -28,7 +28,6 @@ export class CatCodiconsPanel {
 	}
 
 	private static _getHtmlForWebview(webview: vscode.Webview, extensionUri: vscode.Uri, results: any[]) {
-		console.log(results);
 		let resultTable = `<table><tr>
 		<th>URL</th>
 		<th>CVE Description</th>
@@ -38,20 +37,21 @@ export class CatCodiconsPanel {
 	  </tr>`;
 
 		const values = results.map(result => {
-			debugger; // eslint-disable-line no-debugger
+			// debugger; // eslint-disable-line no-debugger
 			return `<tr>
-			<td>${result.purl}</td>
-			<td>${result.nist_cve.description}</td>
-			<td>${result.source}</td>
-			<td>${result.source_id}</td>
-			<td>${result.vulnerable_range}</td>
+			<td>${result?.purl}</td>
+			<td>${result?.nist_cve?.description}</td>
+			<td>${result?.source}</td>
+			<td>${result?.source_id}</td>
+			<td>${result?.vulnerable_range}</td>
 			</tr>
 			`;
-		});
+		}).join(" ");
 		resultTable += values;
 		resultTable += "</table>";
 		// Get resource paths
-		const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'media', 'styles.css'));
+		const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'src/media', 'styles.css'));
+		debugger; // eslint-disable-line no-debugger
 		const codiconsUri = webview.asWebviewUri(vscode.Uri.joinPath(extensionUri, 'node_modules', '@vscode/codicons', 'dist', 'codicon.css'));
 
 		return `<!DOCTYPE html>

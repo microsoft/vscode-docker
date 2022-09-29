@@ -10,6 +10,8 @@ import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 import { executeAsTask } from "../../utils/executeAsTask";
 import { CatCodiconsPanel } from "./CatCodiconsPanel";
 import * as vscode from 'vscode';
+import { time } from "console";
+import { systemDefaultPlatform } from "@vscode/test-electron/out/util";
 
 export async function scanImageWithAtomist(context: IActionContext, node?: ImageTreeItem): Promise<void> {
     if (!node) {
@@ -21,11 +23,14 @@ export async function scanImageWithAtomist(context: IActionContext, node?: Image
     }
 
 
-    await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} run -it -v $(pwd)/src:/atm -v "/var/run/docker.sock":"/var/run/docker.sock" --pull always ghcr.io/cdupuis/index-cli-plugin:main index sbom --image ${node.fullTag} --output /atm/sbom.json --include-vulns`, 'Scanning', { addDockerEnv: true, focus: true });
+    await executeAsTask(
+        context,
+        `${ext.dockerContextManager.getDockerCommand(context)} run -it -v $(pwd)/code/vscode-docker:/atm -v "/var/run/docker.sock":"/var/run/docker.sock" ghcr.io/cdupuis/index-cli-plugin:main index sbom --image ${node.fullTag} --output /atm/sbom.json --include-vulns`, 'Scanning', { addDockerEnv: true, focus: true },
+    );
+    // await new Promise(f => setTimeout(f, 2000));
     const sbomResults = await import('../../sbom.json');
     // await fetch('./sbom.json')
     //     .then((response) => response.json())
     //     .then((json) => sbomResults = json);
-    CatCodiconsPanel.show(vscode.Uri.parse("./"), sbomResults.vulnerabilities);
-
+    CatCodiconsPanel.show(vscode.Uri.parse("./"), sbomResults?.vulnerabilities);
 }
