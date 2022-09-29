@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
 		vscode.commands.registerCommand('catCodicons.show', () => {
-			CVEWebViewPanel.show(context.extensionUri, null, null, null);
+			CVEWebViewPanel.show(context.extensionUri, null, null);
 		})
 	);
 }
