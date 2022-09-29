@@ -10,7 +10,7 @@ import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 import { executeAsTask } from "../../utils/executeAsTask";
 import { CVEWebViewPanel } from "./CVEWebViewPanel";
 import * as vscode from 'vscode';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as os from 'os';
 
@@ -23,14 +23,14 @@ export async function scanImageWithAtomist(context: IActionContext, node?: Image
         });
     }
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'atomist-scan'));
-    console.log(tmpDir);
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'atomist-scan'));
+    const sbomFile = 'sbom.json';
     await executeAsTask(
         context,
-        `${ext.dockerContextManager.getDockerCommand(context)} run -it -v ${tmpDir}:/atm -v "/var/run/docker.sock":"/var/run/docker.sock" ghcr.io/cdupuis/index-cli-plugin:main index sbom --image ${node.fullTag} --output /atm/sbom.json --include-vulns`, 'Scanning', { addDockerEnv: true, focus: true },
+        `${ext.dockerContextManager.getDockerCommand(context)} run -it -v ${tmpDir}:/atm -v "/var/run/docker.sock":"/var/run/docker.sock" ghcr.io/cdupuis/index-cli-plugin:main index sbom --image ${node.fullTag} --output /atm/${sbomFile} --include-vulns`, 'Scanning', { addDockerEnv: true, focus: true },
     );
-    const sbomPath = `${tmpDir}/sbom.json`;
-    const rawResults = fs.readFileSync(sbomPath, { encoding: 'utf8', flag: 'r' });
+    const sbomPath = `${tmpDir}/${sbomFile}`;
+    const rawResults = await fs.readFile(sbomPath, { encoding: 'utf8', flag: 'r' });
     const sbomResults = JSON.parse(rawResults + '');
     CVEWebViewPanel.show(vscode.Uri.parse("./"), sbomResults?.vulnerabilities, node.fullTag);
 }
