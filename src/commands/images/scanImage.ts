@@ -53,5 +53,5 @@ export async function scanImageWithAtomist(context: IActionContext, node?: Image
         title: localize('vscode-docker.commands.images.scan', 'Scanning for vulnerabilities...'),
     };
     const sbomResults = await vscode.window.withProgress(progressOptions, async () => await scan(context, node));
-    CVEWebViewPanel.show(vscode.Uri.parse("./"), sbomResults?.vulnerabilities, node.fullTag);
+    CVEWebViewPanel.show(vscode.Uri.parse("./"), sbomResults?.vulnerabilities || [], node.fullTag);
 }
