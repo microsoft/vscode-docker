@@ -20,6 +20,7 @@ const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
     imageName: string;
+    loginServer?: string;
     username?: string;
     secret?: string;
 }
@@ -50,6 +51,7 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
             throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.noCredentials', 'No credentials found for registry "{0}".', registry.label));
         }
 
+        commandOptions.loginServer = registry.baseUrl;
         commandOptions.username = auth.username;
         commandOptions.secret = auth.password;
     } else {
