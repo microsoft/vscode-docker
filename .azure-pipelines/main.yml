@@ -17,6 +17,7 @@ jobs:
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
   variables:
     Codeql.Enabled: true
+    Codeql.ExcludePathPatterns: "**/extension.bundle.js"
 
 - job: macOS
   pool:
