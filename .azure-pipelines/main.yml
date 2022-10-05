@@ -16,7 +16,8 @@ jobs:
   - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
   variables:
-    Codeql.Enabled: true
+    Codeql.Enabled: $[in(variables['Build.Reason'], 'Schedule')] # Only on scheduled builds because it is slow
+    Codeql.Language: javascript # Stop it from spending tons of extra time scanning the one tiny Python file
     Codeql.ExcludePathPatterns: "**/extension.bundle.js"
 
 - job: macOS
