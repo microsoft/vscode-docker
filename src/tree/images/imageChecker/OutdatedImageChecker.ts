@@ -8,7 +8,6 @@ import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vs
 import { ociClientId } from '../../../constants';
 import { ext } from '../../../extensionVariables';
 import { RequestOptionsLike, httpRequest } from '../../../utils/httpRequest';
-import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
 import { ListImagesItem } from '../../../runtimes/docker';
@@ -48,8 +47,8 @@ export class OutdatedImageChecker {
                 const imageCheckPromises: Promise<void>[] = [];
 
                 for (const image of images) {
-                    const imageRegistry = getImagePropertyValue(image, 'Registry');
-                    const matchingRegistry = registries.find(r => r.registryMatch.test(imageRegistry));
+                    // See if it matches a registry we can check
+                    const matchingRegistry = registries.find(r => r.isMatch(image.image));
 
                     if (matchingRegistry) {
                         imageCheckPromises.push((async () => {

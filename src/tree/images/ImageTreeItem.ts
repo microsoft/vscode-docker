@@ -11,17 +11,19 @@ import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
-import { getImagePropertyValue } from "./ImageProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
+import { NormalizedImageNameInfo } from "./NormalizedImageNameInfo";
 
 export class ImageTreeItem extends ToolTipTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
     private readonly _item: DatedDockerImage;
+    private readonly _normalizedImageNameInfo: NormalizedImageNameInfo;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DatedDockerImage) {
         super(parent);
         this._item = itemInfo;
+        this._normalizedImageNameInfo = new NormalizedImageNameInfo(itemInfo.image);
     }
 
     public get id(): string {
@@ -37,7 +39,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get fullTag(): string {
-        return getImagePropertyValue(this._item, 'FullTag');
+        return this._normalizedImageNameInfo.fullTag;
     }
 
     public get label(): string {

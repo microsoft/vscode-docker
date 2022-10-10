@@ -5,10 +5,12 @@
 
 import { URL } from 'url';
 import { ociClientId } from '../../../constants';
+import { ImageNameInfo } from '../../../runtimes/docker';
 import { HttpErrorResponse, IOAuthContext, RequestLike, RequestOptionsLike, bearerAuthHeader, getWwwAuthenticateContext, httpRequest } from '../../../utils/httpRequest';
+import { NormalizedImageNameInfo } from '../NormalizedImageNameInfo';
 
 export interface ImageRegistry {
-    registryMatch: RegExp;
+    isMatch: (imageNameInfo: ImageNameInfo) => boolean;
     baseUrl: string;
     signRequest?(request: RequestLike, scope: string): Promise<RequestLike>;
 }
@@ -17,7 +19,10 @@ let dockerHubAuthContext: IOAuthContext | undefined;
 
 export const registries: ImageRegistry[] = [
     {
-        registryMatch: /docker[.]io\/library/i,
+        isMatch: (imageNameInfo: ImageNameInfo): boolean => {
+            const normalizedImageNameInfo = new NormalizedImageNameInfo(imageNameInfo);
+            return !!imageNameInfo.originalName && normalizedImageNameInfo.normalizedRegistry === 'docker.io' && normalizedImageNameInfo.normalizedNamespace === 'library';
+        },
         baseUrl: 'https://registry-1.docker.io/v2/library',
         signRequest: async (request: RequestLike, scope: string): Promise<RequestLike> => {
             if (!dockerHubAuthContext) {
@@ -61,7 +66,9 @@ export const registries: ImageRegistry[] = [
         }
     },
     {
-        registryMatch: /mcr[.]microsoft[.]com/i,
+        isMatch: (imageNameInfo: ImageNameInfo): boolean => {
+            return !!imageNameInfo.originalName && imageNameInfo.registry === 'mcr.microsoft.com';
+        },
         baseUrl: 'https://mcr.microsoft.com/v2',
     }
 ];
