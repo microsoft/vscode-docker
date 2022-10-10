@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RunContainerBindMount } from '@microsoft/container-runtimes';
+import { RunContainerBindMount } from '../runtimes/docker';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';

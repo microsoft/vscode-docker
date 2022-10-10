@@ -8,7 +8,7 @@ import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { DockerUri } from './DockerUri';
 import { getDockerOSType } from '../../utils/osUtils';
-import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '@microsoft/container-runtimes';
+import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '../docker';
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';

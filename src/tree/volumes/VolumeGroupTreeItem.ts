@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListVolumeItem } from "@microsoft/container-runtimes";
+import { ListVolumeItem } from "../../runtimes/docker";
 import { ThemeIcon } from "vscode";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getCommonGroupIcon } from "../settings/CommonProperties";

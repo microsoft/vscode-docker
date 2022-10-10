@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isCommandNotSupportedError, ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem } from "@microsoft/container-runtimes";
+import { isCommandNotSupportedError, ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem } from "../runtimes/docker";
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, parseError, registerEvent } from "@microsoft/vscode-azext-utils";
 import { ConfigurationChangeEvent, ConfigurationTarget, ThemeColor, ThemeIcon, TreeView, TreeViewVisibilityChangeEvent, WorkspaceConfiguration, window, workspace } from "vscode";
 import { showDockerInstallNotification } from "../commands/dockerInstaller";

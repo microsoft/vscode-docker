@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerComposeClient, IContainerOrchestratorClient } from '@microsoft/container-runtimes';
+import { DockerComposeClient, IContainerOrchestratorClient } from './docker';
 import { RuntimeManager } from './RuntimeManager';
 
 export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchestratorClient> {

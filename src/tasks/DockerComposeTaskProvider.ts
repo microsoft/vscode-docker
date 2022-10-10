@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from '@microsoft/container-runtimes';
+import { CommandResponse } from '../runtimes/docker';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';

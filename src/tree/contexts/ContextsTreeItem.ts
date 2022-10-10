@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContextItem } from '@microsoft/container-runtimes';
+import { ListContextItem } from '../../runtimes/docker';
 import { AzExtTreeItem, AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, ICreateChildImplContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';

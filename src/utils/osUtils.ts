@@ -6,7 +6,7 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContainerOS } from '@microsoft/container-runtimes';
+import { ContainerOS } from '../runtimes/docker';
 import { ext } from '../extensionVariables';
 
 export async function getDockerOSType(): Promise<ContainerOS> {

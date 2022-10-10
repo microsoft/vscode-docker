@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AccumulatorStream, ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, isChildProcessError, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions } from '@microsoft/container-runtimes';
+import { AccumulatorStream, ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, isChildProcessError, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions } from '../docker';
 import { ext } from '../../extensionVariables';
 import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';

@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesItem } from "@microsoft/container-runtimes";
+import { ListImagesItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { ext } from "../../extensionVariables";

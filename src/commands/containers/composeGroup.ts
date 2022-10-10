@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions } from '@microsoft/container-runtimes';
+import { CommandResponse, CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import { ext } from '../../extensionVariables';

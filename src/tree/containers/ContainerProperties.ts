@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContainersItem } from "@microsoft/container-runtimes";
+import { ListContainersItem } from "../../runtimes/docker";
 import { ThemeColor, ThemeIcon } from "vscode";
 import { localize } from "../../localize";
 import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";

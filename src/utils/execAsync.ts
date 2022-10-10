@@ -5,7 +5,7 @@
 
 import * as cp from 'child_process';
 import * as stream from 'stream';
-import { AccumulatorStream, spawnStreamAsync, StreamSpawnOptions } from '@microsoft/container-runtimes';
+import { AccumulatorStream, spawnStreamAsync, StreamSpawnOptions } from '../runtimes/docker';
 import { CancellationToken } from 'vscode';
 
 type Progress = (content: string, err: boolean) => void;

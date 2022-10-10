@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { InspectContextsItem, ListContextItem } from "@microsoft/container-runtimes";
+import { InspectContextsItem, ListContextItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";

@@ -13,7 +13,7 @@ import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { execAsync } from '../../../utils/execAsync';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 import { executeAciCommandAsTask, throwIfNotInDocker } from '../../../utils/aciUtils';
-import { composeArgs, withArg, withNamedArg } from '@microsoft/container-runtimes';
+import { composeArgs, withArg, withNamedArg } from '../../../runtimes/docker';
 
 export async function deployImageToAci(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     await throwIfNotInDocker(context);

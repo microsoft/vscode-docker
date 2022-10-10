@@ -13,7 +13,7 @@ import { ToolTipParentTreeItem } from '../ToolTipTreeItem';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
-import { ContainerOS, ListContainersItem, PortBinding } from '@microsoft/container-runtimes';
+import { ContainerOS, ListContainersItem, PortBinding } from '../../runtimes/docker';
 import { getDockerOSType } from '../../utils/osUtils';
 
 /**

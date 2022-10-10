@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, PortBinding } from '@microsoft/container-runtimes';
+import { CommandResponse, PortBinding } from '../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';

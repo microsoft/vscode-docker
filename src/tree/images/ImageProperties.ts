@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesItem } from "@microsoft/container-runtimes";
+import { ListImagesItem } from "../../runtimes/docker";
 import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";

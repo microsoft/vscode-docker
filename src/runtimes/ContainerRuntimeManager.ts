@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerClient, IContainersClient } from '@microsoft/container-runtimes';
+import { DockerClient, IContainersClient } from './docker';
 import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 

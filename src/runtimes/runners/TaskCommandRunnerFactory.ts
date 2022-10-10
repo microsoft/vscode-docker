@@ -5,7 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '@microsoft/container-runtimes';
+import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '../docker';
 
 interface TaskCommandRunnerOptions {
     taskName: string;

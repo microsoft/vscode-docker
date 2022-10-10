@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { /* DockerExtensionExport, */ IContainerOrchestratorClient, IContainersClient } from '@microsoft/container-runtimes';
+import { /* DockerExtensionExport, */ IContainerOrchestratorClient, IContainersClient } from './runtimes/docker';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 

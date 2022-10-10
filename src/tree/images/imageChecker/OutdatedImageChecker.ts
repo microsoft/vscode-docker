@@ -11,7 +11,7 @@ import { RequestOptionsLike, httpRequest } from '../../../utils/httpRequest';
 import { getImagePropertyValue } from '../ImageProperties';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
-import { ListImagesItem } from '@microsoft/container-runtimes';
+import { ListImagesItem } from '../../../runtimes/docker';
 
 export class OutdatedImageChecker {
     private shouldLoad: boolean;

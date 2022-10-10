@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, Shell } from '@microsoft/container-runtimes';
+import { CommandResponse, Shell } from '../runtimes/docker';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
 import { resolveVariables } from '../utils/resolveVariables';
 import { execAsync, ExecAsyncOutput } from '../utils/execAsync';

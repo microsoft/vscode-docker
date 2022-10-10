@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { ClientIdentity } from '@microsoft/container-runtimes';
+import { ClientIdentity } from './docker';
 
 export abstract class RuntimeManager<TClient extends ClientIdentity> extends vscode.Disposable {
     private readonly _runtimeClients = new Map<string, TClient>();

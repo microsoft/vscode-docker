@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerClient, DockerComposeClient } from '@microsoft/container-runtimes';
+import { DockerClient, DockerComposeClient } from './runtimes/docker';
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';

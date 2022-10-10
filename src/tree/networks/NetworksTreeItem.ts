@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListNetworkItem } from "@microsoft/container-runtimes";
+import { ListNetworkItem } from "../../runtimes/docker";
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";

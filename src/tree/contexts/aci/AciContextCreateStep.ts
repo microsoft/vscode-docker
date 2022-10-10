@@ -10,7 +10,7 @@ import { localize } from '../../../localize';
 import { execAsync } from '../../../utils/execAsync';
 import { IAciWizardContext } from './IAciWizardContext';
 import { executeAciCommandAsTask, flattenCommandLineArgs, throwIfNotInDocker } from '../../../utils/aciUtils';
-import { composeArgs, withArg, withNamedArg } from '@microsoft/container-runtimes';
+import { composeArgs, withArg, withNamedArg } from '../../../runtimes/docker';
 
 export class AciContextCreateStep extends AzureWizardExecuteStep<IAciWizardContext> {
     public priority: number = 200;

@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { composeArgs, ContainerOS, Shell, withArg, withQuotedArg } from '@microsoft/container-runtimes';
+import { composeArgs, ContainerOS, Shell, withArg, withQuotedArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
 import { ext } from '../../extensionVariables';
