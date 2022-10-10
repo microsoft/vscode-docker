@@ -56,7 +56,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get imageName(): string {
-        return this._item.image;
+        return this._item.image.originalName;
     }
 
     public get labels(): { [key: string]: string } {

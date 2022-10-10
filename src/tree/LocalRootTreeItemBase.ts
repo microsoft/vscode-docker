@@ -25,7 +25,7 @@ type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 
 export type AnyContainerObject =
     ListContainersItem |
-    ListImagesItem |
+    (ListImagesItem & { name?: undefined }) | // Pretend `ListImagesItem` has some always-undefined extra properties to keep TS happy
     ListNetworkItem |
     (ListVolumeItem & { id?: undefined }) | // Pretend `ListVolumeItem` has some always-undefined extra properties to keep TS happy
     (ListContextItem & { id?: undefined, createdAt?: undefined }); // Pretend `ListContextItem` has some always-undefined extra properties to keep TS happy
@@ -409,7 +409,8 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 }
 
 export function getTreeId(object: AnyContainerObject): string {
+    const objectName = object.name || (object as ListImagesItem).image?.originalName || '<none>';
     // Several of these aren't defined for all Docker objects, but the concatenation of whatever exists among them is enough to always be unique
     // *and* change the ID when the state of the object changes
-    return `${object.id}${(object as ListImagesItem).image || object.name}${(object as ListContainersItem).state}${(object as ListContextItem).current}${(object as DatedDockerImage).outdated}`;
+    return `${object.id}${objectName}${(object as ListContainersItem).state}${(object as ListContextItem).current}${(object as DatedDockerImage).outdated}`;
 }
