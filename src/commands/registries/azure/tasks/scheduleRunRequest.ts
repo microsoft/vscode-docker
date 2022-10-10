@@ -52,7 +52,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         ext.outputChannel.show();
 
         const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
-        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code to {0}', tarFilePath));
+        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
         if (requestType === 'DockerBuildRequest') {
