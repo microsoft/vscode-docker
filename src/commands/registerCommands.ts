@@ -41,6 +41,7 @@ import { pushImage } from "./images/pushImage";
 import { removeImage } from "./images/removeImage";
 import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
+import { scanImageWithAtomist } from "./images/scanImage";
 import { hideDanglingImages, setInitialDanglingContextValue, showDanglingImages } from "./images/showDanglingImages";
 import { tagImage } from "./images/tagImage";
 import { installDocker } from "./installDocker";
@@ -145,6 +146,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.images.build', buildImage);
     registerCommand('vscode-docker.images.configureExplorer', configureImagesExplorer);
     registerCommand('vscode-docker.images.inspect', inspectImage);
+    registerCommand('vscode-docker.images.atomist', scanImageWithAtomist);
     registerCommand('vscode-docker.images.prune', pruneImages);
     registerCommand('vscode-docker.images.showDangling', showDanglingImages);
     registerCommand('vscode-docker.images.hideDangling', hideDanglingImages);

@@ -62,6 +62,7 @@
         "onCommand:vscode-docker.images.build",
         "onCommand:vscode-docker.images.configureExplorer",
         "onCommand:vscode-docker.images.inspect",
+        "onCommand:vscode-docker.images.atomist",
         "onCommand:vscode-docker.images.showDangling",
         "onCommand:vscode-docker.images.hideDangling",
         "onCommand:vscode-docker.images.prune",
@@ -519,24 +520,29 @@
                     "group": "images_2_general@1"
                 },
                 {
-                    "command": "vscode-docker.images.pull",
+                    "command": "vscode-docker.images.atomist",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@2"
                 },
                 {
-                    "command": "vscode-docker.images.push",
+                    "command": "vscode-docker.images.pull",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@3"
                 },
                 {
-                    "command": "vscode-docker.images.tag",
+                    "command": "vscode-docker.images.push",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@4"
                 },
                 {
-                    "command": "vscode-docker.images.copyFullTag",
+                    "command": "vscode-docker.images.tag",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_2_general@5"
+                },
+                {
+                    "command": "vscode-docker.images.copyFullTag",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@6"
                 },
                 {
                     "command": "vscode-docker.images.remove",
@@ -2545,6 +2551,11 @@
             {
                 "command": "vscode-docker.images.inspect",
                 "title": "%vscode-docker.commands.images.inspect%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
+            },
+            {
+                "command": "vscode-docker.images.atomist",
+                "title": "%vscode-docker.commands.images.atomist%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {

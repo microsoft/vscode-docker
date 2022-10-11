@@ -230,6 +230,7 @@
     "vscode-docker.commands.images.build": "Build Image...",
     "vscode-docker.commands.images.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.images.inspect": "Inspect",
+    "vscode-docker.commands.images.atomist": "Scan",
     "vscode-docker.commands.images.showDangling": "Show dangling images",
     "vscode-docker.commands.images.hideDangling": "Hide dangling images",
     "vscode-docker.commands.images.prune": "Prune...",
