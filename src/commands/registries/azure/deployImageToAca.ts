@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
@@ -16,6 +17,7 @@ import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
+const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum version that is needed
 
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
@@ -65,14 +67,29 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
 
 function isAcaExtensionInstalled(): boolean {
     const acaExtension = vscode.extensions.getExtension(acaExtensionId);
-    return !!acaExtension;
+
+    if (!acaExtension?.packageJSON?.version) {
+        // If the ACA extension is not present, or the package JSON didn't come through, or the version is not present, then it's not installed
+        return false;
+    }
+
+    const acaVersion = semver.coerce(acaExtension.packageJSON.version);
+    const minVersion = semver.coerce(minimumAcaExtensionVersion);
+
+    return semver.gte(acaVersion, minVersion);
 }
 
 async function openAcaInstallPageAndWait(context: IActionContext): Promise<void> {
-    const message = localize('vscode-docker.commands.registries.azure.deployImageToAca.installAcaExtension', 'The Azure Container Apps extension is required to deploy to Azure Container Apps. Would you like to install it now?');
+    const message = localize(
+        'vscode-docker.commands.registries.azure.deployImageToAca.installAcaExtension',
+        'Version {0} or higher of the Azure Container Apps extension is required to deploy to Azure Container Apps. Would you like to install it now?',
+        minimumAcaExtensionVersion
+    );
+
     const installButton: vscode.MessageItem = {
         title: localize('vscode-docker.commands.registries.azure.deployImageToAca.install', 'Install'),
     };
+
     const response = await context.ui.showWarningMessage(message, { modal: true }, installButton, DialogResponses.cancel);
 
     if (response !== installButton) {
