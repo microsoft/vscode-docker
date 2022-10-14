@@ -3109,6 +3109,7 @@
         "@typescript-eslint/eslint-plugin": "^5.19.0",
         "@typescript-eslint/parser": "^5.19.0",
         "@vscode/test-electron": "^2.1.5",
+        "chai": "^4.3.6",
         "copy-webpack-plugin": "^11.0.0",
         "eslint": "^8.13.0",
         "mocha": "^10.0.0",
