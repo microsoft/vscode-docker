@@ -97,7 +97,6 @@
         "onCommand:vscode-docker.registries.copyRemoteFullTag",
         "onCommand:vscode-docker.registries.deleteImage",
         "onCommand:vscode-docker.registries.deployImageToAzure",
-        "onCommand:vscode-docker.registries.deployImageToAci",
         "onCommand:vscode-docker.registries.disconnectRegistry",
         "onCommand:vscode-docker.registries.dockerHub.openInBrowser",
         "onCommand:vscode-docker.registries.help",
@@ -118,7 +117,6 @@
         "onCommand:vscode-docker.contexts.configureExplorer",
         "onCommand:vscode-docker.contexts.refresh",
         "onCommand:vscode-docker.contexts.help",
-        "onCommand:vscode-docker.contexts.create.aci",
         "onTaskType:docker-build",
         "onTaskType:docker-run",
         "onTaskType:docker-compose",
@@ -390,11 +388,6 @@
                     "group": "navigation@9"
                 },
                 {
-                    "command": "vscode-docker.contexts.create.aci",
-                    "when": "view == vscode-docker.views.dockerContexts && isAzureAccountInstalled",
-                    "group": "navigation@1"
-                },
-                {
                     "command": "vscode-docker.contexts.configureExplorer",
                     "when": "view == vscode-docker.views.dockerContexts",
                     "group": "navigation@8"
@@ -468,27 +461,27 @@
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.logs",
-                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_1_general@1"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.start",
-                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_1_general@2"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.stop",
-                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_1_general@3"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.restart",
-                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.down",
-                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i && !vscode-docker:aciContext",
+                    "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_2_destructive@2"
                 },
                 {
@@ -590,11 +583,6 @@
                     "command": "vscode-docker.registries.deployImageToAzure",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
                     "group": "regs_tag_1_general@4"
-                },
-                {
-                    "command": "vscode-docker.registries.deployImageToAci",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
-                    "group": "regs_tag_1_general@5"
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
@@ -2714,11 +2702,6 @@
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
-                "command": "vscode-docker.registries.deployImageToAci",
-                "title": "%vscode-docker.commands.registries.deployImageToAci%",
-                "category": "%vscode-docker.commands.category.dockerRegistries%"
-            },
-            {
                 "command": "vscode-docker.registries.disconnectRegistry",
                 "title": "%vscode-docker.commands.registries.disconnectRegistry%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
@@ -2842,12 +2825,6 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
-            },
-            {
-                "command": "vscode-docker.contexts.create.aci",
-                "title": "%vscode-docker.commands.contexts.create.aci%",
-                "category": "%vscode-docker.commands.category.contexts%",
-                "icon": "$(add)"
             }
         ],
         "views": {
@@ -2999,8 +2976,7 @@
                         "id": "azDeploy",
                         "title": "%vscode-docker.walkthrough.dockerStart.azDeploy.title%",
                         "completionEvents": [
-                            "onCommand:vscode-docker.registries.deployImageToAzure",
-                            "onCommand:vscode-docker.registries.deployImageToACI"
+                            "onCommand:vscode-docker.registries.deployImageToAzure"
                         ],
                         "description": "%vscode-docker.walkthrough.dockerStart.azDeploy.description%",
                         "when": "isAzureAccountInstalled",

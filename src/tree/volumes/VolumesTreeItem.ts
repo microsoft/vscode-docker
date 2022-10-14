@@ -41,7 +41,6 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, Volum
     }
 
     public async getItems(context: IActionContext): Promise<ListVolumeItem[]> {
-        // TODO: runtimes: ACI does not support "docker volume ls --format {{ json . }}", have to use "docker volume ls --format json"
         return ext.runWithDefaultShell(client =>
             client.listVolumes({})
         );
