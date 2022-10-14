@@ -1,7 +1,7 @@
 <Project>
     <Target Name="GetBlazorManifestLocations" DependsOnTargets="ResolveStaticWebAssetsConfiguration">
         <PropertyGroup>
-            <BlazorManifestInputLocation>$(StaticWebAssetDevelopmentManifestPath)</BlazorManifestInputLocation>
+            <BlazorManifestInputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(StaticWebAssetDevelopmentManifestPath)))</BlazorManifestInputLocation>
             <BlazorManifestOutputLocation>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), $(OutputPath), $(TargetName).staticwebassets.runtime.json))</BlazorManifestOutputLocation>
         </PropertyGroup>
 
