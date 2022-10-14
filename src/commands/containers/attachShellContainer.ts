@@ -29,21 +29,16 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // On Windows containers, always use cmd
         shellCommand = 'cmd';
     } else {
-        if (await ext.runtimeManager.contextManager.isInCloudContext()) {
-            // If it's ACI we have to do sh, because it's not possible to check if bash is present
+        // On Linux containers, check if bash is present
+        // If so use it, otherwise use sh
+        try {
+            // If this succeeds, bash is present (exit code 0)
+            await ext.runWithDefaultShell(client =>
+                client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] })
+            );
+            shellCommand = 'bash';
+        } catch {
             shellCommand = 'sh';
-        } else {
-            // On Linux containers, check if bash is present
-            // If so use it, otherwise use sh
-            try {
-                // If this succeeds, bash is present (exit code 0)
-                await ext.runWithDefaultShell(client =>
-                    client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] })
-                );
-                shellCommand = 'bash';
-            } catch {
-                shellCommand = 'sh';
-            }
         }
     }
 

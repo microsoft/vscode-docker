@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
-import { confirmAllAffectedContainers } from './confirmAllAffectedContainers';
 
 export async function startContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
@@ -20,11 +19,9 @@ export async function startContainer(context: IActionContext, node?: ContainerTr
         nodes
     );
 
-    const references = await confirmAllAffectedContainers(context, nodes);
-
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.start.starting', 'Starting Container(s)...') }, async () => {
         await ext.runWithDefaultShell(client =>
-            client.startContainers({ container: references })
+            client.startContainers({ container: nodes.map(n => n.containerId) })
         );
     });
 }

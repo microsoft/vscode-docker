@@ -12,7 +12,6 @@ export interface IContextManager {
     onContextChanged: vscode.Event<ListContextItem | undefined>;
     getContexts(): Promise<ListContextItem[]>;
     getCurrentContext(): Promise<ListContextItem | undefined>;
-    isInCloudContext(): Promise<boolean>;
     useContext(name: string): Promise<void>;
     removeContext(name: string): Promise<void>;
     inspectContext(name: string): Promise<InspectContextsItem | undefined>;
@@ -32,7 +31,7 @@ export class ContextManager implements IContextManager, vscode.Disposable {
     private lastContext: ListContextItem | undefined;
 
     public constructor() {
-        this.onContextChangedDisposable = this.onContextChanged((context: ListContextItem) => this.updateVSCodeContexts(context));
+        this.onContextChangedDisposable = this.onContextChanged(() => { /* Noop for now */ });
     }
 
     public dispose(): void {
@@ -59,11 +58,6 @@ export class ContextManager implements IContextManager, vscode.Disposable {
         return this.tryGetCurrentContext(await this.getContexts());
     }
 
-    public async isInCloudContext(): Promise<boolean> {
-        const currentContext = await this.getCurrentContext();
-        return currentContext?.type === 'aci' || currentContext?.type === 'ecs';
-    }
-
     public async useContext(name: string): Promise<void> {
         await ext.runWithDefaultShell(client =>
             client.useContext({ context: name })
@@ -82,13 +76,6 @@ export class ContextManager implements IContextManager, vscode.Disposable {
             client.inspectContexts({ contexts: [name] })
         );
         return result?.[0];
-    }
-
-    // TODO: runtimes: ACI: do we even want to do this anymore?
-    private updateVSCodeContexts(context: ListContextItem | undefined): void {
-        // Don't wait for any of them
-        void vscode.commands.executeCommand('setContext', 'vscode-docker:newSdkContext', context?.type === 'aci' || context?.type === 'ecs');
-        void vscode.commands.executeCommand('setContext', 'vscode-docker:aciContext', context?.type === 'aci');
     }
 
     private tryGetCurrentContext(allContexts: ListContextItem[]): ListContextItem | undefined {

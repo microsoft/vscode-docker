@@ -25,7 +25,6 @@ import { startContainer } from "./containers/startContainer";
 import { stats } from "./containers/stats";
 import { stopContainer } from "./containers/stopContainer";
 import { viewContainerLogs } from "./containers/viewContainerLogs";
-import { createAciContext } from "./context/aci/createAciContext";
 import { configureDockerContextsExplorer, dockerContextsHelp } from "./context/DockerContextsViewCommands";
 import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
@@ -55,7 +54,6 @@ import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
-import { deployImageToAci } from "./registries/azure/deployImageToAci";
 import { deployImageToAzure } from "./registries/azure/deployImageToAzure";
 import { openInAzurePortal } from "./registries/azure/openInAzurePortal";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
@@ -169,7 +167,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.copyRemoteFullTag', copyRemoteFullTag);
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
-    registerCommand('vscode-docker.registries.deployImageToAci', deployImageToAci);
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerCommand('vscode-docker.registries.help', registryHelp);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
@@ -202,7 +199,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.contexts.inspect', inspectDockerContext);
     registerCommand('vscode-docker.contexts.remove', removeDockerContext);
     registerCommand('vscode-docker.contexts.use', useDockerContext);
-    registerCommand('vscode-docker.contexts.create.aci', createAciContext);
 
     registerLocalCommand('vscode-docker.installDocker', installDocker);
 

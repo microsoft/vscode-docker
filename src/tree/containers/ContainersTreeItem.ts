@@ -55,21 +55,15 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
     }
 
     public async getItems(context: IActionContext): Promise<DockerContainerInfo[]> {
-        // TODO: runtimes: ACI does not support "docker container ls", have to use "docker ps"
         const rawResults = await ext.runWithDefaultShell(client =>
             client.listContainers({ all: true })
         );
 
-        // TODO: runtimes: ACI
-        // NOTE: We *know* that ACI doesn't currently support showing files, but we'll give the benefit of the doubt to any other context type.
-        // const contextType = (await ext.runtimeManager.contextManager.getCurrentContext())?.type;
-        // const showFiles = contextType !== 'aci';
-        const showFiles = true;
+        const results = rawResults.map(result => ({ showFiles: true, ...result }));
 
-        const results = rawResults.map(result => ({ showFiles, ...result }));
+        // Don't wait
+        void this.updateNewContainerUser(results);
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.updateNewContainerUser(results);
         return results;
     }
 

@@ -35,10 +35,6 @@ export class ContextTreeItem extends ToolTipTreeItem {
             result = 'customContext;';
         }
 
-        if (this._item.type === 'aci') {
-            result += 'aciContext;';
-        }
-
         return result;
     }
 
