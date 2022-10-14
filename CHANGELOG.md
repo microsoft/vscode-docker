@@ -1,3 +1,7 @@
+## 1.22.2 - 14 October 2022
+### Fixed
+* Fixed an issue blocking debugging of ASP.NET apps. [#3638](https://github.com/microsoft/vscode-docker/issues/3638)
+
 ## 1.22.1 - 30 June 2022
 ### Fixed
 * Fixed a crash that could occur with certain Dockerfiles. [#3450](https://github.com/microsoft/vscode-docker/issues/3450)
