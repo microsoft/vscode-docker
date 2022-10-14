@@ -299,7 +299,7 @@
             "view/title": [
                 {
                     "command": "vscode-docker.containers.prune",
-                    "when": "view == dockerContainers && !vscode-docker:newSdkContext",
+                    "when": "view == dockerContainers",
                     "group": "navigation@1"
                 },
                 {
@@ -319,12 +319,12 @@
                 },
                 {
                     "command": "vscode-docker.networks.create",
-                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
+                    "when": "view == dockerNetworks",
                     "group": "navigation@1"
                 },
                 {
                     "command": "vscode-docker.networks.prune",
-                    "when": "view == dockerNetworks && !vscode-docker:newSdkContext",
+                    "when": "view == dockerNetworks",
                     "group": "navigation@2"
                 },
                 {
@@ -334,17 +334,17 @@
                 },
                 {
                     "command": "vscode-docker.images.prune",
-                    "when": "view == dockerImages && !vscode-docker:newSdkContext",
+                    "when": "view == dockerImages",
                     "group": "navigation@2"
                 },
                 {
                     "command": "vscode-docker.images.showDangling",
-                    "when": "view == dockerImages && !vscode-docker:newSdkContext && !vscode-docker:danglingShown",
+                    "when": "view == dockerImages && !vscode-docker:danglingShown",
                     "group": "navigation@3"
                 },
                 {
                     "command": "vscode-docker.images.hideDangling",
-                    "when": "view == dockerImages && !vscode-docker:newSdkContext && vscode-docker:danglingShown",
+                    "when": "view == dockerImages && vscode-docker:danglingShown",
                     "group": "navigation@3"
                 },
                 {
@@ -374,7 +374,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.prune",
-                    "when": "view == dockerVolumes && !vscode-docker:newSdkContext",
+                    "when": "view == dockerVolumes",
                     "group": "navigation@1"
                 },
                 {
@@ -656,7 +656,7 @@
                 },
                 {
                     "command": "vscode-docker.volumes.inspect",
-                    "when": "view == dockerVolumes && viewItem == volume && !vscode-docker:newSdkContext",
+                    "when": "view == dockerVolumes && viewItem == volume",
                     "group": "volumes_1_general@1"
                 },
                 {
