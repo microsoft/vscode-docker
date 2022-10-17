@@ -44,8 +44,7 @@ export class ContextManager implements IContextManager, vscode.Disposable {
         ) || [];
         const currentContext: ListContextItem | undefined = this.tryGetCurrentContext(allContexts);
 
-        if (currentContext?.name !== this.lastContext?.name ||
-            currentContext?.type !== this.lastContext?.type) {
+        if (currentContext?.name !== this.lastContext?.name) {
             this.onContextChangedEmitter.fire(currentContext);
         }
 
