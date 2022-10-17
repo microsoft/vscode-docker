@@ -6,7 +6,6 @@
 import * as assert from 'assert';
 import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import { CommandTemplate, selectCommandTemplate } from '../../commands/selectCommandTemplate';
-import { ListContextItem } from '../../runtimes/docker';
 
 const DefaultPickIndex = 0;
 
@@ -46,67 +45,22 @@ suite("(unit) selectCommandTemplate", () => {
                 }
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
-    });
-
-    test("One constrained from settings (contextTypes)", async () => {
-        const result = await runWithCommandSetting(
-            [
-                {
-                    // *Satisfied constraint (contextTypes + match)
-                    label: 'test',
-                    template: 'test',
-                    match: 'test',
-                    contextTypes: ['moby', 'aci'],
-                },
-                {
-                    // Unsatisfied constraint (match)
-                    label: 'fail',
-                    template: 'fail',
-                    match: 'fail',
-                    contextTypes: ['moby', 'aci'],
-                },
-                {
-                    // Unconstrained
-                    label: 'fail2',
-                    template: 'fail',
-                },
-            ],
-            [
-                {
-                    // Unconstrained default
-                    label: 'fail3',
-                    template: 'fail',
-                },
-            ],
-            [],
-            'moby',
-            ['test']
-        );
-
-        assert.equal(result.command, 'test', 'Incorrect command selected');
-        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
-        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[moby, aci]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two constrained from settings", async () => {
         const result = await runWithCommandSetting(
             [
                 {
-                    // *Satisfied constraint (contextTypes)
+                    // *Satisfied constraint (match)
                     label: 'test',
                     template: 'test',
-                    contextTypes: ['moby'],
+                    match: 'test',
                 },
                 {
                     // *Satisfied constraint (match)
@@ -128,13 +82,11 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [DefaultPickIndex],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One unconstrained from settings", async () => {
@@ -147,12 +99,6 @@ suite("(unit) selectCommandTemplate", () => {
                     match: 'fail',
                 },
                 {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
-                {
                     // *Unconstrained
                     label: 'test',
                     template: 'test',
@@ -166,15 +112,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two unconstrained from settings", async () => {
@@ -187,12 +130,6 @@ suite("(unit) selectCommandTemplate", () => {
                     match: 'fail',
                 },
                 {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
-                {
                     // *Unconstrained
                     label: 'test',
                     template: 'test',
@@ -211,15 +148,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [DefaultPickIndex],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One constrained from defaults (match)", async () => {
@@ -231,12 +165,6 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                     match: 'fail',
                 },
-                {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
             ],
             [
                 {
@@ -252,57 +180,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
-    });
-
-    test("One constrained from defaults (contextTypes)", async () => {
-        const result = await runWithCommandSetting(
-            [
-                {
-                    // Unsatisfied constraint (match)
-                    label: 'fail',
-                    template: 'fail',
-                    match: 'fail',
-                },
-                {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
-            ],
-            [
-                {
-                    // *Satisfied constraint (contextTypes + match) default
-                    label: 'test',
-                    template: 'test',
-                    match: 'test',
-                    contextTypes: ['moby'],
-                },
-                {
-                    // Unconstrained default
-                    label: 'fail3',
-                    template: 'fail',
-                },
-            ],
-            [],
-            'moby',
-            ['test']
-        );
-
-        assert.equal(result.command, 'test', 'Incorrect command selected');
-        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
-        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[moby]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two constrained from defaults", async () => {
@@ -314,20 +197,13 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                     match: 'fail',
                 },
-                {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
             ],
             [
                 {
-                    // *Satisfied constraint (contextTypes + match) default
+                    // *Satisfied constraint (match) default
                     label: 'test',
                     template: 'test',
                     match: 'test',
-                    contextTypes: ['moby'],
                 },
                 {
                     // *Satisfied constraint (match) default
@@ -342,14 +218,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [DefaultPickIndex],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("One unconstrained from defaults", async () => {
@@ -361,12 +235,6 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                     match: 'fail',
                 },
-                {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
             ],
             [
                 {
@@ -374,13 +242,6 @@ suite("(unit) selectCommandTemplate", () => {
                     label: 'fail3',
                     template: 'fail',
                     match: 'fail',
-                    contextTypes: ['moby'],
-                },
-                {
-                    // Unsatisfied constraint (contextTypes) default
-                    label: 'fail4',
-                    template: 'fail',
-                    contextTypes: ['aci']
                 },
                 {
                     // *Unconstrained default
@@ -389,15 +250,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Two unconstrained from defaults", async () => {
@@ -409,12 +267,6 @@ suite("(unit) selectCommandTemplate", () => {
                     template: 'fail',
                     match: 'fail',
                 },
-                {
-                    // Unsatisfied constraint (contextTypes)
-                    label: 'fail2',
-                    template: 'fail',
-                    contextTypes: ['aci'],
-                },
             ],
             [
                 {
@@ -422,13 +274,6 @@ suite("(unit) selectCommandTemplate", () => {
                     label: 'fail3',
                     template: 'fail',
                     match: 'fail',
-                    contextTypes: ['moby'],
-                },
-                {
-                    // Unsatisfied constraint (contextTypes) default
-                    label: 'fail4',
-                    template: 'fail',
-                    contextTypes: ['aci']
                 },
                 {
                     // *Unconstrained default
@@ -442,15 +287,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [DefaultPickIndex],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Setting is a string", async () => {
@@ -465,15 +307,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
     });
 
     test("Setting is falsy", async () => {
@@ -487,77 +326,12 @@ suite("(unit) selectCommandTemplate", () => {
                 },
             ],
             [],
-            'moby',
             ['test']
         );
 
         assert.equal(result.command, 'test', 'Incorrect command selected');
         assert.equal(result.context.telemetry.properties.isDefaultCommand, 'true', 'Wrong value for isDefaultCommand');
         assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'moby', 'Wrong value for currentContextType');
-    });
-
-    test("Unknown context constrained", async () => {
-        const result = await runWithCommandSetting(
-            [
-                {
-                    // *Satisfied constraint (match)
-                    label: 'test',
-                    template: 'test',
-                    match: 'test',
-                },
-                {
-                    // Unconstrained
-                    label: 'fail',
-                    template: 'fail',
-                },
-            ],
-            [
-                {
-                    // Unconstrained default
-                    label: 'fail2',
-                    template: 'fail',
-                },
-            ],
-            [],
-            'abc',
-            ['test']
-        );
-
-        assert.equal(result.command, 'test', 'Incorrect command selected');
-        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
-        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'true', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'abc', 'Wrong value for currentContextType');
-    });
-
-    test("Unknown context unconstrained", async () => {
-        const result = await runWithCommandSetting(
-            [
-                {
-                    // *Unconstrained
-                    label: 'test',
-                    template: 'test',
-                },
-            ],
-            [
-                {
-                    // Unconstrained default
-                    label: 'fail',
-                    template: 'fail',
-                },
-            ],
-            [],
-            'abc',
-            ['test']
-        );
-
-        assert.equal(result.command, 'test', 'Incorrect command selected');
-        assert.equal(result.context.telemetry.properties.isDefaultCommand, 'false', 'Wrong value for isDefaultCommand');
-        assert.equal(result.context.telemetry.properties.isCommandRegexMatched, 'false', 'Wrong value for isCommandRegexMatched');
-        assert.equal(result.context.telemetry.properties.commandContextType, '[]', 'Wrong value for commandContextType');
-        assert.equal(result.context.telemetry.properties.currentContextType, 'abc', 'Wrong value for currentContextType');
     });
 });
 
@@ -565,7 +339,6 @@ async function runWithCommandSetting(
     userTemplates: CommandTemplate[] | string,
     overriddenDefaultTemplates: CommandTemplate[],
     pickInputs: number[],
-    contextType: string,
     matchContext: string[]): Promise<{ command: string, context: IActionContext }> {
 
     const tempContext: IActionContext = {
@@ -588,26 +361,7 @@ async function runWithCommandSetting(
         return { globalValue: userTemplates, defaultValue: overriddenDefaultTemplates };
     };
 
-    const contextManagerGetter = () => {
-        return {
-            onContextChanged: undefined,
-            getContexts: undefined,
-            inspectContext: undefined,
-            useContext: undefined,
-            removeContext: undefined,
-            isInCloudContext: undefined,
-
-            // Only getCurrentContext is called by selectCommandTemplate
-            // From it, only Type is used
-            getCurrentContext: async () => {
-                return {
-                    type: contextType,
-                } as ListContextItem;
-            },
-        };
-    };
-
-    const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, picker, settingsGetter, contextManagerGetter);
+    const cmdResult = await selectCommandTemplate(tempContext, 'build', matchContext, undefined, {}, picker, settingsGetter);
 
     if (pickInputs.length !== 0) {
         // selectCommandTemplate never asked for an input we have (fail)

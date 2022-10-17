@@ -3,12 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerContextType } from "./DockerContextType";
-
 export type DockerContextRecord = {
     Name: string;
     Current: boolean;
-    ContextType: DockerContextType;
     Description?: string;
     DockerEndpoint?: string;
 };

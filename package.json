@@ -1562,17 +1562,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.build.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1605,17 +1594,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.run.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1648,17 +1626,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.runInteractive.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1691,17 +1658,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.attach.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1734,17 +1690,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.logs.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1777,17 +1722,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.composeUp.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1832,17 +1766,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.composeUpSubset.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [
@@ -1887,17 +1810,6 @@
                                     "match": {
                                         "type": "string",
                                         "description": "%vscode-docker.config.template.composeDown.match%"
-                                    },
-                                    "contextTypes": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": [
-                                                "moby",
-                                                "aci"
-                                            ]
-                                        },
-                                        "description": "%vscode-docker.config.template.contextTypes.description%"
                                     }
                                 },
                                 "required": [

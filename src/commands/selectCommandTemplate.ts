@@ -8,7 +8,6 @@ import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancel
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { IContextManager } from '../runtimes/ContextManager';
 import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
 import { resolveVariables } from '../utils/resolveVariables';
 
@@ -17,18 +16,17 @@ type TemplateCommand = 'build' | 'run' | 'runInteractive' | 'attach' | 'logs' | 
 type TemplatePicker = (items: IAzureQuickPickItem<CommandTemplate>[], options: IAzureQuickPickOptions) => Promise<IAzureQuickPickItem<CommandTemplate>>;
 
 interface CommandSettings {
-    defaultValue?: CommandTemplate[] | string,
-    globalValue?: CommandTemplate[] | string,
-    workspaceValue?: CommandTemplate[] | string,
-    workspaceFolderValue?: CommandTemplate[] | string,
+    defaultValue?: CommandTemplate[] | string;
+    globalValue?: CommandTemplate[] | string;
+    workspaceValue?: CommandTemplate[] | string;
+    workspaceFolderValue?: CommandTemplate[] | string;
 }
 
 // Exported only for tests
 export interface CommandTemplate {
-    template: string,
-    label: string,
-    match?: string,
-    contextTypes?: string[],
+    template: string;
+    label: string;
+    match?: string;
 }
 
 export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<CommandResponse<void>> {
@@ -121,15 +119,8 @@ export async function selectCommandTemplate(
     additionalVariables: { [key: string]: string },
     // The following three are overridable for test purposes, but have default values that cover actual usage
     templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o), // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
-    getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`),
-    getContextManager: () => IContextManager = () => ext.runtimeManager.contextManager
+    getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`)
 ): Promise<CommandResponse<void>> {
-    // Get the current context type
-    let currentContextType = (await getContextManager().getCurrentContext())?.type;
-    if (!currentContextType || currentContextType === 'containerd') { // For backwards compatibility, treat 'containerd' as 'moby'
-        currentContextType = 'moby';
-    }
-
     // Get the configured settings values
     const commandSettings = getCommandSettings();
     const userTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.workspaceFolderValue ?? commandSettings.workspaceValue ?? commandSettings.globalValue);
@@ -141,20 +132,20 @@ export async function selectCommandTemplate(
     }
 
     // Build the template selection matrix. Settings-defined values are preferred over default, and constrained over unconstrained.
-    // Constrained templates have either `match` or `contextTypes`, and must match the constraints.
-    // Unconstrained templates have neither `match` nor `contextTypes`.
+    // Constrained templates have `match`, and must match the constraints.
+    // Unconstrained templates do not have `match`.
     const templateMatrix: CommandTemplate[][] = [];
 
-    // 0. Workspace- or user-defined templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(actionContext, userTemplates, matchContext, currentContextType));
+    // 0. Workspace- or user-defined templates with `match`, that satisfy the constraints
+    templateMatrix.push(getConstrainedTemplates(actionContext, userTemplates, matchContext));
 
-    // 1. Workspace- or user-defined templates with neither `match` nor `contextTypes`
+    // 1. Workspace- or user-defined templates without `match`
     templateMatrix.push(getUnconstrainedTemplates(userTemplates));
 
-    // 2. Default templates with either `match` or `contextTypes`, that satisfy the constraints
-    templateMatrix.push(getConstrainedTemplates(actionContext, defaultTemplates, matchContext, currentContextType));
+    // 2. Default templates with either `match`, that satisfy the constraints
+    templateMatrix.push(getConstrainedTemplates(actionContext, defaultTemplates, matchContext));
 
-    // 3. Default templates with neither `match` nor `contextTypes`
+    // 3. Default templates without `match`
     templateMatrix.push(getUnconstrainedTemplates(defaultTemplates));
 
     // Select the template to use
@@ -177,8 +168,6 @@ export async function selectCommandTemplate(
 
     actionContext.telemetry.properties.isDefaultCommand = defaultTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
     actionContext.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
-    actionContext.telemetry.properties.commandContextType = `[${selectedTemplate.contextTypes?.join(', ') ?? ''}]`;
-    actionContext.telemetry.properties.currentContextType = currentContextType;
 
     // This is not really ideal (putting the full command line into `command` instead of `command` + `args`), but parsing a string into a command + args like that is really hard
     // Fortunately, `TaskCommandRunnerFactory` does not really care
@@ -209,32 +198,22 @@ async function quickPickTemplate(templates: CommandTemplate[], templatePicker: T
     return selection.data;
 }
 
-function getConstrainedTemplates(actionContext: IActionContext, templates: CommandTemplate[], matchContext: string[], currentContextType: string): CommandTemplate[] {
+function getConstrainedTemplates(actionContext: IActionContext, templates: CommandTemplate[], matchContext: string[]): CommandTemplate[] {
     return templates.filter(template => {
-        if (!template.contextTypes && !template.match) {
-            // If neither contextTypes nor match is defined, this is an unconstrained template
+        if (!template.match) {
+            // If match is not defined, this is an unconstrained template
             return false;
         }
 
-        return isContextTypeConstraintSatisfied(currentContextType, template.contextTypes) &&
-            isMatchConstraintSatisfied(actionContext, matchContext, template.match);
+        return isMatchConstraintSatisfied(actionContext, matchContext, template.match);
     });
 }
 
 function getUnconstrainedTemplates(templates: CommandTemplate[]): CommandTemplate[] {
     return templates.filter(template => {
-        // Both contextTypes and match must be falsy to make this an unconstrained template
-        return !template.contextTypes && !template.match;
+        // `match` must be falsy to make this an unconstrained template
+        return !template.match;
     });
-}
-
-function isContextTypeConstraintSatisfied(currentContextType: string, templateContextTypes: string[] | undefined): boolean {
-    if (!templateContextTypes) {
-        // If templateContextTypes is undefined or empty, it is automatically satisfied
-        return true;
-    }
-
-    return templateContextTypes.some(tc => tc === currentContextType);
 }
 
 function isMatchConstraintSatisfied(actionContext: IActionContext, matchContext: string[], match: string | undefined): boolean {
