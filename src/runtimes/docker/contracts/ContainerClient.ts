@@ -1482,11 +1482,6 @@ type InspectNetworksCommand = {
 
 // #region Context commands
 
-/**
- * The type for a context. For local contexts it will be 'containerd'; for cloud contexts 'aci', 'ecs', etc.
- */
-export type ContextType = 'aci' | 'containerd' | 'ecs' | string;
-
 // List Contexts Command Types
 
 export type ListContextsCommandOptions = CommonCommandOptions & {
@@ -1506,10 +1501,6 @@ export type ListContextItem = {
      * Whether or not the context is currently selected
      */
     current: boolean;
-    /**
-     * The context type
-     */
-    type?: ContextType;
     /**
      * The endpoint used for the container daemon
      */
@@ -1579,10 +1570,6 @@ export type InspectContextsItem = {
      * The description of the context
      */
     description?: string;
-    /**
-     * The context type
-     */
-    type?: ContextType;
     // More properties exist but are highly dependent on container runtime
     /**
      * The raw JSON from the inspect record

@@ -19,7 +19,7 @@ import { ImageNameInfo } from '../../contracts/ContainerClient';
  *
  * Tag: Everything after the ":", if it is present.
  */
-const imageNameRegex = /^((?<registry>(localhost|([\w-]+(\.[\w-]+)+))(:\d+)?)\/)?(?<image>[\w./<>]+)(:(?<tag>[\w-.<>]+))?$/;
+const imageNameRegex = /^((?<registry>(localhost|([\w-]+(\.[\w-]+)+))(:\d+)?)\/)?(?<image>[\w-./<>]+)(:(?<tag>[\w-.<>]+))?$/;
 
 // In certain cases, Docker makes image/tag names "<none>", which is not really valid. We will reinterpret those as `undefined`.
 const noneImageName = /[<>]/i;

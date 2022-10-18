@@ -10,7 +10,6 @@ import { CommandLineArgs, composeArgs, withArg } from "../../utils/commandLineBu
 import { DockerClientBase } from "../DockerClientBase/DockerClientBase";
 import { withDockerJsonFormatArg } from "../DockerClientBase/withDockerJsonFormatArg";
 import { isDockerContextRecord } from "./DockerContextRecord";
-import { normalizeDockerContextType } from "./DockerContextType";
 import { isDockerInspectContextRecord } from "./DockerInspectContextRecord";
 
 export class DockerClient extends DockerClientBase implements IContainersClient {
@@ -79,7 +78,6 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
                     contexts.push({
                         name: rawContext.Name,
                         current: rawContext.Current,
-                        type: normalizeDockerContextType(rawContext.ContextType),
                         description: rawContext.Description,
                         containerEndpoint: rawContext.DockerEndpoint,
                     });
@@ -183,7 +181,6 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
                     // Return the normalized InspectVolumesItem record
                     const volume: InspectContextsItem = {
                         name: inspect.Name,
-                        type: normalizeDockerContextType(inspect.Metadata?.Type),
                         description: inspect.Metadata?.Description,
                         raw: inspectString,
                     };

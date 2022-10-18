@@ -354,9 +354,11 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     const createdAt = dayjs.utc(rawImage.CreatedAt).toDate();
                     const size = tryParseSize(rawImage.Size);
 
+                    const repositoryAndTag = `${rawImage.Repository}${rawImage.Tag ? `:${rawImage.Tag}` : ''}`;
+
                     images.push({
                         id: rawImage.ID,
-                        image: parseDockerLikeImageName(rawImage.Repository),
+                        image: parseDockerLikeImageName(repositoryAndTag),
                         // labels: {}, // TODO: image labels are conspicuously absent from Docker image listing output
                         createdAt,
                         size,
