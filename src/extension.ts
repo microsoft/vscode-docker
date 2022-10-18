@@ -195,8 +195,8 @@ function registerDockerClients(): void {
 function configureDockerClients(dockerClient: DockerClient, composeClient: DockerComposeClient): void {
     const config = vscode.workspace.getConfiguration('docker');
 
-    const dockerCommand = config.get<string | undefined>('dockerPath') || 'docker';
-    let composeCommand = config.get<string | undefined>('composeCommand') || 'docker';
+    const dockerCommand = config.get<string>('dockerPath', 'docker');
+    let composeCommand = config.get<string>('composeCommand', 'docker compose');
 
     let isComposeV2 = false;
     if (/^docker(\s+compose\s*)?$/i.test(composeCommand)) {
