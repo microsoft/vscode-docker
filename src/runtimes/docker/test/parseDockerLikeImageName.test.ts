@@ -16,6 +16,13 @@ describe('parseDockerLikeImageName', () => {
                 registry: undefined,
             });
 
+            expect(parseDockerLikeImageName('hello-world')).to.deep.equal({
+                originalName: 'hello-world',
+                image: 'hello-world',
+                tag: undefined,
+                registry: undefined,
+            });
+
             expect(parseDockerLikeImageName('library/alpine')).to.deep.equal({
                 originalName: 'library/alpine',
                 image: 'library/alpine',
