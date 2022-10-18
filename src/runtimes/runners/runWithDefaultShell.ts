@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AccumulatorStream, ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, isChildProcessError, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions } from '../docker';
+import { AccumulatorStream, ClientIdentity, CommandResponseLike, IContainerOrchestratorClient, IContainersClient, isChildProcessError, Shell, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions } from '../docker';
 import { ext } from '../../extensionVariables';
 import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
@@ -65,6 +65,7 @@ class DefaultEnvShellStreamCommandRunnerFactory<TOptions extends DefaultEnvShell
     public constructor(options: TOptions) {
         super({
             ...options,
+            shellProvider: Shell.getShellOrDefault(),
             env: withDockerEnvSettings(process.env),
         });
     }
