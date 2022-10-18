@@ -71,9 +71,8 @@ export class ImageTreeItem extends ToolTipTreeItem {
         let ref = this.fullTag;
 
         // Dangling images are shown in the explorer, depending on the setting.
-        // In this case, an image end up with <none> tag need to be deleted using the Id.
-        if (ref.endsWith('<none>')) {
-            // Image is tagged <none>. Need to delete by ID.
+        // In this case, an image ending up with no tag needs to be deleted using the ID.
+        if (!this._item.image.image || !this._item.image.tag) {
             ref = this._item.id;
         }
 
