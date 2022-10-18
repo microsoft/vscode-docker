@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesItem } from "../../runtimes/docker";
+import { ListImagesCommandOptions, ListImagesItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { ext } from "../../extensionVariables";
@@ -60,9 +60,14 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
         const includeDangling = ext.context.globalState.get(danglingImagesMementoKey, false);
+        const options: ListImagesCommandOptions = {
+            // Dangling images are included by default, so if `includeDangling` is true, use `dangling` option `undefined`
+            // If `includeDangling` is false, explicitly exclude the images using `dangling` option `false`
+            dangling: includeDangling ? undefined : false,
+        };
 
         const result = await ext.runWithDefaultShell(client =>
-            client.listImages({ dangling: includeDangling })
+            client.listImages(options)
         );
         this.outdatedImageChecker.markOutdatedImages(result);
 
