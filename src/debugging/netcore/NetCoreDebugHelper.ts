@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { composeArgs, ContainerOS, Shell, withArg, withQuotedArg } from '../../runtimes/docker';
+import { composeArgs, ContainerOS, withArg, withQuotedArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -322,12 +322,10 @@ export class NetCoreDebugHelper implements DebugHelper {
             )();
         }
 
-        const containerCommandArgsQuoted = Shell.getShellOrDefault().quote(containerCommandArgs);
-
         const stdout = await ext.runWithDefaultShell(client =>
             client.execContainer({
                 container: containerName,
-                command: [containerCommand, ...containerCommandArgsQuoted],
+                command: [containerCommand, ...containerCommandArgs],
                 interactive: true,
             })
         );
