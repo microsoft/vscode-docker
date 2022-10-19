@@ -1737,14 +1737,7 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "${composeCommand} ${configurationFile} up ${detached} ${build}",
-                            "contextTypes": [
-                                "moby"
-                            ]
-                        },
-                        {
-                            "label": "Compose Up",
-                            "template": "${composeCommand} ${configurationFile} up ${detached}"
+                            "template": "${composeCommand} ${configurationFile} up ${detached} ${build}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUp.description%"
@@ -1781,14 +1774,7 @@
                     "default": [
                         {
                             "label": "Compose Up",
-                            "template": "${composeCommand} ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}",
-                            "contextTypes": [
-                                "moby"
-                            ]
-                        },
-                        {
-                            "label": "Compose Up",
-                            "template": "${composeCommand} ${configurationFile} ${profileList} up ${detached} ${serviceList}"
+                            "template": "${composeCommand} ${profileList} ${configurationFile} up ${detached} ${build} ${serviceList}"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeUpSubset.description%"
