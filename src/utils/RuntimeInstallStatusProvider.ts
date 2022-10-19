@@ -29,9 +29,9 @@ class RuntimeInstallStatusProvider {
     public async isRuntimeInstalledRealTimeCheck(): Promise<boolean> {
         try {
             await ext.runWithDefaultShell(client =>
-                client.version({})
+                client.checkInstall({})
             );
-            return true; // As long as the version command did't throw exception, assume it is installed.
+            return true; // As long as the -v command did't throw exception, assume it is installed.
         } catch (error) {
             return false; // runtime not installed
         }
