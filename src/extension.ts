@@ -145,18 +145,18 @@ function registerEnvironmentVariableContributions(): void {
     setEnvironmentVariableContributions();
 
     // Register an event to watch for changes to config, reconfigure if needed
-    registerEvent('containers.environment.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+    registerEvent('docker.environment.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
-        if (e.affectsConfiguration('containers.environment')) {
+        if (e.affectsConfiguration('docker.environment')) {
             setEnvironmentVariableContributions();
         }
     });
 }
 
 function setEnvironmentVariableContributions(): void {
-    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('containers').get<NodeJS.ProcessEnv>('environment', {});
+    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
 
     ext.context.environmentVariableCollection.clear();
     ext.context.environmentVariableCollection.persistent = true;
