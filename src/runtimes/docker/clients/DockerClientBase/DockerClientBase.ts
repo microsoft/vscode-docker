@@ -11,6 +11,7 @@ import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { CommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
+    CheckInstallCommandOptions,
     ContainersStatsCommandOptions,
     CreateNetworkCommandOptions,
     CreateVolumeCommandOptions,
@@ -215,6 +216,31 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             command: this.commandName,
             args: this.getVersionCommandArgs(options),
             parse: this.parseVersionCommandOutput,
+        };
+    }
+
+    /**
+     * Get the command line arguments for a Docker-like client install check command
+     * @param options Standard install check command options
+     * @returns Command line args for doing install check for a Docker-like client
+     */
+    protected getCheckInstallCommandArgs(options: CheckInstallCommandOptions): CommandLineArgs {
+        return composeArgs(
+            withArg('-v')
+        )();
+    }
+
+    /**
+     * Install check command implementation for Docker-like clients
+     * @param options Standard install check command options
+     * @returns A CommandResponse object indicating how to run and parse an install check
+     * command for this runtime
+     */
+    async checkInstall(options: CheckInstallCommandOptions): Promise<CommandResponse<string>> {
+        return {
+            command: this.commandName,
+            args: this.getCheckInstallCommandArgs(options),
+            parse: (output) => Promise.resolve(output),
         };
     }
 
