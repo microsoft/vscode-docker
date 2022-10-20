@@ -64,12 +64,16 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'network';
 
-        const networkInspection = (await ext.runWithDefaultShell(client =>
+        // Allows some parallelization of the two commands
+        const networkPromise = ext.runWithDefaultShell(client =>
             client.inspectNetworks({ networks: [this.networkName] })
-        ))?.[0];
-        const associatedContainers = await ext.runWithDefaultShell(client =>
+        );
+        const containersPromise = ext.runWithDefaultShell(client =>
             client.listContainers({ networks: [this.networkName] })
         );
+
+        const networkInspection = (await networkPromise)?.[0];
+        const associatedContainers = await containersPromise;
 
         const handlebarsContext = {
             ...networkInspection,

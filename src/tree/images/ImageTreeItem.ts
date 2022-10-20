@@ -84,12 +84,16 @@ export class ImageTreeItem extends ToolTipTreeItem {
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'image';
 
-        const imageInspection = (await ext.runWithDefaultShell(client =>
+        // Allows some parallelization of the two commands
+        const imagePromise = ext.runWithDefaultShell(client =>
             client.inspectImages({ imageRefs: [this.imageId] })
-        ))?.[0];
-        const associatedContainers = await ext.runWithDefaultShell(client =>
+        );
+        const containersPromise = ext.runWithDefaultShell(client =>
             client.listContainers({ imageAncestors: [this.imageId] })
         );
+
+        const imageInspection = (await imagePromise)?.[0];
+        const associatedContainers = await containersPromise;
 
         const handlebarsContext = {
             ...imageInspection,

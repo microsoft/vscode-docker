@@ -61,12 +61,16 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'volume';
 
-        const volumeInspection = (await ext.runWithDefaultShell(client =>
+        // Allows some parallelization of the two commands
+        const volumePromise = ext.runWithDefaultShell(client =>
             client.inspectVolumes({ volumes: [this.volumeName] })
-        ))?.[0];
-        const associatedContainers = await ext.runWithDefaultShell(client =>
+        );
+        const containersPromise = ext.runWithDefaultShell(client =>
             client.listContainers({ volumes: [this.volumeName] })
         );
+
+        const volumeInspection = (await volumePromise)?.[0];
+        const associatedContainers = await containersPromise;
 
         const handlebarsContext = {
             ...volumeInspection,
