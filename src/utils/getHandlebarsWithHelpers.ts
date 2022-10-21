@@ -101,6 +101,10 @@ export async function getHandlebarsWithHelpers(): Promise<typeof Handlebars> {
         handlebars.registerHelper('nonEmptyObj', (obj: unknown | undefined) => {
             return obj && Object.keys(obj).length !== 0;
         });
+
+        handlebars.registerHelper('nonEmptyArr', (arr: unknown | undefined) => {
+            return arr && Array.isArray(arr) && arr.length > 0;
+        });
     }
 
     return handlebars;

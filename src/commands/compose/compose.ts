@@ -5,8 +5,9 @@
 
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
-import { executeAsTask } from '../../utils/executeAsTask';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { Item, createFileItem, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';
@@ -49,7 +50,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
         }
 
         for (const item of selectedItems) {
-            let terminalCommand = await selectComposeCommand(
+            const terminalCommand = await selectComposeCommand(
                 context,
                 folder,
                 command,
@@ -59,9 +60,15 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
             );
 
             // Add the service list if needed
-            terminalCommand = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand);
+            terminalCommand.command = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand.command);
 
-            await executeAsTask(context, terminalCommand, 'Docker Compose', { addDockerEnv: true, workspaceFolder: folder });
+            const client = await ext.orchestratorManager.getClient();
+            const taskCRF = new TaskCommandRunnerFactory({
+                taskName: client.displayName,
+                workspaceFolder: folder,
+            });
+
+            await taskCRF.getCommandRunner()(terminalCommand);
         }
     }
 }

@@ -11,6 +11,7 @@ import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { CommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
+    CheckInstallCommandOptions,
     ContainersStatsCommandOptions,
     CreateNetworkCommandOptions,
     CreateVolumeCommandOptions,
@@ -218,6 +219,31 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         };
     }
 
+    /**
+     * Get the command line arguments for a Docker-like client install check command
+     * @param options Standard install check command options
+     * @returns Command line args for doing install check for a Docker-like client
+     */
+    protected getCheckInstallCommandArgs(options: CheckInstallCommandOptions): CommandLineArgs {
+        return composeArgs(
+            withArg('-v')
+        )();
+    }
+
+    /**
+     * Install check command implementation for Docker-like clients
+     * @param options Standard install check command options
+     * @returns A CommandResponse object indicating how to run and parse an install check
+     * command for this runtime
+     */
+    async checkInstall(options: CheckInstallCommandOptions): Promise<CommandResponse<string>> {
+        return {
+            command: this.commandName,
+            args: this.getCheckInstallCommandArgs(options),
+            parse: (output) => Promise.resolve(output),
+        };
+    }
+
     //#endregion
 
     //#region Auth Commands
@@ -354,9 +380,11 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     const createdAt = dayjs.utc(rawImage.CreatedAt).toDate();
                     const size = tryParseSize(rawImage.Size);
 
+                    const repositoryAndTag = `${rawImage.Repository}${rawImage.Tag ? `:${rawImage.Tag}` : ''}`;
+
                     images.push({
                         id: rawImage.ID,
-                        image: parseDockerLikeImageName(rawImage.Repository),
+                        image: parseDockerLikeImageName(repositoryAndTag),
                         // labels: {}, // TODO: image labels are conspicuously absent from Docker image listing output
                         createdAt,
                         size,

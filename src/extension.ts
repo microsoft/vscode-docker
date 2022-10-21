@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DockerClient, DockerComposeClient } from './runtimes/docker';
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
-import * as fse from 'fs-extra';
-import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { registerDebugProvider } from './debugging/DebugHelper';
-import { DockerContextManager } from './docker/ContextManager';
-import { ContainerFilesProvider } from './docker/files/ContainerFilesProvider';
+import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
+import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
 import { registerTaskProviders } from './tasks/TaskHelper';
@@ -22,10 +21,10 @@ import { ActivityMeasurementService } from './telemetry/ActivityMeasurementServi
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
-import { cryptoUtils } from './utils/cryptoUtils';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
-import { isLinux, isMac, isWindows } from './utils/osUtils';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -60,10 +59,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         activateContext.errorHandling.rethrow = true;
         activateContext.telemetry.properties.isActivationEvent = 'true';
         activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
-        activateContext.telemetry.properties.dockerInstallationIDHash = await getDockerInstallationIDHash();
-
-        // Set up environment variables
-        setEnvironmentVariableContributions(ctx);
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -80,6 +75,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerErrorHandler(ctx => ctx.errorHandling.suppressReportIssue = true);
         registerReportIssueCommand('vscode-docker.help.reportIssue');
 
+        // Set up Dockerfile completion provider
         ctx.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 DOCUMENT_SELECTOR,
@@ -88,20 +84,29 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        ctx.subscriptions.push(ext.dockerContextManager = new DockerContextManager());
-        // At initialization we need to force a refresh since the filesystem watcher would have no reason to trigger
-        // No need to wait thanks to ContextLoadingClient
-        void ext.dockerContextManager.refresh();
+        // Set up environment variables
+        registerEnvironmentVariableContributions();
 
+        // Set up runtime managers
+        ctx.subscriptions.push(
+            ext.runtimeManager = new ContainerRuntimeManager(),
+            ext.orchestratorManager = new OrchestratorRuntimeManager()
+        );
+
+        // Set up Docker clients
+        registerDockerClients();
+
+        // Set up container filesystem provider
         ctx.subscriptions.push(
             vscode.workspace.registerFileSystemProvider(
                 'docker',
-                new ContainerFilesProvider(() => ext.dockerClient),
+                new ContainerFilesProvider(),
                 {
                     // While Windows containers aren't generally case-sensitive, Linux containers are and make up the overwhelming majority of running containers.
                     isCaseSensitive: true,
-                    isReadonly: false
-                })
+                    isReadonly: false,
+                }
+            )
         );
 
         registerTrees();
@@ -116,20 +121,11 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerListeners();
     });
 
-    // If this call results in changes to the values, the settings listener set up below will automatically re-update
+    // If this call results in changes to the values, the settings listeners set up below will automatically re-update
+    // Don't wait
     void migrateOldEnvironmentSettingsIfNeeded();
 
-    // If the magic VSCODE_DOCKER_TEAM environment variable is set to 1, export the mementos for use by the Memento Explorer extension
-    if (process.env.VSCODE_DOCKER_TEAM === '1') {
-        return {
-            memento: {
-                globalState: ctx.globalState,
-                workspaceState: ctx.workspaceState,
-            },
-        };
-    } else {
-        return undefined;
-    }
+    return new DockerExtensionApi(ctx);
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
@@ -144,38 +140,81 @@ export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<
     });
 }
 
-async function getDockerInstallationIDHash(): Promise<string> {
-    try {
-        if (!isLinux()) {
-            const cached = ext.context.globalState.get<string | undefined>('docker.installIdHash', undefined);
+function registerEnvironmentVariableContributions(): void {
+    // Set environment variable contributions initially
+    setEnvironmentVariableContributions();
 
-            if (cached) {
-                return cached;
-            }
+    // Register an event to watch for changes to config, reconfigure if needed
+    registerEvent('docker.environment.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+        actionContext.telemetry.suppressAll = true;
+        actionContext.errorHandling.suppressDisplay = true;
 
-            let installIdFilePath: string | undefined;
-            if (isWindows() && process.env.APPDATA) {
-                installIdFilePath = path.join(process.env.APPDATA, 'Docker', '.trackid');
-            } else if (isMac()) {
-                installIdFilePath = path.join(os.homedir(), 'Library', 'Group Containers', 'group.com.docker', 'userId');
-            }
-
-            // Sync is intentionally used for performance, this is on the activation code path
-            if (installIdFilePath && fse.pathExistsSync(installIdFilePath)) {
-                let result = fse.readFileSync(installIdFilePath, 'utf-8');
-                result = cryptoUtils.hashString(result);
-                await ext.context.globalState.update('docker.installIdHash', result);
-                return result;
-            }
+        if (e.affectsConfiguration('docker.environment')) {
+            setEnvironmentVariableContributions();
         }
-    } catch {
-        // Best effort
-    }
-
-    return 'unknown';
+    });
 }
 
-/* eslint-disable @typescript-eslint/no-namespace, no-inner-declarations */
+function setEnvironmentVariableContributions(): void {
+    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
+
+    ext.context.environmentVariableCollection.clear();
+    ext.context.environmentVariableCollection.persistent = true;
+
+    for (const key of Object.keys(settingValue)) {
+        ext.context.environmentVariableCollection.replace(key, settingValue[key]);
+    }
+}
+
+function registerDockerClients(): void {
+    // Create the clients
+    const dockerClient = new DockerClient();
+    const composeClient = new DockerComposeClient();
+
+    // Configure them initially
+    configureDockerClients(dockerClient, composeClient);
+
+    // Register the clients
+    ext.context.subscriptions.push(
+        ext.runtimeManager.registerRuntimeClient(dockerClient),
+        ext.orchestratorManager.registerRuntimeClient(composeClient)
+    );
+
+    // Register an event to watch for changes to config, reconfigure if needed
+    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+        actionContext.telemetry.suppressAll = true;
+        actionContext.errorHandling.suppressDisplay = true;
+
+        if (e.affectsConfiguration('docker.dockerPath') ||
+            e.affectsConfiguration('docker.composeCommand')) {
+            configureDockerClients(dockerClient, composeClient);
+        }
+    });
+}
+
+function configureDockerClients(dockerClient: DockerClient, composeClient: DockerComposeClient): void {
+    const config = vscode.workspace.getConfiguration('docker');
+
+    const dockerCommand = config.get<string | undefined>('dockerPath') || 'docker';
+    let composeCommand = config.get<string | undefined>('composeCommand') || 'docker compose';
+
+    let isComposeV2 = false;
+    if (/^docker(\s+compose\s*)?$/i.test(composeCommand)) {
+        // Normalize both "docker" and "docker compose" to "docker", with `isComposeV2` true
+        composeCommand = 'docker';
+        isComposeV2 = true;
+    }
+
+    // TODO: runtimes: Do we want to try auto-detecting Compose v1 vs. v2?
+
+    dockerClient.commandName = dockerCommand;
+    composeClient.commandName = composeCommand;
+    composeClient.composeV2 = isComposeV2;
+}
+
+//#region Language services
+
+/* eslint-disable @typescript-eslint/no-namespace */
 namespace Configuration {
     export function computeConfiguration(params: ConfigurationParams): vscode.WorkspaceConfiguration[] {
         const result: vscode.WorkspaceConfiguration[] = [];
@@ -202,36 +241,11 @@ namespace Configuration {
                 void dockerfileLanguageClient.sendNotification(DidChangeConfigurationNotification.type, {
                     settings: null
                 });
-
-                // Reset extension environment variables contribution if needed
-                if (e.affectsConfiguration('docker.environment')) {
-                    setEnvironmentVariableContributions(ext.context);
-                }
-
-                // These settings will result in a need to change context that doesn't actually change the docker context
-                // So, force a manual refresh so the settings get picked up
-                if (e.affectsConfiguration('docker.environment') ||
-                    e.affectsConfiguration('docker.dockerodeOptions') ||
-                    e.affectsConfiguration('docker.dockerPath') ||
-                    e.affectsConfiguration('docker.composeCommand')) {
-                    await ext.dockerContextManager.refresh();
-                }
             }
         ));
     }
 }
-/* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
-
-function setEnvironmentVariableContributions(ctx: vscode.ExtensionContext): void {
-    const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
-
-    ctx.environmentVariableCollection.clear();
-    ctx.environmentVariableCollection.persistent = true;
-
-    for (const key of Object.keys(settingValue)) {
-        ctx.environmentVariableCollection.replace(key, settingValue[key]);
-    }
-}
+/* eslint-enable @typescript-eslint/no-namespace */
 
 function activateDockerfileLanguageClient(ctx: vscode.ExtensionContext): void {
     // Don't wait
@@ -349,3 +363,5 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
         await composeLanguageClient.start();
     });
 }
+
+//#endregion Language services

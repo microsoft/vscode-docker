@@ -5,13 +5,13 @@
 
 import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
+import * as stream from 'stream';
 import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { CommandLineBuilder } from '../../utils/commandLineBuilder';
-import { execAsync } from '../../utils/spawnAsync';
+import { runWithDefaultShell } from '../../runtimes/runners/runWithDefaultShell';
 
 export async function logInToDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
@@ -39,18 +39,18 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
         };
 
         await vscode.window.withProgress(progressOptions, async () => {
-            let command = CommandLineBuilder.create(ext.dockerContextManager.getDockerCommand(context), 'login');
-
-            if (creds.registryPath) {
-                command = command.withQuotedArg(creds.registryPath);
-            }
-
-            command = command
-                .withNamedArg('--username', { value: username, quoting: vscode.ShellQuoting.Strong })
-                .withArg('--password-stdin');
-
             try {
-                await execAsync(command.build(), { stdin: password });
+                await runWithDefaultShell(
+                    client => client.login({
+                        username: username,
+                        passwordStdIn: true,
+                        registry: creds.registryPath,
+                    }),
+                    ext.runtimeManager,
+                    {
+                        stdInPipe: stream.Readable.from(password),
+                    }
+                );
                 ext.outputChannel.appendLine('Login succeeded.');
             } catch (err) {
                 const error = parseError(err);

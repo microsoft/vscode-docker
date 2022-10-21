@@ -7,10 +7,10 @@ import { IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-ut
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -67,8 +67,16 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
     addImageTaggingTelemetry(context, finalTag, '');
 
-    // Finally push the image
-    await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} push ${finalTag}`, finalTag, { addDockerEnv: true });
+    const client = await ext.runtimeManager.getClient();
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: finalTag
+        }
+    );
+
+    await taskCRF.getCommandRunner()(
+        client.pushImage({ imageRef: finalTag })
+    );
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {

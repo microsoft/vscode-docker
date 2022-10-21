@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListVolumeItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
-import { DockerVolume } from "../../docker/Volumes";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
@@ -21,9 +21,9 @@ interface VolumeTreeItemUsedByRemoteContainers {
 export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUsedByRemoteContainers {
     public static contextValue: string = 'volume';
     public contextValue: string = VolumeTreeItem.contextValue;
-    private readonly _item: DockerVolume;
+    private readonly _item: ListVolumeItem;
 
-    public constructor(parent: AzExtParentTreeItem, itemInfo: DockerVolume) {
+    public constructor(parent: AzExtParentTreeItem, itemInfo: ListVolumeItem) {
         super(parent);
         this._item = itemInfo;
     }
@@ -33,11 +33,11 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt?.valueOf() || 0;
     }
 
     public get volumeName(): string {
-        return this._item.Name;
+        return this._item.name;
     }
 
     public get label(): string {
@@ -53,24 +53,42 @@ export class VolumeTreeItem extends ToolTipTreeItem implements VolumeTreeItemUse
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeVolume(context, this.volumeName);
+        await ext.runWithDefaultShell(client =>
+            client.removeVolumes({ volumes: [this.volumeName] })
+        );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'volume';
-        return resolveTooltipMarkdown(volumeTooltipTemplate, await ext.dockerClient.inspectVolume(actionContext, this.volumeName));
+
+        // Allows some parallelization of the two commands
+        const volumePromise = ext.runWithDefaultShell(client =>
+            client.inspectVolumes({ volumes: [this.volumeName] })
+        );
+        const containersPromise = ext.runWithDefaultShell(client =>
+            client.listContainers({ volumes: [this.volumeName] })
+        );
+
+        const volumeInspection = (await volumePromise)?.[0];
+        const associatedContainers = await containersPromise;
+
+        const handlebarsContext = {
+            ...volumeInspection,
+            containers: associatedContainers
+        };
+        return resolveTooltipMarkdown(volumeTooltipTemplate, handlebarsContext);
     }
 }
 
 const volumeTooltipTemplate = `
-### {{ Name }}
+### {{ name }}
 
 ---
 
 #### Associated Containers
-{{#if (nonEmptyObj Containers)}}
-{{#each Containers}}
-  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{#if (nonEmptyArr containers)}}
+{{#each containers}}
+  - {{ this.name }} ({{ substr this.id 0 12 }})
 {{/each}}
 {{else}}
 _None_

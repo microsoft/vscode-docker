@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ContainerOS, ListFilesItem } from '../../../runtimes/docker';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DockerOSType } from '../../../docker/Common';
-import { DirectoryItem, UnrecognizedDirectoryItemTypeError } from "../../../docker/files/ContainerFilesUtils";
-import { DockerUri } from '../../../docker/files/DockerUri';
+import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
+import { localize } from '../../../localize';
 
-export type DirectoryItemProvider = (path: string | undefined) => Promise<DirectoryItem[]>;
+export type DirectoryItemProvider = (path: string | undefined) => Promise<ListFilesItem[]>;
 
 export class DirectoryTreeItem extends AzExtParentTreeItem {
     private children: AzExtTreeItem[] | undefined;
@@ -20,7 +20,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
         private readonly fs: vscode.FileSystem,
         private readonly name: string,
         private readonly uri: DockerUri,
-        private readonly containerOSProvider: (context: IActionContext) => Promise<DockerOSType>) {
+        private readonly containerOSProvider: (context: IActionContext) => Promise<ContainerOS>) {
         super(parent);
     }
 
@@ -30,10 +30,6 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
 
     public hasMoreChildrenImpl(): boolean {
         return !!this.children;
-    }
-
-    public get iconPath(): vscode.ThemeIcon {
-        return new vscode.ThemeIcon('folder');
     }
 
     public async loadMoreChildrenImpl(clearCache: boolean, context: IActionContext): Promise<AzExtTreeItem[]> {
@@ -75,10 +71,10 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
 
             case vscode.FileType.File:
 
-                return new FileTreeItem(this, name, itemUri.with({ fileType: 'file' }));
+                return new FileTreeItem(this, name, itemUri.with({ fileType: vscode.FileType.File }));
 
             default:
-                throw new UnrecognizedDirectoryItemTypeError();
+                throw new Error(localize('vscode-docker.files.unrecognizedDirectoryItemType', 'Unrecognized directory item type.'));
         }
     }
 

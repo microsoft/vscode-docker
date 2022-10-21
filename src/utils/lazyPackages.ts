@@ -44,11 +44,3 @@ export async function getAzActTreeItem(): Promise<typeof import('../tree/registr
 export async function getAzSubTreeItem(): Promise<typeof import('../tree/registries/azure/SubscriptionTreeItem')> {
     return await import('../tree/registries/azure/SubscriptionTreeItem');
 }
-
-export async function getDockerodeClient(): Promise<typeof import('../docker/DockerodeApiClient/DockerodeApiClient')> {
-    return await import('../docker/DockerodeApiClient/DockerodeApiClient');
-}
-
-export async function getDockerServeClient(): Promise<typeof import('../docker/DockerServeClient/DockerServeClient')> {
-    return await import('../docker/DockerServeClient/DockerServeClient');
-}

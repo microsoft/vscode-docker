@@ -8,8 +8,8 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from "../../runtimes/runners/TaskCommandRunnerFactory";
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
-import { executeAsTask } from "../../utils/executeAsTask";
 import { getValidImageNameFromPath } from "../../utils/getValidImageName";
 import { delay } from "../../utils/promiseUtils";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
@@ -42,7 +42,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
     } else {
         const contextPath: string = defaultContextPath || dockerFileItem.relativeFolderPath;
 
-        let terminalCommand = await selectBuildCommand(
+        const terminalCommand = await selectBuildCommand(
             context,
             rootFolder,
             dockerFileItem.relativeFilePath,
@@ -50,7 +50,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         );
 
         // Replace '${tag}' if needed. Tag is a special case because we don't want to prompt unless necessary, so must manually replace it.
-        if (tagRegex.test(terminalCommand)) {
+        if (tagRegex.test(terminalCommand.command)) {
             const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
             const dockerFileKey = `buildTag_${absFilePath}`;
             const prevImageName: string | undefined = ext.context.workspaceState.get(dockerFileKey);
@@ -66,9 +66,16 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             addImageTaggingTelemetry(context, imageName, '.after');
 
             await ext.context.workspaceState.update(dockerFileKey, imageName);
-            terminalCommand = terminalCommand.replace(tagRegex, imageName);
+            terminalCommand.command = terminalCommand.command.replace(tagRegex, imageName);
         }
 
-        await executeAsTask(context, terminalCommand, 'Docker', { addDockerEnv: true, workspaceFolder: rootFolder });
+        const client = await ext.runtimeManager.getClient();
+        const taskCRF = new TaskCommandRunnerFactory({
+            taskName: client.displayName,
+            workspaceFolder: rootFolder,
+            focus: true,
+        });
+
+        await taskCRF.getCommandRunner()(terminalCommand);
     }
 }

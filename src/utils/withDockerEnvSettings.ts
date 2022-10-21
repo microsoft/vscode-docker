@@ -4,14 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { workspace } from 'vscode';
-import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { cloneObject } from './cloneObject';
 
-export function addDockerSettingsToEnv(environment: NodeJS.ProcessEnv): void {
+export function withDockerEnvSettings(baseEnv: NodeJS.ProcessEnv = process.env): NodeJS.ProcessEnv {
+    const newEnv = cloneObject(baseEnv || {});
     const environmentSettings: NodeJS.ProcessEnv = workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
 
     for (const key of Object.keys(environmentSettings)) {
-        ext.outputChannel.appendLine(localize('vscode-docker.utils.env.overwriting', 'WARNING: Overwriting environment variable "{0}" from VS Code setting "docker.environment".', key));
-        environment[key] = environmentSettings[key];
+        newEnv[key] = environmentSettings[key];
     }
+
+    return newEnv;
 }

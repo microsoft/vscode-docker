@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandResponse, Shell } from '../runtimes/docker';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
-import { addDockerSettingsToEnv } from '../utils/addDockerSettingsToEnv';
-import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
-import { spawnAsync } from '../utils/spawnAsync';
+import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
+import { withDockerEnvSettings } from '../utils/withDockerEnvSettings';
 
 const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
@@ -52,37 +52,13 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public async executeCommandInTerminal(
-        command: CommandLineBuilder,
-        folder: WorkspaceFolder,
-        rejectOnStderr?: boolean,
-        stdoutBuffer?: Buffer,
-        stderrBuffer?: Buffer,
-        token?: CancellationToken): Promise<void> {
-        const commandLine = resolveVariables(command.build(), folder);
-
-        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
-
-        const newEnv = { ...process.env, ...this.resolvedDefinition.options?.env };
-        addDockerSettingsToEnv(newEnv);
-        await spawnAsync(
-            commandLine,
-            { cwd: this.resolvedDefinition.options?.cwd || folder.uri.fsPath, env: newEnv },
-            (stdout: string) => {
-                this.writeOutput(stdout);
-            },
-            stdoutBuffer,
-            (stderr: string) => {
-                this.writeError(stderr);
-
-                if (rejectOnStderr) {
-                    throw new Error(stderr);
-                }
-            },
-            stderrBuffer,
-            token
-        );
+    public getCommandRunner(options: Omit<ExecuteCommandInTerminalOptions, 'commandResponse'>): (commandResponse: CommandResponse<unknown>) => Promise<ExecAsyncOutput> {
+        return async (commandResponse: CommandResponse<unknown>) => {
+            return await this.executeCommandInTerminal({
+                ...options,
+                commandResponse: commandResponse,
+            });
+        };
     }
 
     public writeOutput(message: string): void {
@@ -113,4 +89,40 @@ export class DockerPseudoterminal implements Pseudoterminal {
         message = message.replace(/\r?\n/g, '\r\n'); // The carriage return (/r) is necessary or the pseudoterminal does not return back to the start of line
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
+
+    private async executeCommandInTerminal(options: ExecuteCommandInTerminalOptions): Promise<ExecAsyncOutput> {
+        const quotedArgs = Shell.getShellOrDefault().quote(options.commandResponse.args);
+        const resolvedQuotedArgs = resolveVariables(quotedArgs, options.folder);
+        const commandLine = [options.commandResponse.command, ...resolvedQuotedArgs].join(' ');
+
+        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
+        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
+
+        return await execAsync(
+            commandLine,
+            {
+                cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
+                env: withDockerEnvSettings({ ...process.env, ...this.resolvedDefinition.options?.env }),
+                cancellationToken: options.token,
+            },
+            (output: string, err: boolean) => {
+                if (err) {
+                    this.writeError(output);
+
+                    if (options.rejectOnStderr) {
+                        throw new Error(output);
+                    }
+                } else {
+                    this.writeOutput(output);
+                }
+            }
+        );
+    }
 }
+
+type ExecuteCommandInTerminalOptions = {
+    commandResponse: CommandResponse<unknown>;
+    folder: WorkspaceFolder;
+    rejectOnStderr?: boolean;
+    token?: CancellationToken;
+};

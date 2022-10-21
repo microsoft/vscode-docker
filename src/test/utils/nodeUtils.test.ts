@@ -34,11 +34,11 @@ suite('(unit) utils/nodeUtils', () => {
     });
 
     suite('inferCommand', () => {
-        function inferCommandTest(name: string, nodePackage: NodePackage, inspectMode: InspectMode, inspectPort: number, expectedCommand: string, errorMessage: string) {
+        function inferCommandTest(name: string, nodePackage: NodePackage, inspectMode: InspectMode, inspectPort: number, expectedCommand: string[], errorMessage: string) {
             test(name, async () => {
                 const command = await inferCommand(nodePackage, inspectMode, inspectPort);
 
-                assert.equal(expectedCommand, command, errorMessage);
+                assert.deepStrictEqual(command, expectedCommand, errorMessage);
             });
         }
 
@@ -55,7 +55,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www1', scripts: { start: 'node ./bin/www2' } },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www2',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www2'],
             'A recognized start script should be chosen above a main script');
 
         inferCommandTest(
@@ -63,7 +63,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www1', scripts: { start: 'Node ./bin/www2' } },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www2',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www2'],
             'A recognized start script should be chosen above a main script');
 
         inferCommandTest(
@@ -71,7 +71,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www1', scripts: { start: 'nodejs ./bin/www2' } },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www2',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www2'],
             'Use of nodejs links should be swapped with direct use of node');
 
         inferCommandTest(
@@ -79,7 +79,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www1', scripts: { start: 'NODE_ENV=production node ./bin/www2' } },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www2',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www2'],
             'Preceeding environment should be ignored');
 
         inferCommandTest(
@@ -87,7 +87,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www1', scripts: { start: 'mynode ./bin/www2' } },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www1',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www1'],
             'Should default to the main script if the start script is not recognized');
 
         inferCommandTest(
@@ -95,7 +95,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www' },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www'],
             'Should default to the main script when no scripts exist');
 
         inferCommandTest(
@@ -103,7 +103,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www' },
             'break',
             9229,
-            'node --inspect-brk=0.0.0.0:9229 ./bin/www',
+            ['node', '--inspect-brk=0.0.0.0:9229', './bin/www'],
             'Should use --inspect-brk argument for break mode');
 
         inferCommandTest(
@@ -111,7 +111,7 @@ suite('(unit) utils/nodeUtils', () => {
             { main: './bin/www', scripts: {} },
             'default',
             9229,
-            'node --inspect=0.0.0.0:9229 ./bin/www',
+            ['node', '--inspect=0.0.0.0:9229', './bin/www'],
             'Should default to the main script when no start script exists');
     });
 });

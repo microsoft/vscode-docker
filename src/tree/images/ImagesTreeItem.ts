@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListImagesCommandOptions, ListImagesItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
-import { DockerImage } from "../../docker/Images";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
@@ -16,8 +16,8 @@ import { ImageGroupTreeItem } from './ImageGroupTreeItem';
 import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
 
-export interface DatedDockerImage extends DockerImage {
-    Outdated?: boolean;
+export interface DatedDockerImage extends ListImagesItem {
+    outdated?: boolean;
 }
 
 export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, ImageProperty> {
@@ -60,12 +60,21 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
 
     public async getItems(context: IActionContext): Promise<DatedDockerImage[]> {
         const includeDangling = ext.context.globalState.get(danglingImagesMementoKey, false);
-        const result = await ext.dockerClient.getImages(context, includeDangling);
+        const options: ListImagesCommandOptions = {
+            // Dangling images are included by default, so if `includeDangling` is true, use `dangling` option `undefined`
+            // If `includeDangling` is false, explicitly exclude the images using `dangling` option `false`
+            dangling: includeDangling ? undefined : false,
+        };
+
+        const result = await ext.runWithDefaultShell(client =>
+            client.listImages(options)
+        );
         this.outdatedImageChecker.markOutdatedImages(result);
+
         return result;
     }
 
-    public getPropertyValue(item: DockerImage, property: ImageProperty): string {
+    public getPropertyValue(item: ListImagesItem, property: ImageProperty): string {
         return getImagePropertyValue(item, property);
     }
 }

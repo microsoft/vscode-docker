@@ -6,8 +6,8 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { selectRunCommand } from '../selectCommandTemplate';
 
 export async function runImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -27,16 +27,25 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectImage(context, node.imageId);
+    const inspectResult = await ext.runWithDefaultShell(client =>
+        client.inspectImages({ imageRefs: [node.imageId] })
+    );
 
-    context.telemetry.properties.containerOS = inspectInfo.Os || 'linux';
+    context.telemetry.properties.containerOS = inspectResult?.[0]?.operatingSystem || 'linux';
 
     const terminalCommand = await selectRunCommand(
         context,
         node.fullTag,
         interactive,
-        inspectInfo?.Config?.ExposedPorts
+        inspectResult?.[0]?.ports
     );
 
-    await executeAsTask(context, terminalCommand, node.fullTag, { addDockerEnv: true, alwaysRunNew: interactive });
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: node.fullTag,
+            alwaysRunNew: interactive,
+        }
+    );
+
+    await taskCRF.getCommandRunner()(terminalCommand);
 }

@@ -8,7 +8,7 @@ import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinitio
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { ExecError } from '../utils/spawnAsync';
+import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';

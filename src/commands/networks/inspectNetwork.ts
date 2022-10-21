@@ -17,6 +17,8 @@ export async function inspectNetwork(context: IActionContext, node?: NetworkTree
         });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectNetwork(context, node.networkId);
-    await openReadOnlyJson(node, inspectInfo);
+    const inspectResult = await ext.runWithDefaultShell(client =>
+        client.inspectNetworks({ networks: [node.networkId] })
+    );
+    await openReadOnlyJson(node, JSON.parse(inspectResult[0].raw));
 }

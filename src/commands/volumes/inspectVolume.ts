@@ -14,6 +14,8 @@ export async function inspectVolume(context: IActionContext, node?: VolumeTreeIt
         node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.volumes.inspect.noVolumes', 'No volumes are available to inspect') });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectVolume(context, node.volumeName);
-    await openReadOnlyJson(node, inspectInfo);
+    const inspectResult = await ext.runWithDefaultShell(client =>
+        client.inspectVolumes({ volumes: [node.volumeName] })
+    );
+    await openReadOnlyJson(node, JSON.parse(inspectResult[0].raw));
 }

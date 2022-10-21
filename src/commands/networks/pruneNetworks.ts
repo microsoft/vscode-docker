@@ -16,12 +16,19 @@ export async function pruneNetworks(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.networks.pruning', 'Pruning networks...') },
         async () => {
-            const result = await ext.dockerClient.pruneNetworks(context);
+            const result = await ext.runWithDefaultShell(client =>
+                client.pruneNetworks({})
+            );
 
-            const message = localize('vscode-docker.commands.networks.prune.removed', 'Removed {0} network(s).', result.ObjectsDeleted);
-            // don't wait
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showInformationMessage(message);
+            let message: string;
+            if (result?.networksDeleted?.length) {
+                message = localize('vscode-docker.commands.networks.prune.removed', 'Removed {0} unused networks(s).', result.networksDeleted.length);
+            } else {
+                message = localize('vscode-docker.commands.networks.prune.removed2', 'Removed unused networks.');
+            }
+
+            // Don't wait
+            void vscode.window.showInformationMessage(message);
         }
     );
 }

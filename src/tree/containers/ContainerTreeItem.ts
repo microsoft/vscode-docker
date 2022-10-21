@@ -5,8 +5,6 @@
 
 import * as vscode from 'vscode';
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { DockerOSType } from '../../docker/Common';
-import { DockerContainer, DockerPort } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { MultiSelectNode } from '../../utils/multiSelectNodes';
 import { getTreeId } from "../LocalRootTreeItemBase";
@@ -15,6 +13,8 @@ import { ToolTipParentTreeItem } from '../ToolTipTreeItem';
 import { getContainerStateIcon } from "./ContainerProperties";
 import { DockerContainerInfo } from './ContainersTreeItem';
 import { FilesTreeItem } from "./files/FilesTreeItem";
+import { ContainerOS, ListContainersItem, PortBinding } from '../../runtimes/docker';
+import { getDockerOSType } from '../../utils/osUtils';
 
 /**
  * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.
@@ -30,7 +30,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     public static runningContainerRegExp: RegExp = /^runningContainer$/i;
     private readonly _item: DockerContainerInfo;
     private children: AzExtTreeItem[] | undefined;
-    private containerOS: DockerOSType;
+    private containerOS: ContainerOS;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DockerContainerInfo) {
         super(parent);
@@ -44,23 +44,23 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt.valueOf();
     }
 
     public get containerId(): string {
-        return this._item.Id;
+        return this._item.id;
     }
 
     public get containerName(): string {
-        return this._item.Name;
+        return this._item.name;
     }
 
-    public get fullTag(): string {
-        return this._item.Image;
+    public get imageName(): string {
+        return this._item.image.originalName;
     }
 
     public get labels(): { [key: string]: string } {
-        return this._item.Labels;
+        return this._item.labels;
     }
 
     public get label(): string {
@@ -72,14 +72,14 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public get contextValue(): string {
-        return this._item.State + 'Container';
+        return this._item.state + 'Container';
     }
 
-    public get ports(): DockerPort[] {
-        return this._item.Ports;
+    public get ports(): PortBinding[] {
+        return this._item.ports;
     }
 
-    public get containerItem(): DockerContainer {
+    public get containerItem(): ListContainersItem {
         return this._item;
     }
 
@@ -88,20 +88,22 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
      */
     public get containerDesc(): { Id: string } {
         return {
-            Id: this._item.Id,
+            Id: this._item.id,
         };
     }
 
     public get iconPath(): vscode.ThemeIcon {
-        if (this._item.Status.includes('(unhealthy)')) {
+        if (this._item.status?.includes('(unhealthy)')) {
             return new vscode.ThemeIcon('warning', new vscode.ThemeColor('problemsWarningIcon.foreground'));
         } else {
-            return getContainerStateIcon(this._item.State);
+            return getContainerStateIcon(this._item.state);
         }
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerClient.removeContainer(context, this.containerId);
+        await ext.runWithDefaultShell(client =>
+            client.removeContainers({ containers: [this.containerId], force: true })
+        );
     }
 
     public hasMoreChildrenImpl(): boolean {
@@ -121,7 +123,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
                     this.containerId,
                     async c => {
                         if (this.containerOS === undefined) {
-                            this.containerOS = (await ext.dockerClient.inspectContainer(c, this.containerId)).Platform;
+                            this.containerOS = await getDockerOSType();
                         }
 
                         return this.containerOS;
@@ -144,28 +146,37 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'container';
-        return resolveTooltipMarkdown(containerTooltipTemplate, { NormalizedName: this.containerName, ...await ext.dockerClient.inspectContainer(actionContext, this.containerId) });
+
+        const containerInspection = (await ext.runWithDefaultShell(client =>
+            client.inspectContainers({ containers: [this.containerId] })
+        ))?.[0];
+
+        const handlebarsContext = {
+            ...containerInspection,
+            normalizedName: this.containerName,
+        };
+        return resolveTooltipMarkdown(containerTooltipTemplate, handlebarsContext);
     }
 
     private get isRunning(): boolean {
-        return this._item.State.toLowerCase() === 'running';
+        return this._item.state.toLowerCase() === 'running';
     }
 }
 
 const containerTooltipTemplate = `
-### {{ NormalizedName }} ({{ substr Id 0 12 }})
+### {{ normalizedName }} ({{ substr id 0 12 }})
 
 ---
 
 #### Image
-{{ Config.Image }} ({{ substr Image 7 12 }})
+{{ imageName }} ({{ substr imageId 7 12 }})
 
 ---
 
 #### Ports
-{{#if (nonEmptyObj NetworkSettings.Ports)}}
-{{#each NetworkSettings.Ports}}
-  - [{{ this.[0].HostPort }}](http://localhost:{{ this.[0].HostPort }}) ➔ {{ @key }}
+{{#if (nonEmptyArr ports)}}
+{{#each ports}}
+  - [{{ this.hostPort }}](http://localhost:{{ this.hostPort }}) ➔ {{ this.containerPort }} {{ this.protocol }}
 {{/each}}
 {{else}}
 _None_
@@ -174,13 +185,13 @@ _None_
 ---
 
 #### Volumes
-{{#if Mounts}}
-{{#each Mounts}}
-{{#if (eq this.Type 'bind')}}
-  - {{ friendlyBindHost this.Source }} ➔ {{ this.Destination }} (Bind mount, {{#if this.RW}}RW{{else}}RO{{/if}})
+{{#if (nonEmptyArr mounts)}}
+{{#each mounts}}
+{{#if (eq this.type 'bind')}}
+  - {{ friendlyBindHost this.source }} ➔ {{ this.destination }} (Bind mount, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{#if (eq this.Type 'volume')}}
-  - {{ this.Name }} ➔ {{ this.Destination }} (Named volume, {{#if this.RW}}RW{{else}}RO{{/if}})
+  - {{ this.name }} ➔ {{ this.destination }} (Named volume, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{/each}}
 {{else}}
@@ -190,9 +201,9 @@ _None_
 ---
 
 #### Networks
-{{#if (nonEmptyObj NetworkSettings.Networks)}}
-{{#each NetworkSettings.Networks}}
-  - {{ @key }}
+{{#if (nonEmptyArr networks)}}
+{{#each networks}}
+  - {{ this.name }}
 {{/each}}
 {{else}}
 _None_

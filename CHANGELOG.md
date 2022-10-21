@@ -1,6 +1,7 @@
-## 1.22.2 - 14 October 2022
+## 1.22.2 - 18 October 2022
 ### Fixed
 * Fixed an issue blocking debugging of ASP.NET apps. [#3638](https://github.com/microsoft/vscode-docker/issues/3638)
+* When scaffolding new .NET apps, base image tags with only the .NET version will be used. [#3647](https://github.com/microsoft/vscode-docker/issues/3647)
 
 ## 1.22.1 - 30 June 2022
 ### Fixed

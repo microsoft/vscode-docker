@@ -9,7 +9,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
-import { confirmAllAffectedContainers } from './confirmAllAffectedContainers';
 
 export async function stopContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
@@ -20,11 +19,9 @@ export async function stopContainer(context: IActionContext, node?: ContainerTre
         nodes
     );
 
-    const references = await confirmAllAffectedContainers(context, nodes);
-
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.stop.stopping', 'Stopping Container(s)...') }, async () => {
-        await Promise.all(references.map(async ref => {
-            await ext.dockerClient.stopContainer(context, ref);
-        }));
+        await ext.runWithDefaultShell(client =>
+            client.stopContainers({ container: nodes.map(n => n.containerId) })
+        );
     });
 }

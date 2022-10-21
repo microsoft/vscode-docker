@@ -111,7 +111,22 @@ type VersionCommand = {
     version(options: VersionCommandOptions): Promise<CommandResponse<VersionItem>>;
 };
 
-// Info CommandTypes
+// CheckInstall Command Types
+
+export type CheckInstallCommandOptions = CommonCommandOptions & {
+    // Intentionally empty for now
+};
+
+type CheckInstallCommand = {
+    /**
+     * Generate a CommandResponse to check if the runtime is installed. The
+     * command will return a non-zero exit code if the runtime is not installed.
+     * @param options Command options
+     */
+    checkInstall(options: CheckInstallCommandOptions): Promise<CommandResponse<string>>;
+};
+
+// Info Command Types
 
 export type InfoCommandOptions = CommonCommandOptions & {
     // Intentionally empty for now
@@ -1482,11 +1497,6 @@ type InspectNetworksCommand = {
 
 // #region Context commands
 
-/**
- * The type for a context. For local contexts it will be 'containerd'; for cloud contexts 'aci', 'ecs', etc.
- */
-export type ContextType = 'aci' | 'containerd' | 'ecs' | string;
-
 // List Contexts Command Types
 
 export type ListContextsCommandOptions = CommonCommandOptions & {
@@ -1506,10 +1516,6 @@ export type ListContextItem = {
      * Whether or not the context is currently selected
      */
     current: boolean;
-    /**
-     * The context type
-     */
-    type?: ContextType;
     /**
      * The endpoint used for the container daemon
      */
@@ -1579,10 +1585,6 @@ export type InspectContextsItem = {
      * The description of the context
      */
     description?: string;
-    /**
-     * The context type
-     */
-    type?: ContextType;
     // More properties exist but are highly dependent on container runtime
     /**
      * The raw JSON from the inspect record
@@ -1730,6 +1732,7 @@ export interface IContainersClient extends
     ClientIdentity,
     ImageNameDefaults,
     VersionCommand,
+    CheckInstallCommand,
     InfoCommand,
     LoginCommand,
     LogoutCommand,
