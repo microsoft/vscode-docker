@@ -3,21 +3,20 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListContainersItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { DockerContainer } from "../../docker/Containers";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
-import { getImagePropertyValue } from "../images/ImageProperties";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { ContainerProperty, containerProperties } from "./ContainerProperties";
+import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
-export type DockerContainerInfo = DockerContainer & {
+export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;
 };
 
@@ -38,7 +37,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
     public labelSettingInfo: ITreeSettingInfo<ContainerProperty> = {
         properties: containerProperties,
-        defaultProperty: 'FullTag',
+        defaultProperty: 'Image',
     };
 
     public descriptionSettingInfo: ITreeArraySettingInfo<ContainerProperty> = {
@@ -56,45 +55,16 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
     }
 
     public async getItems(context: IActionContext): Promise<DockerContainerInfo[]> {
-        const rawResults = await ext.dockerClient.getContainers(context);
+        const rawResults = await ext.runWithDefaultShell(client =>
+            client.listContainers({ all: true })
+        );
 
-        // NOTE: We *know* that ACI doesn't currently support showing files, but we'll give the benefit of the doubt to any other context type.
-        const contextType = (await ext.dockerContextManager.getCurrentContext())?.ContextType;
-        const showFiles = contextType && (contextType !== 'aci');
+        const results = rawResults.map(result => ({ showFiles: true, ...result }));
 
-        const results = rawResults.map(result => ({ showFiles, ...result }));
+        // Don't wait
+        void this.updateNewContainerUser(results);
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.updateNewContainerUser(results);
         return results;
-    }
-
-    public getPropertyValue(item: DockerContainerInfo, property: ContainerProperty): string {
-        const networks = item.NetworkSettings?.Networks && Object.keys(item.NetworkSettings.Networks).length > 0 ? Object.keys(item.NetworkSettings.Networks) : ['<none>'];
-        const ports = item.Ports?.length > 0 ? item.Ports.map(p => p.PublicPort) : ['<none>'];
-
-        switch (property) {
-            case 'ContainerId':
-                return item.Id.slice(0, 12);
-            case 'ImageId':
-                return item.ImageID.replace('sha256:', '').slice(0, 12);
-            case 'ContainerName':
-                return item.Name;
-            case 'Networks':
-                return networks.join(',');
-            case 'Ports':
-                return ports.join(',');
-            case 'State':
-                return item.State;
-            case 'Status':
-                // The rapidly-refreshing status during a container's first minute causes a lot of problems with excessive refreshing
-                // This normalizes things like "10 seconds" to "Less than a minute", meaning the refreshes don't happen constantly
-                return item.Status?.replace(/\d+ seconds?/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
-            case 'Compose Project Name':
-                return getComposeProjectName(item);
-            default:
-                return getImagePropertyValue({ ...item, Name: item.Image }, property);
-        }
     }
 
     public compareChildrenImpl(ti1: ContainerTreeItem, ti2: ContainerTreeItem): number {
@@ -113,6 +83,10 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             }
         }
         return super.compareChildrenImpl(ti1, ti2);
+    }
+
+    public getPropertyValue(item: ListContainersItem, property: ContainerProperty): string {
+        return getContainerPropertyValue(item, property);
     }
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
@@ -155,23 +129,5 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             this.newContainerUser = false;
             await ext.context.globalState.update('vscode-docker.container.newContainerUser', false);
         }
-    }
-}
-
-export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Individual Containers');
-
-export function getComposeProjectName(container: DockerContainer): string {
-    if (!container.Labels) {
-        return NonComposeGroupName;
-    }
-
-    const labels = Object.keys(container.Labels)
-        .map(label => ({ label: label, value: container.Labels[label] }));
-
-    const composeProject = labels.find(l => l.label === 'com.docker.compose.project');
-    if (composeProject) {
-        return composeProject.value;
-    } else {
-        return NonComposeGroupName;
     }
 }

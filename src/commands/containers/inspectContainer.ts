@@ -17,6 +17,8 @@ export async function inspectContainer(context: IActionContext, node?: Container
         });
     }
 
-    const inspectInfo = await ext.dockerClient.inspectContainer(context, node.containerId);
-    await openReadOnlyJson(node, inspectInfo);
+    const inspectInfo = await ext.runWithDefaultShell(client =>
+        client.inspectContainers({ containers: [node.containerId] })
+    );
+    await openReadOnlyJson(node, JSON.parse(inspectInfo[0].raw));
 }

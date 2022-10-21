@@ -3,17 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerOS } from '../docker';
 import * as corepath from 'path';
-import * as querystring from 'querystring';
 import * as vscode from 'vscode';
-import { DockerOSType } from '../Common';
-
-export type DockerUriFileType = 'directory' | 'file';
 
 export type DockerUriQuery = {
-    containerOS?: DockerOSType;
-    fileType?: DockerUriFileType;
-    serverOS?: DockerOSType;
+    containerOS?: ContainerOS;
+    fileType?: vscode.FileType;
+    ctime?: number;
+    mtime?: number;
+    size?: number;
 };
 
 export class DockerUri {
@@ -25,8 +24,7 @@ export class DockerUri {
     public static parse(uri: vscode.Uri): DockerUri {
         const containerId = uri.authority;
         const path = uri.path;
-
-        const query = <DockerUriQuery>querystring.decode(uri.query);
+        const query = queryFromURLSearchParams(new URLSearchParams(uri.query));
 
         return DockerUri.create(containerId, path, query);
     }
@@ -56,13 +54,13 @@ export class DockerUri {
             });
 
         return this.options
-            ? uri.with({ query: querystring.encode(this.options)})
+            ? uri.with({ query: queryToURLSearchParams(this.options).toString() })
             : uri;
     }
 
     public get windowsPath(): string {
         if (this.path.startsWith('/')) {
-            return corepath.win32.join('C:\\', this.path.substr(1));
+            return corepath.win32.join('C:\\', this.path.substring(1));
         }
 
         return this.path;
@@ -70,4 +68,24 @@ export class DockerUri {
 
     private constructor(public readonly containerId: string, public readonly path: string, public readonly options?: DockerUriQuery) {
     }
+}
+
+function queryToURLSearchParams(query: DockerUriQuery): URLSearchParams {
+    const queryStringRecord: Record<string, string> = {};
+
+    for (const key of Object.keys(query)) {
+        queryStringRecord[key] = query[key].toString();
+    }
+
+    return new URLSearchParams(queryStringRecord);
+}
+
+function queryFromURLSearchParams(queryParams: URLSearchParams): DockerUriQuery {
+    return {
+        containerOS: queryParams.get('containerOS') as ContainerOS || 'linux',
+        fileType: Number.parseInt(queryParams.get('fileType')) as vscode.FileType || vscode.FileType.File,
+        ctime: Number.parseInt(queryParams.get('ctime')) || 0,
+        mtime: Number.parseInt(queryParams.get('mtime')) || 0,
+        size: Number.parseInt(queryParams.get('mtime')) || 0,
+    };
 }

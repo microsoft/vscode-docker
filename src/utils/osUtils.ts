@@ -6,18 +6,19 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { DockerOSType } from '../docker/Common';
+import { ContainerOS } from '../runtimes/docker';
 import { ext } from '../extensionVariables';
 
-export async function getDockerOSType(context: IActionContext): Promise<DockerOSType> {
-    if (os.platform() !== 'win32') {
+export async function getDockerOSType(): Promise<ContainerOS> {
+    if (!isWindows()) {
         // On Linux or macOS, this can only ever be linux,
         // so short-circuit the Docker call entirely.
         return 'linux';
     } else {
-        const info = await ext.dockerClient.info(context);
-        return info?.OSType || 'linux';
+        const info = await ext.runWithDefaultShell(client =>
+            client.info({})
+        );
+        return info?.osType || 'linux';
     }
 }
 

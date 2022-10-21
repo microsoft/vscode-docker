@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandResponse } from '../runtimes/docker';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
-import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerComposeOptions, DockerComposeTaskDefinitionBase } from './DockerComposeTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -36,17 +36,40 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerCompose);
 
-        const commandLine = await this.resolveCommandLine(definition.dockerCompose);
+        const client = await ext.orchestratorManager.getClient();
 
-        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
-        await context.terminal.executeCommandInTerminal(
-            commandLine,
-            context.folder,
-            false, // rejectOnStderr
-            undefined, // stdoutBuffer
-            Buffer.alloc(10 * 1024), // stderrBuffer
-            context.cancellationToken
-        );
+        const options = definition.dockerCompose;
+        let command: CommandResponse<void>;
+        if (definition.dockerCompose.up) {
+            command = await client.up({
+                files: options.files,
+                environmentFile: options.envFile,
+                profiles: options.up.profiles,
+                projectName: options.projectName,
+                detached: options.up.detached,
+                build: options.up.build,
+                scale: options.up.scale,
+                customOptions: options.up.customOptions,
+                services: options.up.services,
+            });
+        } else {
+            command = await client.down({
+                files: options.files,
+                environmentFile: options.envFile,
+                projectName: options.projectName,
+                removeImages: options.down.removeImages,
+                removeVolumes: options.down.removeVolumes,
+                customOptions: options.down.customOptions,
+            });
+        }
+
+        const runner = context.terminal.getCommandRunner({
+            folder: context.folder,
+            rejectOnStderr: false,
+            token: context.cancellationToken,
+        });
+
+        await runner(command);
         throwIfCancellationRequested(context);
     }
 
@@ -71,43 +94,6 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
         if (dockerCompose.envFile && !(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerCompose.envFile, context.folder))))) {
             throw new Error(localize('vscode-docker.tasks.composeProvider.invalidEnvFile', 'Environment file does not exist or could not be accessed.'));
-        }
-    }
-
-    private async resolveCommandLine(options: DockerComposeOptions): Promise<CommandLineBuilder> {
-        if (options.up) {
-            // CommandLineBuilder requires key-value objects to be string => string, but scale is string => number
-            // So, convert it to string => string
-            const scaleAsString: { [key: string]: string } = {};
-            if (options.up.scale) {
-                for (const key of Object.keys(options.up.scale)) {
-                    scaleAsString[key] = options.up.scale[key].toString();
-                }
-            }
-
-            return CommandLineBuilder
-                .create(await ext.dockerContextManager.getComposeCommand())
-                .withArrayArgs('-f', options.files)
-                .withNamedArg('--env-file', options.envFile)
-                .withArrayArgs('--profile', options.up.profiles)
-                .withNamedArg('--project-name', options.projectName)
-                .withArg('up')
-                .withFlagArg('--detach', !!options.up.detached)
-                .withFlagArg('--build', !!options.up.build)
-                .withKeyValueArgs('--scale', scaleAsString)
-                .withArg(options.up.customOptions)
-                .withArg(options.up.services?.join(' '));
-        } else {
-            // Validation earlier guarantees that if up is not defined, down must be
-            return CommandLineBuilder
-                .create(await ext.dockerContextManager.getComposeCommand())
-                .withArrayArgs('-f', options.files)
-                .withNamedArg('--env-file', options.envFile)
-                .withNamedArg('--project-name', options.projectName)
-                .withArg('down')
-                .withNamedArg('--rmi', options.down.removeImages)
-                .withFlagArg('--volumes', options.down.removeVolumes)
-                .withArg(options.down.customOptions);
         }
     }
 

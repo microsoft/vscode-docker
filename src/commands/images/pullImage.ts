@@ -6,8 +6,8 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function pullImage(context: IActionContext, node?: ImageTreeItem, nodes?: ImageTreeItem[]): Promise<void> {
@@ -21,6 +21,13 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
 
     let noneTagWarningShown = false;
 
+    const client = await ext.runtimeManager.getClient();
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: localize('vscode-docker.commands.images.pull.terminalTitle', 'Pull images')
+        }
+    );
+
     for (const n of nodes) {
         // Images with <none> as a tag (i.e. they don't have a tag) can't be pulled so skip them
         if (/:<none>/i.test(n.fullTag)) {
@@ -33,6 +40,8 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
             continue;
         }
 
-        await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} pull ${n.fullTag}`, 'docker pull', { addDockerEnv: true });
+        await taskCRF.getCommandRunner()(
+            client.pullImage({ imageRef: n.fullTag })
+        );
     }
 }

@@ -204,31 +204,31 @@ export class NetCoreTaskHelper implements TaskHelper {
             const appVolume: DockerContainerVolume = {
                 localPath: path.dirname(helperOptions.appProject),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\app' : '/app',
-                permissions: 'rw,z'
+                permissions: 'rw'
             };
 
             const srcVolume: DockerContainerVolume = {
                 localPath: folder.uri.fsPath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\src' : '/src',
-                permissions: 'rw,z'
+                permissions: 'rw'
             };
 
             const debuggerVolume: DockerContainerVolume = {
                 localPath: vsDbgInstallBasePath,
                 containerPath: runOptions.os === 'Windows' ? 'C:\\remote_debugger' : '/remote_debugger',
-                permissions: 'ro,z'
+                permissions: 'ro'
             };
 
             const nugetRootVolume: DockerContainerVolume = {
                 localPath: path.join(os.homedir(), '.nuget', 'packages'),
                 containerPath: runOptions.os === 'Windows' ? 'C:\\.nuget\\packages' : '/root/.nuget/packages',
-                permissions: 'ro,z'
+                permissions: 'ro'
             };
 
             const nugetUserVolume: DockerContainerVolume = {
                 localPath: nugetRootVolume.localPath, // Same local path as the root one
                 containerPath: runOptions.os === 'Windows' ? 'C:\\Users\\ContainerUser\\.nuget\\packages' : '/home/appuser/.nuget/packages',
-                permissions: 'ro,z'
+                permissions: 'ro'
             };
 
             addVolumeWithoutConflicts(volumes, appVolume);
@@ -242,8 +242,10 @@ export class NetCoreTaskHelper implements TaskHelper {
             // Try to get a container username from the image (best effort only)
             let userName: string | undefined;
             try {
-                const imageInspection = await ext.dockerClient.inspectImage(undefined, runOptions.image);
-                userName = imageInspection?.Config?.User;
+                const imageInspection = (await ext.runWithDefaultShell(client =>
+                    client.inspectImages({ imageRefs: [runOptions.image] })
+                ))?.[0];
+                userName = imageInspection?.user;
             } catch {
                 // Best effort
             }
@@ -254,7 +256,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             const userSecretsVolume: DockerContainerVolume = {
                 localPath: hostSecretsFolders.hostUserSecretsFolder,
                 containerPath: containerSecretsFolders.containerUserSecretsFolder,
-                permissions: 'ro,z'
+                permissions: 'ro'
             };
 
             addVolumeWithoutConflicts(volumes, userSecretsVolume);
@@ -263,7 +265,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 const certVolume: DockerContainerVolume = {
                     localPath: hostSecretsFolders.hostCertificateFolder,
                     containerPath: containerSecretsFolders.containerCertificateFolder,
-                    permissions: 'ro,z'
+                    permissions: 'ro'
                 };
 
                 addVolumeWithoutConflicts(volumes, certVolume);

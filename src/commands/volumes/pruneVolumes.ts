@@ -17,13 +17,19 @@ export async function pruneVolumes(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.volumes.pruning', 'Pruning volumes...') },
         async () => {
-            const result = await ext.dockerClient.pruneVolumes(context);
+            const result = await ext.runWithDefaultShell(client =>
+                client.pruneVolumes({})
+            );
 
-            const mbReclaimed = convertToMB(result.SpaceReclaimed);
-            const message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} volume(s) and reclaimed {1} MB of space.', result.ObjectsDeleted, mbReclaimed);
-            // don't wait
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showInformationMessage(message);
+            let message: string;
+            if (result?.volumesDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
+                message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} unused volume(s) and reclaimed {1} MB of space.', result.volumesDeleted.length, convertToMB(result.spaceReclaimed));
+            } else {
+                message = localize('vscode-docker.commands.volumes.prune.removed2', 'Removed unused volumes.');
+            }
+
+            // Don't wait
+            void vscode.window.showInformationMessage(message);
         }
     );
 }

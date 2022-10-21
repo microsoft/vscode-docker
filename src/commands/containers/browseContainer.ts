@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { PortBinding } from '../../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, TelemetryProperties } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { DockerPort } from '../../docker/Containers';
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
@@ -37,8 +37,8 @@ interface BrowsablePort {
     containerPort: number;
 }
 
-function toBrowsablePort(port: DockerPort): BrowsablePort {
-    let host: string = port.IP;
+function toBrowsablePort(port: PortBinding): BrowsablePort {
+    let host: string = port.hostIp;
     if (
         host === '0.0.0.0' || host === '::' || // IP is standard binding (IPv4 or IPv6)
         host === '127.0.0.1' || host === '::1' // IP is a common loopback binding (IPv4 or IPv6)
@@ -49,8 +49,8 @@ function toBrowsablePort(port: DockerPort): BrowsablePort {
 
     return {
         host: host,
-        hostPort: port.PublicPort,
-        containerPort: port.PrivatePort,
+        hostPort: port.hostPort,
+        containerPort: port.containerPort,
     };
 }
 
@@ -82,9 +82,9 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     }
 
     const ports = node.ports ?? [];
-    const dupedPossiblePorts = ports.filter(port => port.PublicPort && port.PrivatePort) // Ports must be defined (not falsy)
-        .filter(port => port.Type ?? 'tcp' === 'tcp') // Type must be undefined or tcp
-        .filter(port => port.IP); // IP must be defined (not falsy)
+    const dupedPossiblePorts = ports.filter(port => port.hostPort && port.containerPort) // Ports must be defined (not falsy)
+        .filter(port => port.protocol ?? 'tcp' === 'tcp') // Type must be undefined or tcp
+        .filter(port => port.hostIp); // IP must be defined (not falsy)
 
     // There can be multiple ports that are bound to localhost, so let's remove duplicates by sending to and from a Set
     const browsablePorts: BrowsablePort[] = dedupeBrowsablePorts(dupedPossiblePorts.map(toBrowsablePort));

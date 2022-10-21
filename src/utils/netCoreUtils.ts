@@ -8,7 +8,7 @@ import * as path from 'path';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getTempFileName } from './osUtils';
-import { execAsync } from './spawnAsync';
+import { execAsync } from './execAsync';
 
 export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations' | 'GetProjectProperties', project: string): Promise<string[]> {
     const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', `${target}.targets`);

@@ -10,7 +10,6 @@ import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
-import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -51,17 +50,27 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
-        const commandLine = await this.resolveCommandLine(definition.dockerBuild);
+        const client = await ext.runtimeManager.getClient();
 
-        // Because BuildKit outputs everything to stderr, we will not treat output there as a failure
-        await context.terminal.executeCommandInTerminal(
-            commandLine,
-            context.folder,
-            false, // rejectOnStderr
-            undefined, // stdoutBuffer
-            Buffer.alloc(10 * 1024), // stderrBuffer
-            context.cancellationToken
-        );
+        const options = definition.dockerBuild;
+        const command = await client.buildImage({
+            pull: options.pull,
+            file: options.dockerfile,
+            args: options.buildArgs,
+            labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
+            tags: [options.tag],
+            stage: options.target,
+            customOptions: options.customOptions,
+            path: options.context,
+        });
+
+        const runner = context.terminal.getCommandRunner({
+            folder: context.folder,
+            rejectOnStderr: false,
+            token: context.cancellationToken,
+        });
+
+        await runner(command);
         throwIfCancellationRequested(context);
 
         context.imageName = definition.dockerBuild.tag;
@@ -81,18 +90,5 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
         if (dockerBuild.dockerfile && !await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.dockerfile, context.folder)))) {
             throw new Error(localize('vscode-docker.tasks.buildProvider.invalidDockerfile', 'The Dockerfile \'{0}\' does not exist or could not be accessed.', dockerBuild.dockerfile));
         }
-    }
-
-    private async resolveCommandLine(options: DockerBuildOptions): Promise<CommandLineBuilder> {
-        return CommandLineBuilder
-            .create(ext.dockerContextManager.getDockerCommand(), 'build', '--rm')
-            .withFlagArg('--pull', options.pull)
-            .withNamedArg('-f', options.dockerfile)
-            .withKeyValueArgs('--build-arg', options.buildArgs)
-            .withKeyValueArgs('--label', getAggregateLabels(options.labels, defaultVsCodeLabels))
-            .withNamedArg('-t', options.tag)
-            .withNamedArg('--target', options.target)
-            .withArg(options.customOptions)
-            .withQuotedArg(options.context);
     }
 }

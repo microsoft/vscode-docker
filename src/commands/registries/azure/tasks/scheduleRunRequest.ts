@@ -17,7 +17,7 @@ import { registryExpectedContextValues } from "../../../../tree/registries/regis
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
-import { bufferToString } from "../../../../utils/spawnAsync";
+import { bufferToString } from "../../../../utils/execAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 

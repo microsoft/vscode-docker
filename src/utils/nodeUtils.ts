@@ -28,7 +28,7 @@ export async function inferPackageName(nodePackage: NodePackage | undefined, pac
 
 const StartScriptName: string = 'start';
 
-export async function inferCommand(nodePackage: NodePackage | undefined, inspectMode: InspectMode, inspectPort: number): Promise<string> {
+export async function inferCommand(nodePackage: NodePackage | undefined, inspectMode: InspectMode, inspectPort: number): Promise<string[]> {
     const inspectArg = inspectMode === 'break' ? '--inspect-brk' : '--inspect';
     const inspectArgWithPort = `${inspectArg}=0.0.0.0:${inspectPort}`;
 
@@ -41,15 +41,14 @@ export async function inferCommand(nodePackage: NodePackage | undefined, inspect
 
                 if (result) {
                     const capturedString = result[1];
-                    const refactoredString = `node ${inspectArgWithPort}`;
 
-                    return refactoredString + startScript.slice(result.index + capturedString.length);
+                    return ['node', inspectArgWithPort, startScript.slice(result.index + capturedString.length).trim()];
                 }
             }
         }
 
         if (nodePackage.main) {
-            return `node ${inspectArgWithPort} ${nodePackage.main}`;
+            return ['node', inspectArgWithPort, nodePackage.main];
         }
     }
 

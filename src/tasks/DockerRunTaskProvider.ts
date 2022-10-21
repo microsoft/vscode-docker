@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RunContainerBindMount } from '../runtimes/docker';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { cloneObject } from '../utils/cloneObject';
-import { CommandLineBuilder } from '../utils/commandLineBuilder';
 import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
@@ -53,22 +53,37 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
-        const commandLine = await this.resolveCommandLine(definition.dockerRun);
+        const client = await ext.runtimeManager.getClient();
 
-        const stdoutBuffer = Buffer.alloc(4 * 1024); // Any output beyond 4K is not a container ID and we won't deal with it
-        const stderrBuffer = Buffer.alloc(10 * 1024);
+        const options = definition.dockerRun;
+        const command = await client.runContainer({
+            detached: true,
+            publishAllPorts: options.portsPublishAll || (options.portsPublishAll === undefined && (options.ports === undefined || options.ports.length < 1)),
+            name: options.containerName,
+            network: options.network,
+            networkAlias: options.networkAlias,
+            environmentVariables: options.env,
+            environmentFiles: options.envFiles,
+            labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
+            mounts: this.getMounts(options.volumes),
+            ports: options.ports,
+            addHost: options.extraHosts,
+            entrypoint: options.entrypoint,
+            removeOnExit: options.remove,
+            customOptions: options.customOptions,
+            imageRef: options.image,
+            command: options.command,
+        });
 
-        await context.terminal.executeCommandInTerminal(
-            commandLine,
-            context.folder,
-            true, // rejectOnStderr
-            stdoutBuffer,
-            stderrBuffer,
-            context.cancellationToken
-        );
+        const runner = context.terminal.getCommandRunner({
+            folder: context.folder,
+            rejectOnStderr: true,
+            token: context.cancellationToken,
+        });
+
+        const { stdout } = await runner(command);
+        context.containerId = stdout;
         throwIfCancellationRequested(context);
-
-        context.containerId = stdoutBuffer.toString();
 
         if (helper && helper.postRun) {
             await helper.postRun(context, definition);
@@ -81,43 +96,14 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
         }
     }
 
-    private async resolveCommandLine(runOptions: DockerRunOptions): Promise<CommandLineBuilder> {
-        return CommandLineBuilder
-            .create(ext.dockerContextManager.getDockerCommand(), 'run', '-dt')
-            .withFlagArg('-P', runOptions.portsPublishAll || (runOptions.portsPublishAll === undefined && (runOptions.ports === undefined || runOptions.ports.length < 1)))
-            .withNamedArg('--name', runOptions.containerName)
-            .withNamedArg('--network', runOptions.network)
-            .withNamedArg('--network-alias', runOptions.networkAlias)
-            .withKeyValueArgs('-e', runOptions.env)
-            .withArrayArgs('--env-file', runOptions.envFiles)
-            .withKeyValueArgs('--label', getAggregateLabels(runOptions.labels, defaultVsCodeLabels))
-            .withArrayArgs('-v', runOptions.volumes, volume => `${volume.localPath}:${volume.containerPath}${this.getVolumeOptions(volume, runOptions.os === 'Windows')}`)
-            .withArrayArgs('-p', runOptions.ports, port => `${port.hostPort ? port.hostPort + ':' : ''}${port.containerPort}${port.protocol ? '/' + port.protocol : ''}`)
-            .withArrayArgs('--add-host', runOptions.extraHosts, extraHost => `${extraHost.hostname}:${extraHost.ip}`)
-            .withNamedArg('--entrypoint', runOptions.entrypoint)
-            .withFlagArg('--rm', runOptions.remove)
-            .withArg(runOptions.customOptions)
-            .withQuotedArg(runOptions.image)
-            .withArgs(runOptions.command);
-    }
-
-    private getVolumeOptions(volume: DockerContainerVolume, isWindows: boolean): string {
-        if (!volume.permissions) {
-            return '';
-        } else if (!isWindows) {
-            return ':' + volume.permissions;
-        } else {
-            // The 'z' and 'Z' options aren't supported on Windows containers, normalize to simply ro / rw
-            switch (volume.permissions as string) {
-                case 'ro,Z':
-                case 'ro,z':
-                    return ':ro';
-                case 'rw,Z':
-                case 'rw,z':
-                    return ':rw';
-                default:
-                    return ':' + volume.permissions;
-            }
-        }
+    private getMounts(volumes?: DockerContainerVolume[]): RunContainerBindMount[] | undefined {
+        return volumes?.map(v => {
+            return {
+                source: v.localPath,
+                destination: v.containerPath,
+                readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
+                type: 'bind',
+            };
+        });
     }
 }

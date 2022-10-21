@@ -7,7 +7,7 @@ import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-uti
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
-import { execAsync } from '../../utils/spawnAsync';
+import { execAsync } from '../../utils/execAsync';
 
 // Matches an `up` or `down` and everything after it--so that it can be replaced with `config --services`, to get a service list using all of the files originally part of the compose command
 const composeCommandReplaceRegex = /(\b(up|down)\b).*$/i;
@@ -87,7 +87,6 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
     const pickChoices: IAzureQuickPickItem<string>[] = allChoices.map(s => ({
         label: s,
         data: s,
-        picked: previousChoices.some(p => p === s),
     }));
 
     const chosenSubsets = await context.ui.showQuickPick(
@@ -95,6 +94,7 @@ async function pickSubsets(context: IActionContext, type: SubsetType, allChoices
         {
             canPickMany: true,
             placeHolder: label,
+            isPickSelected: (pick) => previousChoices.some(previous => (pick as IAzureQuickPickItem<string>).data === previous),
         }
     );
 

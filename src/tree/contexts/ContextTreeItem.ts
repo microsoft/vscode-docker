@@ -3,22 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { InspectContextsItem, ListContextItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeIcon } from "vscode";
-import { defaultContextNames } from "../../docker/ContextManager";
-import { DockerContext, DockerContextInspection } from "../../docker/Contexts";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
 
+const DefaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
+
 export class ContextTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Context;/;
     public static removableContextRegExp: RegExp = /^customContext;/i;
 
-    private readonly _item: DockerContext;
+    private readonly _item: ListContextItem;
 
-    public constructor(parent: AzExtParentTreeItem, item: DockerContext) {
+    public constructor(parent: AzExtParentTreeItem, item: ListContextItem) {
         super(parent);
         this._item = item;
     }
@@ -26,16 +27,12 @@ export class ContextTreeItem extends ToolTipTreeItem {
     public get contextValue(): string {
         let result: string;
 
-        if (defaultContextNames.indexOf(this.name) >= 0) {
+        if (DefaultContextNames.indexOf(this.name) >= 0) {
             result = 'defaultContext;';
         } else if (this.current) {
             result = 'currentCustomContext;';
         } else {
             result = 'customContext;';
-        }
-
-        if (this._item.ContextType === 'aci') {
-            result += 'aciContext;';
         }
 
         return result;
@@ -60,48 +57,53 @@ export class ContextTreeItem extends ToolTipTreeItem {
     }
 
     public get name(): string {
-        return this._item.Name;
+        return this._item.name;
     }
 
     public get current(): boolean {
-        return this._item.Current;
+        return this._item.current;
     }
 
     public get iconPath(): ThemeIcon | undefined {
-        if (this._item.Current) {
+        if (this._item.current) {
             return new ThemeIcon('plug');
         }
 
         return undefined;
     }
 
-    public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        return ext.dockerContextManager.remove(context, this.name);
+    public async deleteTreeItemImpl(): Promise<void> {
+        return ext.runtimeManager.contextManager.removeContext(this.name);
     }
 
-    public async inspect(context: IActionContext): Promise<DockerContextInspection> {
-        return ext.dockerContextManager.inspect(context, this.name);
+    public async inspect(): Promise<InspectContextsItem> {
+        return ext.runtimeManager.contextManager.inspectContext(this.name);
     }
 
-    public async use(context: IActionContext): Promise<void> {
-        return ext.dockerContextManager.use(context, this.name);
+    public async use(): Promise<void> {
+        return ext.runtimeManager.contextManager.useContext(this.name);
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'context';
-        return resolveTooltipMarkdown(contextTooltipTemplate, await this.inspect(actionContext));
+        const contextInspection = await this.inspect();
+        const handlebarsContext = {
+            ...contextInspection,
+            containerEndpoint: this._item.containerEndpoint
+        };
+        return resolveTooltipMarkdown(contextTooltipTemplate, handlebarsContext);
     }
 }
 
 const contextTooltipTemplate = `
-### {{ Name }}
+### {{ name }}
 
 ---
 
 #### Docker Host Endpoint
-{{#if Endpoints.docker.Host}}
-{{ Endpoints.docker.Host }}
+{{#if containerEndpoint}}
+{{ containerEndpoint }}
 {{else}}
-_{{ Metadata.Type }}_
+_{{ type }}_
 {{/if}}
 `;

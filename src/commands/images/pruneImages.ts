@@ -17,13 +17,19 @@ export async function pruneImages(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.images.pruning', 'Pruning images...') },
         async () => {
-            const result = await ext.dockerClient.pruneImages(context);
+            const result = await ext.runWithDefaultShell(client =>
+                client.pruneImages({})
+            );
 
-            const mbReclaimed = convertToMB(result.SpaceReclaimed);
-            const message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} image(s) and reclaimed {1} MB of space.', result.ObjectsDeleted, mbReclaimed);
-            // don't wait
-            /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-            vscode.window.showInformationMessage(message);
+            let message: string;
+            if (result?.imageRefsDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
+                message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
+            } else {
+                message = localize('vscode-docker.commands.images.prune.removed2', 'Removed dangling images.');
+            }
+
+            // Don't wait
+            void vscode.window.showInformationMessage(message);
         }
     );
 }

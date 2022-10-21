@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from "@microsoft/vscode-azext-utils";
-import { ExtensionContext, TreeView } from "vscode";
-import { ContextManager } from './docker/ContextManager';
-import { DockerApiClient } from './docker/DockerApiClient';
+import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
+import { ExtensionContext, TreeView } from 'vscode';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
@@ -14,6 +13,8 @@ import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
+import { runOrchestratorWithDefaultShellInternal, runWithDefaultShellInternal } from './runtimes/runners/runWithDefaultShell';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -26,8 +27,6 @@ export namespace ext {
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
 
-    export let dockerContextManager: ContextManager;
-    export let dockerClient: DockerApiClient;
     export let treeInitError: unknown;
     export const ignoreBundle = !/^(false|0)?$/i.test(process.env.AZCODE_DOCKER_IGNORE_BUNDLE || '');
 
@@ -56,4 +55,10 @@ export namespace ext {
     export let contextsTree: AzExtTreeDataProvider;
     export let contextsTreeView: TreeView<AzExtTreeItem>;
     export let contextsRoot: ContextsTreeItem;
+
+    // Container runtime related items
+    export let runtimeManager: ContainerRuntimeManager;
+    export let orchestratorManager: OrchestratorRuntimeManager;
+    export const runWithDefaultShell = runWithDefaultShellInternal;
+    export const runOrchestratorWithDefaultShell = runOrchestratorWithDefaultShellInternal;
 }

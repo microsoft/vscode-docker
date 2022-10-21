@@ -8,11 +8,11 @@ import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { dockerInstallStatusProvider } from '../utils/DockerInstallStatusProvider';
-import { executeAsTask } from '../utils/executeAsTask';
+import { TaskCommandRunnerFactory } from '../runtimes/runners/TaskCommandRunnerFactory';
+import { runtimeInstallStatusProvider } from '../utils/RuntimeInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
 import { getTempFileName, isArm64Mac, isLinux } from '../utils/osUtils';
-import { execAsync } from '../utils/spawnAsync';
+import { execAsync } from '../utils/execAsync';
 
 export abstract class DockerInstallerBase {
     protected abstract downloadUrl: string;
@@ -55,7 +55,7 @@ export abstract class DockerInstallerBase {
 
     private async preInstallCheck(): Promise<boolean> {
         let proceedInstall = true;
-        if (await dockerInstallStatusProvider.isDockerInstalledRealTimeCheck()) {
+        if (await runtimeInstallStatusProvider.isRuntimeInstalledRealTimeCheck()) {
             const reinstallMessage = localize('vscode-docker.commands.DockerInstallerBase.reInstall', 'Docker Desktop is already installed. Would you like to reinstall?');
             const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall');
             const response = await vscode.window.showInformationMessage(reinstallMessage, ...[install]);
@@ -112,7 +112,14 @@ export class MacDockerInstaller extends DockerInstallerBase {
         const title = localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install');
         const command = this.getInstallCommand(fileName);
 
-        await executeAsTask(context, command, title, { addDockerEnv: false });
+        const taskCRF = new TaskCommandRunnerFactory({
+            taskName: title,
+        });
+
+        await taskCRF.getCommandRunner()({
+            command: command,
+            args: undefined,
+        });
     }
 }
 

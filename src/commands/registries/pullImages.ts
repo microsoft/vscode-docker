@@ -5,11 +5,11 @@
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 import { RemoteRepositoryTreeItemBase } from '../../tree/registries/RemoteRepositoryTreeItemBase';
 import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
-import { executeAsTask } from '../../utils/executeAsTask';
 import { logInToDockerCli } from './logInToDockerCli';
 
 export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
@@ -17,7 +17,7 @@ export async function pullRepository(context: IActionContext, node?: RemoteRepos
         node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(registryExpectedContextValues.all.repository, context);
     }
 
-    await pullImages(context, node.parent, node.repoName + ' -a');
+    await pullImages(context, node.parent, node.repoName, true);
 }
 
 export async function pullImageFromRepository(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
@@ -25,11 +25,23 @@ export async function pullImageFromRepository(context: IActionContext, node?: Re
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.all.tag, context);
     }
 
-    await pullImages(context, node.parent.parent, node.repoNameAndTag);
+    await pullImages(context, node.parent.parent, node.repoNameAndTag, false);
 }
 
-async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
+async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string, allTags: boolean): Promise<void> {
     await logInToDockerCli(context, node);
 
-    await executeAsTask(context, `${ext.dockerContextManager.getDockerCommand(context)} pull ${node.baseImagePath}/${imageRequest}`, 'Docker', { addDockerEnv: true });
+    const client = await ext.runtimeManager.getClient();
+    const taskCRF = new TaskCommandRunnerFactory({
+        taskName: client.displayName,
+    });
+
+    await taskCRF.getCommandRunner()(
+        client.pullImage(
+            {
+                imageRef: `${node.baseImagePath}/${imageRequest}`,
+                allTags: allTags,
+            }
+        )
+    );
 }

@@ -8,7 +8,7 @@ import { ext } from "../../../../extensionVariables";
 import { localize } from "../../../../localize";
 import { AzureTaskRunTreeItem } from "../../../../tree/registries/azure/AzureTaskRunTreeItem";
 import { getStorageBlob } from "../../../../utils/lazyPackages";
-import { bufferToString } from "../../../../utils/spawnAsync";
+import { bufferToString } from "../../../../utils/execAsync";
 
 export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTaskRunTreeItem): Promise<void> {
     if (!node) {

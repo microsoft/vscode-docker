@@ -12,15 +12,18 @@ import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
 import { DatedDockerImage } from "./ImagesTreeItem";
+import { NormalizedImageNameInfo } from "./NormalizedImageNameInfo";
 
 export class ImageTreeItem extends ToolTipTreeItem {
     public static contextValue: string = 'image';
     public contextValue: string = ImageTreeItem.contextValue;
     private readonly _item: DatedDockerImage;
+    private readonly _normalizedImageNameInfo: NormalizedImageNameInfo;
 
     public constructor(parent: AzExtParentTreeItem, itemInfo: DatedDockerImage) {
         super(parent);
         this._item = itemInfo;
+        this._normalizedImageNameInfo = new NormalizedImageNameInfo(itemInfo.image);
     }
 
     public get id(): string {
@@ -28,15 +31,15 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get createdTime(): number {
-        return this._item.CreatedTime;
+        return this._item.createdAt.valueOf();
     }
 
     public get imageId(): string {
-        return this._item.Id;
+        return this._item.id;
     }
 
     public get fullTag(): string {
-        return this._item.Name;
+        return this._normalizedImageNameInfo.fullTag;
     }
 
     public get label(): string {
@@ -44,11 +47,11 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get description(): string | undefined {
-        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.Outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
+        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
     }
 
     public get iconPath(): ThemeIcon {
-        if (this._item.Outdated) {
+        if (this._item.outdated) {
             return new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground'));
         }
 
@@ -61,42 +64,61 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get size(): number {
-        return this._item.Size ?? 0;
+        return this._item.size ?? 0;
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
         let ref = this.fullTag;
 
         // Dangling images are shown in the explorer, depending on the setting.
-        // In this case, an image end up with <none> tag need to be deleted using the Id.
-        if (ref.endsWith('<none>')) {
-            // Image is tagged <none>. Need to delete by ID.
-            ref = this._item.Id;
+        // In this case, an image ending up with no tag needs to be deleted using the ID.
+        if (!this._item.image.image || !this._item.image.tag) {
+            ref = this._item.id;
         }
 
-        return ext.dockerClient.removeImage(context, ref);
+        await ext.runWithDefaultShell(client =>
+            client.removeImages({ imageRefs: [ref] })
+        );
     }
 
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'image';
-        return resolveTooltipMarkdown(imageTooltipTemplate, { NormalizedName: this.fullTag, NormalizedSize: getCommonPropertyValue(this._item, 'Size'), ...await ext.dockerClient.inspectImage(actionContext, this.imageId) });
+
+        // Allows some parallelization of the two commands
+        const imagePromise = ext.runWithDefaultShell(client =>
+            client.inspectImages({ imageRefs: [this.imageId] })
+        );
+        const containersPromise = ext.runWithDefaultShell(client =>
+            client.listContainers({ imageAncestors: [this.imageId] })
+        );
+
+        const imageInspection = (await imagePromise)?.[0];
+        const associatedContainers = await containersPromise;
+
+        const handlebarsContext = {
+            ...imageInspection,
+            normalizedName: this.fullTag,
+            normalizedSize: getCommonPropertyValue(this._item, 'Size'),
+            containers: associatedContainers
+        };
+        return resolveTooltipMarkdown(imageTooltipTemplate, handlebarsContext);
     }
 }
 
 const imageTooltipTemplate = `
-### {{ NormalizedName }} ({{ substr Id 7 12 }})
+### {{ normalizedName }} ({{ substr id 7 12 }})
 
 ---
 
 #### Size
-{{ NormalizedSize }}
+{{ normalizedSize }}
 
 ---
 
 #### Associated Containers
-{{#if (nonEmptyObj Containers)}}
-{{#each Containers}}
-  - {{ this.Name }} ({{ substr @key 0 12 }})
+{{#if (nonEmptyArr containers)}}
+{{#each containers}}
+  - {{ this.name }} ({{ substr this.id 0 12 }})
 {{/each}}
 {{else}}
 _None_
@@ -105,9 +127,9 @@ _None_
 ---
 
 #### Exposed Ports
-{{#if (nonEmptyObj Config.ExposedPorts)}}
-{{#each Config.ExposedPorts}}
-  - {{ @key }}
+{{#if (nonEmptyArr ports)}}
+{{#each ports}}
+  - {{ this.containerPort }} {{ this.protocol }}
 {{/each}}
 {{else}}
 _None_

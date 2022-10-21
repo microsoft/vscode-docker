@@ -72,9 +72,9 @@ export class PythonTaskHelper implements TaskHelper {
             const basename = path.basename(runOptions.file, '.py');
             const dirname = path.dirname(runOptions.file).replace(path.sep, '.');
             if (dirname !== '.') {
-              runOptions.args.unshift(`${dirname}.${basename}:app`);
+                runOptions.args.unshift(`${dirname}.${basename}:app`);
             } else {
-              runOptions.args.unshift(`${basename}:app`);
+                runOptions.args.unshift(`${basename}:app`);
             }
             runOptions.module = 'uvicorn';
             runOptions.file = undefined;
@@ -132,7 +132,7 @@ export class PythonTaskHelper implements TaskHelper {
         const dbgVolume: DockerContainerVolume = {
             localPath: launcherFolder,
             containerPath: '/debugpy',
-            permissions: 'ro,z'
+            permissions: 'ro'
         };
 
         addVolumeWithoutConflicts(volumes, dbgVolume);
