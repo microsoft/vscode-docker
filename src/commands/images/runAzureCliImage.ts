@@ -53,6 +53,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
                 imageRef: 'mcr.microsoft.com/azure-cli:latest',
                 removeOnExit: true,
                 mounts: volumes,
+                interactive: true,
             })
         );
     }
