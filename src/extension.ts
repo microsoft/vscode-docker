@@ -125,7 +125,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     // Don't wait
     void migrateOldEnvironmentSettingsIfNeeded();
 
-    return new DockerExtensionApi(ctx, ext.runtimeManager, ext.orchestratorManager);
+    return new DockerExtensionApi(ctx);
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
