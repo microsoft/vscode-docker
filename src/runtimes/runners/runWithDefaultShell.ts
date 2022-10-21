@@ -24,8 +24,8 @@ export async function runOrchestratorWithDefaultShellInternal<T>(callback: Clien
     );
 }
 
-// 'strict', 'stdErrPipe', and 'env' are set by this function and thus should not be included as arguments to the additional options
-type DefaultEnvShellStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'strict' | 'stdErrPipe' | 'env'>;
+// 'env', 'shellProvider', 'stdErrPipe', and 'strict' are set by this function and thus should not be included as arguments to the additional options
+type DefaultEnvShellStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'env' | 'shellProvider' | 'stdErrPipe' | 'strict'>;
 
 export async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T>,
