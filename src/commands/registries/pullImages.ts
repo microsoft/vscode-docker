@@ -17,7 +17,7 @@ export async function pullRepository(context: IActionContext, node?: RemoteRepos
         node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(registryExpectedContextValues.all.repository, context);
     }
 
-    await pullImages(context, node.parent, node.repoName + ' -a');
+    await pullImages(context, node.parent, node.repoName, true);
 }
 
 export async function pullImageFromRepository(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
@@ -25,10 +25,10 @@ export async function pullImageFromRepository(context: IActionContext, node?: Re
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.all.tag, context);
     }
 
-    await pullImages(context, node.parent.parent, node.repoNameAndTag);
+    await pullImages(context, node.parent.parent, node.repoNameAndTag, false);
 }
 
-async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string): Promise<void> {
+async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string, allTags: boolean): Promise<void> {
     await logInToDockerCli(context, node);
 
     const client = await ext.runtimeManager.getClient();
@@ -37,6 +37,11 @@ async function pullImages(context: IActionContext, node: RegistryTreeItemBase, i
     });
 
     await taskCRF.getCommandRunner()(
-        client.pullImage({ imageRef: `${node.baseImagePath}/${imageRequest}` })
+        client.pullImage(
+            {
+                imageRef: `${node.baseImagePath}/${imageRequest}`,
+                allTags: allTags,
+            }
+        )
     );
 }
