@@ -20,7 +20,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
     const stderrFinal = new AccumulatorStream();
 
     let stdinPipe: stream.Readable | undefined;
-    if (options.stdin) {
+    if (options?.stdin) {
         stdinPipe = stream.Readable.from(options.stdin);
     }
 
