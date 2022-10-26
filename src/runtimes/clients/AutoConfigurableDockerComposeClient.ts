@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ext } from '@microsoft/vscode-azext-azureappservice/out/src/extensionVariables';
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { execAsync } from '../../utils/execAsync';
 import { AsyncLazy } from '../../utils/lazy';
 import { DockerComposeClient, IContainerOrchestratorClient } from '../docker';
