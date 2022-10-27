@@ -69,7 +69,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
     protected failedToConnect: boolean = false;
 
     private _currentItems: TItem[] | undefined;
-    private _itemsFromPolling: TItem[] | undefined;
+    private _cachedItems: TItem[] | undefined;
     private _currentDockerStatus: DockerStatus;
 
     public get contextValue(): string {
@@ -308,32 +308,16 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
     }
 
     private async getCachedItems(context: IActionContext, clearCache: boolean): Promise<TItem[]> {
-        if (clearCache || !this._itemsFromPolling) {
+        if (clearCache || !this._cachedItems) {
             if (ext.treeInitError === undefined) {
                 const items: TItem[] = await this.getItems(context) || [];
-                this._itemsFromPolling = items.sort((a, b) => getTreeId(a).localeCompare(getTreeId(b)));
+                this._cachedItems = items.sort((a, b) => getTreeId(a).localeCompare(getTreeId(b)));
             } else {
                 throw ext.treeInitError;
             }
         }
 
-        return this._itemsFromPolling;
-    }
-
-    protected areArraysEqual(array1: TItem[] | undefined, array2: TItem[] | undefined): boolean {
-        if (array1 === array2) {
-            return true;
-        } else if (array1 && array2) {
-            if (array1.length !== array2.length) {
-                return false;
-            } else {
-                return !array1.some((item1, index) => {
-                    return getTreeId(item1) !== getTreeId(array2[index]);
-                });
-            }
-        } else {
-            return false;
-        }
+        return this._cachedItems;
     }
 
     private showDockerInstallNotificationIfNeeded(): void {
