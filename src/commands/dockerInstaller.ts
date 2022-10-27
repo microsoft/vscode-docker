@@ -4,15 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import * as fse from 'fs-extra';
 import * as vscode from 'vscode';
-import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { TaskCommandRunnerFactory } from '../runtimes/runners/TaskCommandRunnerFactory';
 import { runtimeInstallStatusProvider } from '../utils/RuntimeInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
 import { getTempFileName, isArm64Mac, isLinux } from '../utils/osUtils';
-import { execAsync } from '../utils/execAsync';
 
 export abstract class DockerInstallerBase {
     protected abstract downloadUrl: string;
@@ -89,15 +86,18 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
         return `"${fileName}"`;
     }
 
-    protected async install(context: IActionContext, fileName: string, cmd: string): Promise<void> {
-        try {
-            ext.outputChannel.appendLine(localize('vscode-docker.commands.DockerInstallerBase.downloadCompleteMessage', 'Executing command {0}', cmd));
-            await execAsync(cmd);
-        } finally {
-            if (await fse.pathExists(fileName)) {
-                await fse.unlink(fileName);
-            }
-        }
+    protected async install(context: IActionContext, fileName: string): Promise<void> {
+        const title = localize('vscode-docker.commands.WindowsDockerInstaller.terminalTitle', 'Docker Install');
+        const command = this.getInstallCommand(fileName);
+
+        const taskCRF = new TaskCommandRunnerFactory({
+            taskName: title,
+        });
+
+        await taskCRF.getCommandRunner()({
+            command: command,
+            args: undefined,
+        });
     }
 }
 
