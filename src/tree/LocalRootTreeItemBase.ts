@@ -20,6 +20,7 @@ import { ITreeSettingWizardInfo, ITreeSettingsWizardContext } from "./settings/I
 import { TreeSettingListStep } from "./settings/TreeSettingListStep";
 import { TreeSettingStep } from "./settings/TreeSettingStep";
 import { DatedDockerImage } from "./images/ImagesTreeItem";
+import { TreePrefix } from "./TreePrefix";
 
 type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 
@@ -48,7 +49,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
         defaultProperty: 'CreatedTime',
     };
 
-    public abstract treePrefix: string;
+    public abstract treePrefix: TreePrefix;
     public abstract configureExplorerTitle: string;
     public abstract childType: LocalChildType<TItem>;
     public abstract childGroupType: LocalChildGroupType<TItem, TProperty>;

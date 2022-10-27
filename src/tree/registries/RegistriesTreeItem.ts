@@ -7,6 +7,7 @@ import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActi
 import { ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
 import { localize } from '../../localize';
+import { TreePrefix } from "../TreePrefix";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";
 import { IConnectRegistryWizardContext } from "./connectWizard/IConnectRegistryWizardContext";
@@ -22,6 +23,7 @@ import { RegistryTreeItemBase } from "./RegistryTreeItemBase";
 const providersKey = 'docker.registryProviders';
 
 export class RegistriesTreeItem extends AzExtParentTreeItem {
+    public treePrefix: TreePrefix = 'registries';
     public static contextValue: string = 'registries';
     public contextValue: string = RegistriesTreeItem.contextValue;
     public label: string = localize('vscode-docker.tree.registries.registriesLabel', 'Registries');

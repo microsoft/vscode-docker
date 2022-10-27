@@ -15,13 +15,14 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
 import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
+import { TreePrefix } from "../TreePrefix";
 
 export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;
 };
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
-    public treePrefix: string = 'containers';
+    public treePrefix: TreePrefix = 'containers';
     public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
     public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
 

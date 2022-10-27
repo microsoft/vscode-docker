@@ -15,6 +15,7 @@ import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
 import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
+import { TreePrefix } from "../TreePrefix";
 
 export interface DatedDockerImage extends ListImagesItem {
     outdated?: boolean;
@@ -31,7 +32,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
         });
     }
 
-    public treePrefix: string = 'images';
+    public treePrefix: TreePrefix = 'images';
     public label: string = localize('vscode-docker.tree.images.label', 'Images');
     public configureExplorerTitle: string = localize('vscode-docker.tree.images.configure', 'Configure images explorer');
 
