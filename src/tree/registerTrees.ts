@@ -13,6 +13,7 @@ import { HelpsTreeItem } from './help/HelpsTreeItem';
 import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { NetworksTreeItem } from "./networks/NetworksTreeItem";
 import { OpenUrlTreeItem } from './OpenUrlTreeItem';
+import { RefreshManager } from './RefreshManager';
 import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
 import { VolumesTreeItem } from "./volumes/VolumesTreeItem";
 
@@ -72,4 +73,7 @@ export function registerTrees(): void {
 
     // Allows OpenUrlTreeItem to open URLs
     registerCommand('vscode-docker.openUrl', async (context: IActionContext, node: OpenUrlTreeItem) => node.openUrl());
+
+    // Register the refresh manager
+    ext.context.subscriptions.push(new RefreshManager());
 }
