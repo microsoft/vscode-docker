@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem, callWithTelemetryAndErrorHandling, IActionContext, parseError, registerCommand } from '@microsoft/vscode-azext-utils';
+import * as os from 'os';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
@@ -14,7 +15,7 @@ const pollingIntervalMs = 60 * 1000; // One minute
 const eventListenerTries = 3; // The event listener will try at most 3 times to connect for events
 
 type RefreshTarget = AzExtTreeItem | TreePrefix;
-type RefreshReason = 'interval' | 'event' | 'config' | 'manual';
+type RefreshReason = 'interval' | 'event' | 'config' | 'manual' | 'contextChange';
 
 export class RefreshManager extends vscode.Disposable {
     private readonly disposables: vscode.Disposable[] = [];
@@ -30,11 +31,17 @@ export class RefreshManager extends vscode.Disposable {
         this.setupRefreshOnRuntimeEvent();
         this.setupRefreshOnConfigurationChange();
         this.setupRefreshOnCommand();
+        this.setupRefreshOnDockerConfigurationChange();
+        this.setupRefreshOnContextChange();
     }
 
     private setupRefreshOnInterval(): void {
         const timer = setInterval(async () => {
             for (const view of AllTreePrefixes) {
+                // Skip the registries view, which does not need to be refreshed on an interval
+                if (view === 'registries') {
+                    continue;
+                }
                 await this.refresh(view, 'interval');
             }
         }, pollingIntervalMs);
@@ -119,6 +126,86 @@ export class RefreshManager extends vscode.Disposable {
                 await this.refresh(view, 'manual');
             });
         }
+    }
+
+    private setupRefreshOnDockerConfigurationChange(): void {
+        // Docker events do not include context change information, so we set up some filesystem listeners to watch
+        // for changes to the Docker config file, which will be triggered by context changes
+
+        void callWithTelemetryAndErrorHandling('vscode-docker.tree.dockerConfigRefresh', async (context: IActionContext) => {
+            context.errorHandling.suppressDisplay = true;
+            context.telemetry.suppressIfSuccessful = true;
+
+            const dockerConfigFolderUri = vscode.Uri.joinPath(vscode.Uri.file(os.homedir()), '.docker');
+            const dockerConfigFile = 'config.json';
+            const dockerConfigFileUri = vscode.Uri.joinPath(dockerConfigFolderUri, dockerConfigFile);
+            const dockerContextsFolderUri = vscode.Uri.joinPath(dockerConfigFolderUri, 'contexts', 'meta');
+
+            try {
+                // Ensure the file exists--this will throw if it does not
+                await vscode.workspace.fs.stat(dockerConfigFileUri);
+
+                const configWatcher = vscode.workspace.createFileSystemWatcher(
+                    new vscode.RelativePattern(dockerConfigFolderUri, dockerConfigFile),
+                    true,
+                    false,
+                    true
+                );
+                this.disposables.push(configWatcher);
+
+                // Changes to this file tend to happen several times in succession, so we debounce
+                const debounceTimerMs = 500;
+                let lastTime = Date.now();
+                this.disposables.push(configWatcher.onDidChange(async () => {
+                    if (Date.now() - lastTime < debounceTimerMs) {
+                        return;
+                    }
+                    lastTime = Date.now();
+
+                    await this.refresh('contexts', 'event');
+                }));
+            } catch {
+                // Ignore
+            }
+
+            try {
+                // Ensure the folder exists--this will throw if it does not
+                await vscode.workspace.fs.stat(dockerContextsFolderUri);
+
+                const contextWatcher = vscode.workspace.createFileSystemWatcher(
+                    new vscode.RelativePattern(dockerContextsFolderUri, '*'),
+                    false,
+                    true,
+                    false
+                );
+                this.disposables.push(contextWatcher);
+
+                this.disposables.push(contextWatcher.onDidCreate(async () => {
+                    await this.refresh('contexts', 'event');
+                }));
+
+                this.disposables.push(contextWatcher.onDidDelete(async () => {
+                    await this.refresh('contexts', 'event');
+                }));
+            } catch {
+                // Ignore
+            }
+        });
+    }
+
+    private setupRefreshOnContextChange(): void {
+        this.disposables.push(
+            ext.runtimeManager.contextManager.onContextChanged(async () => {
+                for (const view of AllTreePrefixes) {
+                    // Refresh all except contexts, which would already have been refreshed
+                    // And registries, which does not need to be refreshed on context change
+                    if (view === 'contexts' || view === 'registries') {
+                        continue;
+                    }
+                    await this.refresh(view, 'contextChange');
+                }
+            })
+        );
     }
 
     private refresh(target: RefreshTarget, reason: RefreshReason): Promise<void> {
