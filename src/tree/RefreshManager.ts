@@ -17,18 +17,11 @@ type RefreshTarget = AzExtTreeItem | TreePrefix;
 type RefreshReason = 'interval' | 'event' | 'config' | 'manual';
 
 export class RefreshManager extends vscode.Disposable {
-    private readonly refreshEmitter = new vscode.EventEmitter<[RefreshTarget, RefreshReason]>();
     private readonly disposables: vscode.Disposable[] = [];
     private readonly cts: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
 
     public constructor() {
         super(() => vscode.Disposable.from(...this.disposables).dispose());
-
-        this.disposables.push(
-            this.refreshEmitter.event(async ([target, reason]) => {
-                await this.refresh(target, reason);
-            })
-        );
 
         // VSCode does *not* cancel by default on disposal of a CancellationTokenSource, so we need to manually cancel
         this.disposables.unshift(new vscode.Disposable(() => this.cts.cancel()));
@@ -42,11 +35,10 @@ export class RefreshManager extends vscode.Disposable {
     private setupRefreshOnInterval(): void {
         const timer = setInterval(async () => {
             for (const view of AllTreePrefixes) {
-                this.refreshEmitter.fire([view, 'interval']);
+                await this.refresh(view, 'interval');
             }
         }, pollingIntervalMs);
 
-        // Put the interval emitter at the front so it gets disposed earlier
         this.disposables.push(new vscode.Disposable(
             () => clearInterval(timer)
         ));
@@ -66,19 +58,19 @@ export class RefreshManager extends vscode.Disposable {
                     for await (const event of eventGenerator) {
                         switch (event.Type) {
                             case 'container':
-                                this.refreshEmitter.fire(['containers', 'event']);
+                                await this.refresh('containers', 'event');
                                 break;
                             case 'network':
-                                this.refreshEmitter.fire(['networks', 'event']);
+                                await this.refresh('networks', 'event');
                                 break;
                             case 'image':
-                                this.refreshEmitter.fire(['images', 'event']);
+                                await this.refresh('images', 'event');
                                 break;
                             case 'volume':
-                                this.refreshEmitter.fire(['volumes', 'event']);
+                                await this.refresh('volumes', 'event');
                                 break;
                             case 'context':
-                                this.refreshEmitter.fire(['contexts', 'event']);
+                                await this.refresh('contexts', 'event');
                                 break;
                             default:
                                 // Ignore other events
@@ -110,10 +102,10 @@ export class RefreshManager extends vscode.Disposable {
 
     private setupRefreshOnConfigurationChange(): void {
         this.disposables.push(
-            vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+            vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
                 for (const view of AllTreePrefixes) {
                     if (e.affectsConfiguration(`docker.${view}`)) {
-                        this.refreshEmitter.fire([view, 'config']);
+                        await this.refresh(view, 'config');
                     }
                 }
             })
@@ -123,16 +115,16 @@ export class RefreshManager extends vscode.Disposable {
     private setupRefreshOnCommand(): void {
         for (const view of AllTreePrefixes) {
             // Because `registerCommand` pushes the disposables onto the `ext.context.subscriptions` array, we don't need to keep track of them
-            registerCommand(`vscode-docker.${view}.refresh`, () => {
-                this.refreshEmitter.fire([view, 'manual']);
+            registerCommand(`vscode-docker.${view}.refresh`, async () => {
+                await this.refresh(view, 'manual');
             });
         }
     }
 
-    private refresh(target: RefreshTarget, reason: 'interval' | 'event' | 'config' | 'manual'): Promise<void> {
+    private refresh(target: RefreshTarget, reason: RefreshReason): Promise<void> {
         return callWithTelemetryAndErrorHandling('vscode-docker.tree.refresh', async (context: IActionContext) => {
-            context.telemetry.properties.refreshReason = reason;
             context.errorHandling.suppressDisplay = true;
+            context.telemetry.properties.refreshReason = reason;
 
             if (isAzExtTreeItem(target)) {
                 context.telemetry.properties.refreshTarget = 'node';
@@ -155,8 +147,6 @@ export class RefreshManager extends vscode.Disposable {
                     default:
                         throw new RangeError(`Unexpected view type: ${target}`);
                 }
-            } else {
-                context.telemetry.properties.refreshTarget = 'none';
             }
         });
     }
