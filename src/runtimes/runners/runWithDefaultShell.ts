@@ -45,6 +45,7 @@ export async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     const client: TClient = await runtimeManager.getClient();
 
     try {
+        // TODO: runtimes: streaming: fix this
         return await factory.getCommandRunner()(
             callback(client)
         );
