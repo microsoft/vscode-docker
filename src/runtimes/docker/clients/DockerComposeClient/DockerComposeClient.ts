@@ -121,7 +121,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
             withComposeArg(this.composeV2),
             withCommonOrchestratorArgs(options),
             withArg('down'),
-            withNamedArg('--images', options.removeImages),
+            withNamedArg('--rmi', options.removeImages),
             withFlagArg('--volumes', options.removeVolumes),
             withNamedArg('--timeout', options.timeoutSeconds?.toString(10)),
             withArg(options.customOptions),
