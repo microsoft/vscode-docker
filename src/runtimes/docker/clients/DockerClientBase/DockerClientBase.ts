@@ -7,14 +7,17 @@ import * as dayjs from 'dayjs';
 import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as utc from 'dayjs/plugin/utc';
 import * as path from 'path';
+import * as readline from 'readline';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
-import { CommandResponse } from '../../contracts/CommandRunner';
+import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
     CheckInstallCommandOptions,
     ContainersStatsCommandOptions,
     CreateNetworkCommandOptions,
     CreateVolumeCommandOptions,
+    EventItem,
+    EventStreamCommandOptions,
     ExecContainerCommandOptions,
     IContainersClient,
     ImageNameInfo,
@@ -75,7 +78,9 @@ import {
     VersionItem,
     WriteFileCommandOptions
 } from "../../contracts/ContainerClient";
+import { CancellationTokenLike } from '../../typings/CancellationTokenLike';
 import { asIds } from '../../utils/asIds';
+import { CancellationError } from '../../utils/CancellationError';
 import {
     CommandLineArgs,
     composeArgs,
@@ -85,8 +90,10 @@ import {
     withQuotedArg,
 } from "../../utils/commandLineBuilder";
 import { CommandNotSupportedError } from '../../utils/CommandNotSupportedError';
+import { byteStreamToGenerator, stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { toArray } from '../../utils/toArray';
 import { ConfigurableClient } from '../ConfigurableClient';
+import { DockerEventRecord, isDockerEventRecord } from './DockerEventRecord';
 import { DockerInfoRecord, isDockerInfoRecord } from './DockerInfoRecord';
 import { DockerInspectContainerRecord, isDockerInspectContainerRecord } from './DockerInspectContainerRecord';
 import { DockerInspectImageRecord, isDockerInspectImageRecord } from './DockerInspectImageRecord';
@@ -168,7 +175,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         };
     }
 
-    async info(options: InfoCommandOptions): Promise<CommandResponse<InfoItem>> {
+    async info(options: InfoCommandOptions): Promise<PromiseCommandResponse<InfoItem>> {
         return {
             command: this.commandName,
             args: this.getInfoCommandArgs(options),
@@ -211,7 +218,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @param options Standard version command options
      * @returns A CommandResponse object indicating how to run and parse a version command for this runtime
      */
-    async version(options: VersionCommandOptions): Promise<CommandResponse<VersionItem>> {
+    async version(options: VersionCommandOptions): Promise<PromiseCommandResponse<VersionItem>> {
         return {
             command: this.commandName,
             args: this.getVersionCommandArgs(options),
@@ -236,11 +243,87 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @returns A CommandResponse object indicating how to run and parse an install check
      * command for this runtime
      */
-    async checkInstall(options: CheckInstallCommandOptions): Promise<CommandResponse<string>> {
+    async checkInstall(options: CheckInstallCommandOptions): Promise<PromiseCommandResponse<string>> {
         return {
             command: this.commandName,
             args: this.getCheckInstallCommandArgs(options),
             parse: (output) => Promise.resolve(output),
+        };
+    }
+
+    protected getEventStreamCommandArgs(
+        options: EventStreamCommandOptions,
+        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerEventRecord>>,
+    ): CommandLineArgs {
+        return composeArgs(
+            withArg('events'),
+            withNamedArg('--since', options.since),
+            withNamedArg('--until', options.until),
+            withDockerLabelFilterArgs(options.labels),
+            withNamedArg('--filter', options.types?.map((type) => `type=${type}`)),
+            withNamedArg('--filter', options.events?.map((event) => `event=${event}`)),
+            withNamedArg(
+                '--format',
+                // By specifying an explicit Go template format output, we're able to use the same normalization logic
+                // for both Docker and Podman clients
+                goTemplateJsonFormat<DockerEventRecord>(
+                    options.shellProvider, {
+                    Type: goTemplateJsonProperty`.Type`,
+                    Action: goTemplateJsonProperty`.Action`,
+                    Actor: goTemplateJsonProperty`.Actor`,
+                    Time: goTemplateJsonProperty`.Time`,
+                    Raw: goTemplateJsonProperty`.`,
+                })
+            ),
+        )();
+    }
+
+    protected async *parseEventStreamCommandOutput(
+        options: EventStreamCommandOptions,
+        output: NodeJS.ReadableStream,
+        strict: boolean,
+        cancellationToken?: CancellationTokenLike
+    ): AsyncGenerator<EventItem> {
+        cancellationToken ||= CancellationTokenLike.None;
+
+        const lineReader = readline.createInterface({
+            input: output,
+            crlfDelay: Infinity,
+        });
+
+        for await (const line of lineReader) {
+            if (cancellationToken.isCancellationRequested) {
+                throw new CancellationError('Event stream cancelled', cancellationToken);
+            }
+
+            try {
+                // Parse a line at a time
+                const item: DockerEventRecord = JSON.parse(line);
+                if (!isDockerEventRecord(item)) {
+                    throw new Error('Invalid event JSON');
+                }
+
+                // Yield the parsed data
+                yield {
+                    type: item.Type,
+                    action: item.Action,
+                    actor: { id: item.Actor.ID, attributes: item.Actor.Attributes },
+                    timestamp: new Date(item.Time),
+                    raw: JSON.stringify(item.Raw),
+                };
+            } catch (err) {
+                if (strict) {
+                    throw err;
+                }
+            }
+        }
+    }
+
+    async getEventStream(options: EventStreamCommandOptions): Promise<GeneratorCommandResponse<EventItem>> {
+        return {
+            command: this.commandName,
+            args: this.getEventStreamCommandArgs(options),
+            parseStream: (output, strict) => this.parseEventStreamCommandOutput(options, output, strict),
         };
     }
 
@@ -257,7 +340,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async login(options: LoginCommandOptions): Promise<CommandResponse<void>> {
+    async login(options: LoginCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getLoginCommandArgs(options),
@@ -271,7 +354,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async logout(options: LogoutCommandOptions): Promise<CommandResponse<void>> {
+    async logout(options: LogoutCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getLogoutCommandArgs(options),
@@ -314,7 +397,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @param options Standard build image command options
      * @returns A CommandResponse object that can be used to invoke and parse the build image command for the current runtime
      */
-    async buildImage(options: BuildImageCommandOptions): Promise<CommandResponse<void>> {
+    async buildImage(options: BuildImageCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getBuildImageCommandArgs(options),
@@ -410,7 +493,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @param options Standard list images command options
      * @returns A CommandResponse indicating how to run and parse/normalize a list image command for a Docker-like client
      */
-    async listImages(options: ListImagesCommandOptions): Promise<CommandResponse<Array<ListImagesItem>>> {
+    async listImages(options: ListImagesCommandOptions): Promise<PromiseCommandResponse<Array<ListImagesItem>>> {
         return {
             command: this.commandName,
             args: this.getListImagesCommandArgs(options),
@@ -438,7 +521,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return asIds(output);
     }
 
-    async removeImages(options: RemoveImagesCommandOptions): Promise<CommandResponse<string[]>> {
+    async removeImages(options: RemoveImagesCommandOptions): Promise<PromiseCommandResponse<string[]>> {
         return {
             command: this.commandName,
             args: this.getRemoveImagesCommandArgs(options),
@@ -457,7 +540,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async pushImage(options: PushImageCommandOptions): Promise<CommandResponse<void>> {
+    async pushImage(options: PushImageCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getPushImageCommandArgs(options),
@@ -485,7 +568,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return Promise.resolve({});
     }
 
-    async pruneImages(options: PruneImagesCommandOptions): Promise<CommandResponse<PruneImagesItem>> {
+    async pruneImages(options: PruneImagesCommandOptions): Promise<PromiseCommandResponse<PruneImagesItem>> {
         return {
             command: this.commandName,
             args: this.getPruneImagesCommandArgs(options),
@@ -516,19 +599,10 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    protected parsePullImageCommandOutput(
-        options: PullImageCommandOptions,
-        output: string,
-        strict: boolean,
-    ): Promise<void> {
-        return Promise.resolve();
-    }
-
-    async pullImage(options: PullImageCommandOptions): Promise<CommandResponse<void>> {
+    async pullImage(options: PullImageCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getPullImageCommandArgs(options),
-            parse: (output, strict) => this.parsePullImageCommandOutput(options, output, strict),
         };
     }
 
@@ -543,7 +617,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async tagImage(options: TagImageCommandOptions): Promise<CommandResponse<void>> {
+    async tagImage(options: TagImageCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getTagImageCommandArgs(options),
@@ -712,7 +786,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return new Array<InspectImagesItem>();
     }
 
-    async inspectImages(options: InspectImagesCommandOptions): Promise<CommandResponse<Array<InspectImagesItem>>> {
+    async inspectImages(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>> {
         return {
             command: this.commandName,
             args: this.getInspectImagesCommandArgs(options),
@@ -778,7 +852,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @param options Standard run container command options
      * @returns A CommandResponse object for a Docker-like run container command
      */
-    async runContainer(options: RunContainerCommandOptions): Promise<CommandResponse<string | undefined>> {
+    async runContainer(options: RunContainerCommandOptions): Promise<PromiseCommandResponse<string | undefined>> {
         return {
             command: this.commandName,
             args: this.getRunContainerCommandArgs(options),
@@ -802,19 +876,11 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    protected parseExecContainerCommandOutput(
-        options: ExecContainerCommandOptions,
-        output: string,
-        strict: boolean,
-    ): Promise<string> {
-        return Promise.resolve(output);
-    }
-
-    async execContainer(options: ExecContainerCommandOptions): Promise<CommandResponse<string>> {
+    async execContainer(options: ExecContainerCommandOptions): Promise<GeneratorCommandResponse<string>> {
         return {
             command: this.commandName,
             args: this.getExecContainerCommandArgs(options),
-            parse: (output, strict) => this.parseExecContainerCommandOutput(options, output, strict),
+            parseStream: (output, strict) => stringStreamToGenerator(output),
         };
     }
 
@@ -929,7 +995,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return containers;
     }
 
-    async listContainers(options: ListContainersCommandOptions): Promise<CommandResponse<Array<ListContainersItem>>> {
+    async listContainers(options: ListContainersCommandOptions): Promise<PromiseCommandResponse<Array<ListContainersItem>>> {
         return {
             command: this.commandName,
             args: this.getListContainersCommandArgs(options),
@@ -956,7 +1022,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return asIds(output);
     }
 
-    async startContainers(options: StartContainersCommandOptions): Promise<CommandResponse<Array<string>>> {
+    async startContainers(options: StartContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>> {
         return {
             command: this.commandName,
             args: this.getStartContainersCommandArgs(options),
@@ -983,7 +1049,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return asIds(output);
     }
 
-    async restartContainers(options: RestartContainersCommandOptions): Promise<CommandResponse<Array<string>>> {
+    async restartContainers(options: RestartContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>> {
         return {
             command: this.commandName,
             args: this.getRestartContainersCommandArgs(options),
@@ -1023,7 +1089,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return asIds(output);
     }
 
-    async stopContainers(options: StopContainersCommandOptions): Promise<CommandResponse<Array<string>>> {
+    async stopContainers(options: StopContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>> {
         return {
             command: this.commandName,
             args: this.getStopContainersCommandArgs(options),
@@ -1051,7 +1117,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return asIds(output);
     }
 
-    async removeContainers(options: RemoveContainersCommandOptions): Promise<CommandResponse<Array<string>>> {
+    async removeContainers(options: RemoveContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>> {
         return {
             command: this.commandName,
             args: this.getRemoveContainersCommandArgs(options),
@@ -1079,7 +1145,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return {};
     }
 
-    async pruneContainers(options: PruneContainersCommandOptions): Promise<CommandResponse<PruneContainersItem>> {
+    async pruneContainers(options: PruneContainersCommandOptions): Promise<PromiseCommandResponse<PruneContainersItem>> {
         return {
             command: this.commandName,
             args: this.getPruneContainersCommandArgs(options),
@@ -1106,7 +1172,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return output;
     }
 
-    async statsContainers(options: ContainersStatsCommandOptions): Promise<CommandResponse<string>> {
+    async statsContainers(options: ContainersStatsCommandOptions): Promise<PromiseCommandResponse<string>> {
         throw new CommandNotSupportedError('statsContainers is not supported for this runtime');
     }
 
@@ -1133,31 +1199,15 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     }
 
     /**
-     * Parse the standard out from running a log container command on a
-     * Docker-like client
-     * @param options Options for the log container command
-     * @param output The standard output from running the command
-     * @param strict Should strict parsing be used?
-     * @returns An empty promise
-     */
-    protected parseLogsForContainerCommandOutput(
-        options: LogsForContainerCommandOptions,
-        output: string,
-        strict: boolean,
-    ): Promise<void> {
-        return Promise.resolve();
-    }
-
-    /**
      * Generate a CommandResponse object for a Docker-like log container command
      * @param options Options for the log container command
      * @returns The CommandResponse object for the log container command
      */
-    async logsForContainer(options: LogsForContainerCommandOptions): Promise<CommandResponse<void>> {
+    async logsForContainer(options: LogsForContainerCommandOptions): Promise<GeneratorCommandResponse<string>> {
         return {
             command: this.commandName,
             args: this.getLogsForContainerCommandArgs(options),
-            parse: (output, strict) => this.parseLogsForContainerCommandOutput(options, output, strict),
+            parseStream: (output, strict) => stringStreamToGenerator(output),
         };
     }
 
@@ -1365,7 +1415,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     async inspectContainers(
         options: InspectContainersCommandOptions,
-    ): Promise<CommandResponse<InspectContainersItem[]>> {
+    ): Promise<PromiseCommandResponse<InspectContainersItem[]>> {
         return {
             command: this.commandName,
             args: this.getInspectContainersCommandArgs(options),
@@ -1390,19 +1440,10 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    protected parseCreateVolumeCommandOutput(
-        options: CreateVolumeCommandOptions,
-        output: string,
-        strict: boolean,
-    ): Promise<void> {
-        return Promise.resolve();
-    }
-
-    async createVolume(options: CreateVolumeCommandOptions): Promise<CommandResponse<void>> {
+    async createVolume(options: CreateVolumeCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getCreateVolumeCommandArgs(options),
-            parse: (output, strict) => this.parseCreateVolumeCommandOutput(options, output, strict),
         };
     }
 
@@ -1480,7 +1521,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return volumes;
     }
 
-    async listVolumes(options: ListVolumesCommandOptions): Promise<CommandResponse<ListVolumeItem[]>> {
+    async listVolumes(options: ListVolumesCommandOptions): Promise<PromiseCommandResponse<ListVolumeItem[]>> {
         return {
             command: this.commandName,
             args: this.getListVolumesCommandArgs(options),
@@ -1527,7 +1568,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      * @param options Options for remove volumes command
      * @returns CommandResponse for the remove volumes command
      */
-    async removeVolumes(options: RemoveVolumesCommandOptions): Promise<CommandResponse<string[]>> {
+    async removeVolumes(options: RemoveVolumesCommandOptions): Promise<PromiseCommandResponse<string[]>> {
         return {
             command: this.commandName,
             args: this.getRemoveVolumesCommandArgs(options),
@@ -1555,7 +1596,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return {};
     }
 
-    async pruneVolumes(options: PruneVolumesCommandOptions): Promise<CommandResponse<PruneVolumesItem>> {
+    async pruneVolumes(options: PruneVolumesCommandOptions): Promise<PromiseCommandResponse<PruneVolumesItem>> {
         return {
             command: this.commandName,
             args: this.getPruneVolumesCommandArgs(options),
@@ -1649,7 +1690,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return new Array<InspectVolumesItem>();
     }
 
-    async inspectVolumes(options: InspectVolumesCommandOptions): Promise<CommandResponse<Array<InspectVolumesItem>>> {
+    async inspectVolumes(options: InspectVolumesCommandOptions): Promise<PromiseCommandResponse<Array<InspectVolumesItem>>> {
         return {
             command: this.commandName,
             args: this.getInspectVolumesCommandArgs(options),
@@ -1673,7 +1714,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async createNetwork(options: CreateNetworkCommandOptions): Promise<CommandResponse<void>> {
+    async createNetwork(options: CreateNetworkCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getCreateNetworkCommandArgs(options),
@@ -1763,7 +1804,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return networks;
     }
 
-    async listNetworks(options: ListNetworksCommandOptions): Promise<CommandResponse<Array<ListNetworkItem>>> {
+    async listNetworks(options: ListNetworksCommandOptions): Promise<PromiseCommandResponse<Array<ListNetworkItem>>> {
         return {
             command: this.commandName,
             args: this.getListNetworksCommandArgs(options),
@@ -1791,7 +1832,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return output.split('\n').map((id) => id);
     }
 
-    async removeNetworks(options: RemoveNetworksCommandOptions): Promise<CommandResponse<Array<string>>> {
+    async removeNetworks(options: RemoveNetworksCommandOptions): Promise<PromiseCommandResponse<Array<string>>> {
         return {
             command: this.commandName,
             args: this.getRemoveNetworksCommandArgs(options),
@@ -1819,7 +1860,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return {};
     }
 
-    async pruneNetworks(options: PruneNetworksCommandOptions): Promise<CommandResponse<PruneNetworksItem>> {
+    async pruneNetworks(options: PruneNetworksCommandOptions): Promise<PromiseCommandResponse<PruneNetworksItem>> {
         return {
             command: this.commandName,
             args: this.getPruneNetworksCommandArgs(options),
@@ -1927,7 +1968,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return new Array<InspectNetworksItem>();
     }
 
-    async inspectNetworks(options: InspectNetworksCommandOptions): Promise<CommandResponse<InspectNetworksItem[]>> {
+    async inspectNetworks(options: InspectNetworksCommandOptions): Promise<PromiseCommandResponse<InspectNetworksItem[]>> {
         return {
             command: this.commandName,
             args: this.getInspectNetworksCommandArgs(options),
@@ -1943,7 +1984,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region ListContexts Command
 
-    async listContexts(options: ListContextsCommandOptions): Promise<CommandResponse<ListContextItem[]>> {
+    async listContexts(options: ListContextsCommandOptions): Promise<PromiseCommandResponse<ListContextItem[]>> {
         throw new CommandNotSupportedError('listContexts is not supported for this runtime');
     }
 
@@ -1951,7 +1992,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region RemoveContexts Command
 
-    async removeContexts(options: RemoveContextsCommandOptions): Promise<CommandResponse<string[]>> {
+    async removeContexts(options: RemoveContextsCommandOptions): Promise<PromiseCommandResponse<string[]>> {
         throw new CommandNotSupportedError('removeContexts is not supported for this runtime');
     }
 
@@ -1959,7 +2000,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region UseContext Command
 
-    async useContext(options: UseContextCommandOptions): Promise<CommandResponse<void>> {
+    async useContext(options: UseContextCommandOptions): Promise<VoidCommandResponse> {
         throw new CommandNotSupportedError('useContext is not supported for this runtime');
     }
 
@@ -1967,7 +2008,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region InspectContexts Command
 
-    async inspectContexts(options: InspectContextsCommandOptions): Promise<CommandResponse<InspectContextsItem[]>> {
+    async inspectContexts(options: InspectContextsCommandOptions): Promise<PromiseCommandResponse<InspectContextsItem[]>> {
         throw new CommandNotSupportedError('inspectContexts is not supported for this runtime');
     }
 
@@ -2018,7 +2059,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         }
     }
 
-    async listFiles(options: ListFilesCommandOptions): Promise<CommandResponse<ListFilesItem[]>> {
+    async listFiles(options: ListFilesCommandOptions): Promise<PromiseCommandResponse<ListFilesItem[]>> {
         return {
             command: this.commandName,
             args: this.getListFilesCommandArgs(options),
@@ -2053,15 +2094,15 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             return composeArgs(
                 withArg('cp'),
                 withContainerPathArg(options),
-                withArg(options.outputFile || '-'),
             )();
         }
     }
 
-    async readFile(options: ReadFileCommandOptions): Promise<CommandResponse<void>> {
+    async readFile(options: ReadFileCommandOptions): Promise<GeneratorCommandResponse<Buffer>> {
         return {
             command: this.commandName,
             args: this.getReadFileCommandArgs(options),
+            parseStream: (output, strict) => byteStreamToGenerator(output),
         };
     }
 
@@ -2077,7 +2118,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         )();
     }
 
-    async writeFile(options: WriteFileCommandOptions): Promise<CommandResponse<void>> {
+    async writeFile(options: WriteFileCommandOptions): Promise<VoidCommandResponse> {
         if (options.operatingSystem === 'windows') {
             throw new CommandNotSupportedError('Writing files is not supported on Windows containers.');
         }

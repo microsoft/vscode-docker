@@ -5,27 +5,46 @@
 
 import { CommandLineArgs } from '../utils/commandLineBuilder';
 
+type CommandResponseBase = {
+    command: string;
+    args: CommandLineArgs;
+};
+
+export type PromiseCommandResponse<T> = CommandResponseBase & {
+    parse: (output: string, strict: boolean) => Promise<T>;
+};
+
+export type GeneratorCommandResponse<T> = CommandResponseBase & {
+    parseStream: (output: NodeJS.ReadableStream, strict: boolean) => AsyncGenerator<T>;
+};
+
+export type VoidCommandResponse = CommandResponseBase & {
+    parse?: never;
+    parseStream?: never;
+};
+
 /**
  * A CommandResponse record provides instructions on how to invoke a command
  * and a parse callback that can be used to parse and normalize the standard
  * output from invoking the command. This is the standard type returned by all
  * commands defined by the IContainersClient interface.
- *
- * Parse will not be implemented for streaming operations, like container logs
- * or files.
  */
-export type CommandResponse<T> = {
-    command: string;
-    args: CommandLineArgs;
-    parse?: (output: string, strict: boolean) => Promise<T>;
-};
+export type CommandResponse<T> = PromiseCommandResponse<T> | GeneratorCommandResponse<T> | VoidCommandResponse;
 
-export type CommandResponseLike<T> = CommandResponse<T> | Promise<CommandResponse<T>> | (() => CommandResponse<T> | Promise<CommandResponse<T>>);
+
+export type Like<T> = T | Promise<T> | (() => T | Promise<T>);
 
 /**
  * A {@link CommandRunner} provides instructions on how to invoke a command
  */
-export type CommandRunner = <T>(commandResponse: CommandResponseLike<T>) => Promise<T>;
+export type CommandRunner =
+    (<T>(commandResponseLike: Like<PromiseCommandResponse<T>>) => Promise<T>) &
+    ((commandResponseLike: Like<VoidCommandResponse>) => Promise<void>);
+
+/**
+ * A {@link StreamingCommandRunner} provides instructions on how to invoke a streaming command
+ */
+export type StreamingCommandRunner = <T>(commandResponseLike: Like<GeneratorCommandResponse<T>>) => Promise<AsyncGenerator<T>>;
 
 /**
  * A {@link ICommandRunnerFactory} is used to build a CommandRunner instance
@@ -33,9 +52,10 @@ export type CommandRunner = <T>(commandResponse: CommandResponseLike<T>) => Prom
  */
 export interface ICommandRunnerFactory {
     getCommandRunner(): CommandRunner;
+    getStreamingCommandRunner(): StreamingCommandRunner;
 }
 
-export function normalizeCommandResponseLike<T>(commandResponseLike: CommandResponseLike<T>): Promise<CommandResponse<T>> {
+export function normalizeCommandResponseLike<TCommandResponse extends CommandResponseBase>(commandResponseLike: Like<TCommandResponse>): Promise<TCommandResponse> {
     if (typeof commandResponseLike === 'function') {
         return Promise.resolve(commandResponseLike());
     } else {

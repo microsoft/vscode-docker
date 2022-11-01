@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { FileType, ShellQuotedString } from 'vscode';
-import { CommandResponse } from "./CommandRunner";
+import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from './CommandRunner';
 import { IShell } from './Shell';
 
 export type ContainerOS = "linux" | "windows";
@@ -108,7 +108,7 @@ type VersionCommand = {
      * Generate a CommandResponse to retrieve runtime version information.
      * @param options Command options
      */
-    version(options: VersionCommandOptions): Promise<CommandResponse<VersionItem>>;
+    version(options: VersionCommandOptions): Promise<PromiseCommandResponse<VersionItem>>;
 };
 
 // CheckInstall Command Types
@@ -123,7 +123,7 @@ type CheckInstallCommand = {
      * command will return a non-zero exit code if the runtime is not installed.
      * @param options Command options
      */
-    checkInstall(options: CheckInstallCommandOptions): Promise<CommandResponse<string>>;
+    checkInstall(options: CheckInstallCommandOptions): Promise<PromiseCommandResponse<string>>;
 };
 
 // Info Command Types
@@ -152,7 +152,82 @@ type InfoCommand = {
      * Generate a CommandResponse to retrieve runtime information
      * @param options Command options
      */
-    info(options: InfoCommandOptions): Promise<CommandResponse<InfoItem>>;
+    info(options: InfoCommandOptions): Promise<PromiseCommandResponse<InfoItem>>;
+};
+
+// Event Stream Command Types
+
+/**
+ * Types of objects that can be listened for events to
+ */
+export type EventType = 'container' | 'image' | 'network' | 'volume' | 'daemon' | 'plugin' | 'config' | 'secret' | 'service' | 'node' | 'task' | 'engine';
+
+/**
+ * Types of event actions that can be listened for. Many more beyond these exist.
+ */
+export type EventAction = 'create' | 'destroy' | 'delete' | 'start' | 'stop' | 'restart' | 'pause' | 'update' | string;
+
+/**
+ * Options for the Event Stream command
+ */
+export type EventStreamCommandOptions = CommonCommandOptions & {
+    /**
+     * Return events since a given timestamp
+     */
+    since?: string;
+    /**
+     * Only stream events until a given timestamp
+     */
+    until?: string;
+    /**
+     * Only listen for events affecting these object types
+     */
+    types?: EventType[];
+    /**
+     * Only listen for events with these labels
+     */
+    labels?: LabelFilters;
+    /**
+     * Only listen for events of these types
+     */
+    events?: EventAction[];
+};
+
+/**
+ * The items returned by the Event Stream command
+ */
+export type EventItem = {
+    /**
+     * The event type
+     */
+    type: EventType;
+    /**
+     * The event action
+     */
+    action: EventAction;
+    /**
+     * The timestamp of the event
+     */
+    timestamp: Date;
+    /**
+     * Details about the affected object
+     */
+    actor: {
+        id: string;
+        attributes: Record<string, unknown>;
+    }
+    /**
+     * The RAW event output
+     */
+    raw: string;
+};
+
+type GetEventStreamCommand = {
+    /**
+     * Generate a CommandResponse for an event stream
+     * @param options Command options
+     */
+    getEventStream(options: EventStreamCommandOptions): Promise<GeneratorCommandResponse<EventItem>>;
 };
 
 // #region Login/Logout commands
@@ -183,7 +258,7 @@ type LoginCommand = {
      * Log in to a Docker registry
      * @param options Command options
      */
-    login(options: LoginCommandOptions): Promise<CommandResponse<void>>;
+    login(options: LoginCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Logout Command Types
@@ -203,7 +278,7 @@ type LogoutCommand = {
      * Log out from a Docker registry
      * @param options Command options
      */
-    logout(options: LogoutCommandOptions): Promise<CommandResponse<void>>;
+    logout(options: LogoutCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // #endregion
@@ -263,7 +338,7 @@ type BuildImageCommand = {
      * Generate a CommandResponse for building a container image.
      * @param options Command options
      */
-    buildImage(options: BuildImageCommandOptions): Promise<CommandResponse<void>>;
+    buildImage(options: BuildImageCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // List Images Command Types
@@ -314,7 +389,7 @@ type ListImagesCommand = {
      * Generate a CommandResponse for listing images
      * @param options Command options
      */
-    listImages(options: ListImagesCommandOptions): Promise<CommandResponse<Array<ListImagesItem>>>;
+    listImages(options: ListImagesCommandOptions): Promise<PromiseCommandResponse<Array<ListImagesItem>>>;
 };
 
 // Remove Images Command Types
@@ -335,7 +410,7 @@ type RemoveImagesCommand = {
      * Generate a CommandResponse for removing image(s).
      * @param options Command options
      */
-    removeImages(options: RemoveImagesCommandOptions): Promise<CommandResponse<Array<string>>>;
+    removeImages(options: RemoveImagesCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Prune Images Command Types
@@ -370,7 +445,7 @@ type PruneImagesCommand = {
      * Generate a CommandResponse for pruning images
      * @param options Command options
      */
-    pruneImages(options: PruneImagesCommandOptions): Promise<CommandResponse<PruneImagesItem>>;
+    pruneImages(options: PruneImagesCommandOptions): Promise<PromiseCommandResponse<PruneImagesItem>>;
 };
 
 // Pull Image Command Types
@@ -398,7 +473,7 @@ type PullImageCommand = {
      * Generate a CommandResponse for pulling an image.
      * @param options Command options
      */
-    pullImage(options: PullImageCommandOptions): Promise<CommandResponse<void>>;
+    pullImage(options: PullImageCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Push Image Command Types
@@ -418,7 +493,7 @@ type PushImageCommand = {
      * Generate a CommandResponse for pushing an image.
      * @param options Command options
      */
-    pushImage(options: PushImageCommandOptions): Promise<CommandResponse<void>>;
+    pushImage(options: PushImageCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Tag Image Command Types
@@ -440,7 +515,7 @@ type TagImageCommand = {
      * image.
      * @param options Command options
      */
-    tagImage(options: TagImageCommandOptions): Promise<CommandResponse<void>>;
+    tagImage(options: TagImageCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Inspect Image Command Types
@@ -527,7 +602,7 @@ type InspectImagesCommand = {
      * Generate a CommandResponse for inspecting images
      * @param options Command options
      */
-    inspectImages(options: InspectImagesCommandOptions): Promise<CommandResponse<Array<InspectImagesItem>>>;
+    inspectImages(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>>;
 };
 
 //#endregion
@@ -658,7 +733,7 @@ type RunContainerCommand = {
      * Generate a CommandResponse for running a container.
      * @param options Command options
      */
-    runContainer(options: RunContainerCommandOptions): Promise<CommandResponse<string | undefined>>;
+    runContainer(options: RunContainerCommandOptions): Promise<PromiseCommandResponse<string | undefined>>;
 };
 
 // Exec Container Command Types
@@ -695,7 +770,7 @@ type ExecContainerCommand = {
      * Generate a CommandResponse for executing a command in a running container.
      * @param options Command options
      */
-    execContainer(options: ExecContainerCommandOptions): Promise<CommandResponse<string>>;
+    execContainer(options: ExecContainerCommandOptions): Promise<GeneratorCommandResponse<string>>;
 };
 
 // List Containers Command Types
@@ -779,7 +854,7 @@ type ListContainersCommand = {
      * Generate a CommandResponse for listing containers.
      * @param options Command options
      */
-    listContainers(options: ListContainersCommandOptions): Promise<CommandResponse<Array<ListContainersItem>>>;
+    listContainers(options: ListContainersCommandOptions): Promise<PromiseCommandResponse<Array<ListContainersItem>>>;
 };
 
 // Stop Containers Command Types
@@ -800,7 +875,7 @@ type StopContainersCommand = {
      * Generate a CommandResponse for stopping container(s).
      * @param options Command options
      */
-    stopContainers(options: StopContainersCommandOptions): Promise<CommandResponse<Array<string>>>;
+    stopContainers(options: StopContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Start Containers Command Types
@@ -817,7 +892,7 @@ type StartContainersCommand = {
      * Generate a CommandResponse for starting container(s).
      * @param options Command options
      */
-    startContainers(options: StartContainersCommandOptions): Promise<CommandResponse<Array<string>>>;
+    startContainers(options: StartContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Restart Containers Command Types
@@ -834,7 +909,7 @@ type RestartContainersCommand = {
      * Generate a CommandResponse for restarting container(s).
      * @param options Command options
      */
-    restartContainers(options: RestartContainersCommandOptions): Promise<CommandResponse<Array<string>>>;
+    restartContainers(options: RestartContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Remove Containers Command Types
@@ -855,7 +930,7 @@ type RemoveContainersCommand = {
      * Generate a CommandResponse for removing container(s).
      * @param options Command options
      */
-    removeContainers(options: RemoveContainersCommandOptions): Promise<CommandResponse<Array<string>>>;
+    removeContainers(options: RemoveContainersCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Prune Containers Command Types
@@ -880,7 +955,7 @@ export type PruneContainersItem = {
 };
 
 type PruneContainersCommand = {
-    pruneContainers(options: PruneContainersCommandOptions): Promise<CommandResponse<PruneContainersItem>>
+    pruneContainers(options: PruneContainersCommandOptions): Promise<PromiseCommandResponse<PruneContainersItem>>
 };
 
 // Logs For Container Command Types
@@ -918,7 +993,7 @@ type LogsForContainerCommand = {
      * Generate a CommandResponse for retrieving container logs
      * @param options Command options
      */
-    logsForContainer(options: LogsForContainerCommandOptions): Promise<CommandResponse<void>>;
+    logsForContainer(options: LogsForContainerCommandOptions): Promise<GeneratorCommandResponse<string>>;
 };
 
 // Inspect Container Command Types
@@ -1076,7 +1151,7 @@ type InspectContainersCommand = {
      * Generate a CommandResponse for inspecting containers.
      * @param options Command options
      */
-    inspectContainers(options: InspectContainersCommandOptions): Promise<CommandResponse<Array<InspectContainersItem>>>;
+    inspectContainers(options: InspectContainersCommandOptions): Promise<PromiseCommandResponse<Array<InspectContainersItem>>>;
 };
 
 // Stats command types
@@ -1093,7 +1168,7 @@ type ContainersStatsCommand = {
      * Show running container stats
      * @param options Command options
      */
-    statsContainers(options: ContainersStatsCommandOptions): Promise<CommandResponse<string>>;
+    statsContainers(options: ContainersStatsCommandOptions): Promise<PromiseCommandResponse<string>>;
 };
 
 // #endregion
@@ -1118,7 +1193,7 @@ type CreateVolumeCommand = {
      * Generate a CommandResponse for creating a volume
      * @param options Command options
      */
-    createVolume(options: CreateVolumeCommandOptions): Promise<CommandResponse<void>>;
+    createVolume(options: CreateVolumeCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // List Volumes Command Types
@@ -1174,7 +1249,7 @@ type ListVolumesCommand = {
      * Generate a CommandResponse for listing volumes
      * @param options Command options
      */
-    listVolumes(options: ListVolumesCommandOptions): Promise<CommandResponse<Array<ListVolumeItem>>>;
+    listVolumes(options: ListVolumesCommandOptions): Promise<PromiseCommandResponse<Array<ListVolumeItem>>>;
 };
 
 // Remove Volumes Command Types
@@ -1195,7 +1270,7 @@ type RemoveVolumesCommand = {
      * Generate a CommandResponse for removing volumes
      * @param options Command options
      */
-    removeVolumes(options: RemoveVolumesCommandOptions): Promise<CommandResponse<Array<string>>>;
+    removeVolumes(options: RemoveVolumesCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Prune Volumes Command Types
@@ -1227,7 +1302,7 @@ type PruneVolumesCommand = {
      * Generate a CommandResponse for pruning volumes
      * @param options Command options
      */
-    pruneVolumes(options: PruneVolumesCommandOptions): Promise<CommandResponse<PruneVolumesItem>>;
+    pruneVolumes(options: PruneVolumesCommandOptions): Promise<PromiseCommandResponse<PruneVolumesItem>>;
 };
 
 // Inspect Volumes Command Types
@@ -1282,7 +1357,7 @@ type InspectVolumesCommand = {
      * Generate a CommandResponse for inspecting volumes.
      * @param options Command options
      */
-    inspectVolumes(options: InspectVolumesCommandOptions): Promise<CommandResponse<Array<InspectVolumesItem>>>;
+    inspectVolumes(options: InspectVolumesCommandOptions): Promise<PromiseCommandResponse<Array<InspectVolumesItem>>>;
 };
 
 // #endregion
@@ -1307,7 +1382,7 @@ type CreateNetworkCommand = {
      * Generate a CommandResponse for creating a network
      * @param options Command options
      */
-    createNetwork(options: CreateNetworkCommandOptions): Promise<CommandResponse<void>>;
+    createNetwork(options: CreateNetworkCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // List Networks Command Types
@@ -1363,7 +1438,7 @@ type ListNetworksCommand = {
      * Generate a CommandResponse for listing networks
      * @param options Command options
      */
-    listNetworks(options: ListNetworksCommandOptions): Promise<CommandResponse<Array<ListNetworkItem>>>;
+    listNetworks(options: ListNetworksCommandOptions): Promise<PromiseCommandResponse<Array<ListNetworkItem>>>;
 };
 
 // Remove Networks Command Types
@@ -1384,7 +1459,7 @@ type RemoveNetworksCommand = {
      * Generate a CommandResponse for removing networks
      * @param options Command options
      */
-    removeNetworks(options: RemoveNetworksCommandOptions): Promise<CommandResponse<Array<string>>>;
+    removeNetworks(options: RemoveNetworksCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Prune Networks Command Types
@@ -1411,7 +1486,7 @@ type PruneNetworksCommand = {
      * Generate a CommandResponse for pruning networks
      * @param options Command options
      */
-    pruneNetworks(options: PruneNetworksCommandOptions): Promise<CommandResponse<PruneNetworksItem>>;
+    pruneNetworks(options: PruneNetworksCommandOptions): Promise<PromiseCommandResponse<PruneNetworksItem>>;
 };
 
 // Inspect Networks Command Types
@@ -1490,7 +1565,7 @@ type InspectNetworksCommand = {
      * Generate a CommandResponse for inspecting networks.
      * @param options Command options
      */
-    inspectNetworks(options: InspectNetworksCommandOptions): Promise<CommandResponse<Array<InspectNetworksItem>>>;
+    inspectNetworks(options: InspectNetworksCommandOptions): Promise<PromiseCommandResponse<Array<InspectNetworksItem>>>;
 };
 
 // #endregion
@@ -1527,7 +1602,7 @@ type ListContextsCommand = {
      * Generate a CommandResponse for listing contexts
      * @param options Command options
      */
-    listContexts(options: ListContextsCommandOptions): Promise<CommandResponse<Array<ListContextItem>>>;
+    listContexts(options: ListContextsCommandOptions): Promise<PromiseCommandResponse<Array<ListContextItem>>>;
 };
 
 // Remove Contexts Command Types
@@ -1544,7 +1619,7 @@ type RemoveContextsCommand = {
      * Generate a CommandResponse for removing contexts
      * @param options Command options
      */
-    removeContexts(options: RemoveContextsCommandOptions): Promise<CommandResponse<Array<string>>>;
+    removeContexts(options: RemoveContextsCommandOptions): Promise<PromiseCommandResponse<Array<string>>>;
 };
 
 // Use Context Command Types
@@ -1561,7 +1636,7 @@ type UseContextCommand = {
      * Generate a CommandResponse for using a context
      * @param options Command options
      */
-    useContext(options: UseContextCommandOptions): Promise<CommandResponse<void>>;
+    useContext(options: UseContextCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Inspect Contexts Command Types
@@ -1597,7 +1672,7 @@ type InspectContextsCommand = {
      * Generate a CommandResponse for inspecting contexts.
      * @param options Command options
      */
-    inspectContexts(options: InspectContextsCommandOptions): Promise<CommandResponse<Array<InspectContextsItem>>>;
+    inspectContexts(options: InspectContextsCommandOptions): Promise<PromiseCommandResponse<Array<InspectContextsItem>>>;
 };
 
 // #endregion
@@ -1653,7 +1728,7 @@ type ListFilesCommand = {
      * Lists the contents of a given path in a container
      * @param options Command options
      */
-    listFiles(options: ListFilesCommandOptions): Promise<CommandResponse<Array<ListFilesItem>>>;
+    listFiles(options: ListFilesCommandOptions): Promise<PromiseCommandResponse<Array<ListFilesItem>>>;
 };
 
 // Read file command types
@@ -1668,11 +1743,6 @@ export type ReadFileCommandOptions = CommonCommandOptions & {
      */
     path: string;
     /**
-     * (Optional) The path on the host to write the container file to. If not given, it is
-     * necessary to handle contents from stdout in the command runner.
-     */
-    outputFile?: string;
-    /**
      * The container operating system. If not supplied, 'linux' will be assumed.
      */
     operatingSystem?: ContainerOS;
@@ -1686,7 +1756,7 @@ type ReadFileCommand = {
      * NOTE: the output stream is in tarball format with Linux containers, and cleartext with Windows containers.
      * @param options Command options
      */
-    readFile(options: ReadFileCommandOptions): Promise<CommandResponse<void>>;
+    readFile(options: ReadFileCommandOptions): Promise<GeneratorCommandResponse<Buffer>>;
 };
 
 // Write file command types
@@ -1719,7 +1789,7 @@ type WriteFileCommand = {
      * NOTE: this command is not supported on Windows containers.
      * @param options Command options
      */
-    writeFile(options: WriteFileCommandOptions): Promise<CommandResponse<void>>;
+    writeFile(options: WriteFileCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // #endregion
@@ -1734,6 +1804,7 @@ export interface IContainersClient extends
     VersionCommand,
     CheckInstallCommand,
     InfoCommand,
+    GetEventStreamCommand,
     LoginCommand,
     LogoutCommand,
     // Image Commands
