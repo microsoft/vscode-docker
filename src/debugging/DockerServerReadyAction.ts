@@ -223,6 +223,7 @@ class DockerLogsTracker extends vscode.Disposable {
 
             // Don't wait
             void runWithDefaultShell(
+                // TODO: runtimes: streaming: fix this
                 client => client.logsForContainer({ container: this.containerName, follow: true }),
                 ext.runtimeManager,
                 {

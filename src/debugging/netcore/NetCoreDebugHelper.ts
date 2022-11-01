@@ -323,6 +323,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         const stdout = await ext.runWithDefaultShell(client =>
+            // TODO: runtimes: streaming: fix this
             client.execContainer({
                 container: containerName,
                 command: [containerCommand, ...containerCommandArgs],

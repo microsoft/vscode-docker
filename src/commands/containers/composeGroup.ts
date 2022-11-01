@@ -12,6 +12,7 @@ import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunn
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
+// TODO: runtimes: streaming: fix this
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
     return composeGroup<LogsCommandOptions>(context, (client, options) => client.logs(options), node, { follow: true, tail: 1000 });
 }
