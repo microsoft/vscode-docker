@@ -44,8 +44,6 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
 
             let result: T | undefined;
 
-            const pipelinePromises: Promise<void>[] = [];
-
             let accumulator: AccumulatorStream | undefined;
 
             try {
@@ -64,8 +62,6 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
                 }
 
                 throwIfCancellationRequested(this.options.cancellationToken);
-
-                await Promise.all(pipelinePromises);
 
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 return result!;
