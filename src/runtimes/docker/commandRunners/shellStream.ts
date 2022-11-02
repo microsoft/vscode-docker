@@ -42,7 +42,7 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
 
             throwIfCancellationRequested(this.options.cancellationToken);
 
-            let result: T | void;
+            let result: T | undefined;
 
             const pipelinePromises: Promise<void>[] = [];
 
