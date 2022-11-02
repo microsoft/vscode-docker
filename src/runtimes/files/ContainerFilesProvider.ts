@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
+import * as stream from 'stream';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { DockerUri } from './DockerUri';
@@ -12,7 +13,7 @@ import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesI
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
-import { runWithDefaultShell } from '../runners/runWithDefaultShell';
+import { runWithDefaultShell, streamWithDefaultShell } from '../runners/runWithDefaultShell';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
@@ -80,19 +81,18 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
                 const accumulator = new AccumulatorStream();
+                const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                await runWithDefaultShell(
-                    // TODO: runtimes: streaming: fix this
+                const generator = await streamWithDefaultShell(
                     client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
                     }),
-                    ext.runtimeManager,
-                    {
-                        stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
-                    }
+                    ext.runtimeManager
                 );
+
+                stream.Readable.from(generator).pipe(targetStream);
 
                 return await accumulator.getBytes();
             };

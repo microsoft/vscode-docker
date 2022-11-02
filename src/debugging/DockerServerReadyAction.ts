@@ -7,6 +7,7 @@
 // Adapted from: https://github.com/microsoft/vscode/blob/8827cf5a607b6ab7abf45817604bc21883314db7/extensions/debug-server-ready/src/extension.ts
 //
 
+import * as readline from 'readline';
 import * as stream from 'stream';
 import * as util from 'util';
 import * as vscode from 'vscode';
@@ -14,7 +15,7 @@ import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vs
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { ResolvedDebugConfiguration } from './DebugHelper';
-import { runWithDefaultShell } from '../runtimes/runners/runWithDefaultShell';
+import { streamWithDefaultShell } from '../runtimes/runners/runWithDefaultShell';
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
 const URI_FORMAT = 'http://localhost:%s';
@@ -191,61 +192,37 @@ interface DockerServerReadyDetector {
 }
 
 class DockerLogsTracker extends vscode.Disposable {
-    private logStream: stream.PassThrough;
     private readonly cts = new vscode.CancellationTokenSource();
+    private lineReader: readline.Interface | undefined;
 
     public constructor(private readonly containerName: string, private readonly detector: DockerServerReadyDetector) {
         super(
             () => {
                 this.cts.cancel();
+                this.lineReader?.close();
             });
 
         if (!this.detector) {
             return;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.startListening();
+        // Don't wait
+        void this.listen();
     }
 
-    private async startListening(): Promise<void> {
-        return callWithTelemetryAndErrorHandling('dockerServerReadyAction.dockerLogsTracker.startListening', async (context: IActionContext) => {
-            // Don't actually telemetrize or show anything (same as prior behavior), but wrap call to get an IActionContext
-            context.telemetry.suppressAll = true;
-            context.errorHandling.suppressDisplay = true;
-            context.errorHandling.rethrow = false;
+    private async listen(): Promise<void> {
+        const generator = await streamWithDefaultShell(
+            client => client.logsForContainer({ container: this.containerName, follow: true }),
+            ext.runtimeManager,
+            {
+                cancellationToken: this.cts.token,
+            }
+        );
 
-            this.logStream = new stream.PassThrough();
-
-            this.logStream.on('data', (data) => {
-                this.detector.detectPattern(data.toString());
-            });
-
-            // Don't wait
-            void runWithDefaultShell(
-                // TODO: runtimes: streaming: fix this
-                client => client.logsForContainer({ container: this.containerName, follow: true }),
-                ext.runtimeManager,
-                {
-                    cancellationToken: this.cts.token,
-                    stdOutPipe: this.logStream,
-                }
-            ).then(
-                () => {
-                    // Do nothing on fulfilled
-                },
-                () => {
-                    // Do nothing on reject
-                    //
-                    // The usual termination path is for `runWithDefaultShell` to throw a `CancellationError`,
-                    // because when this `DockerLogsTracker` object is disposed, cancellation of the process
-                    // is triggered.
-                    //
-                    // If we do not eat that `CancellationError` here, it bubbles up to the extension host process
-                    // where it will be eaten, but ugly warnings show in a few places
-                }
-            );
-        });
+        this.lineReader = readline.createInterface({ input: stream.Readable.from(generator) });
+        for await (const line of this.lineReader) {
+            this.detector.detectPattern(line);
+        }
     }
 }
 

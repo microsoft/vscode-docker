@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerOS } from '../../runtimes/docker';
+import { ContainerOS, VoidCommandResponse } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
@@ -34,8 +34,8 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         try {
             // If this succeeds, bash is present (exit code 0)
             await ext.runWithDefaultShell(client =>
-                // TODO: runtimes: streaming: fix this
-                client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] })
+                // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
+                client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] }) as Promise<VoidCommandResponse>
             );
             shellCommand = 'bash';
         } catch {
