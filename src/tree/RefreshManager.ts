@@ -59,11 +59,14 @@ export class RefreshManager extends vscode.Disposable {
             // Try at most `eventListenerTries` times to (re)connect to the event stream
             for (let i = 0; i < eventListenerTries; i++) {
                 try {
-                    // TODO: finish this
-                    const eventGenerator = 'foo' as unknown as AsyncGenerator<{ Type: string }>;
+                    const eventGenerator = await ext.streamWithDefaultShell(client =>
+                        client.getEventStream({
+                            types: ['container', 'image', 'network', 'volume'],
+                        })
+                    );
 
                     for await (const event of eventGenerator) {
-                        switch (event.Type) {
+                        switch (event.type) {
                             case 'container':
                                 await this.refresh('containers', 'event');
                                 break;
@@ -75,9 +78,6 @@ export class RefreshManager extends vscode.Disposable {
                                 break;
                             case 'volume':
                                 await this.refresh('volumes', 'event');
-                                break;
-                            case 'context':
-                                await this.refresh('contexts', 'event');
                                 break;
                             default:
                                 // Ignore other events

@@ -13,43 +13,46 @@ type ClientCallback<TClient, T> = (client: TClient) => Like<PromiseCommandRespon
 type VoidClientCallback<TClient> = (client: TClient) => Like<VoidCommandResponse>;
 type StreamingClientCallback<TClient, T> = (client: TClient) => Like<GeneratorCommandResponse<T>>;
 
-export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T>): Promise<T>;
-export async function runWithDefaultShellInternal(callback: VoidClientCallback<IContainersClient>): Promise<void>;
-export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>): Promise<T | void> {
-    return await runWithDefaultShell(
-        callback,
-        ext.runtimeManager
-    );
-}
-
-export async function streamWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainersClient, T>): Promise<AsyncGenerator<T>> {
-    return await streamWithDefaultShell(
-        callback,
-        ext.runtimeManager
-    );
-}
-
-export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T>): Promise<T>;
-export async function runOrchestratorWithDefaultShellInternal(callback: VoidClientCallback<IContainerOrchestratorClient>): Promise<void>;
-export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T> | VoidClientCallback<IContainerOrchestratorClient>): Promise<T | void> {
-    return await runWithDefaultShell(
-        callback,
-        ext.orchestratorManager
-    );
-}
-
-export async function streamOrchestratorWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>): Promise<AsyncGenerator<T>> {
-    return await streamWithDefaultShell(
-        callback,
-        ext.orchestratorManager
-    );
-}
-
-
 // 'env', 'shellProvider', 'stdErrPipe', and 'strict' are set by this function and thus should not be included as arguments to the additional options
 type DefaultEnvShellStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'env' | 'shellProvider' | 'stdErrPipe' | 'strict'>;
 
-export async function runWithDefaultShell<TClient extends ClientIdentity, T>(
+export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T>;
+export async function runWithDefaultShellInternal(callback: VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<void>;
+export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T | void> {
+    return await runWithDefaultShell(
+        callback,
+        ext.runtimeManager,
+        additionalOptions
+    );
+}
+
+export async function streamWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<AsyncGenerator<T>> {
+    return await streamWithDefaultShell(
+        callback,
+        ext.runtimeManager,
+        additionalOptions
+    );
+}
+
+export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T>;
+export async function runOrchestratorWithDefaultShellInternal(callback: VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<void>;
+export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T> | VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T | void> {
+    return await runWithDefaultShell(
+        callback,
+        ext.orchestratorManager,
+        additionalOptions
+    );
+}
+
+export async function streamOrchestratorWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<AsyncGenerator<T>> {
+    return await streamWithDefaultShell(
+        callback,
+        ext.orchestratorManager,
+        additionalOptions
+    );
+}
+
+async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T> | VoidClientCallback<TClient>,
     runtimeManager: RuntimeManager<TClient>,
     additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions
@@ -82,7 +85,7 @@ export async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     }
 }
 
-export async function streamWithDefaultShell<TClient extends ClientIdentity, T>(
+async function streamWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: StreamingClientCallback<TClient, T>,
     runtimeManager: RuntimeManager<TClient>,
     additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions

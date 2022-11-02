@@ -13,7 +13,6 @@ import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesI
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
-import { runWithDefaultShell, streamWithDefaultShell } from '../runners/runWithDefaultShell';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
@@ -83,13 +82,12 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const accumulator = new AccumulatorStream();
                 const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                const generator = await streamWithDefaultShell(
+                const generator = await ext.streamWithDefaultShell(
                     client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
-                    }),
-                    ext.runtimeManager
+                    })
                 );
 
                 stream.Readable.from(generator).pipe(targetStream);
@@ -109,13 +107,12 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     path.win32.dirname(dockerUri.windowsPath) :
                     path.posix.dirname(dockerUri.path);
 
-                await runWithDefaultShell(
+                await ext.runWithDefaultShell(
                     client => client.writeFile({
                         container: dockerUri.containerId,
                         path: destDirectory,
                         operatingSystem: containerOS,
                     }),
-                    ext.runtimeManager,
                     {
                         stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
                     }
