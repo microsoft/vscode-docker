@@ -10,7 +10,6 @@ import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunn
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { selectLogsCommand } from '../selectCommandTemplate';
 
-// TODO: runtimes: streaming: fix this
 export async function viewContainerLogs(context: IActionContext, node?: ContainerTreeItem): Promise<void> {
     if (!node) {
         await ext.containersTree.refresh(context);
