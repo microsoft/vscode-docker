@@ -2094,6 +2094,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             return composeArgs(
                 withArg('cp'),
                 withContainerPathArg(options),
+                withArg('-'),
             )();
         }
     }
