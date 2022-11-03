@@ -1540,11 +1540,6 @@
                     "default": true,
                     "description": "%vscode-docker.config.docker.promptForRegistryWhenPushingImages%"
                 },
-                "docker.explorerRefreshInterval": {
-                    "type": "number",
-                    "default": 2000,
-                    "description": "%vscode-docker.config.docker.explorerRefreshInterval%"
-                },
                 "docker.commands.build": {
                     "oneOf": [
                         {
