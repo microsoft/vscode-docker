@@ -81,7 +81,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const accumulator = new AccumulatorStream();
                 const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                const generator = await ext.streamWithDefaultShell(
+                const generator = ext.streamWithDefaultShell(
                     client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,

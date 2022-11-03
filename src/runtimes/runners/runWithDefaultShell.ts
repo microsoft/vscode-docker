@@ -26,8 +26,8 @@ export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IC
     );
 }
 
-export async function streamWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<AsyncGenerator<T>> {
-    return await streamWithDefaultShell(
+export function streamWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): AsyncGenerator<T> {
+    return streamWithDefaultShell(
         callback,
         ext.runtimeManager,
         additionalOptions
@@ -44,8 +44,8 @@ export async function runOrchestratorWithDefaultShellInternal<T>(callback: Clien
     );
 }
 
-export async function streamOrchestratorWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<AsyncGenerator<T>> {
-    return await streamWithDefaultShell(
+export function streamOrchestratorWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): AsyncGenerator<T> {
+    return streamWithDefaultShell(
         callback,
         ext.orchestratorManager,
         additionalOptions
@@ -85,11 +85,11 @@ async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     }
 }
 
-async function streamWithDefaultShell<TClient extends ClientIdentity, T>(
+async function* streamWithDefaultShell<TClient extends ClientIdentity, T>(
     callback: StreamingClientCallback<TClient, T>,
     runtimeManager: RuntimeManager<TClient>,
     additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions
-): Promise<AsyncGenerator<T>> {
+): AsyncGenerator<T> {
     // Get a `DefaultEnvShellStreamCommandRunnerFactory`
     const factory = new DefaultEnvShellStreamCommandRunnerFactory(additionalOptions);
 
@@ -97,9 +97,12 @@ async function streamWithDefaultShell<TClient extends ClientIdentity, T>(
     const client: TClient = await runtimeManager.getClient();
 
     try {
-        return await factory.getStreamingCommandRunner()(
-            callback(client)
-        );
+        const runner = await factory.getStreamingCommandRunner();
+        const generator = await runner(callback(client));
+
+        for await (const element of generator) {
+            yield element;
+        }
     } catch (err) {
         if (isChildProcessError(err)) {
             // If this is a child process error, alter the message to be the stderr output, if it isn't falsy

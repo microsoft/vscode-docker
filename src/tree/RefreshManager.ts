@@ -67,7 +67,7 @@ export class RefreshManager extends vscode.Disposable {
             // Try at most `eventListenerTries` times to (re)connect to the event stream
             for (let i = 0; i < eventListenerTries; i++) {
                 try {
-                    const eventGenerator = await ext.streamWithDefaultShell(client =>
+                    const eventGenerator = ext.streamWithDefaultShell(client =>
                         client.getEventStream({
                             types: eventTypesToWatch,
                             events: eventActionsToWatch,
