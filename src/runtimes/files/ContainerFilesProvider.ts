@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from 'path';
-import * as stream from 'stream';
 import * as vscode from 'vscode';
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { DockerUri } from './DockerUri';
@@ -90,7 +89,9 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     })
                 );
 
-                stream.Readable.from(generator).pipe(targetStream);
+                for await (const chunk of generator) {
+                    targetStream.write(chunk);
+                }
 
                 return await accumulator.getBytes();
             };
