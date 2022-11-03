@@ -8,7 +8,7 @@ import * as os from 'os';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
-import { isCancellationError } from '../runtimes/docker';
+import { EventAction, EventType, isCancellationError } from '../runtimes/docker';
 import { AllTreePrefixes, TreePrefix } from './TreePrefix';
 
 const pollingIntervalMs = 60 * 1000; // One minute
@@ -16,6 +16,11 @@ const eventListenerTries = 3; // The event listener will try at most 3 times to 
 
 type RefreshTarget = AzExtTreeItem | TreePrefix;
 type RefreshReason = 'interval' | 'event' | 'config' | 'manual' | 'contextChange';
+
+const ContainerEventActions: EventAction[] = ['create', 'destroy', 'die', 'kill', 'pause', 'rename', 'restart', 'start', 'stop', 'unpause', 'update'];
+const ImageEventActions: EventAction[] = ['delete', 'import', 'load', 'pull', 'save', 'tag', 'untag'];
+const NetworkEventActions: EventAction[] = ['create', 'destroy', 'remove'];
+const VolumeEventActions: EventAction[] = ['create', 'destroy'];
 
 export class RefreshManager extends vscode.Disposable {
     private readonly disposables: vscode.Disposable[] = [];
@@ -56,12 +61,16 @@ export class RefreshManager extends vscode.Disposable {
             context.errorHandling.suppressDisplay = true;
             context.telemetry.suppressIfSuccessful = true;
 
+            const eventTypesToWatch: EventType[] = ['container', 'image', 'network', 'volume'];
+            const eventActionsToWatch: EventAction[] = Array.from(new Set<EventAction>([...ContainerEventActions, ...ImageEventActions, ...NetworkEventActions, ...VolumeEventActions]));
+
             // Try at most `eventListenerTries` times to (re)connect to the event stream
             for (let i = 0; i < eventListenerTries; i++) {
                 try {
                     const eventGenerator = await ext.streamWithDefaultShell(client =>
                         client.getEventStream({
-                            types: ['container', 'image', 'network', 'volume'],
+                            types: eventTypesToWatch,
+                            events: eventActionsToWatch,
                         })
                     );
 
@@ -70,11 +79,11 @@ export class RefreshManager extends vscode.Disposable {
                             case 'container':
                                 await this.refresh('containers', 'event');
                                 break;
-                            case 'network':
-                                await this.refresh('networks', 'event');
-                                break;
                             case 'image':
                                 await this.refresh('images', 'event');
+                                break;
+                            case 'network':
+                                await this.refresh('networks', 'event');
                                 break;
                             case 'volume':
                                 await this.refresh('volumes', 'event');
@@ -221,10 +230,10 @@ export class RefreshManager extends vscode.Disposable {
                 switch (target) {
                     case 'containers':
                         return await ext.containersRoot.refresh(context);
-                    case 'networks':
-                        return await ext.networksRoot.refresh(context);
                     case 'images':
                         return await ext.imagesRoot.refresh(context);
+                    case 'networks':
+                        return await ext.networksRoot.refresh(context);
                     case 'registries':
                         return await ext.registriesRoot.refresh(context);
                     case 'volumes':
