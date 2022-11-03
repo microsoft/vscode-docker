@@ -210,16 +210,21 @@ class DockerLogsTracker extends vscode.Disposable {
     }
 
     private async listen(): Promise<void> {
-        const generator = await ext.streamWithDefaultShell(
-            client => client.logsForContainer({ container: this.containerName, follow: true }),
-            {
-                cancellationToken: this.cts.token,
-            }
-        );
+        try {
+            const generator = await ext.streamWithDefaultShell(
+                client => client.logsForContainer({ container: this.containerName, follow: true }),
+                {
+                    cancellationToken: this.cts.token,
+                }
+            );
 
-        this.lineReader = readline.createInterface({ input: stream.Readable.from(generator) });
-        for await (const line of this.lineReader) {
-            this.detector.detectPattern(line);
+            this.lineReader = readline.createInterface({ input: stream.Readable.from(generator) });
+            for await (const line of this.lineReader) {
+                this.detector.detectPattern(line);
+            }
+        } catch {
+            // Do nothing
+            // The usual termination pathway is cancellation through the CTS above, so errors are expected
         }
     }
 }
