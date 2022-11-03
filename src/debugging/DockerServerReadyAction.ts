@@ -225,6 +225,8 @@ class DockerLogsTracker extends vscode.Disposable {
         } catch {
             // Do nothing
             // The usual termination pathway is cancellation through the CTS above, so errors are expected
+            // TODO: for unknown reasons, the cancellation error does not actually get thrown to here, and ends
+            // up in the extension host output log. Ideally this should not happen.
         }
     }
 }
