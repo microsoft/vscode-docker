@@ -160,7 +160,7 @@ type InfoCommand = {
 /**
  * Types of objects that can be listened for events to
  */
-export type EventType = 'container' | 'image' | 'network' | 'volume' | 'daemon' | 'plugin' | 'config' | 'secret' | 'service' | 'node' | 'task' | 'engine';
+export type EventType = 'container' | 'image' | 'network' | 'volume' | 'daemon' | 'plugin' | 'config' | 'secret' | 'service' | 'node' | 'task' | 'engine' | string;
 
 /**
  * Types of event actions that can be listened for. Many more beyond these exist.

@@ -172,6 +172,7 @@ export async function spawnStreamAsync(
 
     return new Promise<void>((resolve, reject) => {
         const disposable = cancellationToken.onCancellationRequested(() => {
+            disposable.dispose();
             options.stdOutPipe?.end();
             options.stdErrPipe?.end();
             childProcess.removeAllListeners();

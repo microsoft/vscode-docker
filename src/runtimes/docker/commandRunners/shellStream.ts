@@ -5,7 +5,7 @@
 
 import * as stream from 'stream';
 import {
-    CommandResponse,
+    CommandResponseBase,
     CommandRunner,
     GeneratorCommandResponse,
     ICommandRunnerFactory,
@@ -72,25 +72,29 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
     }
 
     public getStreamingCommandRunner(): StreamingCommandRunner {
-        return async <T>(commandResponseLike: Like<GeneratorCommandResponse<T>>) => {
-            const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
-            const { command, args } = this.getCommandAndArgs(commandResponse);
-
-            throwIfCancellationRequested(this.options.cancellationToken);
-
-            const dataStream: stream.PassThrough = new stream.PassThrough();
-            const generator = commandResponse.parseStream(dataStream, !!this.options.strict);
-
-            // Unlike above in `getCommandRunner()`, we cannot await the process, because it will (probably) never exit
-            // Instead, forward any error it throws through the stream to the generator
-            spawnStreamAsync(command, args, { ...this.options, stdOutPipe: dataStream, shell: true })
-                .catch(err => dataStream.destroy(err));
-
-            return generator;
-        };
+        return this.streamingCommandRunner.bind(this);
     }
 
-    protected getCommandAndArgs(commandResponse: CommandResponse<unknown>): { command: string, args: string[] } {
+    private async *streamingCommandRunner<T>(commandResponseLike: Like<GeneratorCommandResponse<T>>): AsyncGenerator<T> {
+        const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
+        const { command, args } = this.getCommandAndArgs(commandResponse);
+
+        throwIfCancellationRequested(this.options.cancellationToken);
+
+        const dataStream: stream.PassThrough = new stream.PassThrough();
+        const innerGenerator = commandResponse.parseStream(dataStream, !!this.options.strict);
+
+        // The process promise will be awaited only after the innerGenerator finishes
+        const processPromise = spawnStreamAsync(command, args, { ...this.options, stdOutPipe: dataStream, shell: true });
+
+        for await (const element of innerGenerator) {
+            yield element;
+        }
+
+        await processPromise;
+    }
+
+    protected getCommandAndArgs(commandResponse: CommandResponseBase): { command: string, args: string[] } {
         return {
             command: commandResponse.command,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
