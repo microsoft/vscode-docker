@@ -73,7 +73,10 @@ export class RefreshManager extends vscode.Disposable {
                         client.getEventStream({
                             types: eventTypesToWatch,
                             events: eventActionsToWatch,
-                        })
+                        }),
+                        {
+                            cancellationToken: this.cts.token,
+                        }
                     );
 
                     for await (const event of eventGenerator) {
