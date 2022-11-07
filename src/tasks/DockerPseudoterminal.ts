@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, Shell } from '../runtimes/docker';
+import { PromiseCommandResponse, Shell, VoidCommandResponse } from '../runtimes/docker';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
 import { resolveVariables } from '../utils/resolveVariables';
 import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
@@ -52,12 +52,18 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public getCommandRunner(options: Omit<ExecuteCommandInTerminalOptions, 'commandResponse'>): (commandResponse: CommandResponse<unknown>) => Promise<ExecAsyncOutput> {
-        return async (commandResponse: CommandResponse<unknown>) => {
-            return await this.executeCommandInTerminal({
+    public getCommandRunner(options: Omit<ExecuteCommandInTerminalOptions, 'commandResponse'>): <T>(commandResponse: VoidCommandResponse | PromiseCommandResponse<T>) => Promise<T> {
+        return async <T>(commandResponse: VoidCommandResponse | PromiseCommandResponse<T>) => {
+            const output = await this.executeCommandInTerminal({
                 ...options,
                 commandResponse: commandResponse,
             });
+
+            if (commandResponse.parse) {
+                return commandResponse.parse(output.stdout, true);
+            }
+
+            return undefined;
         };
     }
 
@@ -121,7 +127,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
 }
 
 type ExecuteCommandInTerminalOptions = {
-    commandResponse: CommandResponse<unknown>;
+    commandResponse: VoidCommandResponse | PromiseCommandResponse<unknown>;
     folder: WorkspaceFolder;
     rejectOnStderr?: boolean;
     token?: CancellationToken;
