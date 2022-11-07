@@ -97,8 +97,8 @@ async function* streamWithDefaultShell<TClient extends ClientIdentity, T>(
     const client: TClient = await runtimeManager.getClient();
 
     try {
-        const runner = await factory.getStreamingCommandRunner();
-        const generator = await runner(callback(client));
+        const runner = factory.getStreamingCommandRunner();
+        const generator = runner(callback(client));
 
         for await (const element of generator) {
             yield element;
