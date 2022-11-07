@@ -25,19 +25,60 @@ const NetworkEventActions: EventAction[] = ['create', 'destroy', 'remove'];
 const VolumeEventActions: EventAction[] = ['create', 'destroy'];
 
 export class RefreshManager extends vscode.Disposable {
-    private readonly disposables: vscode.Disposable[] = [];
+    private readonly autoRefreshDisposables: vscode.Disposable[] = [];
+    private readonly viewOpenedDisposables: vscode.Disposable[] = [];
     private readonly cts: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
+    private autoRefreshSetup: boolean = false;
 
     public constructor() {
-        super(() => vscode.Disposable.from(...this.disposables).dispose());
+        super(() => vscode.Disposable.from(...this.autoRefreshDisposables, ...this.viewOpenedDisposables).dispose());
+
+        // Refresh on command will be unconditionally set up since it is a user action
+        this.setupRefreshOnCommand();
+
+        // When any of these views becomes visible, we will initiate auto refreshes
+        // The disposables are kept separate because we dispose of them sooner
+        const treeViewsToInitiateAutoRefresh = [
+            ext.containersTreeView,
+            ext.imagesTreeView,
+            ext.networksTreeView,
+            ext.volumesTreeView,
+            ext.contextsTreeView
+        ];
+
+        // If one of the views is already visible, immediately initiate auto-refreshes, otherwise wait for one to become visible
+        if (treeViewsToInitiateAutoRefresh.some(v => v.visible)) {
+            this.setupAutoRefreshes();
+        } else {
+            for (const treeView of treeViewsToInitiateAutoRefresh) {
+                this.viewOpenedDisposables.push(
+                    treeView.onDidChangeVisibility(e => {
+                        if (e.visible) {
+                            // Dispose of the listeners to this event and empty the array
+                            vscode.Disposable.from(...this.viewOpenedDisposables).dispose();
+                            this.viewOpenedDisposables.splice(0);
+
+                            // Set up auto refreshes
+                            this.setupAutoRefreshes();
+                        }
+                    })
+                );
+            }
+        }
+    }
+
+    private setupAutoRefreshes(): void {
+        if (this.autoRefreshSetup) {
+            return;
+        }
+        this.autoRefreshSetup = true;
 
         // VSCode does *not* cancel by default on disposal of a CancellationTokenSource, so we need to manually cancel
-        this.disposables.unshift(new vscode.Disposable(() => this.cts.cancel()));
+        this.autoRefreshDisposables.unshift(new vscode.Disposable(() => this.cts.cancel()));
 
         this.setupRefreshOnInterval();
         this.setupRefreshOnRuntimeEvent();
         this.setupRefreshOnConfigurationChange();
-        this.setupRefreshOnCommand();
         this.setupRefreshOnDockerConfigurationChange();
         this.setupRefreshOnContextChange();
     }
@@ -53,7 +94,7 @@ export class RefreshManager extends vscode.Disposable {
             }
         }, pollingIntervalMs);
 
-        this.disposables.push(new vscode.Disposable(
+        this.autoRefreshDisposables.push(new vscode.Disposable(
             () => clearInterval(timer)
         ));
     }
@@ -122,7 +163,7 @@ export class RefreshManager extends vscode.Disposable {
     }
 
     private setupRefreshOnConfigurationChange(): void {
-        this.disposables.push(
+        this.autoRefreshDisposables.push(
             vscode.workspace.onDidChangeConfiguration(async (e: vscode.ConfigurationChangeEvent) => {
                 for (const view of AllTreePrefixes) {
                     if (e.affectsConfiguration(`docker.${view}`)) {
@@ -165,12 +206,12 @@ export class RefreshManager extends vscode.Disposable {
                     false,
                     true
                 );
-                this.disposables.push(configWatcher);
+                this.autoRefreshDisposables.push(configWatcher);
 
                 // Changes to this file tend to happen several times in succession, so we debounce
                 const debounceTimerMs = 500;
                 let lastTime = Date.now();
-                this.disposables.push(configWatcher.onDidChange(async () => {
+                this.autoRefreshDisposables.push(configWatcher.onDidChange(async () => {
                     if (Date.now() - lastTime < debounceTimerMs) {
                         return;
                     }
@@ -192,13 +233,13 @@ export class RefreshManager extends vscode.Disposable {
                     true,
                     false
                 );
-                this.disposables.push(contextWatcher);
+                this.autoRefreshDisposables.push(contextWatcher);
 
-                this.disposables.push(contextWatcher.onDidCreate(async () => {
+                this.autoRefreshDisposables.push(contextWatcher.onDidCreate(async () => {
                     await this.refresh('contexts', 'event');
                 }));
 
-                this.disposables.push(contextWatcher.onDidDelete(async () => {
+                this.autoRefreshDisposables.push(contextWatcher.onDidDelete(async () => {
                     await this.refresh('contexts', 'event');
                 }));
             } catch {
@@ -208,7 +249,7 @@ export class RefreshManager extends vscode.Disposable {
     }
 
     private setupRefreshOnContextChange(): void {
-        this.disposables.push(
+        this.autoRefreshDisposables.push(
             ext.runtimeManager.contextManager.onContextChanged(async () => {
                 for (const view of AllTreePrefixes) {
                     // Refresh all except contexts, which would already have been refreshed
