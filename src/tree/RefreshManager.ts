@@ -9,10 +9,12 @@ import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { EventAction, EventType, isCancellationError } from '../runtimes/docker';
+import { debounce } from '../utils/debounce';
 import { AllTreePrefixes, TreePrefix } from './TreePrefix';
 
 const pollingIntervalMs = 60 * 1000; // One minute
 const eventListenerTries = 3; // The event listener will try at most 3 times to connect for events
+const debounceDelayMs = 500; // Refreshes rapidly initiated for the same tree view will be debounced to occur 500ms after the last initiation
 
 type RefreshTarget = AzExtTreeItem | TreePrefix;
 type RefreshReason = 'interval' | 'event' | 'config' | 'manual' | 'contextChange';
@@ -224,24 +226,42 @@ export class RefreshManager extends vscode.Disposable {
 
             if (isAzExtTreeItem(target)) {
                 context.telemetry.properties.refreshTarget = 'node';
-                return await target.refresh(context);
+
+                // Refreshes targeting a specific tree item will not be debounced
+                await target.refresh(context);
             } else if (typeof target === 'string') {
                 context.telemetry.properties.refreshTarget = target;
+
+                let callback: () => Promise<void>;
                 switch (target) {
                     case 'containers':
-                        return await ext.containersRoot.refresh(context);
+                        callback = () => ext.containersRoot.refresh(context);
+                        break;
                     case 'images':
-                        return await ext.imagesRoot.refresh(context);
+                        callback = () => ext.imagesRoot.refresh(context);
+                        break;
                     case 'networks':
-                        return await ext.networksRoot.refresh(context);
+                        callback = () => ext.networksRoot.refresh(context);
+                        break;
                     case 'registries':
-                        return await ext.registriesRoot.refresh(context);
+                        callback = () => ext.registriesRoot.refresh(context);
+                        break;
                     case 'volumes':
-                        return await ext.volumesRoot.refresh(context);
+                        callback = () => ext.volumesRoot.refresh(context);
+                        break;
                     case 'contexts':
-                        return await ext.contextsRoot.refresh(context);
+                        callback = () => ext.contextsRoot.refresh(context);
+                        break;
                     default:
                         throw new RangeError(`Unexpected view type: ${target}`);
+                }
+
+                if (reason === 'manual') {
+                    // Manual refreshes will not be debounced--they should occur instantly
+                    await callback();
+                } else {
+                    // Debounce all other refreshes by 500 ms
+                    debounce(debounceDelayMs, `${target}.refresh`, callback);
                 }
             }
         });
