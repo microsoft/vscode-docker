@@ -11,7 +11,6 @@ import { ext } from '../../extensionVariables';
 import { localize } from "../../localize";
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { runWithDefaultShell } from '../../runtimes/runners/runWithDefaultShell';
 
 export async function logInToDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
     if (!node) {
@@ -40,13 +39,12 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
 
         await vscode.window.withProgress(progressOptions, async () => {
             try {
-                await runWithDefaultShell(
+                await ext.runWithDefaultShell(
                     client => client.login({
                         username: username,
                         passwordStdIn: true,
                         registry: creds.registryPath,
                     }),
-                    ext.runtimeManager,
                     {
                         stdInPipe: stream.Readable.from(password),
                     }

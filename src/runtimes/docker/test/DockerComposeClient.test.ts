@@ -78,7 +78,7 @@ xdescribe('DockerComposeClient', () => {
             onCommand: (command: string) => { console.log(`Executing ${command}`); },
         });
 
-        await logsCRF.getCommandRunner()(client.logs(options));
+        await logsCRF.getStreamingCommandRunner()(client.logs(options));
         const logs = await accumulator.getString();
         expect(logs).to.be.ok;
     });

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import {
-    CommandResponse,
+    CommandResponseBase,
     ICommandRunnerFactory,
 } from '../contracts/CommandRunner';
 import { Shell } from '../utils/spawnStreamAsync';
@@ -23,7 +23,7 @@ export type WslShellCommandRunnerOptions = ShellStreamCommandRunnerOptions & {
  */
 export class WslShellCommandRunnerFactory extends ShellStreamCommandRunnerFactory<WslShellCommandRunnerOptions> implements ICommandRunnerFactory {
     protected override getCommandAndArgs(
-        commandResponse: CommandResponse<unknown>,
+        commandResponse: CommandResponseBase,
     ): {
         command: string;
         args: string[];

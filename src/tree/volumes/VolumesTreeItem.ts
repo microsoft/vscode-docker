@@ -13,9 +13,10 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
 import { VolumeProperty, volumeProperties } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
+import { TreePrefix } from "../TreePrefix";
 
 export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, VolumeProperty> {
-    public treePrefix: string = 'volumes';
+    public treePrefix: TreePrefix = 'volumes';
     public label: string = localize('vscode-docker.tree.volumes.label', 'Volumes');
     public configureExplorerTitle: string = localize('vscode-docker.tree.volumes.configure', 'Configure volumes explorer');
     public childType: LocalChildType<ListVolumeItem> = VolumeTreeItem;

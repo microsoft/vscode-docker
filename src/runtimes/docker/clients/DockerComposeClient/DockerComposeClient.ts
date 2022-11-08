@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from '../../contracts/CommandRunner';
+import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     CommonOrchestratorCommandOptions,
     ConfigCommandOptions,
@@ -24,6 +24,7 @@ import {
     withFlagArg,
     withNamedArg
 } from '../../utils/commandLineBuilder';
+import { stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { ConfigurableClient } from '../ConfigurableClient';
 
 function withCommonOrchestratorArgs(options: CommonOrchestratorCommandOptions): CommandLineCurryFn {
@@ -105,7 +106,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator up command options
      * @returns A CommandResponse indicating how to run an orchestrator up command for Docker Compose
      */
-    public async up(options: UpCommandOptions): Promise<CommandResponse<void>> {
+    public async up(options: UpCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getUpCommandArgs(options),
@@ -133,7 +134,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator down command options
      * @returns A CommandResponse indicating how to run an orchestrator down command for Docker Compose
      */
-    public async down(options: DownCommandOptions): Promise<CommandResponse<void>> {
+    public async down(options: DownCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getDownCommandArgs(options),
@@ -157,7 +158,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator start command options
      * @returns A CommandResponse indicating how to run an orchestrator start command for Docker Compose
      */
-    public async start(options: StartCommandOptions): Promise<CommandResponse<void>> {
+    public async start(options: StartCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getStartCommandArgs(options),
@@ -182,7 +183,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator stop command options
      * @returns A CommandResponse indicating how to run an orchestrator stop command for Docker Compose
      */
-    public async stop(options: StopCommandOptions): Promise<CommandResponse<void>> {
+    public async stop(options: StopCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getStopCommandArgs(options),
@@ -207,7 +208,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator restart command options
      * @returns A CommandResponse indicating how to run an orchestrator restart command for Docker Compose
      */
-    public async restart(options: RestartCommandOptions): Promise<CommandResponse<void>> {
+    public async restart(options: RestartCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getRestartCommandArgs(options),
@@ -233,10 +234,11 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator logs command options
      * @returns A CommandResponse indicating how to run an orchestrator logs command for Docker Compose
      */
-    public async logs(options: LogsCommandOptions): Promise<CommandResponse<void>> {
+    public async logs(options: LogsCommandOptions): Promise<GeneratorCommandResponse<string>> {
         return {
             command: this.commandName,
             args: this.getLogsCommandArgs(options),
+            parseStream: (output, strict) => stringStreamToGenerator(output),
         };
     }
 
@@ -265,7 +267,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
      * @param options Standard orchestrator config command options
      * @returns A CommandResponse indicating how to run an orchestrator config command for Docker Compose
      */
-    public async config(options: ConfigCommandOptions): Promise<CommandResponse<Array<ConfigItem>>> {
+    public async config(options: ConfigCommandOptions): Promise<PromiseCommandResponse<Array<ConfigItem>>> {
         return {
             command: this.commandName,
             args: this.getConfigCommandArgs(options),

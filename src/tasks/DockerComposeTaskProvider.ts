@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from '../runtimes/docker';
+import { VoidCommandResponse } from '../runtimes/docker';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
@@ -39,7 +39,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
         const client = await ext.orchestratorManager.getClient();
 
         const options = definition.dockerCompose;
-        let command: CommandResponse<void>;
+        let command: VoidCommandResponse;
         if (definition.dockerCompose.up) {
             command = await client.up({
                 files: options.files,

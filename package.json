@@ -1540,11 +1540,6 @@
                     "default": true,
                     "description": "%vscode-docker.config.docker.promptForRegistryWhenPushingImages%"
                 },
-                "docker.explorerRefreshInterval": {
-                    "type": "number",
-                    "default": 2000,
-                    "description": "%vscode-docker.config.docker.explorerRefreshInterval%"
-                },
                 "docker.commands.build": {
                     "oneOf": [
                         {
@@ -2979,6 +2974,7 @@
         "node-fetch": "^2.6.7",
         "semver": "^7.3.7",
         "tar": "^6.1.11",
+        "tree-kill": "^1.2.2",
         "vscode-languageclient": "^8.0.2",
         "vscode-nls": "^5.0.0",
         "vscode-tas-client": "^0.1.22",

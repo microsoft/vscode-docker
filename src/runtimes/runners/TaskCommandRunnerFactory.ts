@@ -5,7 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandResponse, CommandResponseLike, CommandRunner, ICommandRunnerFactory, normalizeCommandResponseLike } from '../docker';
+import { CommandNotSupportedError, CommandRunner, ICommandRunnerFactory, Like, normalizeCommandResponseLike, PromiseCommandResponse, StreamingCommandRunner, VoidCommandResponse } from '../docker';
 
 interface TaskCommandRunnerOptions {
     taskName: string;
@@ -22,12 +22,16 @@ export class TaskCommandRunnerFactory implements ICommandRunnerFactory {
     }
 
     public getCommandRunner(): CommandRunner {
-        return async <T>(commandResponseLike: CommandResponseLike<T>) => {
-            const commandResponse: CommandResponse<T> = await normalizeCommandResponseLike(commandResponseLike);
+        return async <T>(commandResponseLike: Like<PromiseCommandResponse<T> | VoidCommandResponse>) => {
+            const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
             await executeAsTask(this.options, commandResponse.command, commandResponse.args);
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             return undefined!;
         };
+    }
+
+    public getStreamingCommandRunner(): StreamingCommandRunner {
+        throw new CommandNotSupportedError('Streaming commands are not supported for task runners');
     }
 }
 

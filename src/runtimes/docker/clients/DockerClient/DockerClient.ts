@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from "../../contracts/CommandRunner";
+import { PromiseCommandResponse, VoidCommandResponse } from "../../contracts/CommandRunner";
 import { IContainersClient, InspectContextsCommandOptions, InspectContextsItem, ListContextItem, ListContextsCommandOptions, RemoveContextsCommandOptions, UseContextCommandOptions } from "../../contracts/ContainerClient";
 import { asIds } from "../../utils/asIds";
 import { CommandLineArgs, composeArgs, withArg } from "../../utils/commandLineBuilder";
@@ -96,7 +96,7 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
         return contexts;
     }
 
-    override async listContexts(options: ListContextsCommandOptions): Promise<CommandResponse<ListContextItem[]>> {
+    override async listContexts(options: ListContextsCommandOptions): Promise<PromiseCommandResponse<ListContextItem[]>> {
         return {
             command: this.commandName,
             args: this.getListContextsCommandArgs(options),
@@ -123,7 +123,7 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
         return asIds(output);
     }
 
-    override async removeContexts(options: RemoveContextsCommandOptions): Promise<CommandResponse<string[]>> {
+    override async removeContexts(options: RemoveContextsCommandOptions): Promise<PromiseCommandResponse<string[]>> {
         return {
             command: this.commandName,
             args: this.getRemoveContextsCommandArgs(options),
@@ -142,7 +142,7 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
         )();
     }
 
-    override async useContext(options: UseContextCommandOptions): Promise<CommandResponse<void>> {
+    override async useContext(options: UseContextCommandOptions): Promise<VoidCommandResponse> {
         return {
             command: this.commandName,
             args: this.getUseContextCommandArgs(options),
@@ -203,7 +203,7 @@ export class DockerClient extends DockerClientBase implements IContainersClient 
         return new Array<InspectContextsItem>();
     }
 
-    override async inspectContexts(options: InspectContextsCommandOptions): Promise<CommandResponse<InspectContextsItem[]>> {
+    override async inspectContexts(options: InspectContextsCommandOptions): Promise<PromiseCommandResponse<InspectContextsItem[]>> {
         return {
             command: this.commandName,
             args: this.getInspectContextsCommandArgs(options),

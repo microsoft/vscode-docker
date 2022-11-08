@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions } from '../../runtimes/docker';
+import { CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions, VoidCommandResponse } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import { ext } from '../../extensionVariables';
@@ -13,7 +13,8 @@ import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTree
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 
 export async function composeGroupLogs(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
-    return composeGroup<LogsCommandOptions>(context, (client, options) => client.logs(options), node, { follow: true, tail: 1000 });
+    // Since we're not interested in the output, we can pretend this is a `VoidCommandResponse`
+    return composeGroup<LogsCommandOptions>(context, (client, options) => client.logs(options) as Promise<VoidCommandResponse>, node, { follow: true, tail: 1000 });
 }
 
 export async function composeGroupStart(context: IActionContext, node: ContainerGroupTreeItem): Promise<void> {
@@ -36,7 +37,7 @@ type AdditionalOptions<TOptions extends CommonOrchestratorCommandOptions> = Omit
 
 async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(
     context: IActionContext,
-    composeCommandCallback: (client: IContainerOrchestratorClient, options: TOptions) => Promise<CommandResponse<unknown>>,
+    composeCommandCallback: (client: IContainerOrchestratorClient, options: TOptions) => Promise<VoidCommandResponse>,
     node: ContainerGroupTreeItem,
     additionalOptions?: AdditionalOptions<TOptions>
 ): Promise<void> {

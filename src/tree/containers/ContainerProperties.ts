@@ -60,8 +60,8 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
             return item.state;
         case 'Status':
             // The rapidly-refreshing status during a container's first minute causes a lot of problems with excessive refreshing
-            // This normalizes things like "10 seconds" to "Less than a minute", meaning the refreshes don't happen constantly
-            return item.status?.replace(/\d+ seconds?/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
+            // This normalizes things like "10 seconds" and "Less than a second" to "Less than a minute", meaning the refreshes don't happen constantly
+            return item.status?.replace(/(\d+ seconds?)|(Less than a second)/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
         case 'Compose Project Name':
             return getComposeProjectName(item);
         case 'Image':

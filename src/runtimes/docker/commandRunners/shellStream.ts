@@ -4,13 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as stream from 'stream';
-import * as streamPromise from 'stream/promises';
 import {
-    CommandResponse,
-    CommandResponseLike,
+    CommandResponseBase,
     CommandRunner,
+    GeneratorCommandResponse,
     ICommandRunnerFactory,
+    Like,
     normalizeCommandResponseLike,
+    PromiseCommandResponse,
+    StreamingCommandRunner,
+    VoidCommandResponse,
 } from '../contracts/CommandRunner';
 import { CancellationTokenLike } from '../typings/CancellationTokenLike';
 import { AccumulatorStream } from '../utils/AccumulatorStream';
@@ -21,7 +24,7 @@ import {
     StreamSpawnOptions,
 } from '../utils/spawnStreamAsync';
 
-export type ShellStreamCommandRunnerOptions = StreamSpawnOptions & {
+export type ShellStreamCommandRunnerOptions = Omit<StreamSpawnOptions, 'stdOutPipe'> & {
     strict?: boolean;
 };
 
@@ -33,7 +36,7 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
     public constructor(protected readonly options: TOptions) { }
 
     public getCommandRunner(): CommandRunner {
-        return async <T>(commandResponseLike: CommandResponseLike<T>) => {
+        return async <T>(commandResponseLike: Like<VoidCommandResponse> | Like<PromiseCommandResponse<T>>) => {
             const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
             const { command, args } = this.getCommandAndArgs(commandResponse);
 
@@ -41,28 +44,14 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
 
             let result: T | undefined;
 
-            let splitterStream: stream.PassThrough | undefined;
-            const pipelinePromises: Promise<void>[] = [];
-
             let accumulator: AccumulatorStream | undefined;
 
             try {
                 if (commandResponse.parse) {
-                    splitterStream ??= new stream.PassThrough();
                     accumulator = new AccumulatorStream();
-                    pipelinePromises.push(
-                        streamPromise.pipeline(splitterStream, accumulator)
-                    );
                 }
 
-                if (this.options.stdOutPipe) {
-                    splitterStream ??= new stream.PassThrough;
-                    pipelinePromises.push(
-                        streamPromise.pipeline(splitterStream, this.options.stdOutPipe)
-                    );
-                }
-
-                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: splitterStream, shell: true });
+                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: accumulator, shell: true });
 
                 throwIfCancellationRequested(this.options.cancellationToken);
 
@@ -74,8 +63,6 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
 
                 throwIfCancellationRequested(this.options.cancellationToken);
 
-                await Promise.all(pipelinePromises);
-
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 return result!;
             } finally {
@@ -84,7 +71,30 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
         };
     }
 
-    protected getCommandAndArgs(commandResponse: CommandResponse<unknown>): { command: string, args: string[] } {
+    public getStreamingCommandRunner(): StreamingCommandRunner {
+        return this.streamingCommandRunner.bind(this);
+    }
+
+    private async *streamingCommandRunner<T>(commandResponseLike: Like<GeneratorCommandResponse<T>>): AsyncGenerator<T> {
+        const commandResponse = await normalizeCommandResponseLike(commandResponseLike);
+        const { command, args } = this.getCommandAndArgs(commandResponse);
+
+        throwIfCancellationRequested(this.options.cancellationToken);
+
+        const dataStream: stream.PassThrough = new stream.PassThrough();
+        const innerGenerator = commandResponse.parseStream(dataStream, !!this.options.strict);
+
+        // The process promise will be awaited only after the innerGenerator finishes
+        const processPromise = spawnStreamAsync(command, args, { ...this.options, stdOutPipe: dataStream, shell: true });
+
+        for await (const element of innerGenerator) {
+            yield element;
+        }
+
+        await processPromise;
+    }
+
+    protected getCommandAndArgs(commandResponse: CommandResponseBase): { command: string, args: string[] } {
         return {
             command: commandResponse.command,
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
