@@ -174,11 +174,11 @@ export type EventStreamCommandOptions = CommonCommandOptions & {
     /**
      * Return events since a given timestamp
      */
-    since?: string;
+    since?: string | number;
     /**
      * Only stream events until a given timestamp
      */
-    until?: string;
+    until?: string | number;
     /**
      * Only listen for events affecting these object types
      */
