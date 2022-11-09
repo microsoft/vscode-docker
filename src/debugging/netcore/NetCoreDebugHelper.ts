@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { composeArgs, ContainerOS, withArg, withQuotedArg } from '../../runtimes/docker';
+import { composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -312,25 +312,29 @@ export class NetCoreDebugHelper implements DebugHelper {
             containerCommand = 'cmd';
             containerCommandArgs = composeArgs(
                 withArg('/C'),
-                withQuotedArg(`IF EXIST "${debuggerPath}" (echo true) else (echo false)`)
+                withQuotedArg(`IF EXIST "${debuggerPath}" (exit 0) else (exit 1)`)
             )();
         } else {
             containerCommand = '/bin/sh';
             containerCommandArgs = composeArgs(
                 withArg('-c'),
-                withQuotedArg(`if [ -f ${debuggerPath} ]; then echo true; fi;`)
+                withQuotedArg(`if [ -f ${debuggerPath} ]; then exit 0; else exit 1; fi;`)
             )();
         }
 
-        const stdout = await ext.runWithDefaultShell(client =>
-            client.execContainer({
-                container: containerName,
-                command: [containerCommand, ...containerCommandArgs],
-                interactive: true,
-            })
-        );
-
-        return /true/ig.test(stdout);
+        try {
+            await ext.runWithDefaultShell(client =>
+                // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
+                client.execContainer({
+                    container: containerName,
+                    command: [containerCommand, ...containerCommandArgs],
+                    interactive: true,
+                }) as Promise<VoidCommandResponse>
+            );
+            return true;
+        } catch {
+            return false;
+        }
     }
 
     private async getContainerNameToAttach(context: IActionContext): Promise<string> {

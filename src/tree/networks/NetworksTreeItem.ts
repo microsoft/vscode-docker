@@ -15,9 +15,10 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
 import { NetworkProperty, networkProperties } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
+import { TreePrefix } from "../TreePrefix";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, NetworkProperty> {
-    public treePrefix: string = 'networks';
+    public treePrefix: TreePrefix = 'networks';
     public label: string = localize('vscode-docker.tree.networks.label', 'Networks');
     public configureExplorerTitle: string = localize('vscode-docker.tree.networks.configure', 'Configure networks explorer');
     public childType: LocalChildType<ListNetworkItem> = NetworkTreeItem;

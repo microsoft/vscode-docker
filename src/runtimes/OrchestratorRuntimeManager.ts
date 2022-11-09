@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { isAutoConfigurableDockerComposeClient } from './clients/AutoConfigurableDockerComposeClient';
 import { DockerComposeClient, IContainerOrchestratorClient } from './docker';
 import { RuntimeManager } from './RuntimeManager';
 
@@ -13,9 +14,15 @@ export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchest
         super('orchestratorClient');
     }
 
-    // TODO: runtimes: alt: temporarily just return the Docker Compose client, always
-    public getClient(): Promise<IContainerOrchestratorClient> {
-        return Promise.resolve(this.runtimeClients.find(isDockerComposeClient));
+    public async getClient(): Promise<IContainerOrchestratorClient> {
+        // TODO: runtimes: alt: temporarily just return the Docker Compose client, always
+        const composeClient = this.runtimeClients.find(isDockerComposeClient);
+
+        if (isAutoConfigurableDockerComposeClient(composeClient)) {
+            await composeClient.slowConfigure();
+        }
+
+        return composeClient;
     }
 }
 

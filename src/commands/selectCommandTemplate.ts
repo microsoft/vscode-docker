@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse, PortBinding } from '../runtimes/docker';
+import { PortBinding, VoidCommandResponse } from '../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
@@ -29,7 +29,7 @@ export interface CommandTemplate {
     match?: string;
 }
 
-export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<CommandResponse<void>> {
+export async function selectBuildCommand(context: IActionContext, folder: vscode.WorkspaceFolder, dockerfile: string, buildContext: string): Promise<VoidCommandResponse> {
     return await selectCommandTemplate(
         context,
         'build',
@@ -39,7 +39,7 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<CommandResponse<void>> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
@@ -54,7 +54,7 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
     );
 }
 
-export async function selectAttachCommand(context: IActionContext, containerName: string, imageName: string, containerId: string, shellCommand: string): Promise<CommandResponse<void>> {
+export async function selectAttachCommand(context: IActionContext, containerName: string, imageName: string, containerId: string, shellCommand: string): Promise<VoidCommandResponse> {
     return await selectCommandTemplate(
         context,
         'attach',
@@ -64,7 +64,7 @@ export async function selectAttachCommand(context: IActionContext, containerName
     );
 }
 
-export async function selectLogsCommand(context: IActionContext, containerName: string, imageName: string, containerId: string): Promise<CommandResponse<void>> {
+export async function selectLogsCommand(context: IActionContext, containerName: string, imageName: string, containerId: string): Promise<VoidCommandResponse> {
     return await selectCommandTemplate(
         context,
         'logs',
@@ -74,7 +74,7 @@ export async function selectLogsCommand(context: IActionContext, containerName: 
     );
 }
 
-export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down' | 'upSubset', configurationFile?: string, detached?: boolean, build?: boolean): Promise<CommandResponse<void>> {
+export async function selectComposeCommand(context: IActionContext, folder: vscode.WorkspaceFolder, composeCommand: 'up' | 'down' | 'upSubset', configurationFile?: string, detached?: boolean, build?: boolean): Promise<VoidCommandResponse> {
     let template: TemplateCommand;
 
     switch (composeCommand) {
@@ -120,7 +120,7 @@ export async function selectCommandTemplate(
     // The following three are overridable for test purposes, but have default values that cover actual usage
     templatePicker: TemplatePicker = (i, o) => actionContext.ui.showQuickPick(i, o), // Default is the normal ext.ui.showQuickPick (this longer syntax is because doing `ext.ui.showQuickPick` alone doesn't result in the right `this` further down)
     getCommandSettings: () => CommandSettings = () => vscode.workspace.getConfiguration('docker').inspect<string | CommandTemplate[]>(`commands.${command}`)
-): Promise<CommandResponse<void>> {
+): Promise<VoidCommandResponse> {
     // Get the configured settings values
     const commandSettings = getCommandSettings();
     const userTemplates: CommandTemplate[] = toCommandTemplateArray(commandSettings.workspaceFolderValue ?? commandSettings.workspaceValue ?? commandSettings.globalValue);

@@ -14,9 +14,10 @@ import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
 import { ContextGroupTreeItem } from './ContextGroupTreeItem';
 import { ContextProperty, contextProperties } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
+import { TreePrefix } from '../TreePrefix';
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<ListContextItem, ContextProperty> {
-    public treePrefix: string = 'contexts';
+    public treePrefix: TreePrefix = 'contexts';
     public label: string = localize('vscode-docker.tree.Contexts.label', 'Contexts');
     public configureExplorerTitle: string = localize('vscode-docker.tree.Contexts.configure', 'Configure Docker Contexts Explorer');
     public childType: LocalChildType<ListContextItem> = ContextTreeItem;

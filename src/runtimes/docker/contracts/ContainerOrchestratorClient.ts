@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommandResponse } from "./CommandRunner";
+import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from "./CommandRunner";
 import { ClientIdentity, CommonCommandOptions } from "./ContainerClient";
 
 // #region Container orchestrator commands
@@ -61,10 +61,10 @@ export type UpCommandOptions = CommonOrchestratorCommandOptions & {
 
 type UpCommand = {
     /**
-     * Generate a {@link CommandResponse} for up'ing services with a container orchestrator
+     * Generate a {@link VoidCommandResponse} for up'ing services with a container orchestrator
      * @param options Command options
      */
-    up(options: UpCommandOptions): Promise<CommandResponse<void>>;
+    up(options: UpCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Down command types
@@ -89,10 +89,10 @@ export type DownCommandOptions = CommonOrchestratorCommandOptions & {
 
 type DownCommand = {
     /**
-     * Generate a {@link CommandResponse} for down'ing services with a container orchestrator
+     * Generate a {@link VoidCommandResponse} for down'ing services with a container orchestrator
      * @param options Command options
      */
-    down(options: DownCommandOptions): Promise<CommandResponse<void>>;
+    down(options: DownCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Start command types
@@ -101,10 +101,10 @@ export type StartCommandOptions = CommonOrchestratorCommandOptions;
 
 type StartCommand = {
     /**
-     * Generate a {@link CommandResponse} for starting services with a container orchestrator
+     * Generate a {@link VoidCommandResponse} for starting services with a container orchestrator
      * @param options Command options
      */
-    start(options: StartCommandOptions): Promise<CommandResponse<void>>;
+    start(options: StartCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Stop command types
@@ -117,10 +117,10 @@ export type StopCommandOptions = CommonOrchestratorCommandOptions & {
 
 type StopCommand = {
     /**
-     * Generate a {@link CommandResponse} for stopping services with a container orchestrator
+     * Generate a {@link VoidCommandResponse} for stopping services with a container orchestrator
      * @param options Command options
      */
-    stop(options: StopCommandOptions): Promise<CommandResponse<void>>;
+    stop(options: StopCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Restart command types
@@ -133,10 +133,10 @@ export type RestartCommandOptions = CommonOrchestratorCommandOptions & {
 
 type RestartCommand = {
     /**
-     * Generate a {@link CommandResponse} for restarting services with a container orchestrator
+     * Generate a {@link VoidCommandResponse} for restarting services with a container orchestrator
      * @param options Command options
      */
-    restart(options: RestartCommandOptions): Promise<CommandResponse<void>>;
+    restart(options: RestartCommandOptions): Promise<VoidCommandResponse>;
 };
 
 // Logs command types
@@ -153,10 +153,10 @@ export type LogsCommandOptions = CommonOrchestratorCommandOptions & {
 
 type LogsCommand = {
     /**
-     * Generate a {@link CommandResponse} for getting collated logs from services with a container orchestrator
+     * Generate a {@link GeneratorCommandResponse} for getting collated logs from services with a container orchestrator
      * @param options Command options
      */
-    logs(options: LogsCommandOptions): Promise<CommandResponse<void>>;
+    logs(options: LogsCommandOptions): Promise<GeneratorCommandResponse<string>>;
 };
 
 // Config command types
@@ -169,10 +169,10 @@ export type ConfigItem = string;
 
 type ConfigCommand = {
     /**
-     * Generate a {@link CommandResponse} for getting config information for services
+     * Generate a {@link PromiseCommandResponse} for getting config information for services
      * @param options Command options
      */
-    config(options: ConfigCommandOptions): Promise<CommandResponse<Array<ConfigItem>>>;
+    config(options: ConfigCommandOptions): Promise<PromiseCommandResponse<Array<ConfigItem>>>;
 };
 
 // #endregion

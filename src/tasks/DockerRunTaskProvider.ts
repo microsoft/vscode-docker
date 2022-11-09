@@ -81,8 +81,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             token: context.cancellationToken,
         });
 
-        const { stdout } = await runner(command);
-        context.containerId = stdout;
+        context.containerId = await runner(command);
         throwIfCancellationRequested(context);
 
         if (helper && helper.postRun) {

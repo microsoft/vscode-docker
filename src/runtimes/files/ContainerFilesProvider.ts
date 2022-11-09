@@ -12,7 +12,6 @@ import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesI
 import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
-import { runWithDefaultShell } from '../runners/runWithDefaultShell';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
@@ -80,18 +79,19 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
                 const accumulator = new AccumulatorStream();
+                const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                await runWithDefaultShell(
+                const generator = ext.streamWithDefaultShell(
                     client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
-                    }),
-                    ext.runtimeManager,
-                    {
-                        stdOutPipe: containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator),
-                    }
+                    })
                 );
+
+                for await (const chunk of generator) {
+                    targetStream.write(chunk);
+                }
 
                 return await accumulator.getBytes();
             };
@@ -108,13 +108,12 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     path.win32.dirname(dockerUri.windowsPath) :
                     path.posix.dirname(dockerUri.path);
 
-                await runWithDefaultShell(
+                await ext.runWithDefaultShell(
                     client => client.writeFile({
                         container: dockerUri.containerId,
                         path: destDirectory,
                         operatingSystem: containerOS,
                     }),
-                    ext.runtimeManager,
                     {
                         stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
                     }

@@ -15,13 +15,14 @@ import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettin
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
 import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
+import { TreePrefix } from "../TreePrefix";
 
 export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;
 };
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
-    public treePrefix: string = 'containers';
+    public treePrefix: TreePrefix = 'containers';
     public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
     public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
 
@@ -96,28 +97,6 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
             return [dockerTutorialTreeItem];
         }
         return super.getTreeItemForEmptyList();
-    }
-
-    protected areArraysEqual(array1: DockerContainerInfo[] | undefined, array2: DockerContainerInfo[] | undefined): boolean {
-        if (!super.areArraysEqual(array1, array2)) {
-            // If they aren't the same according to the base class implementation, they are definitely not the same according to this either
-            return false;
-        }
-
-        // If they are both undefined, return true
-        // If only one is undefined, return false
-        // This matches the behavior of the base class implementation, and guards against null refs below
-        if (array1 === undefined && array2 === undefined) {
-            return true;
-        } else if (array1 === undefined || array2 === undefined) {
-            return false;
-        }
-
-        // Containers' labels/descriptions (status in particular) can change. If they do, we want to cause a refresh. But, we also don't want to change the tree ID based on status (in `getTreeId()` in LocalRootTreeItemBase.ts).
-        return !array1.some((item, index) => {
-            return this.getTreeItemLabel(item) !== this.getTreeItemLabel(array2[index]) ||
-                this.getTreeItemDescription(item) !== this.getTreeItemDescription(array2[index]);
-        });
     }
 
     private isNewContainerUser(): boolean {

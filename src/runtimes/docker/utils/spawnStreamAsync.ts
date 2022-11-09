@@ -5,6 +5,7 @@
 
 import { spawn, SpawnOptions } from 'child_process';
 import * as os from 'os';
+import * as treeKill from 'tree-kill';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { IShell } from '../contracts/Shell';
 
@@ -171,10 +172,15 @@ export async function spawnStreamAsync(
 
     return new Promise<void>((resolve, reject) => {
         const disposable = cancellationToken.onCancellationRequested(() => {
+            disposable.dispose();
             options.stdOutPipe?.end();
             options.stdErrPipe?.end();
             childProcess.removeAllListeners();
-            childProcess.kill();
+
+            if (childProcess.pid) {
+                treeKill(childProcess.pid);
+            }
+
             reject(new CancellationError('Command cancelled', cancellationToken));
         });
 

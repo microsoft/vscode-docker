@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerClient, DockerComposeClient } from './runtimes/docker';
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
@@ -25,6 +24,8 @@ import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFea
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
+import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
+import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -168,11 +169,8 @@ function setEnvironmentVariableContributions(): void {
 
 function registerDockerClients(): void {
     // Create the clients
-    const dockerClient = new DockerClient();
-    const composeClient = new DockerComposeClient();
-
-    // Configure them initially
-    configureDockerClients(dockerClient, composeClient);
+    const dockerClient = new AutoConfigurableDockerClient();
+    const composeClient = new AutoConfigurableDockerComposeClient();
 
     // Register the clients
     ext.context.subscriptions.push(
@@ -185,31 +183,14 @@ function registerDockerClients(): void {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
-        if (e.affectsConfiguration('docker.dockerPath') ||
-            e.affectsConfiguration('docker.composeCommand')) {
-            configureDockerClients(dockerClient, composeClient);
+        if (e.affectsConfiguration('docker.dockerPath')) {
+            dockerClient.reconfigure();
+        }
+
+        if (e.affectsConfiguration('docker.composeCommand')) {
+            composeClient.reconfigure();
         }
     });
-}
-
-function configureDockerClients(dockerClient: DockerClient, composeClient: DockerComposeClient): void {
-    const config = vscode.workspace.getConfiguration('docker');
-
-    const dockerCommand = config.get<string | undefined>('dockerPath') || 'docker';
-    let composeCommand = config.get<string | undefined>('composeCommand') || 'docker compose';
-
-    let isComposeV2 = false;
-    if (/^docker(\s+compose\s*)?$/i.test(composeCommand)) {
-        // Normalize both "docker" and "docker compose" to "docker", with `isComposeV2` true
-        composeCommand = 'docker';
-        isComposeV2 = true;
-    }
-
-    // TODO: runtimes: Do we want to try auto-detecting Compose v1 vs. v2?
-
-    dockerClient.commandName = dockerCommand;
-    composeClient.commandName = composeCommand;
-    composeClient.composeV2 = isComposeV2;
 }
 
 //#region Language services
