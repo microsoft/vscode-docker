@@ -174,7 +174,6 @@ export class RefreshManager extends vscode.Disposable {
                 // giving up, regardless of whether or not they are consecutive.
             }
         });
-
     }
 
     private setupRefreshOnConfigurationChange(): void {
