@@ -170,6 +170,8 @@ export class RefreshManager extends vscode.Disposable {
 
                 // If the event generator terminates on its expected lifecycle it will exit without an error
                 // Continue the loop as normal, starting the next event stream at the previous stop time
+                // We intentionally do not reset the `errorCount`, so that at most 3 failures occur before
+                // giving up, regardless of whether or not they are consecutive.
             }
         });
 
