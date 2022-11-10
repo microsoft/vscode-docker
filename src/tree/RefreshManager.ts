@@ -14,6 +14,7 @@ import { AllTreePrefixes, TreePrefix } from './TreePrefix';
 
 const pollingIntervalMs = 60 * 1000; // One minute
 const eventListenerTries = 3; // The event listener will try at most 3 times to connect for events
+const eventListenerLifetimeSeconds = 60 * 5; // Five minutes
 const debounceDelayMs = 500; // Refreshes rapidly initiated for the same tree view will be debounced to occur 500ms after the last initiation
 
 type RefreshTarget = AzExtTreeItem | TreePrefix;
@@ -108,12 +109,18 @@ export class RefreshManager extends vscode.Disposable {
             const eventActionsToWatch: EventAction[] = Array.from(new Set<EventAction>([...ContainerEventActions, ...ImageEventActions, ...NetworkEventActions, ...VolumeEventActions]));
 
             // Try at most `eventListenerTries` times to (re)connect to the event stream
-            for (let i = 0; i < eventListenerTries; i++) {
+            let errorCount = 0;
+            let eventsSinceTimestamp = Math.round(Date.now() / 1000);
+            while (errorCount < eventListenerTries) {
+                const eventsUntilTimestamp = eventsSinceTimestamp + eventListenerLifetimeSeconds;
+
                 try {
                     const eventGenerator = ext.streamWithDefaultShell(client =>
                         client.getEventStream({
                             types: eventTypesToWatch,
                             events: eventActionsToWatch,
+                            since: eventsSinceTimestamp,
+                            until: eventsUntilTimestamp,
                         }),
                         {
                             cancellationToken: this.cts.token,
@@ -145,7 +152,7 @@ export class RefreshManager extends vscode.Disposable {
                     if (isCancellationError(err) || error.isUserCancelledError) {
                         // Cancelled, so don't try again and don't rethrow--this is a normal termination pathway
                         return;
-                    } else if (i < eventListenerTries - 1) {
+                    } else if (++errorCount < eventListenerTries) {
                         // Still in the retry loop
                         continue;
                     } else {
@@ -156,10 +163,17 @@ export class RefreshManager extends vscode.Disposable {
 
                         throw error;
                     }
+                } finally {
+                    // Move the next start timestamp to the current end timestamp
+                    eventsSinceTimestamp = eventsUntilTimestamp;
                 }
+
+                // If the event generator terminates on its expected lifecycle it will exit without an error
+                // Continue the loop as normal, starting the next event stream at the previous stop time
+                // We intentionally do not reset the `errorCount`, so that at most 3 failures occur before
+                // giving up, regardless of whether or not they are consecutive.
             }
         });
-
     }
 
     private setupRefreshOnConfigurationChange(): void {
