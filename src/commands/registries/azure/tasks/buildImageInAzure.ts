@@ -20,7 +20,7 @@ export async function buildImageInAzure(context: IActionContext, uri?: vscode.Ur
     const getRun = await scheduleRunRequest(context, "DockerBuildRequest", uri);
     
     let run = await getRun();
-    const { KnownRunStatus }= await getArmContainerRegistry();
+    const { KnownRunStatus } = await getArmContainerRegistry();
     while (run.status === KnownRunStatus.Running) {
         await delay(WAIT_MS);
         run = await getRun();
