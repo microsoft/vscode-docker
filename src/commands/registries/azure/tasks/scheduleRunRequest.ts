@@ -24,7 +24,7 @@ import { getStorageBlob } from '../../../../utils/lazyPackages';
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
-export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<void> {
+export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<() => Promise<AcrRun>> {
     // Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
@@ -76,10 +76,14 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Schedule the run and Clean up.
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
-        const run = await (await node.getClient(context)).registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
+        const client = await node.getClient(context);
+        const run = await client.registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
         void streamLogs(context, node, run);
+
+        // function returns the AcrRun info
+        return async () => client.runs.get(node.resourceGroup, node.registryName, run.runId);
     } finally {
         if (await fse.pathExists(tarFilePath)) {
             await fse.unlink(tarFilePath);
