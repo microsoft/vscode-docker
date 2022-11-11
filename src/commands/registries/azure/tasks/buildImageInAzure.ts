@@ -21,7 +21,11 @@ export async function buildImageInAzure(context: IActionContext, uri?: vscode.Ur
     
     let run = await getRun();
     const { KnownRunStatus } = await getArmContainerRegistry();
-    while (run.status === KnownRunStatus.Running) {
+    while (
+        run.status === KnownRunStatus.Started ||
+        run.status === KnownRunStatus.Queued ||
+        run.status === KnownRunStatus.Running
+    ) {
         await delay(WAIT_MS);
         run = await getRun();
     }
