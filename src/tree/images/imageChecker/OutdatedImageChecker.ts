@@ -26,7 +26,7 @@ export class OutdatedImageChecker {
             headers: {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 'X-Meta-Source-Client': ociClientId,
-                'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json',
+                'Accept': 'application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json',
             },
         };
     }
