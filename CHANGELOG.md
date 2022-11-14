@@ -1,3 +1,18 @@
+## 1.23.0 - 28 November 2022
+### Added
+* This version includes major changes and rearchitecting to use the Docker CLI exclusively, instead of a mix of the CLI and the HTTP API. This fixes a very common class of issues where the CLI would be working, but the Explorer view would not. [#3263](https://github.com/microsoft/vscode-docker/issues/3263)
+* Added a new `docker.environment` setting that replaces `docker.host`, `docker.context`, `docker.machineName`, etc. If these settings are in use, you will be prompted to automatically migrate them on first use. [#3539](https://github.com/microsoft/vscode-docker/issues/3539)
+
+### Fixed
+* No communication with Docker should occur until the Explorer view is opened or a command is run. [#3475](https://github.com/microsoft/vscode-docker/issues/3475)
+* The explorer view did not work if certificates were needed to authenticate to the Docker server, or if a `gpg-agent` was in use, or several other scenarios. [#2058](https://github.com/microsoft/vscode-docker/issues/2058), [#3295](https://github.com/microsoft/vscode-docker/issues/3295), [#3590](https://github.com/microsoft/vscode-docker/issues/3590)
+* Debugging Python apps in WSL, without Docker Desktop, should now work. [#3525](https://github.com/microsoft/vscode-docker/issues/3525)
+
+### Removed
+* The `docker.explorerRefreshInterval` setting has been removed. Instead of the Explorer view refreshing automatically every two seconds (by default), refreshes occur when relevant events are detected. [#3674](https://github.com/microsoft/vscode-docker/issues/3674)
+* As part of the move to using the CLI, the `--mount` flag is now used instead of `--volume` when adding volumes to containers. As a result, the SELinux relabel option `,z` is no longer supported. [#3656](https://github.com/microsoft/vscode-docker/issues/3656)
+* Features related to Azure Container Instances (ACI), including creating and using ACI contexts, and deploying to ACI, have been removed. [#3655](https://github.com/microsoft/vscode-docker/issues/3655)
+
 ## 1.22.2 - 18 October 2022
 ### Fixed
 * Fixed an issue blocking debugging of ASP.NET apps. [#3638](https://github.com/microsoft/vscode-docker/issues/3638)
