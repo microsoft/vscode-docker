@@ -59,6 +59,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         let rootUri = rootFolder.uri;
         if (rootStrategy === RootStrategy.DOCKERFILE_FOLDER) {
             // changes the root to the folder where the Dockerfile is
+            // it is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
             const fileUri = vscode.Uri.file(fileItem.absoluteFilePath);
             fileItem = createFileItem(rootUri, fileUri);
