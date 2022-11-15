@@ -25,8 +25,8 @@ const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
 export enum RootStrategy {
-    DEFAULT,
-    DOCKERFILE_FOLDER,
+    Default,
+    DockerfileFolder,
 }
 
 export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined, rootStrategy?: RootStrategy | undefined): Promise<() => Promise<AcrRun>> {
@@ -57,7 +57,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         ext.outputChannel.show();
 
         let rootUri = rootFolder.uri;
-        if (rootStrategy === RootStrategy.DOCKERFILE_FOLDER) {
+        if (rootStrategy === RootStrategy.DockerfileFolder) {
             // changes the root to the folder where the Dockerfile is
             // it is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
