@@ -20,8 +20,8 @@ async function getFileUris(folder: vscode.WorkspaceFolder, globPattern: string, 
     return await vscode.workspace.findFiles(new vscode.RelativePattern(folder, globPattern), excludePattern ? new vscode.RelativePattern(folder, excludePattern) : undefined, FILE_SEARCH_MAX_RESULT, undefined);
 }
 
-export function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.Uri): Item {
-    const relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.uri.fsPath.length));
+export function createFileItem(rootFolder: vscode.Uri, uri: vscode.Uri): Item {
+    const relativeFilePath = path.join(".", uri.fsPath.substr(rootFolder.fsPath.length));
 
     return <Item>{
         description: undefined,
@@ -29,7 +29,7 @@ export function createFileItem(rootFolder: vscode.WorkspaceFolder, uri: vscode.U
         label: relativeFilePath,
         relativeFolderPath: path.dirname(relativeFilePath),
         absoluteFilePath: uri.fsPath,
-        absoluteFolderPath: rootFolder.uri.fsPath,
+        absoluteFolderPath: rootFolder.fsPath,
     };
 }
 
@@ -71,7 +71,7 @@ export async function resolveFilesOfPattern(rootFolder: vscode.WorkspaceFolder, 
     if (!uris || uris.length === 0) {
         return undefined;
     } else {
-        return uris.map(uri => createFileItem(rootFolder, uri));
+        return uris.map(uri => createFileItem(rootFolder.uri, uri));
     }
 }
 
@@ -89,7 +89,7 @@ async function quickPickFileItem(context: IActionContext, items: Item[], message
 
 export async function quickPickDockerFileItem(context: IActionContext, dockerFileUri: vscode.Uri | undefined, rootFolder: vscode.WorkspaceFolder): Promise<Item> {
     if (dockerFileUri) {
-        return createFileItem(rootFolder, dockerFileUri);
+        return createFileItem(rootFolder.uri, dockerFileUri);
     }
 
     let selectedDockerFile: Item;
@@ -154,7 +154,7 @@ function isDefaultDockerComposeOverrideFile(fileName: string): boolean {
 
 export async function quickPickYamlFileItem(context: IActionContext, fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noYamlFileMessage: string): Promise<Item> {
     if (fileUri) {
-        return createFileItem(rootFolder, fileUri);
+        return createFileItem(rootFolder.uri, fileUri);
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [YAML_GLOB_PATTERN]);
@@ -168,7 +168,7 @@ export async function quickPickYamlFileItem(context: IActionContext, fileUri: vs
 
 export async function quickPickProjectFileItem(context: IActionContext, fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
     if (fileUri) {
-        return createFileItem(rootFolder, fileUri);
+        return createFileItem(rootFolder.uri, fileUri);
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);

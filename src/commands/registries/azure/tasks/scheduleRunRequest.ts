@@ -15,7 +15,7 @@ import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { delay } from '../../../../utils/promiseUtils';
-import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
+import { Item, quickPickDockerFileItem, quickPickYamlFileItem, createFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
 import { bufferToString } from "../../../../utils/execAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
@@ -24,7 +24,12 @@ import { getStorageBlob } from '../../../../utils/lazyPackages';
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
-export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<() => Promise<AcrRun>> {
+export enum RootStrategy {
+    DEFAULT,
+    DOCKERFILE_FOLDER,
+}
+
+export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined, rootStrategy?: RootStrategy | undefined): Promise<() => Promise<AcrRun>> {
     // Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
@@ -51,7 +56,15 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Prepare to run.
         ext.outputChannel.show();
 
-        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
+        let rootUri = rootFolder.uri;
+        if (rootStrategy === RootStrategy.DOCKERFILE_FOLDER) {
+            // changes the root to the folder where the Dockerfile is
+            rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
+            const fileUri = vscode.Uri.file(fileItem.absoluteFilePath);
+            fileItem = createFileItem(rootUri, fileUri);
+        }
+
+        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
@@ -120,9 +133,9 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     return imageName;
 }
 
-async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
+async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.Uri, tarFilePath: string): Promise<string> {
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
-    const source: string = rootFolder.uri.fsPath;
+    const source: string = rootFolder.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any
