@@ -80,7 +80,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         } else {
             runRequest = {
                 type: 'FileTaskRunRequest',
-                taskFilePath: fileItem.relativeFilePath,
+                taskFilePath: path.relative(rootUri.fsPath, fileItem.absoluteFilePath),
                 sourceLocation: uploadedSourceLocation,
                 platform: { os: osType }
             };
