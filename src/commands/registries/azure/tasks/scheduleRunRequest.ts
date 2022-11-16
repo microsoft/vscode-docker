@@ -62,8 +62,6 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             // changes the root to the folder where the Dockerfile is
             // it is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
-            const fileUri = vscode.Uri.file(fileItem.absoluteFilePath);
-            fileItem = createFileItem(rootUri, fileUri);
         }
 
         const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootUri, tarFilePath);
@@ -77,7 +75,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
                 isPushEnabled: true,
                 sourceLocation: uploadedSourceLocation,
                 platform: { os: osType },
-                dockerFilePath: fileItem.relativeFilePath
+                dockerFilePath: path.relative(rootUri.fsPath, fileItem.absoluteFilePath)
             };
         } else {
             runRequest = {

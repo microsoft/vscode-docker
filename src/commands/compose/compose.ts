@@ -32,7 +32,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
         commandParameterFileUris = [];
     }
 
-    let selectedItems: Item[] = commandParameterFileUris.map(uri => createFileItem(folder.uri, uri));
+    let selectedItems: Item[] = commandParameterFileUris.map(uri => createFileItem(folder, uri));
     if (!selectedItems.length) {
         // prompt for compose file
         const selectedItem = await quickPickDockerComposeFileItem(context, folder, message);
