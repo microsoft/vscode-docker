@@ -6,18 +6,18 @@
 import * as vscode from 'vscode';
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import type { Run } from '@azure/arm-containerregistry';
-import { scheduleRunRequest } from './scheduleRunRequest';
+import { scheduleRunRequest, RootStrategy } from './scheduleRunRequest';
 import { delay } from '../../../../utils/promiseUtils';
 import { getArmContainerRegistry } from '../../../../utils/lazyPackages';
 
 const WAIT_MS = 5000;
 
-export async function buildImageInAzure(context: IActionContext, uri?: vscode.Uri | undefined): Promise<Run | undefined> {
+export async function buildImageInAzure(context: IActionContext, uri?: vscode.Uri | undefined, rootStrategy?: RootStrategy | undefined): Promise<Run | undefined> {
     if (!vscode.workspace.isTrusted) {
         throw new UserCancelledError('enforceTrust');
     }
 
-    const getRun = await scheduleRunRequest(context, "DockerBuildRequest", uri);
+    const getRun = await scheduleRunRequest(context, "DockerBuildRequest", uri, rootStrategy);
     
     let run = await getRun();
     const { KnownRunStatus } = await getArmContainerRegistry();
