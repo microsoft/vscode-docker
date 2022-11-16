@@ -24,9 +24,10 @@ import { getStorageBlob } from '../../../../utils/lazyPackages';
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
+// this is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
 export enum RootStrategy {
-    Default,
-    DockerfileFolder,
+    Default = 'Default',
+    DockerfileFolder = 'DockerfileFolder',
 }
 
 export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined, rootStrategy?: RootStrategy | undefined): Promise<() => Promise<AcrRun>> {
