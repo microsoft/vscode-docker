@@ -15,7 +15,7 @@ import { localize } from "../../../../localize";
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
 import { delay } from '../../../../utils/promiseUtils';
-import { Item, quickPickDockerFileItem, quickPickYamlFileItem, createFileItem } from '../../../../utils/quickPickFile';
+import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
 import { bufferToString } from "../../../../utils/execAsync";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
