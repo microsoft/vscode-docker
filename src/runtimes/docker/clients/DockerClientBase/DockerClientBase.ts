@@ -135,7 +135,10 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      */
     public readonly defaultTag: string = 'latest';
 
-    private listDateFormat: string = 'YYYY-MM-DD HH:mm:ss ZZ';
+    /**
+     * Custom parsing string for the date format from list commands
+     */
+    public readonly listDateFormat: string = 'YYYY-MM-DD HH:mm:ss ZZ';
 
     //#region Information Commands
 
@@ -460,7 +463,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid image JSON');
                     }
 
-                    const createdAt = dayjs.utc(rawImage.CreatedAt).toDate();
+                    const createdAt = dayjs.utc(rawImage.CreatedAt, this.listDateFormat).toDate();
                     const size = tryParseSize(rawImage.Size);
 
                     const repositoryAndTag = `${rawImage.Repository}${rawImage.Tag ? `:${rawImage.Tag}` : ''}`;
@@ -1492,7 +1495,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     const labels = parseDockerLikeLabels(rawVolume.Labels);
 
                     const createdAt = rawVolume.CreatedAt
-                        ? dayjs.utc(rawVolume.CreatedAt)
+                        ? dayjs.utc(rawVolume.CreatedAt, this.listDateFormat)
                         : undefined;
 
                     const size = tryParseSize(rawVolume.Size);
@@ -1777,7 +1780,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     // Parse the labels assigned to the networks and normalize to key value pairs
                     const labels = parseDockerLikeLabels(rawNetwork.Labels);
 
-                    const createdAt = dayjs.utc(rawNetwork.CreatedAt).toDate();
+                    const createdAt = dayjs.utc(rawNetwork.CreatedAt, this.listDateFormat).toDate();
 
                     networks.push({
                         id: rawNetwork.Id,
