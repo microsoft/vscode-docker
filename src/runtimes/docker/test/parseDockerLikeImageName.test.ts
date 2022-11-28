@@ -13,6 +13,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'alpine',
                 image: 'alpine',
                 tag: undefined,
+                digest: undefined,
                 registry: undefined,
             });
 
@@ -20,6 +21,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'hello-world',
                 image: 'hello-world',
                 tag: undefined,
+                digest: undefined,
                 registry: undefined,
             });
 
@@ -27,6 +29,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'hello_world',
                 image: 'hello_world',
                 tag: undefined,
+                digest: undefined,
                 registry: undefined,
             });
 
@@ -34,6 +37,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'library/alpine',
                 image: 'library/alpine',
                 tag: undefined,
+                digest: undefined,
                 registry: undefined,
             });
         });
@@ -43,6 +47,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'alpine:latest',
                 image: 'alpine',
                 tag: 'latest',
+                digest: undefined,
                 registry: undefined,
             });
 
@@ -50,6 +55,17 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'library/alpine:5',
                 image: 'library/alpine',
                 tag: '5',
+                digest: undefined,
+                registry: undefined,
+            });
+        });
+
+        it('Should parse those with a digest', () => {
+            expect(parseDockerLikeImageName('kindest/node:v1.24.0@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e')).to.deep.equal({
+                originalName: 'kindest/node:v1.24.0@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                image: 'kindest/node',
+                tag: 'v1.24.0',
+                digest: 'sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
                 registry: undefined,
             });
         });
@@ -59,6 +75,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'docker.io/library/alpine:latest',
                 image: 'library/alpine',
                 tag: 'latest',
+                digest: undefined,
                 registry: 'docker.io',
             });
 
@@ -66,6 +83,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'localhost/alpine:latest',
                 image: 'alpine',
                 tag: 'latest',
+                digest: undefined,
                 registry: 'localhost',
             });
 
@@ -73,6 +91,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'with-a.port:5000/library/alpine:latest',
                 image: 'library/alpine',
                 tag: 'latest',
+                digest: undefined,
                 registry: 'with-a.port:5000',
             });
 
@@ -80,6 +99,7 @@ describe('parseDockerLikeImageName', () => {
                 originalName: '1.2.3.4:5000/library/alpine:latest',
                 image: 'library/alpine',
                 tag: 'latest',
+                digest: undefined,
                 registry: '1.2.3.4:5000',
             });
 
@@ -87,6 +107,31 @@ describe('parseDockerLikeImageName', () => {
                 originalName: 'localhost:5000/alpine:latest',
                 image: 'alpine',
                 tag: 'latest',
+                digest: undefined,
+                registry: 'localhost:5000',
+            });
+
+            expect(parseDockerLikeImageName('with-a.port:5000/library/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e')).to.deep.equal({
+                originalName: 'with-a.port:5000/library/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                image: 'library/alpine',
+                tag: 'latest',
+                digest: 'sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                registry: 'with-a.port:5000',
+            });
+
+            expect(parseDockerLikeImageName('1.2.3.4:5000/library/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e')).to.deep.equal({
+                originalName: '1.2.3.4:5000/library/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                image: 'library/alpine',
+                tag: 'latest',
+                digest: 'sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                registry: '1.2.3.4:5000',
+            });
+
+            expect(parseDockerLikeImageName('localhost:5000/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e')).to.deep.equal({
+                originalName: 'localhost:5000/alpine:latest@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
+                image: 'alpine',
+                tag: 'latest',
+                digest: 'sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e',
                 registry: 'localhost:5000',
             });
         });
@@ -97,6 +142,7 @@ describe('parseDockerLikeImageName', () => {
             originalName: '<none>:<none>',
             image: undefined,
             tag: undefined,
+            digest: undefined,
             registry: undefined,
         });
 
@@ -104,6 +150,7 @@ describe('parseDockerLikeImageName', () => {
             originalName: '<none>',
             image: undefined,
             tag: undefined,
+            digest: undefined,
             registry: undefined,
         });
 
@@ -111,6 +158,7 @@ describe('parseDockerLikeImageName', () => {
             originalName: 'alpine:<none>',
             image: 'alpine',
             tag: undefined,
+            digest: undefined,
             registry: undefined,
         });
     });
