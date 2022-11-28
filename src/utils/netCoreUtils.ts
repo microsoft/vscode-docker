@@ -34,7 +34,7 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
             }
         }
 
-        throw new Error(localize('vscode-docker.netCoreUtils.noProjectInfo', 'Unable to determine project information for target \'{0}\' on project \'{1}\' {2}', target, project, ''));
+        throw new Error(localize('vscode-docker.netCoreUtils.noProjectInfo2', 'Unable to determine project information for target \'{0}\' on project \'{1}\'', target, project));
     } finally {
         if (await fse.pathExists(outputFile)) {
             await fse.unlink(outputFile);
