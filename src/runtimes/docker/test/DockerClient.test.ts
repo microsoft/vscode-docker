@@ -5,6 +5,9 @@
 
 import { expect } from 'chai';
 import * as crypto from 'crypto';
+import * as dayjs from 'dayjs';
+import * as customParseFormat from 'dayjs/plugin/customParseFormat';
+import * as utc from 'dayjs/plugin/utc';
 import { describe, it } from 'mocha';
 import { ShellQuoting } from 'vscode';
 
@@ -13,8 +16,30 @@ import {
 } from '../clients/DockerClient/DockerClient';
 import { escaped } from '../utils/commandLineBuilder';
 
+dayjs.extend(customParseFormat);
+dayjs.extend(utc);
+
 describe('DockerClient', () => {
     const client = new DockerClient();
+
+    describe('#listImagesAsync()', () => {
+        it('parses date formats', async () => {
+            const commandResult = await client.listImages({});
+            const results = await commandResult.parse(
+                [
+                    '{"Containers":"N/A","CreatedAt":"2021-06-08 08:07:21 +0100 BST","CreatedSince":"17 months ago","Digest":"\u003cnone\u003e","ID":"someid","Repository":"some/repository","SharedSize":"N/A","Size":"1MB","Tag":"sometag","UniqueSize":"N/A","VirtualSize":"1MB"}',
+                    '{"Containers":"N/A","CreatedAt":"2021-06-08 08:07:21.000Z","CreatedSince":"17 months ago","Digest":"\u003cnone\u003e","ID":"otherid","Repository":"some/repository","SharedSize":"N/A","Size":"1MB","Tag":"sometag","UniqueSize":"N/A","VirtualSize":"1MB"}',
+                ].join('\n'),
+                false,
+            );
+
+            expect(results).to.have.lengthOf(2);
+            expect(results[0]).to.have.property('createdAt');
+            expect(results[0].createdAt.getDay()).to.not.be.NaN;
+            expect(results[1]).to.have.property('createdAt');
+            expect(results[1].createdAt.getDay()).to.not.be.NaN;
+        });
+    });
 
     describe('#buildImageAsync()', () => {
         it('handles default values', async () => {
