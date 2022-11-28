@@ -41,6 +41,10 @@ export interface ImageNameInfo {
      * The tag/anchor name. If absent, this will be undefined.
      */
     readonly tag?: string;
+    /**
+     * The digest. If absent, this will be undefined.
+     */
+    readonly digest?: string;
 }
 
 export type Labels = {
