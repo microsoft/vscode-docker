@@ -97,7 +97,7 @@ export class DockerComposeClient extends ConfigurableClient implements IContaine
             withNamedArg('--timeout', options.timeoutSeconds?.toString(10)),
             withFlagArg('--wait', options.wait),
             withArg(options.customOptions),
-            withArg(options.services?.join(' ')),
+            withArg(...(options.services || [])),
         )();
     }
 
