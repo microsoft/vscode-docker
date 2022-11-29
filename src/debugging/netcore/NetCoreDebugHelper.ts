@@ -5,9 +5,9 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
+import { CommandLineArgs, composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
+import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
@@ -307,7 +307,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: ContainerOS): Promise<boolean> {
         let containerCommand: string;
-        let containerCommandArgs: ShellQuotedString[];
+        let containerCommandArgs: CommandLineArgs;
         if (containerOS === 'windows') {
             containerCommand = 'cmd';
             containerCommandArgs = composeArgs(
