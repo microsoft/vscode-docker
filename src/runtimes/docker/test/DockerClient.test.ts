@@ -104,8 +104,8 @@ describe('DockerClient (unit)', () => {
         };
 
         const commandResponse = await client.buildImage(options);
-        const pwshQuoted = Powershell.getShellOrDefault().quote(commandResponse.args);
-        const bashQuoted = Bash.getShellOrDefault().quote(commandResponse.args);
+        const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const bashQuoted = new Bash().quote(commandResponse.args);
 
         expect(pwshQuoted).to.deep.equal(['image', 'build', '--no-cache --progress plain', '\'.\'']);
         expect(bashQuoted).to.deep.equal(['image', 'build', '--no-cache --progress plain', '\'.\'']);
@@ -118,8 +118,8 @@ describe('DockerClient (unit)', () => {
         };
 
         const commandResponse = await client.runContainer(options);
-        const pwshQuoted = Powershell.getShellOrDefault().quote(commandResponse.args);
-        const bashQuoted = Bash.getShellOrDefault().quote(commandResponse.args);
+        const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const bashQuoted = new Bash().quote(commandResponse.args);
 
         expect(pwshQuoted).to.deep.equal(['container', 'run', 'someimage', 'sh -c "echo hello world"']);
         expect(bashQuoted).to.deep.equal(['container', 'run', 'someimage', 'sh -c "echo hello world"']);
@@ -132,10 +132,10 @@ describe('DockerClient (unit)', () => {
         };
 
         const commandResponse = await client.runContainer(options);
-        const pwshQuoted = Powershell.getShellOrDefault().quote(commandResponse.args);
-        const bashQuoted = Bash.getShellOrDefault().quote(commandResponse.args);
+        const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const bashQuoted = new Bash().quote(commandResponse.args);
 
         expect(pwshQuoted).to.deep.equal(['container', 'run', 'someimage', 'sh', '-c', 'echo` hello` world']);
-        expect(bashQuoted).to.deep.equal(['container', 'run', 'someimage', 'sh', '-c', 'echo` hello` world']);
+        expect(bashQuoted).to.deep.equal(['container', 'run', 'someimage', 'sh', '-c', 'echo\\ hello\\ world']);
     });
 });

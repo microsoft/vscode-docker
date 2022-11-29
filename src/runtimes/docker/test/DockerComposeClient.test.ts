@@ -117,8 +117,8 @@ describe('DockerComposeClient (unit)', () => {
         };
 
         const commandResponse = await client.up(options);
-        const pwshQuoted = Powershell.getShellOrDefault().quote(commandResponse.args);
-        const bashQuoted = Bash.getShellOrDefault().quote(commandResponse.args);
+        const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const bashQuoted = new Bash().quote(commandResponse.args);
 
         expect(pwshQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
         expect(bashQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
