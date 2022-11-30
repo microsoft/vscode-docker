@@ -71,6 +71,14 @@ export class NormalizedImageNameInfo {
      * Normalized registry + normalized image name
      */
     public get normalizedRegistryAndImageName(): string {
-        return `${this.normalizedRegistry}/${this.normalizedImageName}`;
+        // If the registry is explicitly or implicitly `docker.io`, and the namespace is explicitly or implicitly `library`,
+        // then we don't show either of those parts as the image name--that most closely matches the Docker CLI's default
+        // display behavior. As a slight but intentional deviation from that behavior, if an image is namespaced, we'll
+        // include the implicit `docker.io`.
+        if (this.normalizedRegistry === 'docker.io' && this.normalizedNamespace === 'library') {
+            return this.normalizedImageName;
+        } else {
+            return `${this.normalizedRegistry}/${this.normalizedImageName}`;
+        }
     }
 }
