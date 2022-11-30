@@ -49,15 +49,18 @@ export class NormalizedImageNameInfo {
     }
 
     /**
-     * The part of the image name before the first '/' (if image name is truthy and contains '/'), otherwise 'library' (i.e. the 'library' in 'docker.io/library')
+     * The part of the image name before the last '/' (if image name is truthy and contains '/'), otherwise 'library' if the
+     * normalized registry is 'docker.io', otherwise undefined
      */
-    public get normalizedNamespace(): string {
+    public get normalizedNamespace(): string | undefined {
         let i: number;
-        if ((i = this.normalizedImageName.indexOf('/')) >= 0) {
+        if ((i = this.normalizedImageName.lastIndexOf('/')) >= 0) {
             return this.normalizedImageName.substring(0, i);
+        } else if (this.normalizedRegistry === 'docker.io') {
+            return 'library';
+        } else {
+            return undefined;
         }
-
-        return 'library';
     }
 
     /**
