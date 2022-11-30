@@ -74,12 +74,7 @@ suite('(unit) NormalizedImageNameInfo Tests', () => {
             'alpine',
         ];
 
-        testCases.forEach((testCase, index) => {
-            test(testCase.originalName, () => {
-                const normalizedImageNameInfo = new NormalizedImageNameInfo(testCase);
-                assert.strictEqual(normalizedImageNameInfo.normalizedImageName, expected[index]);
-            });
-        });
+        testPropertyAgainstExpectedValues('normalizedImageName', expected);
     });
 
     suite(('normalizedTag'), () => {
