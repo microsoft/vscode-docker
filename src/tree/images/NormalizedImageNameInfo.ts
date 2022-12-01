@@ -49,15 +49,18 @@ export class NormalizedImageNameInfo {
     }
 
     /**
-     * The part of the image name before the first '/' (if image name is truthy and contains '/'), otherwise 'library' (i.e. the 'library' in 'docker.io/library')
+     * The part of the image name before the last '/' (if image name is truthy and contains '/'), otherwise 'library' if the
+     * normalized registry is 'docker.io', otherwise undefined
      */
-    public get normalizedNamespace(): string {
+    public get normalizedNamespace(): string | undefined {
         let i: number;
-        if ((i = this.normalizedImageName.indexOf('/')) >= 0) {
+        if ((i = this.normalizedImageName.lastIndexOf('/')) >= 0) {
             return this.normalizedImageName.substring(0, i);
+        } else if (this.normalizedRegistry === 'docker.io') {
+            return 'library';
+        } else {
+            return undefined;
         }
-
-        return 'library';
     }
 
     /**
@@ -71,6 +74,14 @@ export class NormalizedImageNameInfo {
      * Normalized registry + normalized image name
      */
     public get normalizedRegistryAndImageName(): string {
-        return `${this.normalizedRegistry}/${this.normalizedImageName}`;
+        // If the registry is explicitly or implicitly `docker.io`, and the namespace is explicitly or implicitly `library`,
+        // then we don't show either of those parts as the image name--that most closely matches the Docker CLI's default
+        // display behavior. As a slight but intentional deviation from that behavior, if an image is namespaced, we'll
+        // include the implicit `docker.io`.
+        if (this.normalizedRegistry === 'docker.io' && this.normalizedNamespace === 'library') {
+            return this.normalizedImageName;
+        } else {
+            return `${this.normalizedRegistry}/${this.normalizedImageName}`;
+        }
     }
 }
