@@ -3,6 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListImagesItem } from '../../contracts/ContainerClient';
+import { dayjs } from '../../utils/dayjs';
+import { parseDockerLikeImageName } from './parseDockerLikeImageName';
+import { tryParseSize } from './tryParseSize';
+
 export type DockerListImageRecord = {
     ID: string;
     Repository: string;
@@ -39,4 +44,19 @@ export function isDockerListImageRecord(maybeImage: unknown): maybeImage is Dock
     }
 
     return true;
+}
+
+export function normalizeDockerListImageRecord(image: DockerListImageRecord): ListImagesItem {
+    const createdAt = dayjs.utc(image.CreatedAt).toDate();
+    const size = tryParseSize(image.Size);
+
+    const repositoryAndTag = `${image.Repository}${image.Tag ? `:${image.Tag}` : ''}`;
+
+    return {
+        id: image.ID,
+        image: parseDockerLikeImageName(repositoryAndTag),
+        // labels: {}, // TODO: image labels are conspicuously absent from Docker image listing output
+        createdAt,
+        size,
+    };
 }

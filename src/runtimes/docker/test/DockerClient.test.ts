@@ -5,9 +5,6 @@
 
 import { expect } from 'chai';
 import * as crypto from 'crypto';
-import * as dayjs from 'dayjs';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-import * as utc from 'dayjs/plugin/utc';
 import { describe, it } from 'mocha';
 import { ShellQuoting } from 'vscode';
 
@@ -17,9 +14,6 @@ import {
 import { BuildImageCommandOptions, RunContainerCommandOptions } from '../contracts/ContainerClient';
 import { escaped } from '../utils/commandLineBuilder';
 import { Bash, Powershell } from '../utils/spawnStreamAsync';
-
-dayjs.extend(customParseFormat);
-dayjs.extend(utc);
 
 describe('DockerClient', () => {
     const client = new DockerClient();

@@ -12,8 +12,7 @@ export type DockerEventRecord = {
         ID: string;
         Attributes: Record<string, unknown>;
     };
-    Time: number;
-    Raw: object;
+    time: number;
 };
 
 export function isDockerEventRecord(maybeEvent: unknown): maybeEvent is DockerEventRecord {
@@ -43,11 +42,7 @@ export function isDockerEventRecord(maybeEvent: unknown): maybeEvent is DockerEv
         return false;
     }
 
-    if (typeof event.Time !== 'number') {
-        return false;
-    }
-
-    if (!event.Raw || typeof event.Raw !== 'object') {
+    if (typeof event.time !== 'number') {
         return false;
     }
 
