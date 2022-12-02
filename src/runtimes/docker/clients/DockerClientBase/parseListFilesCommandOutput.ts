@@ -3,13 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjs from 'dayjs';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ListFilesCommandOptions, ListFilesItem } from '../../contracts/ContainerClient';
-
-dayjs.extend(customParseFormat);
+import { dayjs } from '../../utils/dayjs';
 
 const DateFormats = [
     'MMM D HH:mm', // Linux format
