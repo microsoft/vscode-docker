@@ -1,3 +1,10 @@
+## 1.23.2 - 6 December 2022
+### Fixed
+* If an older version of Docker Engine / Docker CE was present, the containers view would not work. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
+* Image tag format was excessively verbose for common images. [#3734](https://github.com/microsoft/vscode-docker/issues/3734)
+* On Windows, if PowerShell profiles were in use, many features would not work. [#3725](https://github.com/microsoft/vscode-docker/issues/3725)
+* File permissions and owners were being changed when editing a file in a container. [#3740](https://github.com/microsoft/vscode-docker/issues/3740)
+
 ## 1.23.1 - 30 November 2022
 ### Fixed
 * Images were sometimes listed as created "NaN years ago". [#3718](https://github.com/microsoft/vscode-docker/issues/3718)
