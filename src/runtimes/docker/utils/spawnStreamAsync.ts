@@ -141,13 +141,16 @@ export type StreamSpawnOptions = SpawnOptions & {
 
 export async function spawnStreamAsync(
     command: string,
-    args: Array<string>,
+    args: CommandLineArgs,
     options: StreamSpawnOptions,
 ): Promise<void> {
     const cancellationToken = options.cancellationToken || CancellationTokenLike.None;
     // Force PowerShell as the default on Windows, but use the system default on
     // *nix
     const shell = options.shellProvider?.getShellOrDefault(options.shell) ?? options.shell;
+
+    // If there is a shell provider, apply its quoting, otherwise just flatten arguments into strings
+    const normalizedArgs: string[] = options.shellProvider?.quote(args) ?? args.map(arg => typeof arg === 'string' ? arg : arg.value);
 
     if (cancellationToken.isCancellationRequested) {
         throw new CancellationError('Command cancelled', cancellationToken);
@@ -159,7 +162,7 @@ export async function spawnStreamAsync(
 
     const childProcess = spawn(
         command,
-        args,
+        normalizedArgs,
         {
             ...options,
             shell,
