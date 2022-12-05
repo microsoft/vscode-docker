@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainerOrchestratorClient, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
+import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
 import { ext } from '../../extensionVariables';
 import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
@@ -30,24 +30,6 @@ export function streamWithDefaultsInternal<T>(callback: StreamingClientCallback<
     return streamWithDefaults(
         callback,
         ext.runtimeManager,
-        additionalOptions
-    );
-}
-
-export async function runOrchestratorWithDefaultsInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T>;
-export async function runOrchestratorWithDefaultsInternal(callback: VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<void>;
-export async function runOrchestratorWithDefaultsInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T> | VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T | void> {
-    return await runWithDefaults(
-        callback,
-        ext.orchestratorManager,
-        additionalOptions
-    );
-}
-
-export function streamOrchestratorWithDefaultsInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): AsyncGenerator<T> {
-    return streamWithDefaults(
-        callback,
-        ext.orchestratorManager,
         additionalOptions
     );
 }
