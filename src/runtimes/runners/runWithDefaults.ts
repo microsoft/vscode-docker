@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainerOrchestratorClient, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, PromiseCommandResponse, Shell, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
+import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainerOrchestratorClient, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
 import { ext } from '../../extensionVariables';
 import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
@@ -13,52 +13,52 @@ type ClientCallback<TClient, T> = (client: TClient) => Like<PromiseCommandRespon
 type VoidClientCallback<TClient> = (client: TClient) => Like<VoidCommandResponse>;
 type StreamingClientCallback<TClient, T> = (client: TClient) => Like<GeneratorCommandResponse<T>>;
 
-// 'env', 'shellProvider', 'stdErrPipe', and 'strict' are set by this function and thus should not be included as arguments to the additional options
-type DefaultEnvShellStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'env' | 'shellProvider' | 'stdErrPipe' | 'strict'>;
+// 'env', 'shell', 'shellProvider', 'stdErrPipe', and 'strict' are set by this function and thus should not be included as arguments to the additional options
+type DefaultEnvStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'env' | 'shell' | 'shellProvider' | 'stdErrPipe' | 'strict'>;
 
-export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T>;
-export async function runWithDefaultShellInternal(callback: VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<void>;
-export async function runWithDefaultShellInternal<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T | void> {
-    return await runWithDefaultShell(
+export async function runWithDefaultsInternal<T>(callback: ClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T>;
+export async function runWithDefaultsInternal(callback: VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<void>;
+export async function runWithDefaultsInternal<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T | void> {
+    return await runWithDefaults(
         callback,
         ext.runtimeManager,
         additionalOptions
     );
 }
 
-export function streamWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): AsyncGenerator<T> {
-    return streamWithDefaultShell(
+export function streamWithDefaultsInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): AsyncGenerator<T> {
+    return streamWithDefaults(
         callback,
         ext.runtimeManager,
         additionalOptions
     );
 }
 
-export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T>;
-export async function runOrchestratorWithDefaultShellInternal(callback: VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<void>;
-export async function runOrchestratorWithDefaultShellInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T> | VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): Promise<T | void> {
-    return await runWithDefaultShell(
+export async function runOrchestratorWithDefaultsInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T>;
+export async function runOrchestratorWithDefaultsInternal(callback: VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<void>;
+export async function runOrchestratorWithDefaultsInternal<T>(callback: ClientCallback<IContainerOrchestratorClient, T> | VoidClientCallback<IContainerOrchestratorClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T | void> {
+    return await runWithDefaults(
         callback,
         ext.orchestratorManager,
         additionalOptions
     );
 }
 
-export function streamOrchestratorWithDefaultShellInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions): AsyncGenerator<T> {
-    return streamWithDefaultShell(
+export function streamOrchestratorWithDefaultsInternal<T>(callback: StreamingClientCallback<IContainerOrchestratorClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): AsyncGenerator<T> {
+    return streamWithDefaults(
         callback,
         ext.orchestratorManager,
         additionalOptions
     );
 }
 
-async function runWithDefaultShell<TClient extends ClientIdentity, T>(
+async function runWithDefaults<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T> | VoidClientCallback<TClient>,
     runtimeManager: RuntimeManager<TClient>,
-    additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions
+    additionalOptions?: DefaultEnvStreamCommandRunnerOptions
 ): Promise<T | void> {
-    // Get a `DefaultEnvShellStreamCommandRunnerFactory`
-    const factory = new DefaultEnvShellStreamCommandRunnerFactory(additionalOptions);
+    // Get a `DefaultEnvStreamCommandRunnerFactory`
+    const factory = new DefaultEnvStreamCommandRunnerFactory(additionalOptions);
 
     // Get the active client
     const client: TClient = await runtimeManager.getClient();
@@ -85,13 +85,13 @@ async function runWithDefaultShell<TClient extends ClientIdentity, T>(
     }
 }
 
-async function* streamWithDefaultShell<TClient extends ClientIdentity, T>(
+async function* streamWithDefaults<TClient extends ClientIdentity, T>(
     callback: StreamingClientCallback<TClient, T>,
     runtimeManager: RuntimeManager<TClient>,
-    additionalOptions?: DefaultEnvShellStreamCommandRunnerOptions
+    additionalOptions?: DefaultEnvStreamCommandRunnerOptions
 ): AsyncGenerator<T> {
-    // Get a `DefaultEnvShellStreamCommandRunnerFactory`
-    const factory = new DefaultEnvShellStreamCommandRunnerFactory(additionalOptions);
+    // Get a `DefaultEnvStreamCommandRunnerFactory`
+    const factory = new DefaultEnvStreamCommandRunnerFactory(additionalOptions);
 
     // Get the active client
     const client: TClient = await runtimeManager.getClient();
@@ -116,7 +116,7 @@ async function* streamWithDefaultShell<TClient extends ClientIdentity, T>(
     }
 }
 
-class DefaultEnvShellStreamCommandRunnerFactory<TOptions extends DefaultEnvShellStreamCommandRunnerOptions> extends ShellStreamCommandRunnerFactory<ShellStreamCommandRunnerOptions> implements vscode.Disposable {
+class DefaultEnvStreamCommandRunnerFactory<TOptions extends DefaultEnvStreamCommandRunnerOptions> extends ShellStreamCommandRunnerFactory<ShellStreamCommandRunnerOptions> implements vscode.Disposable {
     public readonly errAccumulator: AccumulatorStream;
 
     public constructor(options: TOptions) {
@@ -124,10 +124,11 @@ class DefaultEnvShellStreamCommandRunnerFactory<TOptions extends DefaultEnvShell
 
         super({
             ...options,
-            strict: true,
-            stdErrPipe: errAccumulator,
-            shellProvider: Shell.getShellOrDefault(),
             env: withDockerEnvSettings(process.env),
+            shell: false,
+            shellProvider: undefined,
+            stdErrPipe: errAccumulator,
+            strict: true,
         });
 
         this.errAccumulator = errAccumulator;
