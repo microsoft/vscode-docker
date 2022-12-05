@@ -115,7 +115,7 @@ export class RefreshManager extends vscode.Disposable {
                 const eventsUntilTimestamp = eventsSinceTimestamp + eventListenerLifetimeSeconds;
 
                 try {
-                    const eventGenerator = ext.streamWithDefaultShell(client =>
+                    const eventGenerator = ext.streamWithDefaults(client =>
                         client.getEventStream({
                             types: eventTypesToWatch,
                             events: eventActionsToWatch,

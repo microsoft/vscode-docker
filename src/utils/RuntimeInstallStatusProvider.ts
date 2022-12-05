@@ -28,7 +28,7 @@ class RuntimeInstallStatusProvider {
 
     public async isRuntimeInstalledRealTimeCheck(): Promise<boolean> {
         try {
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 client.checkInstall({})
             );
             return true; // As long as the -v command did't throw exception, assume it is installed.

@@ -134,7 +134,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
     }
 
     private async getHostPortForContainerPort(containerName: string, containerPort: number): Promise<number> {
-        const containerInspectInfo = (await ext.runWithDefaultShell(client =>
+        const containerInspectInfo = (await ext.runWithDefaults(client =>
             client.inspectContainers({ containers: [containerName] })
         ))?.[0];
         const hostPort = containerInspectInfo?.ports.find(p => p.containerPort === containerPort)?.hostPort;
@@ -211,7 +211,7 @@ class DockerLogsTracker extends vscode.Disposable {
 
     private async listen(): Promise<void> {
         try {
-            const generator = ext.streamWithDefaultShell(
+            const generator = ext.streamWithDefaults(
                 client => client.logsForContainer({ container: this.containerName, follow: true }),
                 {
                     cancellationToken: this.cts.token,

@@ -54,7 +54,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
             const dockerUri = DockerUri.parse(uri);
             const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-            const items: ListFilesItem[] = await ext.runWithDefaultShell(client =>
+            const items: ListFilesItem[] = await ext.runWithDefaults(client =>
                 client.listFiles({
                     container: dockerUri.containerId,
                     path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
@@ -81,7 +81,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                 const accumulator = new AccumulatorStream();
                 const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                const generator = ext.streamWithDefaultShell(
+                const generator = ext.streamWithDefaults(
                     client => client.readFile({
                         container: dockerUri.containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
@@ -108,7 +108,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                     path.win32.dirname(dockerUri.windowsPath) :
                     path.posix.dirname(dockerUri.path);
 
-                await ext.runWithDefaultShell(
+                await ext.runWithDefaults(
                     client => client.writeFile({
                         container: dockerUri.containerId,
                         path: destDirectory,

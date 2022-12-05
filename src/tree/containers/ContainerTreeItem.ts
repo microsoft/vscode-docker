@@ -101,7 +101,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.removeContainers({ containers: [this.containerId], force: true })
         );
     }
@@ -147,7 +147,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'container';
 
-        const containerInspection = (await ext.runWithDefaultShell(client =>
+        const containerInspection = (await ext.runWithDefaults(client =>
             client.inspectContainers({ containers: [this.containerId] })
         ))?.[0];
 

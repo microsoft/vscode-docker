@@ -268,7 +268,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
         if (containerOS === 'windows') {
-            const inspectInfo = (await ext.runWithDefaultShell(client =>
+            const inspectInfo = (await ext.runWithDefaults(client =>
                 client.inspectContainers({ containers: [containerName] })
             ))?.[0];
             const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
@@ -295,7 +295,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 client.writeFile({
                     container: containerName,
                     inputFile: vsDbgInstallBasePath,
@@ -323,7 +323,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         try {
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
                 client.execContainer({
                     container: containerName,
