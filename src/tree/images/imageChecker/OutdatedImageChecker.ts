@@ -89,7 +89,7 @@ export class OutdatedImageChecker {
             const latestImageDigest = await this.getLatestImageDigest(registry, imageNameInfo.image, imageNameInfo.tag);
 
             // 2. Compare it with the current image's value
-            const imageInspectInfo = (await ext.runWithDefaultShell(client =>
+            const imageInspectInfo = (await ext.runWithDefaults(client =>
                 client.inspectImages({ imageRefs: [image.id] })
             ))?.[0];
 

@@ -18,8 +18,8 @@ import {
 import { CancellationTokenLike } from '../typings/CancellationTokenLike';
 import { AccumulatorStream } from '../utils/AccumulatorStream';
 import { CancellationError } from '../utils/CancellationError';
+import { CommandLineArgs } from '../utils/commandLineBuilder';
 import {
-    Shell,
     spawnStreamAsync,
     StreamSpawnOptions,
 } from '../utils/spawnStreamAsync';
@@ -94,12 +94,8 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
         await processPromise;
     }
 
-    protected getCommandAndArgs(commandResponse: CommandResponseBase): { command: string, args: string[] } {
-        return {
-            command: commandResponse.command,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            args: Shell.getShellOrDefault(this.options.shellProvider).quote(commandResponse.args),
-        };
+    protected getCommandAndArgs(commandResponse: CommandResponseBase): { command: string, args: CommandLineArgs } {
+        return commandResponse;
     }
 }
 

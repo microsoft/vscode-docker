@@ -39,7 +39,7 @@ export class ContextManager implements IContextManager, vscode.Disposable {
     }
 
     public async getContexts(): Promise<ListContextItem[]> {
-        const allContexts = await ext.runWithDefaultShell(client =>
+        const allContexts = await ext.runWithDefaults(client =>
             client.listContexts({})
         ) || [];
         const currentContext: ListContextItem | undefined = this.tryGetCurrentContext(allContexts);
@@ -58,20 +58,20 @@ export class ContextManager implements IContextManager, vscode.Disposable {
     }
 
     public async useContext(name: string): Promise<void> {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.useContext({ context: name })
         );
         await this.getCurrentContext(); // Reestablish the current context, to cause the change emitter to fire indirectly if the context has actually changed
     }
 
     public async removeContext(name: string): Promise<void> {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.removeContexts({ contexts: [name] })
         );
     }
 
     public async inspectContext(name: string): Promise<InspectContextsItem | undefined> {
-        const result = await ext.runWithDefaultShell(client =>
+        const result = await ext.runWithDefaults(client =>
             client.inspectContexts({ contexts: [name] })
         );
         return result?.[0];

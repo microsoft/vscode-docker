@@ -20,7 +20,7 @@ export async function restartContainer(context: IActionContext, node?: Container
     );
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.restart.restarting', 'Restarting Container(s)...') }, async () => {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.restartContainers({ container: nodes.map(n => n.containerId) })
         );
     });

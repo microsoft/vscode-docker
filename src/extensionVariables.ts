@@ -14,7 +14,7 @@ import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { runOrchestratorWithDefaultShellInternal, runWithDefaultShellInternal, streamOrchestratorWithDefaultShellInternal, streamWithDefaultShellInternal } from './runtimes/runners/runWithDefaultShell';
+import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWithDefaultsImpl } from './runtimes/runners/runWithDefaults';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -59,8 +59,6 @@ export namespace ext {
     // Container runtime related items
     export let runtimeManager: ContainerRuntimeManager;
     export let orchestratorManager: OrchestratorRuntimeManager;
-    export const runWithDefaultShell = runWithDefaultShellInternal;
-    export const streamWithDefaultShell = streamWithDefaultShellInternal;
-    export const runOrchestratorWithDefaultShell = runOrchestratorWithDefaultShellInternal;
-    export const streamOrchestratorWithDefaultShell = streamOrchestratorWithDefaultShellInternal;
+    export const runWithDefaults = runWithDefaultsImpl;
+    export const streamWithDefaults = streamWithDefaultsImpl;
 }

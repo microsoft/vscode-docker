@@ -27,7 +27,7 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
         });
     }
 
-    const inspectResult = await ext.runWithDefaultShell(client =>
+    const inspectResult = await ext.runWithDefaults(client =>
         client.inspectImages({ imageRefs: [node.imageId] })
     );
 

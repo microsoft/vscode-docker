@@ -33,7 +33,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // If so use it, otherwise use sh
         try {
             // If this succeeds, bash is present (exit code 0)
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
                 client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] }) as Promise<VoidCommandResponse>
             );
