@@ -1,4 +1,4 @@
-## 1.23.2 - 6 December 2022
+## 1.23.2 - 7 December 2022
 ### Fixed
 * If an older version of Docker Engine / Docker CE was present, the containers view would not work. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
 * Image tag format was excessively verbose for common images. [#3734](https://github.com/microsoft/vscode-docker/issues/3734)
