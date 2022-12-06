@@ -16,25 +16,25 @@ type StreamingClientCallback<TClient, T> = (client: TClient) => Like<GeneratorCo
 // 'env', 'shell', 'shellProvider', 'stdErrPipe', and 'strict' are set by this function and thus should not be included as arguments to the additional options
 type DefaultEnvStreamCommandRunnerOptions = Omit<ShellStreamCommandRunnerOptions, 'env' | 'shell' | 'shellProvider' | 'stdErrPipe' | 'strict'>;
 
-export async function runWithDefaultsInternal<T>(callback: ClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T>;
-export async function runWithDefaultsInternal(callback: VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<void>;
-export async function runWithDefaultsInternal<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T | void> {
-    return await runWithDefaults(
+export async function runWithDefaults<T>(callback: ClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T>;
+export async function runWithDefaults(callback: VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<void>;
+export async function runWithDefaults<T>(callback: ClientCallback<IContainersClient, T> | VoidClientCallback<IContainersClient>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): Promise<T | void> {
+    return await runWithDefaultsInternal(
         callback,
         ext.runtimeManager,
         additionalOptions
     );
 }
 
-export function streamWithDefaultsInternal<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): AsyncGenerator<T> {
-    return streamWithDefaults(
+export function streamWithDefaults<T>(callback: StreamingClientCallback<IContainersClient, T>, additionalOptions?: DefaultEnvStreamCommandRunnerOptions): AsyncGenerator<T> {
+    return streamWithDefaultsInternal(
         callback,
         ext.runtimeManager,
         additionalOptions
     );
 }
 
-async function runWithDefaults<TClient extends ClientIdentity, T>(
+async function runWithDefaultsInternal<TClient extends ClientIdentity, T>(
     callback: ClientCallback<TClient, T> | VoidClientCallback<TClient>,
     runtimeManager: RuntimeManager<TClient>,
     additionalOptions?: DefaultEnvStreamCommandRunnerOptions
@@ -67,7 +67,7 @@ async function runWithDefaults<TClient extends ClientIdentity, T>(
     }
 }
 
-async function* streamWithDefaults<TClient extends ClientIdentity, T>(
+async function* streamWithDefaultsInternal<TClient extends ClientIdentity, T>(
     callback: StreamingClientCallback<TClient, T>,
     runtimeManager: RuntimeManager<TClient>,
     additionalOptions?: DefaultEnvStreamCommandRunnerOptions
