@@ -114,10 +114,6 @@ export class DockerPseudoterminal implements Pseudoterminal {
             (output: string, err: boolean) => {
                 if (err) {
                     this.writeError(output);
-
-                    if (options.rejectOnStderr) {
-                        throw new Error(output);
-                    }
                 } else {
                     this.writeOutput(output);
                 }
@@ -129,6 +125,5 @@ export class DockerPseudoterminal implements Pseudoterminal {
 type ExecuteCommandInTerminalOptions = {
     commandResponse: VoidCommandResponse | PromiseCommandResponse<unknown>;
     folder: WorkspaceFolder;
-    rejectOnStderr?: boolean;
     token?: CancellationToken;
 };

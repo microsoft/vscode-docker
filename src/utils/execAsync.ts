@@ -29,13 +29,21 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
     if (progress) {
         stdoutIntermediate = new stream.PassThrough();
         stdoutIntermediate.on('data', (chunk: Buffer) => {
-            progress(bufferToString(chunk), false);
+            try {
+                progress(bufferToString(chunk), false);
+            } catch {
+                // Do nothing
+            }
         });
         stdoutIntermediate.pipe(stdoutFinal);
 
         stderrIntermediate = new stream.PassThrough();
         stderrIntermediate.on('data', (chunk: Buffer) => {
-            progress(bufferToString(chunk), true);
+            try {
+                progress(bufferToString(chunk), true);
+            } catch {
+                // Do nothing
+            }
         });
         stderrIntermediate.pipe(stderrFinal);
     }

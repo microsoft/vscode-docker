@@ -77,7 +77,6 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         const runner = context.terminal.getCommandRunner({
             folder: context.folder,
-            rejectOnStderr: true,
             token: context.cancellationToken,
         });
 
