@@ -32,7 +32,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
             try {
                 progress(bufferToString(chunk), false);
             } catch {
-                // Do nothing
+                // Best effort
             }
         });
         stdoutIntermediate.pipe(stdoutFinal);
@@ -42,7 +42,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
             try {
                 progress(bufferToString(chunk), true);
             } catch {
-                // Do nothing
+                // Best effort
             }
         });
         stderrIntermediate.pipe(stderrFinal);
