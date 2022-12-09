@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as readline from 'readline';
-import { ShellQuotedString, ShellQuoting } from 'vscode';
+import type { ShellQuotedString } from 'vscode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -76,6 +76,7 @@ import { CancellationError } from '../../utils/CancellationError';
 import {
     CommandLineArgs,
     composeArgs,
+    innerQuoted,
     withArg,
     withFlagArg,
     withNamedArg,
@@ -105,6 +106,7 @@ import { withContainerPathArg } from './withContainerPathArg';
 import { withDockerAddHostArg } from './withDockerAddHostArg';
 import { withDockerBuildArg } from './withDockerBuildArg';
 import { withDockerEnvArg } from './withDockerEnvArg';
+import { withDockerBooleanFilterArg, withDockerFilterArg } from './withDockerFilterArg';
 import { withDockerJsonFormatArg } from "./withDockerJsonFormatArg";
 import { withDockerLabelFilterArgs } from "./withDockerLabelFilterArgs";
 import { withDockerLabelsArg } from "./withDockerLabelsArg";
@@ -232,8 +234,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withNamedArg('--since', options.since?.toString(), { shouldQuote: !(typeof options.since === 'number') }), // If it's numeric it should not be quoted
             withNamedArg('--until', options.until?.toString(), { shouldQuote: !(typeof options.until === 'number') }), // If it's numeric it should not be quoted
             withDockerLabelFilterArgs(options.labels),
-            withNamedArg('--filter', options.types?.map((type) => `type=${type}`)),
-            withNamedArg('--filter', options.events?.map((event) => `event=${event}`)),
+            withDockerFilterArg(options.types?.map((type) => `type=${type}`)),
+            withDockerFilterArg(options.events?.map((event) => `event=${event}`)),
             withDockerJsonFormatArg,
         )();
     }
@@ -377,12 +379,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return composeArgs(
             withArg('image', 'ls'),
             withFlagArg('--all', options.all),
-            withNamedArg(
-                '--filter',
-                typeof options.dangling === 'boolean'
-                    ? `dangling=${options.dangling}`
-                    : undefined),
-            withNamedArg('--filter', options.references?.map((reference) => `reference=${reference}`)),
+            withDockerBooleanFilterArg('dangling', options.dangling),
+            withDockerFilterArg(options.references?.map((reference) => `reference=${reference}`)),
             withDockerLabelFilterArgs(options.labels),
             withDockerNoTruncArg,
             withDockerJsonFormatArg,
@@ -748,12 +746,12 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withArg('container', 'ls'),
             withFlagArg('--all', options.all),
             withDockerLabelFilterArgs(options.labels),
-            withNamedArg('--filter', options.running ? 'status=running' : undefined),
-            withNamedArg('--filter', options.exited ? 'status=exited' : undefined),
-            withNamedArg('--filter', options.names?.map((name) => `name=${name}`)),
-            withNamedArg('--filter', options.imageAncestors?.map((id) => `ancestor=${id}`)),
-            withNamedArg('--filter', options.volumes?.map((volume) => `volume=${volume}`)),
-            withNamedArg('--filter', options.networks?.map((network) => `network=${network}`)),
+            withDockerFilterArg(options.running ? 'status=running' : undefined),
+            withDockerFilterArg(options.exited ? 'status=exited' : undefined),
+            withDockerFilterArg(options.names?.map((name) => `name=${name}`)),
+            withDockerFilterArg(options.imageAncestors?.map((id) => `ancestor=${id}`)),
+            withDockerFilterArg(options.volumes?.map((volume) => `volume=${volume}`)),
+            withDockerFilterArg(options.networks?.map((network) => `network=${network}`)),
             withDockerNoTruncArg,
             withDockerJsonFormatArg,
         )();
@@ -1113,16 +1111,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     protected getListVolumesCommandArgs(options: ListVolumesCommandOptions): CommandLineArgs {
         return composeArgs(
             withArg('volume', 'ls'),
-            withNamedArg(
-                '--filter',
-                typeof options.dangling === 'boolean'
-                    ? `dangling=${options.dangling}`
-                    : undefined),
-            withNamedArg(
-                '--filter',
-                options.driver
-                    ? `driver=${options.driver}`
-                    : undefined),
+            withDockerBooleanFilterArg('dangling', options.dangling),
+            withDockerFilterArg(options.driver ? `driver=${options.driver}` : undefined),
             withDockerLabelFilterArgs(options.labels),
             withDockerJsonFormatArg,
         )();
@@ -1353,7 +1343,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         options: ListNetworksCommandOptions,
     ): CommandLineArgs {
         return composeArgs(
-            withNamedArg('network', 'ls'),
+            withArg('network', 'ls'),
             withDockerLabelFilterArgs(options.labels),
             withDockerNoTruncArg,
             withDockerJsonFormatArg,
@@ -1569,13 +1559,13 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                 '/C',
                 // Path is intentionally *not* quoted--no good quoting options work, but
                 // `cd` doesn't seem to care, so cd to the path and then do dir
-                { value: `cd ${options.path} & dir /A-S /-C`, quoting: ShellQuoting.Strong }
+                innerQuoted(`cd ${options.path} & dir /A-S /-C`) as ShellQuotedString,
             ];
         } else {
             command = [
                 '/bin/sh',
                 '-c',
-                { value: `ls -lA "${options.path}"`, quoting: ShellQuoting.Strong }
+                innerQuoted(`ls -lA '${options.path}'`) as ShellQuotedString,
             ];
         }
 
@@ -1621,7 +1611,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             const command = [
                 'cmd',
                 '/C',
-                { value: `cd ${folder} & type ${file}`, quoting: ShellQuoting.Strong }
+                innerQuoted(`cd ${folder} & type ${file}`) as ShellQuotedString,
             ];
 
             return this.getExecContainerCommandArgs(

@@ -169,7 +169,7 @@ const containerTooltipTemplate = `
 ---
 
 #### Image
-{{ imageName }} ({{ substr imageId 7 12 }})
+{{ image.originalName }} ({{ substr imageId 7 12 }})
 
 ---
 
@@ -190,7 +190,7 @@ _None_
 {{#if (eq this.type 'bind')}}
   - {{ friendlyBindHost this.source }} ➔ {{ this.destination }} (Bind mount, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
-{{#if (eq this.Type 'volume')}}
+{{#if (eq this.type 'volume')}}
   - {{ this.name }} ➔ {{ this.destination }} (Named volume, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{/each}}
