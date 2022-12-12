@@ -10,8 +10,8 @@ import { ImageNameInfo } from '../../contracts/ContainerClient';
  * the image names are valid.
  *
  * Registry: Everything before the first slash--must be either exactly "localhost", or contain a DNS
- * separator ".". Port, if present, will also be included. If it does not meet these rules, it is
- * not the registry but instead part of the image name. See
+ * separator "." or port separator ":". Port, if present, will also be included. If it does not meet
+ * these rules, it is not the registry but instead part of the image name. See
  * https://stackoverflow.com/questions/37861791/how-are-docker-image-names-parsed.
  *
  * Image name: Everything after the registry (if the registry is valid) until the tag. Otherwise,
@@ -19,7 +19,7 @@ import { ImageNameInfo } from '../../contracts/ContainerClient';
  *
  * Tag: Everything after the ":", if it is present.
  */
-const imageNameRegex = /^((?<registry>(localhost|([\w-]+(\.[\w-]+)+))(:\d+)?)\/)?(?<image>[\w-./<>]+)(:(?<tag>[\w-.<>]+))?(@(?<digest>.+))?$/;
+const imageNameRegex = /^((?<registry>((localhost|([\w-]+(\.[\w-]+)+))(:\d+)?)|([\w-]+:\d+))\/)?(?<image>[\w-./<>]+)(:(?<tag>[\w-.<>]+))?(@(?<digest>.+))?$/;
 
 // In certain cases, Docker makes image/tag names "<none>", which is not really valid. We will reinterpret those as `undefined`.
 const noneImageName = /[<>]/i;
