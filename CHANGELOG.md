@@ -1,5 +1,6 @@
 ## 1.23.3 - 14 December 2022
 ### Fixed
+* Old versions of Docker Engine should no longer show "Invalid JSON" errors in the container view. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
 * Container file ownership and permissions were being overwritten when the file was saved. [#3740](https://github.com/microsoft/vscode-docker/issues/3740)
 * If the `docker-run` task emitted a warning or error, debugging would not start, instead just spinning forever. [#3751](https://github.com/microsoft/vscode-docker/issues/3751)
 * If an image name contained a registry that was just a hostname and port, parsing would fail. [#3752](https://github.com/microsoft/vscode-docker/issues/3752)
