@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as readline from 'readline';
-import type { ShellQuotedString } from 'vscode';
+import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -1558,13 +1558,13 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                 '/C',
                 // Path is intentionally *not* quoted--no good quoting options work, but
                 // `cd` doesn't seem to care, so cd to the path and then do dir
-                `cd ${options.path} & dir /A-S /-C`,
+                { value: `cd ${options.path} & dir /A-S /-C`, quoting: ShellQuoting.Strong }
             ];
         } else {
             command = [
                 '/bin/sh',
                 '-c',
-                `ls -lA "${options.path}"`,
+                { value: `ls -lA "${options.path}"`, quoting: ShellQuoting.Strong }
             ];
         }
 
@@ -1610,7 +1610,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             const command = [
                 'cmd',
                 '/C',
-                `cd ${folder} & type ${file}`,
+                { value: `cd ${folder} & type ${file}`, quoting: ShellQuoting.Strong }
             ];
 
             return this.getExecContainerCommandArgs(

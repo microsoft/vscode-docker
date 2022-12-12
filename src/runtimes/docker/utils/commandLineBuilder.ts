@@ -90,7 +90,7 @@ type WithNamedArgOptions = {
  */
 export function withNamedArg(
     name: string,
-    args: Array<ShellQuotedString | string | undefined> | ShellQuotedString | string | null | undefined,
+    args: Array<ShellQuotedString | string | null | undefined> | ShellQuotedString | string | null | undefined,
     { assignValue = false, shouldQuote = true }: WithNamedArgOptions = {},
 ): CommandLineCurryFn {
     return (cmdLineArgs: CommandLineArgs = []) => {
