@@ -152,7 +152,8 @@ export async function spawnStreamAsync(
     // Apply quoting using the given shell provider or default
     // Because Docker is reparsing arguments containing spaces, the arguments *must* be quoted,
     // even though they are being supplied as whole strings without shell execution
-    const normalizedArgs: string[] = Shell.getShellOrDefault(options.shellProvider).quote(args);
+    //const normalizedArgs: string[] = Shell.getShellOrDefault(options.shellProvider).quote(args);
+    const normalizedArgs: string[] = options.shellProvider?.quote(args) ?? args.map(a => typeof a === 'string' ? a : a.value);
 
     if (cancellationToken.isCancellationRequested) {
         throw new CancellationError('Command cancelled', cancellationToken);

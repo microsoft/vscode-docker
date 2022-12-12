@@ -76,7 +76,6 @@ import { CancellationError } from '../../utils/CancellationError';
 import {
     CommandLineArgs,
     composeArgs,
-    innerQuoted,
     withArg,
     withFlagArg,
     withNamedArg,
@@ -1559,13 +1558,13 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                 '/C',
                 // Path is intentionally *not* quoted--no good quoting options work, but
                 // `cd` doesn't seem to care, so cd to the path and then do dir
-                innerQuoted(`cd ${options.path} & dir /A-S /-C`) as ShellQuotedString,
+                `cd ${options.path} & dir /A-S /-C`,
             ];
         } else {
             command = [
                 '/bin/sh',
                 '-c',
-                innerQuoted(`ls -lA '${options.path}'`) as ShellQuotedString,
+                `ls -lA "${options.path}"`,
             ];
         }
 
@@ -1611,7 +1610,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             const command = [
                 'cmd',
                 '/C',
-                innerQuoted(`cd ${folder} & type ${file}`) as ShellQuotedString,
+                `cd ${folder} & type ${file}`,
             ];
 
             return this.getExecContainerCommandArgs(

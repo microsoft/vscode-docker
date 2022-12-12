@@ -4,11 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { ShellQuotedString } from 'vscode';
-import { CommandLineCurryFn, innerQuoted, withNamedArg } from '../../utils/commandLineBuilder';
+import { CommandLineCurryFn, withNamedArg } from '../../utils/commandLineBuilder';
 
-// The Docker CLI requires weak quoting of the --filter argument
 export function withDockerFilterArg(filter: string | ShellQuotedString | (string | ShellQuotedString | null | undefined)[] | null | undefined): CommandLineCurryFn {
-    return withNamedArg('--filter', Array.isArray(filter) ? filter.map(innerQuoted) : innerQuoted(filter));
+    return withNamedArg('--filter', filter);
 }
 
 export function withDockerBooleanFilterArg(filter: string, value: boolean | null | undefined): CommandLineCurryFn {
