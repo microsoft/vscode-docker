@@ -62,6 +62,13 @@ export class Powershell extends Shell {
         const escape = (value: string) => `\`${value}`;
 
         return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
             switch (quotedArg.quoting) {
                 case ShellQuoting.Escape:
                     return quotedArg.value.replace(/[ "'()]/g, escape);
@@ -103,6 +110,13 @@ export class Bash extends Shell {
         const escape = (value: string) => `\\${value}`;
 
         return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
             switch (quotedArg.quoting) {
                 case ShellQuoting.Escape:
                     return quotedArg.value.replace(/[ "']/g, escape);
@@ -127,13 +141,18 @@ export type StreamSpawnOptions = SpawnOptions & {
 
 export async function spawnStreamAsync(
     command: string,
-    args: Array<string>,
+    args: CommandLineArgs,
     options: StreamSpawnOptions,
 ): Promise<void> {
     const cancellationToken = options.cancellationToken || CancellationTokenLike.None;
     // Force PowerShell as the default on Windows, but use the system default on
     // *nix
     const shell = options.shellProvider?.getShellOrDefault(options.shell) ?? options.shell;
+
+    // Apply quoting using the given shell provider or default
+    // Because Docker is reparsing arguments containing spaces, the arguments *must* be quoted,
+    // even though they are being supplied as whole strings without shell execution
+    const normalizedArgs: string[] = Shell.getShellOrDefault(options.shellProvider).quote(args);
 
     if (cancellationToken.isCancellationRequested) {
         throw new CancellationError('Command cancelled', cancellationToken);
@@ -145,7 +164,7 @@ export async function spawnStreamAsync(
 
     const childProcess = spawn(
         command,
-        args,
+        normalizedArgs,
         {
             ...options,
             shell,
@@ -195,6 +214,8 @@ export async function spawnStreamAsync(
             disposable.dispose();
             if (code === 0) {
                 resolve();
+            } else if (signal) {
+                reject(new ChildProcessError(`Process exited due to signal ${signal}`, code, signal));
             } else {
                 reject(new ChildProcessError(`Process exited with code ${code}`, code, signal));
             }

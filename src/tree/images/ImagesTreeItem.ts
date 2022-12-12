@@ -67,7 +67,7 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
             dangling: includeDangling ? undefined : false,
         };
 
-        const result = await ext.runWithDefaultShell(client =>
+        const result = await ext.runWithDefaults(client =>
             client.listImages(options)
         );
         this.outdatedImageChecker.markOutdatedImages(result);

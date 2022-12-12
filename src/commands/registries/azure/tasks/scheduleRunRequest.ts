@@ -24,7 +24,13 @@ import { getStorageBlob } from '../../../../utils/lazyPackages';
 const idPrecision = 6;
 const vcsIgnoreList = ['.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'];
 
-export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined): Promise<() => Promise<AcrRun>> {
+// this is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
+export enum RootStrategy {
+    Default = 'Default',
+    DockerfileFolder = 'DockerfileFolder',
+}
+
+export async function scheduleRunRequest(context: IActionContext, requestType: 'DockerBuildRequest' | 'FileTaskRunRequest', uri: vscode.Uri | undefined, rootStrategy?: RootStrategy | undefined): Promise<() => Promise<AcrRun>> {
     // Acquire information.
     let rootFolder: vscode.WorkspaceFolder;
     let fileItem: Item;
@@ -51,7 +57,14 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Prepare to run.
         ext.outputChannel.show();
 
-        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootFolder, tarFilePath);
+        let rootUri = rootFolder.uri;
+        if (rootStrategy === RootStrategy.DockerfileFolder) {
+            // changes the root to the folder where the Dockerfile is
+            // it is used by the ms-kubernetes-tools.aks-devx-tools extension (https://github.com/Azure/aks-devx-tools)
+            rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
+        }
+
+        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
@@ -62,12 +75,12 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
                 isPushEnabled: true,
                 sourceLocation: uploadedSourceLocation,
                 platform: { os: osType },
-                dockerFilePath: fileItem.relativeFilePath
+                dockerFilePath: path.relative(rootUri.fsPath, fileItem.absoluteFilePath)
             };
         } else {
             runRequest = {
                 type: 'FileTaskRunRequest',
-                taskFilePath: fileItem.relativeFilePath,
+                taskFilePath: path.relative(rootUri.fsPath, fileItem.absoluteFilePath),
                 sourceLocation: uploadedSourceLocation,
                 platform: { os: osType }
             };
@@ -120,9 +133,9 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
     return imageName;
 }
 
-async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.WorkspaceFolder, tarFilePath: string): Promise<string> {
+async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.Uri, tarFilePath: string): Promise<string> {
     ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
-    const source: string = rootFolder.uri.fsPath;
+    const source: string = rootFolder.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any

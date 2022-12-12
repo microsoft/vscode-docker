@@ -5,9 +5,9 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
+import { CommandLineArgs, composeArgs, ContainerOS, innerQuoted, VoidCommandResponse, withArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { DebugConfiguration, MessageItem, ProgressLocation, ShellQuotedString, window } from 'vscode';
+import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { localize } from '../../localize';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
@@ -268,7 +268,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
         if (containerOS === 'windows') {
-            const inspectInfo = (await ext.runWithDefaultShell(client =>
+            const inspectInfo = (await ext.runWithDefaults(client =>
                 client.inspectContainers({ containers: [containerName] })
             ))?.[0];
             const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
@@ -295,7 +295,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             location: ProgressLocation.Notification,
             title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 client.writeFile({
                     container: containerName,
                     inputFile: vsDbgInstallBasePath,
@@ -307,23 +307,23 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async isDebuggerInstalled(containerName: string, debuggerPath: string, containerOS: ContainerOS): Promise<boolean> {
         let containerCommand: string;
-        let containerCommandArgs: ShellQuotedString[];
+        let containerCommandArgs: CommandLineArgs;
         if (containerOS === 'windows') {
             containerCommand = 'cmd';
             containerCommandArgs = composeArgs(
                 withArg('/C'),
-                withQuotedArg(`IF EXIST "${debuggerPath}" (exit 0) else (exit 1)`)
+                withArg(innerQuoted(`IF EXIST "${debuggerPath}" (exit 0) else (exit 1)`))
             )();
         } else {
             containerCommand = '/bin/sh';
             containerCommandArgs = composeArgs(
                 withArg('-c'),
-                withQuotedArg(`if [ -f ${debuggerPath} ]; then exit 0; else exit 1; fi;`)
+                withArg(innerQuoted(`if [ -f ${debuggerPath} ]; then exit 0; else exit 1; fi;`))
             )();
         }
 
         try {
-            await ext.runWithDefaultShell(client =>
+            await ext.runWithDefaults(client =>
                 // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
                 client.execContainer({
                     container: containerName,

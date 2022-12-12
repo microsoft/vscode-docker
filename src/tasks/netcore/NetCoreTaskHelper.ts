@@ -242,7 +242,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             // Try to get a container username from the image (best effort only)
             let userName: string | undefined;
             try {
-                const imageInspection = (await ext.runWithDefaultShell(client =>
+                const imageInspection = (await ext.runWithDefaults(client =>
                     client.inspectImages({ imageRefs: [runOptions.image] })
                 ))?.[0];
                 userName = imageInspection?.user;

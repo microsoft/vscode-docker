@@ -5,7 +5,7 @@
 
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandNotSupportedError, CommandRunner, ICommandRunnerFactory, Like, normalizeCommandResponseLike, PromiseCommandResponse, StreamingCommandRunner, VoidCommandResponse } from '../docker';
+import { CommandLineArgs, CommandNotSupportedError, CommandRunner, ICommandRunnerFactory, Like, normalizeCommandResponseLike, PromiseCommandResponse, StreamingCommandRunner, VoidCommandResponse } from '../docker';
 
 interface TaskCommandRunnerOptions {
     taskName: string;
@@ -35,7 +35,7 @@ export class TaskCommandRunnerFactory implements ICommandRunnerFactory {
     }
 }
 
-async function executeAsTask(options: TaskCommandRunnerOptions, command: string, args?: vscode.ShellQuotedString[]): Promise<void> {
+async function executeAsTask(options: TaskCommandRunnerOptions, command: string, args?: CommandLineArgs): Promise<void> {
     const shellExecutionOptions = { cwd: options.cwd || options.workspaceFolder?.uri?.fsPath || os.homedir() };
 
     const shellExecution = args ?

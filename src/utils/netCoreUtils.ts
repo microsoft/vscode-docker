@@ -9,6 +9,7 @@ import { ext } from '../extensionVariables';
 import { localize } from '../localize';
 import { getTempFileName } from './osUtils';
 import { execAsync } from './execAsync';
+import { parseError } from '@microsoft/vscode-azext-utils';
 
 export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations' | 'GetProjectProperties', project: string): Promise<string[]> {
     const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', `${target}.targets`);
@@ -17,7 +18,13 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
     const command = `dotnet build /r:false /t:${target} /p:CustomAfterMicrosoftCommonTargets="${targetsFile}" /p:CustomAfterMicrosoftCommonCrossTargetingTargets="${targetsFile}" /p:InfoOutputPath="${outputFile}" "${project}"`;
 
     try {
-        await execAsync(command, { timeout: 10000 });
+        try {
+            await execAsync(command, { timeout: 20000 });
+        } catch (err) {
+            const error = parseError(err);
+            throw new Error(localize('vscode-docker.netCoreUtils.noProjectInfo', 'Unable to determine project information for target \'{0}\' on project \'{1}\' {2}', target, project, error.message));
+        }
+
 
         if (await fse.pathExists(outputFile)) {
             const contents = await fse.readFile(outputFile, 'utf-8');
@@ -27,7 +34,7 @@ export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations'
             }
         }
 
-        throw new Error(localize('vscode-docker.netCoreUtils.noProjectInfo', 'Unable to determine project information for target \'{0}\' on project \'{1}\'', target, project));
+        throw new Error(localize('vscode-docker.netCoreUtils.noProjectInfo2', 'Unable to determine project information for target \'{0}\' on project \'{1}\'', target, project));
     } finally {
         if (await fse.pathExists(outputFile)) {
             await fse.unlink(outputFile);

@@ -23,7 +23,7 @@ type RefreshReason = 'interval' | 'event' | 'config' | 'manual' | 'contextChange
 const ContainerEventActions: EventAction[] = ['create', 'destroy', 'die', 'kill', 'pause', 'rename', 'restart', 'start', 'stop', 'unpause', 'update'];
 const ImageEventActions: EventAction[] = ['delete', 'import', 'load', 'pull', 'save', 'tag', 'untag'];
 const NetworkEventActions: EventAction[] = ['create', 'destroy', 'remove'];
-const VolumeEventActions: EventAction[] = ['create', 'destroy'];
+const VolumeEventActions: EventAction[] = ['create', 'destroy', 'prune']; // Unlike containers/images/networks, when pruning volumes, no `destroy` event is fired, only `prune`, so we listen to that too
 
 export class RefreshManager extends vscode.Disposable {
     private readonly autoRefreshDisposables: vscode.Disposable[] = [];
@@ -115,7 +115,7 @@ export class RefreshManager extends vscode.Disposable {
                 const eventsUntilTimestamp = eventsSinceTimestamp + eventListenerLifetimeSeconds;
 
                 try {
-                    const eventGenerator = ext.streamWithDefaultShell(client =>
+                    const eventGenerator = ext.streamWithDefaults(client =>
                         client.getEventStream({
                             types: eventTypesToWatch,
                             events: eventActionsToWatch,

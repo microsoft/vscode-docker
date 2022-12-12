@@ -16,7 +16,7 @@ export async function pruneNetworks(context: IActionContext): Promise<void> {
     await vscode.window.withProgress(
         { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.networks.pruning', 'Pruning networks...') },
         async () => {
-            const result = await ext.runWithDefaultShell(client =>
+            const result = await ext.runWithDefaults(client =>
                 client.pruneNetworks({})
             );
 

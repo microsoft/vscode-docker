@@ -18,6 +18,7 @@ import {
     UpCommandOptions
 } from '../contracts/ContainerOrchestratorClient';
 import { AccumulatorStream } from '../utils/AccumulatorStream';
+import { Bash, Powershell } from '../utils/spawnStreamAsync';
 
 const commonOptions: CommonOrchestratorCommandOptions = {
     files: ['docker-compose.yml'],
@@ -100,5 +101,26 @@ xdescribe('DockerComposeClient', () => {
         const result = await runner(client.config(options));
         expect(result).to.be.ok;
         expect(result).to.contain('registry');
+    });
+});
+
+describe('DockerComposeClient (unit)', () => {
+    const client = new DockerComposeClient();
+    client.composeV2 = false;
+
+    it('Should produce the expected lack of quoting/escaping customOptions', async () => {
+        const options: UpCommandOptions = {
+            ...commonOptions,
+            detached: true,
+            build: true,
+            customOptions: '--timeout 10 --wait'
+        };
+
+        const commandResponse = await client.up(options);
+        const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const bashQuoted = new Bash().quote(commandResponse.args);
+
+        expect(pwshQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
+        expect(bashQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
     });
 });

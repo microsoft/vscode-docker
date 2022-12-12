@@ -56,7 +56,7 @@ export class NetworkTreeItem extends ToolTipTreeItem {
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.removeNetworks({ networks: [this.networkId] })
         );
     }
@@ -65,10 +65,10 @@ export class NetworkTreeItem extends ToolTipTreeItem {
         actionContext.telemetry.properties.tooltipType = 'network';
 
         // Allows some parallelization of the two commands
-        const networkPromise = ext.runWithDefaultShell(client =>
+        const networkPromise = ext.runWithDefaults(client =>
             client.inspectNetworks({ networks: [this.networkName] })
         );
-        const containersPromise = ext.runWithDefaultShell(client =>
+        const containersPromise = ext.runWithDefaults(client =>
             client.listContainers({ networks: [this.networkName] })
         );
 
