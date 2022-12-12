@@ -51,6 +51,14 @@ describe('parseDockerLikeImageName', () => {
                 registry: undefined,
             });
 
+            expect(parseDockerLikeImageName('alpine:5')).to.deep.equal({
+                originalName: 'alpine:5',
+                image: 'alpine',
+                tag: '5',
+                digest: undefined,
+                registry: undefined,
+            });
+
             expect(parseDockerLikeImageName('library/alpine:5')).to.deep.equal({
                 originalName: 'library/alpine:5',
                 image: 'library/alpine',
@@ -93,6 +101,14 @@ describe('parseDockerLikeImageName', () => {
                 tag: 'latest',
                 digest: undefined,
                 registry: 'with-a.port:5000',
+            });
+
+            expect(parseDockerLikeImageName('tldwithport:5000/library/alpine:latest')).to.deep.equal({
+                originalName: 'tldwithport:5000/library/alpine:latest',
+                image: 'library/alpine',
+                tag: 'latest',
+                digest: undefined,
+                registry: 'tldwithport:5000',
             });
 
             expect(parseDockerLikeImageName('1.2.3.4:5000/library/alpine:latest')).to.deep.equal({
