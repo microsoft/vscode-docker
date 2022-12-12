@@ -17,7 +17,7 @@ export type DockerListContainerRecord = {
     Networks: string;
     Labels: string;
     CreatedAt: string;
-    State: string;
+    State?: string;
     Status: string;
 };
 
@@ -53,10 +53,6 @@ export function isDockerListContainerRecord(maybeContainer: unknown): maybeConta
     }
 
     if (typeof container.CreatedAt !== 'string') {
-        return false;
-    }
-
-    if (typeof container.State !== 'string') {
         return false;
     }
 
@@ -99,7 +95,26 @@ export function normalizeDockerListContainerRecord(container: DockerListContaine
         ports,
         networks,
         createdAt,
-        state: container.State,
+        state: normalizeContainerState(container),
         status: container.Status,
     };
+}
+
+// Exported just for tests, also why the typing is just a subset of the full record
+export function normalizeContainerState(container: Pick<DockerListContainerRecord, 'State' | 'Status'>): string {
+    if (container.State) {
+        return container.State;
+    }
+
+    if (/paused/i.test(container.Status)) {
+        return 'paused';
+    } else if (/exit|terminate|dead/i.test(container.Status)) {
+        return 'exited';
+    } else if (/created/i.test(container.Status)) {
+        return 'created';
+    } else if (/up/i.test(container.Status)) {
+        return 'running';
+    }
+
+    return 'unknown';
 }
