@@ -1,3 +1,9 @@
+## 1.23.3 - 14 December 2022
+### Fixed
+* Container file ownership and permissions were being overwritten when the file was saved. [#3740](https://github.com/microsoft/vscode-docker/issues/3740)
+* If the `docker-run` task emitted a warning or error, debugging would not start, instead just spinning forever. [#3751](https://github.com/microsoft/vscode-docker/issues/3751)
+* If an image name contained a registry that was just a hostname and port, parsing would fail. [#3752](https://github.com/microsoft/vscode-docker/issues/3752)
+
 ## 1.23.2 - 7 December 2022
 ### Fixed
 * If an older version of Docker Engine / Docker CE was present, the containers view would not work. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
