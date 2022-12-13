@@ -4,7 +4,7 @@ WORKDIR /app
 EXPOSE {{ . }}
 {{/each}}
 
-{{#if (eq platform '.NET: ASP.NET Core')}}
+{{#if (eq platform '.NET: ASP.NET')}}
 {{#if ports}}
 ENV ASPNETCORE_URLS=http://+:{{ ports.[0] }}
 

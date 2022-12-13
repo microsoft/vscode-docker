@@ -173,7 +173,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             result = resolveVariables(helperOptions.appProject, context.folder);
         } else {
             // Find a .csproj or .fsproj in the folder
-            const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, localize('vscode-docker.tasks.netCore.noCsproj', 'No .NET Core project file (.csproj or .fsproj) could be found.'));
+            const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, localize('vscode-docker.tasks.netCore.noCsproj', 'No .NET project file (.csproj or .fsproj) could be found.'));
             result = item.absoluteFilePath;
         }
 

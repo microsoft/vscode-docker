@@ -42,7 +42,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         return [
             {
-                name: 'Docker .NET Core Launch',
+                name: 'Docker .NET Launch',
                 type: 'docker',
                 request: 'launch',
                 preLaunchTask: 'docker-run: debug',
@@ -101,7 +101,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                 action: 'openExternally',
                 uriFormat: '%s://localhost:%s',
             },
-            configureSsl || await NetCoreTaskHelper.isWebApp(debugConfiguration.netCore.appProject) // For .NET Core Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
+            configureSsl || await NetCoreTaskHelper.isWebApp(debugConfiguration.netCore.appProject) // For .NET Console we won't create a DockerServerReadyAction unless at least part of one is user-provided
         );
 
         return {
@@ -279,7 +279,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         const yesItem: MessageItem = DialogResponses.yes;
-        const message = localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET Core debugger in the container. Do you want to copy the debugger to the container?');
+        const message = localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET debugger in the container. Do you want to copy the debugger to the container?');
         const install = (yesItem === await window.showInformationMessage(message, ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
             throw new UserCancelledError();
@@ -293,7 +293,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         await window.withProgress({
             location: ProgressLocation.Notification,
-            title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET Core debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
+            title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
             await ext.runWithDefaults(client =>
                 client.writeFile({

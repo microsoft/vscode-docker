@@ -58,7 +58,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
 
             // semver.coerce tolerates version strings like "5.0" which is typically what is present in the .NET project file
             const netCoreVersion = semver.coerce(netCoreVersionString);
-            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
+            wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
             wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
         }
 
@@ -67,7 +67,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         }
 
         if (!wizardContext.dockerfileDirectory) {
-            // For .NET Core, the Dockerfile is always adjacent the artifact (csproj)
+            // For .NET, the Dockerfile is always adjacent the artifact (csproj)
             wizardContext.dockerfileDirectory = path.dirname(wizardContext.artifact);
         }
 

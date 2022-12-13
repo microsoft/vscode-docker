@@ -21,7 +21,7 @@ export async function scaffoldDebugConfig(wizardContext: Partial<ScaffoldingWiza
 
     const promptSteps: AzureWizardPromptStep<ScaffoldingWizardContext>[] = [
         new ChooseWorkspaceFolderStep(),
-        new ChoosePlatformStep(['Node.js', '.NET: ASP.NET Core', '.NET: Core Console', 'Python: Django', 'Python: FastAPI', 'Python: Flask', 'Python: General']),
+        new ChoosePlatformStep(['Node.js', '.NET: ASP.NET', '.NET: Console', 'Python: Django', 'Python: FastAPI', 'Python: Flask', 'Python: General']),
     ];
 
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {

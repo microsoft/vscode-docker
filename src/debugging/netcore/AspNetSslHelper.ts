@@ -25,7 +25,7 @@ export async function trustCertificateIfNecessary(context: IActionContext): Prom
     if (isWindows()) {
         if (!(await isCertificateTrusted())) {
             const trust: MessageItem = { title: localize('vscode-docker.debugging.netCore.trust', 'Trust') };
-            const message = localize('vscode-docker.debugging.netCore.notTrusted', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`, or click "Trust" below.');
+            const message = localize('vscode-docker.debugging.netCore.notTrusted', 'The ASP.NET HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`, or click "Trust" below.');
 
             // Don't wait
             void context.ui
@@ -39,7 +39,7 @@ export async function trustCertificateIfNecessary(context: IActionContext): Prom
         }
     } else if (isMac()) {
         if (!(await isCertificateTrusted())) {
-            const message = localize('vscode-docker.debugging.netCore.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`.');
+            const message = localize('vscode-docker.debugging.netCore.notTrustedRunManual', 'The ASP.NET HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`.');
 
             // Don't wait
             void context.ui.showWarningMessage(

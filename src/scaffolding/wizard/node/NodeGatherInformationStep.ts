@@ -45,7 +45,7 @@ export class NodeGatherInformationStep extends GatherInformationStep<NodeScaffol
         }
 
         if (!wizardContext.dockerfileDirectory) {
-            // For .NET Core, the Dockerfile is always adjacent the artifact (package.json)
+            // For .NET, the Dockerfile is always adjacent the artifact (package.json)
             wizardContext.dockerfileDirectory = path.dirname(wizardContext.artifact);
         }
 
