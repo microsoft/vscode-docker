@@ -51,7 +51,7 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
                     accumulator = new AccumulatorStream();
                 }
 
-                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: accumulator, shell: true });
+                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: accumulator });
 
                 throwIfCancellationRequested(this.options.cancellationToken);
 
@@ -85,7 +85,7 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
         const innerGenerator = commandResponse.parseStream(dataStream, !!this.options.strict);
 
         // The process promise will be awaited only after the innerGenerator finishes
-        const processPromise = spawnStreamAsync(command, args, { ...this.options, stdOutPipe: dataStream, shell: true });
+        const processPromise = spawnStreamAsync(command, args, { ...this.options, stdOutPipe: dataStream });
 
         for await (const element of innerGenerator) {
             yield element;

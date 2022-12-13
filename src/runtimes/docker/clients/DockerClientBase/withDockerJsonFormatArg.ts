@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { innerQuoted, withNamedArg } from '../../utils/commandLineBuilder';
+import { withNamedArg } from '../../utils/commandLineBuilder';
 
-// The Docker CLI requires weak quoting of the --format argument
-export const withDockerJsonFormatArg = withNamedArg('--format', innerQuoted('{{json .}}'));
+export const withDockerJsonFormatArg = withNamedArg('--format', '{{json .}}');
