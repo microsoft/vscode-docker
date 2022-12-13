@@ -5,7 +5,7 @@
 
 import * as path from 'path';
 import * as readline from 'readline';
-import type { ShellQuotedString } from 'vscode';
+import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -76,7 +76,6 @@ import { CancellationError } from '../../utils/CancellationError';
 import {
     CommandLineArgs,
     composeArgs,
-    innerQuoted,
     withArg,
     withFlagArg,
     withNamedArg,
@@ -1559,13 +1558,13 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                 '/C',
                 // Path is intentionally *not* quoted--no good quoting options work, but
                 // `cd` doesn't seem to care, so cd to the path and then do dir
-                innerQuoted(`cd ${options.path} & dir /A-S /-C`) as ShellQuotedString,
+                { value: `cd ${options.path} & dir /A-S /-C`, quoting: ShellQuoting.Strong }
             ];
         } else {
             command = [
                 '/bin/sh',
                 '-c',
-                innerQuoted(`ls -lA '${options.path}'`) as ShellQuotedString,
+                { value: `ls -lA "${options.path}"`, quoting: ShellQuoting.Strong }
             ];
         }
 
@@ -1611,7 +1610,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             const command = [
                 'cmd',
                 '/C',
-                innerQuoted(`cd ${folder} & type ${file}`) as ShellQuotedString,
+                { value: `cd ${folder} & type ${file}`, quoting: ShellQuoting.Strong }
             ];
 
             return this.getExecContainerCommandArgs(
