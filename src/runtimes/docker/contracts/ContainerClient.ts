@@ -1710,14 +1710,6 @@ export type ListFilesItem = {
      */
     path: string;
     /**
-     * The creation time of the file/directory, in milliseconds since Unix epoch
-     */
-    ctime: number;
-    /**
-     * The modification time of the file/directory, in milliseconds since Unix epoch
-     */
-    mtime: number;
-    /**
      * The size of the file (0 if a directory), in bytes
      */
     size: number;
@@ -1725,6 +1717,30 @@ export type ListFilesItem = {
      * The type of the file item (file/directory)
      */
     type: FileType;
+    /**
+     * The mode (permissions) of the file in base 10
+     */
+    mode?: number;
+    /**
+     * The (container) uid of the user the file belongs to
+     */
+    uid?: number;
+    /**
+     * The (container) gid of the user the file belongs to
+     */
+    gid?: number;
+    /**
+     * The modification time of the file/directory, in milliseconds since Unix epoch
+     */
+    mtime?: number;
+    /**
+     * The creation time of the file/directory, in milliseconds since Unix epoch
+     */
+    ctime?: number;
+    /**
+     * The access time of the file/directory, in milliseconds since Unix epoch
+     */
+    atime?: number;
 };
 
 type ListFilesCommand = {
@@ -1733,6 +1749,33 @@ type ListFilesCommand = {
      * @param options Command options
      */
     listFiles(options: ListFilesCommandOptions): Promise<PromiseCommandResponse<Array<ListFilesItem>>>;
+};
+
+// Stat path command types
+
+export type StatPathCommandOptions = CommonCommandOptions & {
+    /**
+    * The container to execute a command in
+    */
+    container: string;
+    /**
+     * The absolute path of a file or directory in the container to get stats for
+     */
+    path: string;
+    /**
+     * The container operating system. If not supplied, 'linux' will be assumed.
+     */
+    operatingSystem?: ContainerOS;
+};
+
+export type StatPathItem = ListFilesItem;
+
+type StatPathCommand = {
+    /**
+     * Gets stats for a given file in a container
+     * @param options Command options
+     */
+    statPath(options: StatPathCommandOptions): Promise<PromiseCommandResponse<StatPathItem | undefined>>;
 };
 
 // Read file command types
@@ -1851,5 +1894,6 @@ export interface IContainersClient extends
     InspectContextsCommand,
     // Filesystem commands
     ListFilesCommand,
+    StatPathCommand,
     ReadFileCommand,
     WriteFileCommand { }

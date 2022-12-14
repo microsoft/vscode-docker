@@ -46,6 +46,12 @@ declare module "tar" {
         path: string;
         type: 'File' | 'Directory';
         size: number;
+        atime: Date;
+        mtime: Date;
+        ctime: Date;
+        mode?: number;
+        gid?: number;
+        uid?: number;
     }
 
     export interface ReadEntryClass extends NodeJS.EventEmitter, NodeJS.ReadWriteStream {

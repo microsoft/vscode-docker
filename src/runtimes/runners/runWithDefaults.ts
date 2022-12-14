@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
+import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, NoShell, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
 import { ext } from '../../extensionVariables';
 import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
@@ -108,8 +108,9 @@ class DefaultEnvStreamCommandRunnerFactory<TOptions extends DefaultEnvStreamComm
             ...options,
             env: withDockerEnvSettings(process.env),
             shell: false,
-            shellProvider: undefined,
+            shellProvider: new NoShell(),
             stdErrPipe: errAccumulator,
+            windowsVerbatimArguments: true,
             strict: true,
         });
 
