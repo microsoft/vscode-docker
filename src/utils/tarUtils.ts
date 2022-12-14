@@ -31,6 +31,9 @@ export function tarUnpackStream(destination: NodeJS.WritableStream): NodeJS.Writ
  * @param source The source file as a buffer.
  * @param sourceFileName The name of the source file (will be written
  * into the tarball)
+ * @param atime Optional date when the file was last accessed
+ * @param mtime Optional date when the file was last modified
+ * @param ctime Optional date when the file was created
  * @param mode Optional unix file mode specifier
  * @param gid Optional unix group id specifier
  * @param uid Optional unix user id specifier

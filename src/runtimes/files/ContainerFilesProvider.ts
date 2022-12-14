@@ -85,9 +85,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
         accumulator.end();
 
-        const file = await accumulator.getBytes();
-        console.log(file.toString());
-        return file;
+        return await accumulator.getBytes();
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): Promise<void> {
