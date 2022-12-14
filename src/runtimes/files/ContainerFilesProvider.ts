@@ -91,8 +91,12 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): Promise<void> {
-        const method =
-            async (): Promise<void> => {
+        return callWithTelemetryAndErrorHandling(
+            `containerFilesProvider.writeFile`,
+            async actionContext => {
+                actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup.
+                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
+
                 const dockerUri = DockerUri.parse(uri);
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
                 const destDirectory = containerOS === 'windows' ?
@@ -124,15 +128,6 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
                         stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path), atime, mtime, ctime, mode, gid, uid),
                     },
                 );
-            };
-
-        return callWithTelemetryAndErrorHandling(
-            `containerFilesProvider.writeFile`,
-            async actionContext => {
-                actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup.
-                actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
-
-                await method();
             });
     }
 
