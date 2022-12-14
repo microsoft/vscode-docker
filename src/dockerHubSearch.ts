@@ -36,7 +36,7 @@ const popular = [
     { "is_automated": false, "name": "node", "is_trusted": false, "is_official": true, "star_count": 1200, "description": localize('vscode-docker.dockerHubSearch.node', 'Node.js is a JavaScript-based platform for server-side and networking applications.') },
     { "is_automated": false, "name": "nginx", "is_trusted": false, "is_official": true, "star_count": 1600, "description": localize('vscode-docker.dockerHubSearch.nginx', 'Official build of Nginx.') },
     { "is_automated": false, "name": "postgres", "is_trusted": false, "is_official": true, "star_count": 1200, "description": localize('vscode-docker.dockerHubSearch.postgres', 'The PostgreSQL object-relational database system provides reliability and data integrity.') },
-    { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": localize('vscode-docker.dockerHubSearch.aspNet', 'ASP.NET is an open source server-side Web application framework') }
+    { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": localize('vscode-docker.dockerHubSearch.aspNet', 'ASP.NET Core is an open source server-side Web application framework') }
 ];
 /* eslint-enable @typescript-eslint/naming-convention */
 

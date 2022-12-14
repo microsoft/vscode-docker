@@ -62,7 +62,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
             case 'Node.js':
                 subPath = path.join('node', `${this.fileType}.template`);
                 break;
-            case '.NET: ASP.NET':
+            case '.NET: ASP.NET Core':
             case '.NET: Console':
                 subPath = path.join('netCore', `${this.fileType}.template`);
                 break;

@@ -32,7 +32,7 @@ export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardConte
         new NetCoreChooseOsStep(),
     ];
 
-    if (wizardContext.platform === '.NET: ASP.NET' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
+    if (wizardContext.platform === '.NET: ASP.NET Core' && (wizardContext.scaffoldType === 'all' || wizardContext.scaffoldType === 'compose')) {
         promptSteps.push(new NetCoreTryGetRandomPortStep());
         promptSteps.push(new ChoosePortsStep([5000]));
     }

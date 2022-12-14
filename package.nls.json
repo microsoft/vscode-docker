@@ -91,7 +91,7 @@
     "vscode-docker.tasks.docker-run.netCore.description": "Options for running .NET projects in Docker.",
     "vscode-docker.tasks.docker-run.netCore.appProject": "The .NET project (.csproj, .fsproj, etc.) to build.",
     "vscode-docker.tasks.docker-run.netCore.enableDebugging": "Whether to enable debugging within the container.",
-    "vscode-docker.tasks.docker-run.netCore.configureSsl": "Whether to configure certificate and other settings to enable SSL on ASP.NET web services.",
+    "vscode-docker.tasks.docker-run.netCore.configureSsl": "Whether to configure certificate and other settings to enable SSL on ASP.NET Core web services.",
     "vscode-docker.tasks.docker-run.node.description": "Options for running Node.js applications in Docker.",
     "vscode-docker.tasks.docker-run.node.enableDebugging": "Whether to enable debugging within the container.",
     "vscode-docker.tasks.docker-run.node.inspectMode": "Whether debugging should break immediately upon application start.",
