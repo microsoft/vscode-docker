@@ -31,14 +31,23 @@ export function tarUnpackStream(destination: NodeJS.WritableStream): NodeJS.Writ
  * @param source The source file as a buffer.
  * @param sourceFileName The name of the source file (will be written
  * into the tarball)
+ * @param mode Optional unix file mode specifier
+ * @param gid Optional unix group id specifier
+ * @param uid Optional unix user id specifier
  * @returns A stream to read tarball data from
  */
-export function tarPackStream(source: Buffer, sourceFileName: string): NodeJS.ReadableStream {
+export function tarPackStream(source: Buffer, sourceFileName: string, atime: Date = new Date(), mtime: Date = new Date(), ctime: Date = new Date(), mode?: number, gid?: number, uid?: number): NodeJS.ReadableStream {
     const tarPack = new tar.Pack({ portable: true });
     const readEntry = new tar.ReadEntry({
         path: sourceFileName,
         type: 'File',
         size: source.length,
+        atime,
+        mtime,
+        ctime,
+        mode,
+        gid,
+        uid,
     });
 
     const sourceStream = stream.Readable.from(source);

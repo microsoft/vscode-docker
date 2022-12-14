@@ -14,89 +14,103 @@ const DateFormats = [
     'MM/DD/YYYY hh:mm A', // Windows format
 ];
 
+type FileMode = {
+    mode?: number;
+    fileType: vscode.FileType;
+};
+
 export function parseListFilesCommandLinuxOutput(
     options: ListFilesCommandOptions,
     output: string
 ): ListFilesItem[] {
-    return parseListFilesOutput(
-        output,
-        /^(?<type>[bcdDlps-])(?<perm>[r-][w-][sStTx-]){3}\s+(?<links>\d+)\s+(?<owner>[a-z0-9_.][a-z0-9_.-]*\$?)\s+(?<group>[a-z0-9_.][a-z0-9_.-]*\$?)\s+(?<size>\d+(, \d+)?)\s+(?<mtime>(?<date>\w+\s+\d+)\s+(?<yearOrTime>\d{4}|\d{1,2}:\d{2}))\s+(?<name>.*)$/gm,
-        parseLinuxType,
-        (name) => path.posix.join(options.path, name)
-    );
+    const regex = /^(?<type>[0-9a-fA-F]+)\s+(?<links>\d+)\s+(?<group>\d+)\s+(?<owner>\d+)\s+(?<size>\d+)\s+(?<atime>\d+)\s+(?<mtime>\d+)\s+(?<ctime>\d+)\s+(?<name>.*)$/gm;
+
+    const items = new Array<ListFilesItem>();
+    for (const match of output.matchAll(regex)) {
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
+        const name = path.basename(match.groups!.name);
+        const { mode, fileType } = parseLinuxType(match.groups!.type);
+        const size = Number.parseInt(match.groups!.size, 10);
+        const mtime = dayjs.unix(Number.parseInt(match.groups!.mtime, 10)).valueOf();
+        const ctime = dayjs.unix(Number.parseInt(match.groups!.ctime, 10)).valueOf();
+        const atime = dayjs.unix(Number.parseInt(match.groups!.atime, 10)).valueOf();
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
+
+        // Ignore relative directory items...
+        if (fileType === vscode.FileType.Directory && (name === '.' || name === '..')) {
+            continue;
+        }
+
+        // Ignore everything other than directories and plain files
+        if (![vscode.FileType.Directory, vscode.FileType.File].includes(fileType)) {
+            continue;
+        }
+
+        items.push({
+            name,
+            path: path.posix.join(options.path, name),
+            type: fileType,
+            mode,
+            ctime,
+            mtime,
+            atime,
+            size,
+        });
+    }
+
+    return items;
 }
 
 export function parseListFilesCommandWindowsOutput(
     options: ListFilesCommandOptions,
     output: string
 ): ListFilesItem[] {
-    return parseListFilesOutput(
-        output,
-        /^(?<mtime>(?<date>\d{1,2}(\/|\.)\d{1,2}(\/|\.)\d{4})\s+(?<time>\d{1,2}:\d{1,2}( (AM|PM))?))\s+((?<type><DIR>|<SYMLINKD>)|(?<size>\d+))\s+(?<name>.*)$/gm,
-        parseWindowsType,
-        (name) => path.win32.join(options.path, name)
-    );
-}
+    const regex = /^(?<mtime>(?<date>\d{1,2}(\/|\.)\d{1,2}(\/|\.)\d{4})\s+(?<time>\d{1,2}:\d{1,2}( (AM|PM))?))\s+((?<type><DIR>|<SYMLINKD>)|(?<size>\d+))\s+(?<name>.*)$/gm;
 
-function parseListFilesOutput(
-    output: string,
-    expression: RegExp,
-    parseType: (type: string) => vscode.FileType,
-    pathJoin: (name: string) => string
-): ListFilesItem[] {
-    let match = expression.exec(output);
-
-    const items: ListFilesItem[] = [];
-
-    while (match !== null) {
+    const items = new Array<ListFilesItem>();
+    for (const match of output.matchAll(regex)) {
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const name = match.groups!.name;
-        const type = parseType(match.groups!.type);
-        const size = type === vscode.FileType.Directory ? 0 : Number.parseInt(match.groups!.size, 10);
-        const mtime = dayjs(match.groups!.mtime, DateFormats);
+        const fileType = parseWindowsType(match.groups!.type);
+        const size = fileType === vscode.FileType.Directory ? 0 : Number.parseInt(match.groups!.size, 10);
+        const mtime = dayjs(match.groups!.mtime, DateFormats).valueOf();
         /* eslint-enable @typescript-eslint/no-non-null-assertion */
 
-        match = expression.exec(output);
-
-        //
-        // NOTE: Do not use `match` below this point.
-        //
-
         // Ignore relative directory items...
-        if (type === vscode.FileType.Directory && (name === '.' || name === '..')) {
+        if (fileType === vscode.FileType.Directory && (name === '.' || name === '..')) {
             continue;
         }
 
         // Ignore everything other than directories and plain files
-        if (type !== vscode.FileType.Directory && type !== vscode.FileType.File) {
-            continue;
+        if (![vscode.FileType.Directory, vscode.FileType.File].includes(fileType)) {
+            return items;
         }
 
-        items.push(
-            {
-                name,
-                path: pathJoin(name),
-                type,
-                ctime: 0,
-                mtime: mtime.valueOf(),
-                size,
-            }
-        );
+        items.push({
+            name,
+            path: path.win32.join(options.path, name),
+            type: fileType,
+            mtime,
+            size,
+        });
     }
 
     return items;
 }
 
-function parseLinuxType(type: string): vscode.FileType {
-    switch (type) {
-        case 'd':
-            return vscode.FileType.Directory;
-        case '-':
-            return vscode.FileType.File;
-        case 'l':
-            return vscode.FileType.SymbolicLink;
+function parseLinuxType(fullModeHex: string): FileMode {
+    const fullMode = parseInt(fullModeHex, 16);
+    const fileType = (fullMode & 0xf000) >> 12;
+    const mode = fullMode & 0xfff;
+    switch (fileType) {
+        case 4:
+            return { mode, fileType: vscode.FileType.Directory };
+        case 8:
+            return { mode, fileType: vscode.FileType.File };
+        case 10:
+            return { mode, fileType: vscode.FileType.SymbolicLink };
         default:
-            return vscode.FileType.Unknown;
+            return { mode, fileType: vscode.FileType.Unknown };
     }
 }
 
