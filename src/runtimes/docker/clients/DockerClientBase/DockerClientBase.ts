@@ -1569,7 +1569,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             command = [
                 '/bin/sh',
                 '-c',
-                { value: `stat -c '${LinuxStatArguments}' "${dirPath}"* "${dirPath}".*`, quoting: ShellQuoting.Strong },
+                { value: `stat -c '${LinuxStatArguments}' "${dirPath}"* || true && stat -c '${LinuxStatArguments}' "${dirPath}".*`, quoting: ShellQuoting.Strong },
             ];
         }
 
