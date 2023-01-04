@@ -1,3 +1,23 @@
+## 1.23.3 - 14 December 2022
+### Fixed
+* Old versions of Docker Engine should no longer show "Invalid JSON" errors in the container view. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
+* Container file ownership and permissions were being overwritten when the file was saved. [#3740](https://github.com/microsoft/vscode-docker/issues/3740)
+* If the `docker-run` task emitted a warning or error, debugging would not start, instead just spinning forever. [#3751](https://github.com/microsoft/vscode-docker/issues/3751)
+* If an image name contained a registry that was just a hostname and port, parsing would fail. [#3752](https://github.com/microsoft/vscode-docker/issues/3752)
+
+## 1.23.2 - 7 December 2022
+### Fixed
+* If an older version of Docker Engine / Docker CE was present, the containers view would not work. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
+* Image tag format was excessively verbose for common images. [#3734](https://github.com/microsoft/vscode-docker/issues/3734)
+* On Windows, if PowerShell profiles were in use, many features would not work. [#3725](https://github.com/microsoft/vscode-docker/issues/3725)
+
+## 1.23.1 - 30 November 2022
+### Fixed
+* Images were sometimes listed as created "NaN years ago". [#3718](https://github.com/microsoft/vscode-docker/issues/3718)
+* Certain image name formats caused the containers view to no longer work. [#3719](https://github.com/microsoft/vscode-docker/issues/3719)
+* The `customOptions` and `command` properties on certain tasks were being over-escaped. [#3722](https://github.com/microsoft/vscode-docker/issues/3722)
+* `docker-compose` tasks with a list of services to start were being over-escaped. [#3726](https://github.com/microsoft/vscode-docker/issues/3726)
+
 ## 1.23.0 - 28 November 2022
 ### Added
 * This version includes major changes and rearchitecting to use the Docker CLI exclusively, instead of a mix of the CLI and the HTTP API. This fixes a very common class of issues where the CLI would be working, but the Explorer view would not. [#3263](https://github.com/microsoft/vscode-docker/issues/3263)

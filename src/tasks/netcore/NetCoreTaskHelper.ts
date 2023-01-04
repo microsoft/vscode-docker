@@ -234,15 +234,19 @@ export class NetCoreTaskHelper implements TaskHelper {
             addVolumeWithoutConflicts(volumes, appVolume);
             addVolumeWithoutConflicts(volumes, srcVolume);
             addVolumeWithoutConflicts(volumes, debuggerVolume);
-            addVolumeWithoutConflicts(volumes, nugetRootVolume);
-            addVolumeWithoutConflicts(volumes, nugetUserVolume);
+            if (await fse.pathExists(nugetRootVolume.localPath)) {
+                addVolumeWithoutConflicts(volumes, nugetRootVolume);
+            }
+            if (await fse.pathExists(nugetUserVolume.localPath)) {
+                addVolumeWithoutConflicts(volumes, nugetUserVolume);
+            }
         }
 
         if (userSecrets || ssl) {
             // Try to get a container username from the image (best effort only)
             let userName: string | undefined;
             try {
-                const imageInspection = (await ext.runWithDefaultShell(client =>
+                const imageInspection = (await ext.runWithDefaults(client =>
                     client.inspectImages({ imageRefs: [runOptions.image] })
                 ))?.[0];
                 userName = imageInspection?.user;

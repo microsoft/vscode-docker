@@ -34,99 +34,98 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
         return DisposableLike.None;
     }
 
-    public stat(uri: vscode.Uri): Promise<vscode.FileStat> {
-        const method = async (): Promise<vscode.FileStat> => {
-            const dockerUri = DockerUri.parse(uri);
+    public async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
+        const dockerUri = DockerUri.parse(uri);
 
-            return {
-                ctime: dockerUri.options.ctime,
-                mtime: dockerUri.options.mtime,
-                size: dockerUri.options.size,
-                type: dockerUri.options.fileType,
-            };
+        return {
+            type: dockerUri.options.fileType,
+            mtime: 0,
+            ctime: 0,
+            size: 0,
         };
-
-        return method();
     }
 
-    public readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-        const method = async (): Promise<[string, vscode.FileType][]> => {
-            const dockerUri = DockerUri.parse(uri);
-            const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
+    public async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+        const dockerUri = DockerUri.parse(uri);
+        const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-            const items: ListFilesItem[] = await ext.runWithDefaultShell(client =>
-                client.listFiles({
-                    container: dockerUri.containerId,
-                    path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
-                    operatingSystem: containerOS,
-                })
-            );
+        const items: ListFilesItem[] = await ext.runWithDefaults(client =>
+            client.listFiles({
+                container: dockerUri.containerId,
+                path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                operatingSystem: containerOS,
+            }),
+        );
 
-            return items.map(item => [item.name, item.type]);
-        };
-
-        return method();
+        return items.map(item => [item.name, item.type]);
     }
 
     public createDirectory(uri: vscode.Uri): void {
         throw new MethodNotImplementedError();
     }
 
-    public readFile(uri: vscode.Uri): Promise<Uint8Array> {
-        const method =
-            async (): Promise<Uint8Array> => {
-                const dockerUri = DockerUri.parse(uri);
-                const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
+    public async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+        const dockerUri = DockerUri.parse(uri);
+        const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
 
-                const accumulator = new AccumulatorStream();
-                const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
+        const accumulator = new AccumulatorStream();
+        const targetStream = containerOS === 'windows' ? accumulator : tarUnpackStream(accumulator);
 
-                const generator = ext.streamWithDefaultShell(
-                    client => client.readFile({
-                        container: dockerUri.containerId,
-                        path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
-                        operatingSystem: containerOS,
-                    })
-                );
+        const generator = ext.streamWithDefaults(
+            client => client.readFile({
+                container: dockerUri.containerId,
+                path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                operatingSystem: containerOS,
+            }),
+        );
 
-                for await (const chunk of generator) {
-                    targetStream.write(chunk);
-                }
+        for await (const chunk of generator) {
+            targetStream.write(chunk);
+        }
 
-                return await accumulator.getBytes();
-            };
+        accumulator.end();
 
-        return method();
+        return await accumulator.getBytes();
     }
 
     public writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): Promise<void> {
-        const method =
-            async (): Promise<void> => {
-                const dockerUri = DockerUri.parse(uri);
-                const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
-                const destDirectory = containerOS === 'windows' ?
-                    path.win32.dirname(dockerUri.windowsPath) :
-                    path.posix.dirname(dockerUri.path);
-
-                await ext.runWithDefaultShell(
-                    client => client.writeFile({
-                        container: dockerUri.containerId,
-                        path: destDirectory,
-                        operatingSystem: containerOS,
-                    }),
-                    {
-                        stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path)),
-                    }
-                );
-            };
-
         return callWithTelemetryAndErrorHandling(
             `containerFilesProvider.writeFile`,
             async actionContext => {
                 actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup.
                 actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
-                await method();
+                const dockerUri = DockerUri.parse(uri);
+                const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
+                const destDirectory = containerOS === 'windows' ?
+                    path.win32.dirname(dockerUri.windowsPath) :
+                    path.posix.dirname(dockerUri.path);
+
+                const fileStats = await ext.runWithDefaults(
+                    client => client.statPath({
+                        container: dockerUri.containerId,
+                        path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
+                        operatingSystem: containerOS,
+                    }),
+                );
+
+                const atime = new Date(fileStats?.atime ?? Date.now());
+                const mtime = new Date(fileStats?.mtime ?? Date.now());
+                const ctime = new Date(fileStats?.ctime ?? Date.now());
+                const mode = fileStats?.mode;
+                const gid = fileStats?.gid;
+                const uid = fileStats?.uid;
+
+                await ext.runWithDefaults(
+                    client => client.writeFile({
+                        container: dockerUri.containerId,
+                        path: destDirectory,
+                        operatingSystem: containerOS,
+                    }),
+                    {
+                        stdInPipe: tarPackStream(Buffer.from(content), path.basename(uri.path), atime, mtime, ctime, mode, gid, uid),
+                    },
+                );
             });
     }
 

@@ -42,7 +42,7 @@ export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, Volum
     }
 
     public async getItems(context: IActionContext): Promise<ListVolumeItem[]> {
-        return ext.runWithDefaultShell(client =>
+        return ext.runWithDefaults(client =>
             client.listVolumes({})
         );
     }

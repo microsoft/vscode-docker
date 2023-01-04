@@ -101,7 +101,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.removeContainers({ containers: [this.containerId], force: true })
         );
     }
@@ -147,7 +147,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
     public async resolveTooltipInternal(actionContext: IActionContext): Promise<vscode.MarkdownString> {
         actionContext.telemetry.properties.tooltipType = 'container';
 
-        const containerInspection = (await ext.runWithDefaultShell(client =>
+        const containerInspection = (await ext.runWithDefaults(client =>
             client.inspectContainers({ containers: [this.containerId] })
         ))?.[0];
 
@@ -169,7 +169,7 @@ const containerTooltipTemplate = `
 ---
 
 #### Image
-{{ imageName }} ({{ substr imageId 7 12 }})
+{{ image.originalName }} ({{ substr imageId 7 12 }})
 
 ---
 
@@ -190,7 +190,7 @@ _None_
 {{#if (eq this.type 'bind')}}
   - {{ friendlyBindHost this.source }} ➔ {{ this.destination }} (Bind mount, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
-{{#if (eq this.Type 'volume')}}
+{{#if (eq this.type 'volume')}}
   - {{ this.name }} ➔ {{ this.destination }} (Named volume, {{#if this.readOnly}}RO{{else}}RW{{/if}})
 {{/if}}
 {{/each}}

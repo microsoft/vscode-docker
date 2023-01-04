@@ -20,7 +20,7 @@ export async function startContainer(context: IActionContext, node?: ContainerTr
     );
 
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.containers.start.starting', 'Starting Container(s)...') }, async () => {
-        await ext.runWithDefaultShell(client =>
+        await ext.runWithDefaults(client =>
             client.startContainers({ container: nodes.map(n => n.containerId) })
         );
     });

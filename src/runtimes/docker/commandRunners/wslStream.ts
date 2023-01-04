@@ -7,7 +7,7 @@ import {
     CommandResponseBase,
     ICommandRunnerFactory,
 } from '../contracts/CommandRunner';
-import { Shell } from '../utils/spawnStreamAsync';
+import { CommandLineArgs, composeArgs, withArg, withNamedArg } from '../utils/commandLineBuilder';
 import {
     ShellStreamCommandRunnerFactory,
     ShellStreamCommandRunnerOptions,
@@ -22,20 +22,14 @@ export type WslShellCommandRunnerOptions = ShellStreamCommandRunnerOptions & {
  * Special case of {@link ShellStreamCommandRunnerFactory} for executing commands in a wsl distro
  */
 export class WslShellCommandRunnerFactory extends ShellStreamCommandRunnerFactory<WslShellCommandRunnerOptions> implements ICommandRunnerFactory {
-    protected override getCommandAndArgs(
-        commandResponse: CommandResponseBase,
-    ): {
-        command: string;
-        args: string[];
-    } {
+    protected getCommandAndArgs(commandResponse: CommandResponseBase): { command: string, args: CommandLineArgs } {
         const command = this.options.wslPath ?? 'wsl.exe';
-        const args = [
-            ...(this.options.distro ? ['-d', this.options.distro] : []),
-            '--',
-            commandResponse.command,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            ...Shell.getShellOrDefault(this.options.shellProvider).quote(commandResponse.args),
-        ];
+        const args = composeArgs(
+            withNamedArg('-d', this.options.distro),
+            withArg('--'),
+            withArg(commandResponse.command),
+            withArg(...commandResponse.args),
+        )();
 
         return { command, args };
     }

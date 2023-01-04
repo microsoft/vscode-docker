@@ -23,7 +23,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
-    await ext.runWithDefaultShell(client =>
+    await ext.runWithDefaults(client =>
         client.tagImage({ fromImageRef: node.imageId, toImageRef: newTaggedName })
     );
 

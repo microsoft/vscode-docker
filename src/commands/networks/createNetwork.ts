@@ -36,7 +36,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         }
     );
 
-    await ext.runWithDefaultShell(client =>
+    await ext.runWithDefaults(client =>
         client.createNetwork({ name: name, driver: driverSelection.label })
     );
 }

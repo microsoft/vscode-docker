@@ -25,7 +25,7 @@ export abstract class Shell implements IShell {
         }
 
         if (os.platform() === 'win32') {
-            return new Powershell();
+            return new Cmd();
         } else {
             return new Bash();
         }
@@ -62,6 +62,13 @@ export class Powershell extends Shell {
         const escape = (value: string) => `\`${value}`;
 
         return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
             switch (quotedArg.quoting) {
                 case ShellQuoting.Escape:
                     return quotedArg.value.replace(/[ "'()]/g, escape);
@@ -103,6 +110,13 @@ export class Bash extends Shell {
         const escape = (value: string) => `\\${value}`;
 
         return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
             switch (quotedArg.quoting) {
                 case ShellQuoting.Escape:
                     return quotedArg.value.replace(/[ "']/g, escape);
@@ -112,6 +126,78 @@ export class Bash extends Shell {
                     return `'${quotedArg.value.replace(/[']/g, escape)}'`;
             }
         });
+    }
+}
+
+/**
+ * Quoting/escaping rules for cmd shell
+ */
+export class Cmd extends Shell {
+    public quote(args: CommandLineArgs): Array<string> {
+        const escapeQuote = (value: string) => `\\${value}`;
+        const escape = (value: string) => `^${value}`;
+
+        return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
+            switch (quotedArg.quoting) {
+                case ShellQuoting.Escape:
+                    return quotedArg.value.replace(/[ "^&\\<>|]/g, escape);
+                case ShellQuoting.Weak:
+                    return quotedArg.value.replace(/[ "^&\\<>|]/g, escape);
+                case ShellQuoting.Strong:
+                    return `"${quotedArg.value.replace(/["]/g, escapeQuote)}"`;
+            }
+        });
+    }
+}
+
+/**
+ * Quoting/escaping rules for no shell
+ */
+export class NoShell extends Shell {
+    private readonly isWindows: boolean;
+
+    public constructor(isWindows?: boolean) {
+        super();
+
+        this.isWindows = typeof isWindows === 'boolean' ? isWindows : os.platform() === 'win32';
+    }
+
+    public quote(args: CommandLineArgs): Array<string> {
+        const windowsEscape = (value: string) => `\\${value}`;
+
+        return args.map((quotedArg) => {
+            // If it's a verbatim argument, return it as-is.
+            // The overwhelming majority of arguments are `ShellQuotedString`, so
+            // verbatim arguments will only show up if `withVerbatimArg` is used.
+            if (typeof quotedArg === 'string') {
+                return quotedArg;
+            }
+
+            // Windows requires special quoting behavior even when running without a shell
+            // to allow us to use windowsVerbatimArguments: true
+            if (this.isWindows) {
+                switch (quotedArg.quoting) {
+                    case ShellQuoting.Weak:
+                    case ShellQuoting.Strong:
+                        return `"${quotedArg.value.replace(/["]/g, windowsEscape)}"`;
+                    default:
+                        return quotedArg.value;
+                }
+            }
+
+            return quotedArg.value;
+        });
+    }
+
+    public override getShellOrDefault(shell?: string | boolean | undefined): string | boolean | undefined {
+        return false;
     }
 }
 
@@ -127,13 +213,16 @@ export type StreamSpawnOptions = SpawnOptions & {
 
 export async function spawnStreamAsync(
     command: string,
-    args: Array<string>,
+    args: CommandLineArgs,
     options: StreamSpawnOptions,
 ): Promise<void> {
     const cancellationToken = options.cancellationToken || CancellationTokenLike.None;
     // Force PowerShell as the default on Windows, but use the system default on
     // *nix
     const shell = options.shellProvider?.getShellOrDefault(options.shell) ?? options.shell;
+
+    // If there is a shell provider, apply its quoting, otherwise just flatten arguments into strings
+    const normalizedArgs: string[] = options.shellProvider?.quote(args) ?? args.map(arg => typeof arg === 'string' ? arg : arg.value);
 
     if (cancellationToken.isCancellationRequested) {
         throw new CancellationError('Command cancelled', cancellationToken);
@@ -145,7 +234,7 @@ export async function spawnStreamAsync(
 
     const childProcess = spawn(
         command,
-        args,
+        normalizedArgs,
         {
             ...options,
             shell,

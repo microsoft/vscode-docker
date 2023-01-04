@@ -3,10 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjs from 'dayjs';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-import * as utc from 'dayjs/plugin/utc';
-import * as path from 'path';
 import * as readline from 'readline';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
@@ -20,13 +16,10 @@ import {
     EventStreamCommandOptions,
     ExecContainerCommandOptions,
     IContainersClient,
-    ImageNameInfo,
     InfoCommandOptions,
     InfoItem,
     InspectContainersCommandOptions,
     InspectContainersItem,
-    InspectContainersItemMount,
-    InspectContainersItemNetwork,
     InspectContextsCommandOptions,
     InspectContextsItem,
     InspectImagesCommandOptions,
@@ -50,8 +43,6 @@ import {
     LoginCommandOptions,
     LogoutCommandOptions,
     LogsForContainerCommandOptions,
-    NetworkIpamConfig,
-    PortBinding,
     PruneContainersCommandOptions,
     PruneContainersItem,
     PruneImagesCommandOptions,
@@ -71,6 +62,8 @@ import {
     RestartContainersCommandOptions,
     RunContainerCommandOptions,
     StartContainersCommandOptions,
+    StatPathCommandOptions,
+    StatPathItem,
     StopContainersCommandOptions,
     TagImageCommandOptions,
     UseContextCommandOptions,
@@ -88,32 +81,32 @@ import {
     withFlagArg,
     withNamedArg,
     withQuotedArg,
+    withVerbatimArg,
 } from "../../utils/commandLineBuilder";
 import { CommandNotSupportedError } from '../../utils/CommandNotSupportedError';
+import { dayjs } from '../../utils/dayjs';
 import { byteStreamToGenerator, stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { toArray } from '../../utils/toArray';
 import { ConfigurableClient } from '../ConfigurableClient';
 import { DockerEventRecord, isDockerEventRecord } from './DockerEventRecord';
-import { DockerInfoRecord, isDockerInfoRecord } from './DockerInfoRecord';
-import { DockerInspectContainerRecord, isDockerInspectContainerRecord } from './DockerInspectContainerRecord';
-import { DockerInspectImageRecord, isDockerInspectImageRecord } from './DockerInspectImageRecord';
-import { DockerInspectNetworkRecord, isDockerInspectNetworkRecord } from './DockerInspectNetworkRecord';
-import { DockerInspectVolumeRecord, isDockerInspectVolumeRecord } from './DockerInspectVolumeRecord';
-import { DockerListContainerRecord, isDockerListContainerRecord } from './DockerListContainerRecord';
-import { isDockerListImageRecord } from "./DockerListImageRecord";
-import { DockerNetworkRecord, isDockerNetworkRecord } from './DockerNetworkRecord';
+import { isDockerInfoRecord } from './DockerInfoRecord';
+import { isDockerInspectContainerRecord, normalizeDockerInspectContainerRecord } from './DockerInspectContainerRecord';
+import { isDockerInspectImageRecord, normalizeDockerInspectImageRecord } from './DockerInspectImageRecord';
+import { isDockerInspectNetworkRecord, normalizeDockerInspectNetworkRecord } from './DockerInspectNetworkRecord';
+import { isDockerInspectVolumeRecord, normalizeDockerInspectVolumeRecord } from './DockerInspectVolumeRecord';
+import { isDockerListContainerRecord, normalizeDockerListContainerRecord } from './DockerListContainerRecord';
+import { isDockerListImageRecord, normalizeDockerListImageRecord } from "./DockerListImageRecord";
+import { isDockerListNetworkRecord, normalizeDockerListNetworkRecord } from './DockerListNetworkRecord';
 import { isDockerVersionRecord } from "./DockerVersionRecord";
 import { isDockerVolumeRecord } from './DockerVolumeRecord';
-import { goTemplateJsonFormat, GoTemplateJsonFormatOptions, goTemplateJsonProperty } from './goTemplateJsonFormat';
-import { parseDockerLikeImageName } from './parseDockerLikeImageName';
 import { parseDockerLikeLabels } from './parseDockerLikeLabels';
-import { parseDockerRawPortString } from './parseDockerRawPortString';
 import { parseListFilesCommandLinuxOutput, parseListFilesCommandWindowsOutput } from './parseListFilesCommandOutput';
 import { tryParseSize } from './tryParseSize';
 import { withContainerPathArg } from './withContainerPathArg';
 import { withDockerAddHostArg } from './withDockerAddHostArg';
 import { withDockerBuildArg } from './withDockerBuildArg';
 import { withDockerEnvArg } from './withDockerEnvArg';
+import { withDockerBooleanFilterArg, withDockerFilterArg } from './withDockerFilterArg';
 import { withDockerJsonFormatArg } from "./withDockerJsonFormatArg";
 import { withDockerLabelFilterArgs } from "./withDockerLabelFilterArgs";
 import { withDockerLabelsArg } from "./withDockerLabelsArg";
@@ -121,8 +114,8 @@ import { withDockerMountsArg } from './withDockerMountsArg';
 import { withDockerNoTruncArg } from "./withDockerNoTruncArg";
 import { withDockerPortsArg } from './withDockerPortsArg';
 
-dayjs.extend(customParseFormat);
-dayjs.extend(utc);
+const LinuxStatArguments = '%f %h %g %u %s %X %Y %Z %n';
+const WindowsStatArguments = '/A-S /-C /TW';
 
 export abstract class DockerClientBase extends ConfigurableClient implements IContainersClient {
     /**
@@ -135,29 +128,14 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      */
     public readonly defaultTag: string = 'latest';
 
-    private listDateFormat: string = 'YYYY-MM-DD HH:mm:ss ZZ';
-
     //#region Information Commands
 
     protected getInfoCommandArgs(
         options: InfoCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerInfoRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('info'),
-            withNamedArg(
-                '--format',
-                // By specifying an explicit Go template format output, we're able to use the same normalization logic
-                // for both Docker and Podman clients
-                goTemplateJsonFormat<DockerInfoRecord>(
-                    options.shellProvider, {
-                    OperatingSystem: goTemplateJsonProperty`.OperatingSystem`,
-                    OSType: goTemplateJsonProperty`.OSType`,
-                    Raw: goTemplateJsonProperty`.`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
         )();
     }
 
@@ -171,7 +149,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return {
             operatingSystem: info.OperatingSystem,
             osType: info.OSType,
-            raw: info.Raw,
+            raw: output,
         };
     }
 
@@ -253,28 +231,15 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     protected getEventStreamCommandArgs(
         options: EventStreamCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerEventRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('events'),
             withNamedArg('--since', options.since?.toString(), { shouldQuote: !(typeof options.since === 'number') }), // If it's numeric it should not be quoted
             withNamedArg('--until', options.until?.toString(), { shouldQuote: !(typeof options.until === 'number') }), // If it's numeric it should not be quoted
             withDockerLabelFilterArgs(options.labels),
-            withNamedArg('--filter', options.types?.map((type) => `type=${type}`)),
-            withNamedArg('--filter', options.events?.map((event) => `event=${event}`)),
-            withNamedArg(
-                '--format',
-                // By specifying an explicit Go template format output, we're able to use the same normalization logic
-                // for both Docker and Podman clients
-                goTemplateJsonFormat<DockerEventRecord>(
-                    options.shellProvider, {
-                    Type: goTemplateJsonProperty`.Type`,
-                    Action: goTemplateJsonProperty`.Action`,
-                    Actor: goTemplateJsonProperty`.Actor`,
-                    Time: goTemplateJsonProperty`.Time`,
-                    Raw: goTemplateJsonProperty`.`,
-                })
-            ),
+            withDockerFilterArg(options.types?.map((type) => `type=${type}`)),
+            withDockerFilterArg(options.events?.map((event) => `event=${event}`)),
+            withDockerJsonFormatArg,
         )();
     }
 
@@ -308,8 +273,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     type: item.Type,
                     action: item.Action,
                     actor: { id: item.Actor.ID, attributes: item.Actor.Attributes },
-                    timestamp: new Date(item.Time),
-                    raw: JSON.stringify(item.Raw),
+                    timestamp: new Date(item.time),
+                    raw: JSON.stringify(line),
                 };
             } catch (err) {
                 if (strict) {
@@ -387,7 +352,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withDockerLabelsArg(options.labels),
             withNamedArg('--iidfile', options.imageIdFile),
             withDockerBuildArg(options.args),
-            withArg(options.customOptions),
+            withVerbatimArg(options.customOptions),
             withQuotedArg(options.path),
         )();
     }
@@ -417,12 +382,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return composeArgs(
             withArg('image', 'ls'),
             withFlagArg('--all', options.all),
-            withNamedArg(
-                '--filter',
-                typeof options.dangling === 'boolean'
-                    ? `dangling=${options.dangling}`
-                    : undefined),
-            withNamedArg('--filter', options.references?.map((reference) => `reference=${reference}`)),
+            withDockerBooleanFilterArg('dangling', options.dangling),
+            withDockerFilterArg(options.references?.map((reference) => `reference=${reference}`)),
             withDockerLabelFilterArgs(options.labels),
             withDockerNoTruncArg,
             withDockerJsonFormatArg,
@@ -460,18 +421,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid image JSON');
                     }
 
-                    const createdAt = dayjs.utc(rawImage.CreatedAt).toDate();
-                    const size = tryParseSize(rawImage.Size);
-
-                    const repositoryAndTag = `${rawImage.Repository}${rawImage.Tag ? `:${rawImage.Tag}` : ''}`;
-
-                    images.push({
-                        id: rawImage.ID,
-                        image: parseDockerLikeImageName(repositoryAndTag),
-                        // labels: {}, // TODO: image labels are conspicuously absent from Docker image listing output
-                        createdAt,
-                        size,
-                    });
+                    images.push(normalizeDockerListImageRecord(rawImage));
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -636,35 +586,10 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
      */
     protected getInspectImagesCommandArgs(
         options: InspectImagesCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerInspectImageRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('image', 'inspect'),
-            withNamedArg(
-                '--format',
-                // By specifying an explicit Go template format output, we're able to use the same normalization logic
-                // for both Docker and Podman clients
-                goTemplateJsonFormat<DockerInspectImageRecord>(
-                    options.shellProvider, {
-                    Id: goTemplateJsonProperty`.ID`,
-                    RepoTags: goTemplateJsonProperty`.RepoTags`,
-                    EnvVars: goTemplateJsonProperty`.Config.Env`,
-                    Labels: goTemplateJsonProperty`.Config.Labels`,
-                    Ports: goTemplateJsonProperty`.Config.ExposedPorts`,
-                    Volumes: goTemplateJsonProperty`.Config.Volumes`,
-                    Entrypoint: goTemplateJsonProperty`.Config.Entrypoint`,
-                    Command: goTemplateJsonProperty`.Config.Cmd`,
-                    CWD: goTemplateJsonProperty`.Config.WorkingDir`,
-                    RepoDigests: goTemplateJsonProperty`.RepoDigests`,
-                    Architecture: goTemplateJsonProperty`.Architecture`,
-                    OperatingSystem: goTemplateJsonProperty`.Os`,
-                    CreatedAt: goTemplateJsonProperty`.Created`,
-                    User: goTemplateJsonProperty`.Config.User`,
-                    Raw: goTemplateJsonProperty`.`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
             withArg(...options.imageRefs),
         )();
     }
@@ -695,78 +620,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid image inspect json');
                     }
 
-                    // This is effectively doing firstOrDefault on the RepoTags for the image. If there are any values
-                    // in RepoTags, the first one will be parsed and returned as the tag name for the image.
-                    const imageNameInfo: ImageNameInfo = parseDockerLikeImageName(inspect.RepoTags?.[0]);
-
-                    // Parse any environment variables defined for the image
-                    const environmentVariables = (inspect.EnvVars || []).reduce<Record<string, string>>((evs, ev) => {
-                        const index = ev.indexOf('=');
-                        if (index > -1) {
-                            const name = ev.slice(0, index);
-                            const value = ev.slice(index + 1);
-
-                            return {
-                                ...evs,
-                                [name]: value,
-                            };
-                        }
-
-                        return evs;
-                    }, {});
-
-                    // Parse any default ports exposed by the image
-                    const ports = Object.entries(inspect.Ports || {}).map<PortBinding>(([rawPort]) => {
-                        const [port, protocol] = rawPort.split('/');
-                        return {
-                            containerPort: parseInt(port),
-                            protocol: protocol.toLowerCase() === 'tcp' ? 'tcp' : protocol.toLowerCase() === 'udp' ? 'udp' : undefined,
-                        };
-                    });
-
-                    // Parse any default volumes specified by the image
-                    const volumes = Object.entries(inspect.Volumes || {}).map<string>(([rawVolume]) => rawVolume);
-
-                    // Parse any labels assigned to the image
-                    const labels = inspect.Labels ?? {};
-
-                    // Parse and normalize the image architecture
-                    const architecture = inspect.Architecture.toLowerCase() === 'amd64'
-                        ? 'amd64'
-                        : inspect.Architecture.toLowerCase() === 'arm64' ? 'arm64' : undefined;
-
-                    // Parse and normalize the image OS
-                    const os = inspect.OperatingSystem.toLowerCase() === 'linux'
-                        ? 'linux'
-                        : inspect.Architecture.toLowerCase() === 'windows'
-                            ? 'windows'
-                            : undefined;
-
-                    // Determine if the image has been pushed to a remote repo
-                    // (no repo digests or only localhost/ repo digests)
-                    const isLocalImage = !(inspect.RepoDigests || []).some((digest) => !digest.toLowerCase().startsWith('localhost/'));
-
-                    // Return a normalized InspectImagesItem record
-                    const image: InspectImagesItem = {
-                        id: inspect.Id,
-                        image: imageNameInfo,
-                        repoDigests: inspect.RepoDigests,
-                        isLocalImage,
-                        environmentVariables,
-                        ports,
-                        volumes,
-                        labels,
-                        entrypoint: inspect.Entrypoint,
-                        command: inspect.Command,
-                        currentDirectory: inspect.CWD || undefined,
-                        architecture,
-                        operatingSystem: os,
-                        createdAt: dayjs.utc(inspect.CreatedAt).toDate(),
-                        user: inspect.User,
-                        raw: JSON.stringify(inspect.Raw),
-                    };
-
-                    return [...images, image];
+                    return [...images, normalizeDockerInspectImageRecord(inspect)];
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -826,9 +680,9 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withDockerEnvArg(options.environmentVariables),
             withNamedArg('--env-file', options.environmentFiles),
             withNamedArg('--entrypoint', options.entrypoint),
-            withArg(options.customOptions),
+            withVerbatimArg(options.customOptions),
             withArg(options.imageRef),
-            withArg(...(toArray(options.command || []))),
+            typeof options.command === 'string' ? withVerbatimArg(options.command) : withArg(...(toArray(options.command || []))),
         )();
     }
 
@@ -872,7 +726,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withFlagArg('--tty', options.tty),
             withDockerEnvArg(options.environmentVariables),
             withArg(options.container),
-            withArg(...toArray(options.command)),
+            typeof options.command === 'string' ? withVerbatimArg(options.command) : withArg(...toArray(options.command)),
         )();
     }
 
@@ -888,43 +742,22 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region ListContainers Command
 
-    protected getListContainersCommandArgsCore(
+    protected getListContainersCommandArgs(
         options: ListContainersCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerListContainerRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('container', 'ls'),
             withFlagArg('--all', options.all),
             withDockerLabelFilterArgs(options.labels),
-            withNamedArg('--filter', options.running ? 'status=running' : undefined),
-            withNamedArg('--filter', options.exited ? 'status=exited' : undefined),
-            withNamedArg('--filter', options.names?.map((name) => `name=${name}`)),
-            withNamedArg('--filter', options.imageAncestors?.map((id) => `ancestor=${id}`)),
-            withNamedArg('--filter', options.volumes?.map((volume) => `volume=${volume}`)),
-            withNamedArg('--filter', options.networks?.map((network) => `network=${network}`)),
+            withDockerFilterArg(options.running ? 'status=running' : undefined),
+            withDockerFilterArg(options.exited ? 'status=exited' : undefined),
+            withDockerFilterArg(options.names?.map((name) => `name=${name}`)),
+            withDockerFilterArg(options.imageAncestors?.map((id) => `ancestor=${id}`)),
+            withDockerFilterArg(options.volumes?.map((volume) => `volume=${volume}`)),
+            withDockerFilterArg(options.networks?.map((network) => `network=${network}`)),
             withDockerNoTruncArg,
-            withNamedArg(
-                '--format',
-                goTemplateJsonFormat<DockerListContainerRecord>(
-                    options.shellProvider, {
-                    Id: goTemplateJsonProperty`.ID`,
-                    Names: goTemplateJsonProperty`.Names`,
-                    Image: goTemplateJsonProperty`.Image`,
-                    Ports: goTemplateJsonProperty`.Ports`,
-                    Networks: goTemplateJsonProperty`.Networks`,
-                    Labels: goTemplateJsonProperty`.Labels`,
-                    CreatedAt: goTemplateJsonProperty`.CreatedAt`,
-                    State: goTemplateJsonProperty`.State`,
-                    Status: goTemplateJsonProperty`.Status`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
         )();
-    }
-
-    protected getListContainersCommandArgs(options: ListContainersCommandOptions) {
-        return this.getListContainersCommandArgsCore(options);
     }
 
     protected async parseListContainersCommandOutput(
@@ -946,40 +779,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid container JSON');
                     }
 
-                    const labels = parseDockerLikeLabels(rawContainer.Labels);
-
-                    const ports = rawContainer.Ports
-                        .split(',')
-                        .map((port) => port.trim())
-                        .filter((port) => !!port)
-                        .reduce<Array<PortBinding>>((portBindings, rawPort) => {
-                            const parsedPort = parseDockerRawPortString(rawPort);
-                            if (parsedPort) {
-                                return portBindings.concat(parsedPort);
-                            } else if (strict) {
-                                throw new Error('Invalid container JSON');
-                            } else {
-                                return portBindings;
-                            }
-                        }, []);
-
-                    const networks = rawContainer.Networks
-                        .split(',');
-
-                    const name = rawContainer.Names.split(',')[0].trim();
-                    const createdAt = dayjs.utc(rawContainer.CreatedAt, this.listDateFormat).toDate();
-
-                    containers.push({
-                        id: rawContainer.Id,
-                        name,
-                        labels,
-                        image: parseDockerLikeImageName(rawContainer.Image),
-                        ports,
-                        networks,
-                        createdAt,
-                        state: rawContainer.State,
-                        status: rawContainer.Status,
-                    });
+                    containers.push(normalizeDockerListContainerRecord(rawContainer, strict));
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -1216,57 +1016,18 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     //#region InspectContainers Command
 
     /**
-     * Only override this method if you need to make substantial changes to the inspect container commands required for
-     * a given runtime
+     * Override this method if the default inspect containers args need to be changed for a given runtime
      * @param options Inspect containers command options
-     * @param formatOverrides Optional overrides for the Go template JSON mapping
      * @returns Command line args for invoking inspect containers on a Docker-like client
      */
-    protected getInspectContainersCommandArgsCore(
+    protected getInspectContainersCommandArgs(
         options: InspectContainersCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerInspectContainerRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('container', 'inspect'),
-            withNamedArg(
-                '--format',
-                goTemplateJsonFormat<DockerInspectContainerRecord>(
-                    options.shellProvider, {
-                    Id: goTemplateJsonProperty`.ID`,
-                    Name: goTemplateJsonProperty`.Name`,
-                    ImageId: goTemplateJsonProperty`.Image`,
-                    ImageName: goTemplateJsonProperty`.Config.Image`,
-                    Status: goTemplateJsonProperty`.State.Status`,
-                    Platform: goTemplateJsonProperty`.Platform`,
-                    EnvVars: goTemplateJsonProperty`.Config.Env`,
-                    Networks: goTemplateJsonProperty`.NetworkSettings.Networks`,
-                    IP: goTemplateJsonProperty`.NetworkSettings.IPAddress`,
-                    Ports: goTemplateJsonProperty`.NetworkSettings.Ports`,
-                    PublishAllPorts: goTemplateJsonProperty`.HostConfig.PublishAllPorts`,
-                    Mounts: goTemplateJsonProperty`.Mounts`,
-                    Labels: goTemplateJsonProperty`.Config.Labels`,
-                    Entrypoint: goTemplateJsonProperty`.Config.Entrypoint`,
-                    Command: goTemplateJsonProperty`.Config.Cmd`,
-                    CWD: goTemplateJsonProperty`.Config.WorkingDir`,
-                    CreatedAt: goTemplateJsonProperty`.Created`,
-                    StartedAt: goTemplateJsonProperty`.State.StartedAt`,
-                    FinishedAt: goTemplateJsonProperty`.State.FinishedAt`,
-                    Raw: goTemplateJsonProperty`.`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
             withArg(...options.containers)
         )();
-    }
-
-    /**
-     * Override this method if the default Go Template JSON mappings need to be changed for a given runtime
-     * @param options Inspect containers command options
-     * @returns Command line args for invoking inspect containers on a Docker-like client
-     */
-    protected getInspectContainersCommandArgs(options: InspectContainersCommandOptions): CommandLineArgs {
-        return this.getInspectContainersCommandArgsCore(options);
     }
 
     /**
@@ -1294,108 +1055,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid container inspect json');
                     }
 
-                    // Parse the environment variables assigned to the container at runtime
-                    const environmentVariables = (inspect.EnvVars || []).reduce<Record<string, string>>((evs, ev) => {
-                        const index = ev.indexOf('=');
-                        if (index > -1) {
-                            const name = ev.slice(0, index);
-                            const value = ev.slice(index + 1);
-
-                            return {
-                                ...evs,
-                                [name]: value,
-                            };
-                        }
-
-                        return evs;
-                    }, {});
-
-                    // Parse the networks assigned to the container and normalize to InspectContainersItemNetwork
-                    // records
-                    const networks = Object.entries(inspect.Networks || {}).map<InspectContainersItemNetwork>(([name, dockerNetwork]) => {
-                        return {
-                            name,
-                            gateway: dockerNetwork.Gateway || undefined,
-                            ipAddress: dockerNetwork.IPAddress || undefined,
-                            macAddress: dockerNetwork.MacAddress || undefined,
-                        };
-                    });
-
-                    // Parse the exposed ports for the container and normalize to a PortBinding record
-                    const ports = Object.entries(inspect.Ports || {}).map<PortBinding>(([rawPort, hostBinding]) => {
-                        const [port, protocol] = rawPort.split('/');
-                        return {
-                            hostIp: hostBinding?.[0]?.HostIp,
-                            hostPort: hostBinding?.[0]?.HostPort,
-                            containerPort: parseInt(port),
-                            protocol: protocol.toLowerCase() === 'tcp'
-                                ? 'tcp'
-                                : protocol.toLowerCase() === 'udp'
-                                    ? 'udp'
-                                    : undefined,
-                        };
-                    });
-
-                    // Parse the volume and bind mounts associated with the given runtime and normalize to
-                    // InspectContainersItemMount records
-                    const mounts = (inspect.Mounts || []).reduce<Array<InspectContainersItemMount>>((curMounts, mount) => {
-                        switch (mount?.Type) {
-                            case 'bind':
-                                return [...curMounts, {
-                                    type: 'bind',
-                                    source: mount.Source,
-                                    destination: mount.Destination,
-                                    readOnly: !mount.RW,
-                                }];
-                            case 'volume':
-                                return [...curMounts, {
-                                    type: 'volume',
-                                    name: mount.Name,
-                                    source: mount.Source,
-                                    destination: mount.Destination,
-                                    driver: mount.Driver,
-                                    readOnly: !mount.RW,
-                                }];
-                        }
-
-                    }, new Array<InspectContainersItemMount>());
-                    const labels = inspect.Labels ?? {};
-
-                    const createdAt = dayjs.utc(inspect.CreatedAt);
-                    const startedAt = inspect.StartedAt
-                        ? dayjs.utc(inspect.StartedAt)
-                        : undefined;
-                    const finishedAt = inspect.FinishedAt
-                        ? dayjs.utc(inspect.FinishedAt)
-                        : undefined;
-
-                    // Return the normalized InspectContainersItem record
-                    const container: InspectContainersItem = {
-                        id: inspect.Id,
-                        name: inspect.Name,
-                        imageId: inspect.ImageId,
-                        image: parseDockerLikeImageName(inspect.ImageName),
-                        status: inspect.Status,
-                        environmentVariables,
-                        networks,
-                        ipAddress: inspect.IP ? inspect.IP : undefined,
-                        ports,
-                        mounts,
-                        labels,
-                        entrypoint: toArray(inspect.Entrypoint ?? []),
-                        command: toArray(inspect.Command ?? []),
-                        currentDirectory: inspect.CWD || undefined,
-                        createdAt: createdAt.toDate(),
-                        startedAt: startedAt && (startedAt.isSame(createdAt) || startedAt.isAfter(createdAt))
-                            ? startedAt.toDate()
-                            : undefined,
-                        finishedAt: finishedAt && (finishedAt.isSame(createdAt) || finishedAt.isAfter(createdAt))
-                            ? finishedAt.toDate()
-                            : undefined,
-                        raw: JSON.stringify(inspect.Raw),
-                    };
-
-                    return [...containers, container];
+                    return [...containers, normalizeDockerInspectContainerRecord(inspect)];
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -1454,16 +1114,8 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     protected getListVolumesCommandArgs(options: ListVolumesCommandOptions): CommandLineArgs {
         return composeArgs(
             withArg('volume', 'ls'),
-            withNamedArg(
-                '--filter',
-                typeof options.dangling === 'boolean'
-                    ? `dangling=${options.dangling}`
-                    : undefined),
-            withNamedArg(
-                '--filter',
-                options.driver
-                    ? `driver=${options.driver}`
-                    : undefined),
+            withDockerBooleanFilterArg('dangling', options.dangling),
+            withDockerFilterArg(options.driver ? `driver=${options.driver}` : undefined),
             withDockerLabelFilterArgs(options.labels),
             withDockerJsonFormatArg,
         )();
@@ -1609,35 +1261,14 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region InspectVolumes Command
 
-    protected getInspectVolumesCommandArgsCore(
+    protected getInspectVolumesCommandArgs(
         options: InspectVolumesCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerInspectVolumeRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('volume', 'inspect'),
-            withNamedArg(
-                '--format',
-                goTemplateJsonFormat<DockerInspectVolumeRecord>(
-                    options.shellProvider,
-                    {
-                        Name: goTemplateJsonProperty`.Name`,
-                        Driver: goTemplateJsonProperty`.Driver`,
-                        Mountpoint: goTemplateJsonProperty`.Mountpoint`,
-                        Scope: goTemplateJsonProperty`.Scope`,
-                        Labels: goTemplateJsonProperty`.Labels`,
-                        Options: goTemplateJsonProperty`.Options`,
-                        CreatedAt: goTemplateJsonProperty`.CreatedAt`,
-                        Raw: goTemplateJsonProperty`.`,
-                    },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
             withArg(...options.volumes),
         )();
-    }
-
-    protected getInspectVolumesCommandArgs(options: InspectVolumesCommandOptions): CommandLineArgs {
-        return this.getInspectVolumesCommandArgsCore(options);
     }
 
     protected async parseInspectVolumesCommandOutput(
@@ -1658,21 +1289,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid volume inspect json');
                     }
 
-                    const createdAt = dayjs.utc(inspect.CreatedAt);
-
-                    // Return the normalized InspectVolumesItem record
-                    const volume: InspectVolumesItem = {
-                        name: inspect.Name,
-                        driver: inspect.Driver,
-                        mountpoint: inspect.Mountpoint,
-                        scope: inspect.Scope,
-                        labels: inspect.Labels,
-                        options: inspect.Options,
-                        createdAt: createdAt.toDate(),
-                        raw: JSON.stringify(inspect.Raw),
-                    };
-
-                    return [...volumes, volume];
+                    return [...volumes, normalizeDockerInspectVolumeRecord(inspect)];
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -1725,34 +1342,15 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region ListNetworks Command
 
-    protected getListNetworksCommandArgsCore(
+    protected getListNetworksCommandArgs(
         options: ListNetworksCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerNetworkRecord>>,
     ): CommandLineArgs {
         return composeArgs(
-            withNamedArg('network', 'ls'),
+            withArg('network', 'ls'),
             withDockerLabelFilterArgs(options.labels),
-            withNamedArg(
-                '--format',
-                goTemplateJsonFormat<DockerNetworkRecord>(
-                    options.shellProvider, {
-                    Id: goTemplateJsonProperty`.ID`,
-                    Name: goTemplateJsonProperty`.Name`,
-                    Driver: goTemplateJsonProperty`.Driver`,
-                    Scope: goTemplateJsonProperty`.Scope`,
-                    Labels: goTemplateJsonProperty`.Labels`,
-                    IPv6: goTemplateJsonProperty`.IPv6`,
-                    Internal: goTemplateJsonProperty`.Internal`,
-                    CreatedAt: goTemplateJsonProperty`.CreatedAt`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerNoTruncArg,
+            withDockerJsonFormatArg,
         )();
-    }
-
-    protected getListNetworksCommandArgs(options: ListNetworksCommandOptions): CommandLineArgs {
-        return this.getListNetworksCommandArgsCore(options);
     }
 
     protected async parseListNetworksCommandOutput(
@@ -1770,25 +1368,11 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
                     const rawNetwork = JSON.parse(networkJson);
 
-                    if (!isDockerNetworkRecord(rawNetwork)) {
+                    if (!isDockerListNetworkRecord(rawNetwork)) {
                         throw new Error('Invalid volume JSON');
                     }
 
-                    // Parse the labels assigned to the networks and normalize to key value pairs
-                    const labels = parseDockerLikeLabels(rawNetwork.Labels);
-
-                    const createdAt = dayjs.utc(rawNetwork.CreatedAt).toDate();
-
-                    networks.push({
-                        id: rawNetwork.Id,
-                        name: rawNetwork.Name,
-                        driver: rawNetwork.Driver,
-                        labels,
-                        scope: rawNetwork.Scope,
-                        ipv6: rawNetwork.IPv6.toLowerCase() === 'true',
-                        internal: rawNetwork.Internal.toLowerCase() === 'true',
-                        createdAt,
-                    });
+                    networks.push(normalizeDockerListNetworkRecord(rawNetwork));
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -1872,38 +1456,14 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#region InspectNetworks Command
 
-    protected getInspectNetworksCommandArgsCore(
+    protected getInspectNetworksCommandArgs(
         options: InspectNetworksCommandOptions,
-        formatOverrides?: Partial<GoTemplateJsonFormatOptions<DockerInspectNetworkRecord>>,
     ): CommandLineArgs {
         return composeArgs(
             withArg('network', 'inspect'),
-            withNamedArg(
-                '--format',
-                goTemplateJsonFormat<DockerInspectNetworkRecord>(
-                    options.shellProvider, {
-                    Id: goTemplateJsonProperty`.Id`,
-                    Name: goTemplateJsonProperty`.Name`,
-                    Driver: goTemplateJsonProperty`.Driver`,
-                    Scope: goTemplateJsonProperty`.Scope`,
-                    Labels: goTemplateJsonProperty`.Labels`,
-                    Ipam: goTemplateJsonProperty`.IPAM`,
-                    EnableIPv6: goTemplateJsonProperty`.EnableIPv6`,
-                    Internal: goTemplateJsonProperty`.Internal`,
-                    Attachable: goTemplateJsonProperty`.Attachable`,
-                    Ingress: goTemplateJsonProperty`.Ingress`,
-                    CreatedAt: goTemplateJsonProperty`.Created`,
-                    Raw: goTemplateJsonProperty`.`,
-                },
-                    formatOverrides,
-                ),
-            ),
+            withDockerJsonFormatArg,
             withArg(...options.networks),
         )();
-    }
-
-    protected getInspectNetworksCommandArgs(options: InspectNetworksCommandOptions): CommandLineArgs {
-        return this.getInspectNetworksCommandArgsCore(options);
     }
 
     protected async parseInspectNetworksCommandOutput(
@@ -1924,33 +1484,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                         throw new Error('Invalid network inspect json');
                     }
 
-                    const ipam: NetworkIpamConfig = {
-                        driver: inspect.Ipam.Driver,
-                        config: inspect.Ipam.Config.map(({ Subnet, Gateway }) => ({
-                            subnet: Subnet,
-                            gateway: Gateway,
-                        })),
-                    };
-
-                    const createdAt = dayjs.utc(inspect.CreatedAt);
-
-                    // Return the normalized InspectNetworksItem record
-                    const network: InspectNetworksItem = {
-                        id: inspect.Id,
-                        name: inspect.Name,
-                        driver: inspect.Driver,
-                        scope: inspect.Scope,
-                        labels: inspect.Labels,
-                        ipam,
-                        ipv6: inspect.EnableIPv6,
-                        internal: inspect.Internal,
-                        attachable: inspect.Attachable,
-                        ingress: inspect.Ingress,
-                        createdAt: createdAt.toDate(),
-                        raw: JSON.stringify(inspect.Raw),
-                    };
-
-                    return [...networks, network];
+                    return [...networks, normalizeDockerInspectNetworkRecord(inspect)];
                 } catch (err) {
                     if (strict) {
                         throw err;
@@ -2025,16 +1559,22 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         if (options.operatingSystem === 'windows') {
             command = [
                 'cmd',
+                '/D',
+                '/S',
                 '/C',
-                // Path is intentionally *not* quoted--no good quoting options work, but
-                // `cd` doesn't seem to care, so cd to the path and then do dir
-                { value: `cd ${options.path} & dir /A-S /-C`, quoting: ShellQuoting.Strong }
+                `dir ${WindowsStatArguments} "${options.path}"`,
             ];
         } else {
+            const dirPath = options.path.endsWith('/') ? options.path : options.path + '/';
+            // Calling stat <path>/* on an empty directory returns an error code, while stat <path>/.* for hidden files
+            // should still succeed due to the implicit . and .. relative folders. Therefore we are calling stat twice
+            // and uppressing any errors from the first call with || true. If there are any legitimate issues invoking
+            // stat in a given contaienr, the second call will still fail and should surface the actual error, allowing
+            // us to suppress a false error without suppressing legitimate issues.
             command = [
                 '/bin/sh',
                 '-c',
-                { value: `ls -lA "${options.path}"`, quoting: ShellQuoting.Strong }
+                { value: `stat -c '${LinuxStatArguments}' "${dirPath}"* || true && stat -c '${LinuxStatArguments}' "${dirPath}".*`, quoting: ShellQuoting.Strong },
             ];
         }
 
@@ -2069,18 +1609,67 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#endregion
 
+    //#region StatPath Command
+
+    protected getStatPathCommandArgs(options: StatPathCommandOptions): CommandLineArgs {
+        let command: (string | ShellQuotedString)[];
+        if (options.operatingSystem === 'windows') {
+            command = [
+                'cmd',
+                '/D',
+                '/S',
+                '/C',
+                `dir ${WindowsStatArguments} "${options.path}"`,
+            ];
+        } else {
+            command = [
+                '/bin/sh',
+                '-c',
+                { value: `stat -c '${LinuxStatArguments}' "${options.path}"`, quoting: ShellQuoting.Strong },
+            ];
+        }
+
+        return this.getExecContainerCommandArgs(
+            {
+                container: options.container,
+                interactive: true,
+                command,
+            }
+        );
+    }
+
+    protected async parseStatPathCommandOutput(
+        options: StatPathCommandOptions,
+        output: string,
+        strict: boolean,
+    ): Promise<StatPathItem | undefined> {
+        if (options.operatingSystem === 'windows') {
+            return parseListFilesCommandWindowsOutput(options, output).shift();
+        } else {
+            return parseListFilesCommandLinuxOutput(options, output).shift();
+        }
+    }
+
+    async statPath(options: StatPathCommandOptions): Promise<PromiseCommandResponse<StatPathItem | undefined>> {
+        return {
+            command: this.commandName,
+            args: this.getStatPathCommandArgs(options),
+            parse: (output, strict) => this.parseStatPathCommandOutput(options, output, strict),
+        };
+    }
+
+    //#endregion
+
     //#region ReadFile Command
 
     protected getReadFileCommandArgs(options: ReadFileCommandOptions): CommandLineArgs {
         if (options.operatingSystem === 'windows') {
-            // Split up the path so we can CD to the directory--to avoid the space / quoting issue
-            // Note, this still doesn't work if the filename itself contains a space
-            const folder = path.win32.dirname(options.path);
-            const file = path.win32.basename(options.path);
             const command = [
                 'cmd',
+                '/D',
+                '/S',
                 '/C',
-                { value: `cd ${folder} & type ${file}`, quoting: ShellQuoting.Strong }
+                `type "${options.path}"`,
             ];
 
             return this.getExecContainerCommandArgs(
