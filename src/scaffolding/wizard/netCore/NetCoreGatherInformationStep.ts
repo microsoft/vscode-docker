@@ -67,7 +67,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         }
 
         if (!wizardContext.dockerfileDirectory) {
-            // For .NET Core, the Dockerfile is always adjacent the artifact (csproj)
+            // For .NET, the Dockerfile is always adjacent the artifact (csproj)
             wizardContext.dockerfileDirectory = path.dirname(wizardContext.artifact);
         }
 

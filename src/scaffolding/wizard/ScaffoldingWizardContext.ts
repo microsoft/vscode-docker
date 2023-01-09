@@ -20,7 +20,7 @@ export interface ScaffoldingWizardContext extends IActionContext {
     scaffoldCompose?: boolean;
     workspaceFolder?: vscode.WorkspaceFolder;
 
-    // A project file (.NET Core), entrypoint file (Python), or package.json (Node). For applicable platforms, guaranteed to be defined after the prompt phase.
+    // A project file (.NET), entrypoint file (Python), or package.json (Node). For applicable platforms, guaranteed to be defined after the prompt phase.
     artifact?: string;
 
     // Additional info that depends on artifact and platform, guaranteed to be defined after the prompt phase.
