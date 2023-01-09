@@ -18,7 +18,7 @@ import {
     UpCommandOptions
 } from '../contracts/ContainerOrchestratorClient';
 import { AccumulatorStream } from '../utils/AccumulatorStream';
-import { Bash, Powershell } from '../utils/spawnStreamAsync';
+import { Bash, Cmd, NoShell, Powershell } from '../utils/spawnStreamAsync';
 
 const commonOptions: CommonOrchestratorCommandOptions = {
     files: ['docker-compose.yml'],
@@ -118,9 +118,15 @@ describe('DockerComposeClient (unit)', () => {
 
         const commandResponse = await client.up(options);
         const pwshQuoted = new Powershell().quote(commandResponse.args);
+        const cmdQuoted = new Cmd().quote(commandResponse.args);
         const bashQuoted = new Bash().quote(commandResponse.args);
+        const noShellQuotedWindows = new NoShell(true).quote(commandResponse.args);
+        const noShellQuotedLinux = new NoShell(false).quote(commandResponse.args);
 
         expect(pwshQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
+        expect(cmdQuoted).to.deep.equal(['--file', '"docker-compose.yml"', 'up', '--detach', '--build', '--timeout 10 --wait']);
         expect(bashQuoted).to.deep.equal(['--file', '\'docker-compose.yml\'', 'up', '--detach', '--build', '--timeout 10 --wait']);
+        expect(noShellQuotedWindows).to.deep.equal(['--file', '"docker-compose.yml"', 'up', '--detach', '--build', '--timeout 10 --wait']);
+        expect(noShellQuotedLinux).to.deep.equal(['--file', 'docker-compose.yml', 'up', '--detach', '--build', '--timeout 10 --wait']);
     });
 });

@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CommandLineArgs, composeArgs, ContainerOS, innerQuoted, VoidCommandResponse, withArg } from '../../runtimes/docker';
+import { CommandLineArgs, composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -312,13 +312,13 @@ export class NetCoreDebugHelper implements DebugHelper {
             containerCommand = 'cmd';
             containerCommandArgs = composeArgs(
                 withArg('/C'),
-                withArg(innerQuoted(`IF EXIST "${debuggerPath}" (exit 0) else (exit 1)`))
+                withQuotedArg(`IF EXIST "${debuggerPath}" (exit 0) else (exit 1)`)
             )();
         } else {
             containerCommand = '/bin/sh';
             containerCommandArgs = composeArgs(
                 withArg('-c'),
-                withArg(innerQuoted(`if [ -f ${debuggerPath} ]; then exit 0; else exit 1; fi;`))
+                withQuotedArg(`if [ -f ${debuggerPath} ]; then exit 0; else exit 1; fi;`)
             )();
         }
 

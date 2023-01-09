@@ -10,8 +10,10 @@ import * as vscode from 'vscode';
 export type DockerUriQuery = {
     containerOS?: ContainerOS;
     fileType?: vscode.FileType;
+    mode?: number;
     ctime?: number;
     mtime?: number;
+    atime?: number;
     size?: number;
 };
 
@@ -59,11 +61,7 @@ export class DockerUri {
     }
 
     public get windowsPath(): string {
-        if (this.path.startsWith('/')) {
-            return corepath.win32.join('C:\\', this.path.substring(1));
-        }
-
-        return this.path;
+        return corepath.win32.resolve(this.path);
     }
 
     private constructor(public readonly containerId: string, public readonly path: string, public readonly options?: DockerUriQuery) {
@@ -84,8 +82,10 @@ function queryFromURLSearchParams(queryParams: URLSearchParams): DockerUriQuery 
     return {
         containerOS: queryParams.get('containerOS') as ContainerOS || 'linux',
         fileType: Number.parseInt(queryParams.get('fileType')) as vscode.FileType || vscode.FileType.File,
-        ctime: Number.parseInt(queryParams.get('ctime')) || 0,
-        mtime: Number.parseInt(queryParams.get('mtime')) || 0,
-        size: Number.parseInt(queryParams.get('mtime')) || 0,
+        mode: Number.parseInt(queryParams.get('mode')) || undefined,
+        ctime: Number.parseInt(queryParams.get('ctime')) || undefined,
+        mtime: Number.parseInt(queryParams.get('mtime')) || undefined,
+        atime: Number.parseInt(queryParams.get('atime')) || undefined,
+        size: Number.parseInt(queryParams.get('size')) || 0,
     };
 }

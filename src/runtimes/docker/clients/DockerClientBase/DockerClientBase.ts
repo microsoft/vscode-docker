@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import * as readline from 'readline';
-import type { ShellQuotedString } from 'vscode';
+import { ShellQuotedString, ShellQuoting } from 'vscode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -63,6 +62,8 @@ import {
     RestartContainersCommandOptions,
     RunContainerCommandOptions,
     StartContainersCommandOptions,
+    StatPathCommandOptions,
+    StatPathItem,
     StopContainersCommandOptions,
     TagImageCommandOptions,
     UseContextCommandOptions,
@@ -76,7 +77,6 @@ import { CancellationError } from '../../utils/CancellationError';
 import {
     CommandLineArgs,
     composeArgs,
-    innerQuoted,
     withArg,
     withFlagArg,
     withNamedArg,
@@ -113,6 +113,9 @@ import { withDockerLabelsArg } from "./withDockerLabelsArg";
 import { withDockerMountsArg } from './withDockerMountsArg';
 import { withDockerNoTruncArg } from "./withDockerNoTruncArg";
 import { withDockerPortsArg } from './withDockerPortsArg';
+
+const LinuxStatArguments = '%f %h %g %u %s %X %Y %Z %n';
+const WindowsStatArguments = '/A-S /-C /TW';
 
 export abstract class DockerClientBase extends ConfigurableClient implements IContainersClient {
     /**
@@ -1556,16 +1559,22 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         if (options.operatingSystem === 'windows') {
             command = [
                 'cmd',
+                '/D',
+                '/S',
                 '/C',
-                // Path is intentionally *not* quoted--no good quoting options work, but
-                // `cd` doesn't seem to care, so cd to the path and then do dir
-                innerQuoted(`cd ${options.path} & dir /A-S /-C`) as ShellQuotedString,
+                `dir ${WindowsStatArguments} "${options.path}"`,
             ];
         } else {
+            const dirPath = options.path.endsWith('/') ? options.path : options.path + '/';
+            // Calling stat <path>/* on an empty directory returns an error code, while stat <path>/.* for hidden files
+            // should still succeed due to the implicit . and .. relative folders. Therefore we are calling stat twice
+            // and uppressing any errors from the first call with || true. If there are any legitimate issues invoking
+            // stat in a given contaienr, the second call will still fail and should surface the actual error, allowing
+            // us to suppress a false error without suppressing legitimate issues.
             command = [
                 '/bin/sh',
                 '-c',
-                innerQuoted(`ls -lA '${options.path}'`) as ShellQuotedString,
+                { value: `stat -c '${LinuxStatArguments}' "${dirPath}"* || true && stat -c '${LinuxStatArguments}' "${dirPath}".*`, quoting: ShellQuoting.Strong },
             ];
         }
 
@@ -1600,18 +1609,67 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#endregion
 
+    //#region StatPath Command
+
+    protected getStatPathCommandArgs(options: StatPathCommandOptions): CommandLineArgs {
+        let command: (string | ShellQuotedString)[];
+        if (options.operatingSystem === 'windows') {
+            command = [
+                'cmd',
+                '/D',
+                '/S',
+                '/C',
+                `dir ${WindowsStatArguments} "${options.path}"`,
+            ];
+        } else {
+            command = [
+                '/bin/sh',
+                '-c',
+                { value: `stat -c '${LinuxStatArguments}' "${options.path}"`, quoting: ShellQuoting.Strong },
+            ];
+        }
+
+        return this.getExecContainerCommandArgs(
+            {
+                container: options.container,
+                interactive: true,
+                command,
+            }
+        );
+    }
+
+    protected async parseStatPathCommandOutput(
+        options: StatPathCommandOptions,
+        output: string,
+        strict: boolean,
+    ): Promise<StatPathItem | undefined> {
+        if (options.operatingSystem === 'windows') {
+            return parseListFilesCommandWindowsOutput(options, output).shift();
+        } else {
+            return parseListFilesCommandLinuxOutput(options, output).shift();
+        }
+    }
+
+    async statPath(options: StatPathCommandOptions): Promise<PromiseCommandResponse<StatPathItem | undefined>> {
+        return {
+            command: this.commandName,
+            args: this.getStatPathCommandArgs(options),
+            parse: (output, strict) => this.parseStatPathCommandOutput(options, output, strict),
+        };
+    }
+
+    //#endregion
+
     //#region ReadFile Command
 
     protected getReadFileCommandArgs(options: ReadFileCommandOptions): CommandLineArgs {
         if (options.operatingSystem === 'windows') {
-            // Split up the path so we can CD to the directory--to avoid the space / quoting issue
-            // Note, this still doesn't work if the filename itself contains a space
-            const folder = path.win32.dirname(options.path);
-            const file = path.win32.basename(options.path);
             const command = [
                 'cmd',
+                '/D',
+                '/S',
                 '/C',
-                innerQuoted(`cd ${folder} & type ${file}`) as ShellQuotedString,
+                `type "${options.path}"`,
             ];
 
             return this.getExecContainerCommandArgs(
