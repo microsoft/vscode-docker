@@ -47,7 +47,6 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
     if (registry instanceof AzureRegistryTreeItem) {
         // No additional work to do; ACA can handle this on its own
     } else {
-        // Any other V2 compliant registry
         const { auth, registryPath } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string }, registryPath: string };
 
         if (!auth?.username || !auth?.password || !registryPath) {
