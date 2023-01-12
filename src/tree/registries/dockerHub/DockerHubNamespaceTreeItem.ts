@@ -11,7 +11,7 @@ import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItem
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
 import { DockerHubRepositoryTreeItem } from "./DockerHubRepositoryTreeItem";
 
-const dockerHubRegistryUrl: string = 'index.docker.io';
+const dockerHubRegistryUrl: string = 'https://index.docker.io/v1/';
 
 export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
     public parent: DockerHubAccountTreeItem;
