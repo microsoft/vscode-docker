@@ -39,7 +39,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
                 break;
 
             case '.NET: ASP.NET Core':
-            case '.NET: Core Console':
+            case '.NET: Console':
                 scaffoldContext.platform = 'netCore';
                 await dockerDebugScaffoldingProvider.initializeNetCoreForDebugging(
                     scaffoldContext,
@@ -73,7 +73,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
         switch (wizardContext.platform) {
             case 'Node.js':
             case '.NET: ASP.NET Core':
-            case '.NET: Core Console':
+            case '.NET: Console':
             case 'Python: Django':
             case 'Python: FastAPI':
             case 'Python: Flask':

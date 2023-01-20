@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.23.3",
+    "version": "1.23.5-alpha",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -967,10 +967,10 @@
                         }
                     },
                     {
-                        "label": "Docker: .NET Core Attach (Preview)",
-                        "description": "Docker: Attach to a .NET Core process in a container",
+                        "label": "Docker: .NET Attach (Preview)",
+                        "description": "Docker: Attach to a .NET process in a container",
                         "body": {
-                            "name": "Docker .NET Core Attach (Preview)",
+                            "name": "Docker .NET Attach (Preview)",
                             "type": "docker",
                             "request": "attach",
                             "platform": "netCore",

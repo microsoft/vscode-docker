@@ -63,7 +63,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 subPath = path.join('node', `${this.fileType}.template`);
                 break;
             case '.NET: ASP.NET Core':
-            case '.NET: Core Console':
+            case '.NET: Console':
                 subPath = path.join('netCore', `${this.fileType}.template`);
                 break;
             case 'Python: Django':

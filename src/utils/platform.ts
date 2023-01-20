@@ -7,7 +7,7 @@ export const AllPlatformOSs = ['Windows', 'Linux', 'Mac'] as const;
 export const AllPlatforms = [
     'Node.js',
     '.NET: ASP.NET Core',
-    '.NET: Core Console',
+    '.NET: Console',
     'Python: Django',
     'Python: FastAPI',
     'Python: Flask',

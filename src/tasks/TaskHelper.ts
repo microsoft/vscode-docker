@@ -103,14 +103,14 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
 }
 
 export function hasTask(taskLabel: string, folder: WorkspaceFolder): boolean {
-    const workspaceTasks = workspace.getConfiguration('tasks', folder.uri);
+    const workspaceTasks = workspace.getConfiguration('tasks', folder);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
     return allTasks.findIndex(t => t.label === taskLabel) > -1;
 }
 
 export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTaskDefinition, folder: WorkspaceFolder, overwrite?: boolean): Promise<boolean> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks, and avoids confusion on resolved type !== true type
-    const workspaceTasks = workspace.getConfiguration('tasks', folder.uri);
+    const workspaceTasks = workspace.getConfiguration('tasks', folder);
     const allTasks = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
     const existingTaskIndex = allTasks.findIndex(t => t.label === newTask.label);
@@ -131,17 +131,17 @@ export async function addTask(newTask: DockerBuildTaskDefinition | DockerRunTask
     return true;
 }
 
-export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration): Promise<DockerRunTaskDefinition | undefined> {
+export async function getAssociatedDockerRunTask(debugConfiguration: DockerDebugConfiguration, folder: WorkspaceFolder): Promise<DockerRunTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
-    const workspaceTasks = workspace.getConfiguration('tasks');
+    const workspaceTasks = workspace.getConfiguration('tasks', folder);
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
     return await recursiveFindTaskByType(allTasks, 'docker-run', debugConfiguration) as DockerRunTaskDefinition;
 }
 
-export async function getAssociatedDockerBuildTask(runTask: DockerRunTask): Promise<DockerBuildTaskDefinition | undefined> {
+export async function getAssociatedDockerBuildTask(runTask: DockerRunTask, folder: WorkspaceFolder): Promise<DockerBuildTaskDefinition | undefined> {
     // Using config API instead of tasks API means no wasted perf on re-resolving the tasks (not just our tasks), and avoids confusion on resolved type !== true type
-    const workspaceTasks = workspace.getConfiguration('tasks');
+    const workspaceTasks = workspace.getConfiguration('tasks', folder);
     const allTasks: TaskDefinitionBase[] = workspaceTasks && workspaceTasks.tasks as TaskDefinitionBase[] || [];
 
     // Due to inconsistencies in the Task API, runTask does not have its dependsOn, so we need to re-find it by label
