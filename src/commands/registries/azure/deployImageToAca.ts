@@ -21,7 +21,7 @@ const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum versi
 
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
-    imageName: string;
+    image: string;
     loginServer?: string;
     username?: string;
     secret?: string;
@@ -38,27 +38,31 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
     }
 
     const commandOptions: DeployImageToAcaOptionsContract = {
-        imageName: node.fullTag,
+        image: node.fullTag,
     };
 
-    addImageTaggingTelemetry(context, commandOptions.imageName, '');
+    addImageTaggingTelemetry(context, commandOptions.image, '');
 
     const registry: RegistryTreeItemBase = node.parent.parent;
     if (registry instanceof AzureRegistryTreeItem) {
         // No additional work to do; ACA can handle this on its own
-    } else if (registry instanceof DockerHubNamespaceTreeItem || registry instanceof DockerV2RegistryTreeItemBase) {
-        const { auth } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string } };
+    } else {
+        const { auth, registryPath } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string }, registryPath: string };
 
-        if (!auth?.username || !auth?.password) {
+        if (!auth?.username || !auth?.password || !registryPath) {
             throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.noCredentials', 'No credentials found for registry "{0}".', registry.label));
         }
 
-        commandOptions.loginServer = registry.baseUrl;
+        if (registry instanceof DockerHubNamespaceTreeItem || registry instanceof DockerV2RegistryTreeItemBase) {
+            // ACA preference for Docker Hub images to be prefixed with 'docker.io/...'
+            if (!/^docker.io\//.test(commandOptions.image)) {
+                commandOptions.image = 'docker.io/' + commandOptions.image;
+            }
+        }
+
+        commandOptions.loginServer = registryPath;
         commandOptions.username = auth.username;
         commandOptions.secret = auth.password;
-    } else {
-        context.errorHandling.suppressReportIssue = true;
-        throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.unsupportedRegistry', 'Unsupported registry type'));
     }
 
     // Don't wait
