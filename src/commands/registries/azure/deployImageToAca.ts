@@ -30,7 +30,9 @@ interface DeployImageToAcaOptionsContract {
 export async function deployImageToAca(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
     // Assert installation of the ACA extension
     if (!isAcaExtensionInstalled()) {
-        await openAcaInstallPageAndWait(context);
+        // This will always throw a `UserCancelledError` but with the appropriate step name
+        // based on user choice about installation
+        await openAcaInstallPage(context);
     }
 
     if (!node) {
@@ -83,7 +85,7 @@ function isAcaExtensionInstalled(): boolean {
     return semver.gte(acaVersion, minVersion);
 }
 
-async function openAcaInstallPageAndWait(context: IActionContext): Promise<void> {
+async function openAcaInstallPage(context: IActionContext): Promise<void> {
     const message = localize(
         'vscode-docker.commands.registries.azure.deployImageToAca.installAcaExtension',
         'Version {0} or higher of the Azure Container Apps extension is required to deploy to Azure Container Apps. Would you like to install it now?',
@@ -102,13 +104,5 @@ async function openAcaInstallPageAndWait(context: IActionContext): Promise<void>
 
     await vscode.commands.executeCommand('extension.open', acaExtensionId);
 
-    // TODO: time out and reject after a minute or so?
-    return new Promise((resolve) => {
-        const subscription = vscode.extensions.onDidChange(() => {
-            if (isAcaExtensionInstalled()) {
-                subscription.dispose();
-                resolve();
-            }
-        });
-    });
+    throw new UserCancelledError('installAcaExtensionOpened');
 }
