@@ -15,6 +15,7 @@ import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegis
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
 import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
+import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
 const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum version that is needed
@@ -22,6 +23,7 @@ const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum versi
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
     image: string;
+    registryName?: string;
     loginServer?: string;
     username?: string;
     secret?: string;
@@ -66,6 +68,8 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
         commandOptions.username = auth.username;
         commandOptions.secret = auth.password;
     }
+
+    commandOptions.registryName = parseDockerLikeImageName(commandOptions.image).registry;
 
     // Don't wait
     void vscode.commands.executeCommand('containerApps.deployImageApi', commandOptions);
