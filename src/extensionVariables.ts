@@ -22,6 +22,7 @@ import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWit
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ext {
     export let context: ExtensionContext;
+    export let diagnosticLogging: boolean;
     export let outputChannel: IAzExtOutputChannel;
 
     export let experimentationService: IExperimentationServiceAdapter;

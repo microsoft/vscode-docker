@@ -26,6 +26,8 @@ import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
+import { isLinux } from './utils/osUtils';
+import { execAsync } from './utils/execAsync';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -45,8 +47,16 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
 
+    // Store whether diagnostic logging is enabled for the extension (requires extension reload after enabling or disabling)
+    ext.diagnosticLogging = vscode.workspace.getConfiguration('docker').get<boolean>('diagnosticLogging', false);
+
     ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
+
+    if (ext.diagnosticLogging) {
+        ext.outputChannel.show(true);
+        ext.outputChannel.appendLine('---DIAGNOSTIC LOGGING ENABLED---');
+    }
 
     registerUIExtensionVariables(ext);
 }
@@ -93,6 +103,29 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             ext.runtimeManager = new ContainerRuntimeManager(),
             ext.orchestratorManager = new OrchestratorRuntimeManager()
         );
+
+        if (ext.diagnosticLogging) {
+            try {
+                ext.outputChannel.appendLine(`DOCKER_HOST: ${process.env.DOCKER_HOST}`);
+            } catch {
+                // Do not throw for diagnostic logging
+            }
+        }
+
+        // Additional diagnostic logging for Linux systems
+        if (ext.diagnosticLogging && isLinux()) {
+            try {
+                await execAsync('uname -a');
+            } catch {
+                // Do not throw for diagnostic logging
+            }
+
+            try {
+                await execAsync('cat /etc/os-release');
+            } catch {
+                // Do not throw for diagnostic logging
+            }
+        }
 
         // Set up Docker clients
         registerDockerClients();
@@ -179,7 +212,7 @@ function registerDockerClients(): void {
     );
 
     // Register an event to watch for changes to config, reconfigure if needed
-    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, async (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
@@ -189,6 +222,14 @@ function registerDockerClients(): void {
 
         if (e.affectsConfiguration('docker.composeCommand')) {
             composeClient.reconfigure();
+        }
+
+        if (ext.diagnosticLogging && isLinux()) {
+            try {
+                await execAsync(`which ${dockerClient.commandName}`);
+            } catch {
+                // Do not throw for diagnostic logging
+            }
         }
     });
 }

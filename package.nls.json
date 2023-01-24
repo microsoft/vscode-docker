@@ -193,6 +193,7 @@
     "vscode-docker.config.docker.dockerPath": "Absolute path to Docker client executable (`docker` command). If the path contains whitespace, it needs to be quoted appropriately.",
     "vscode-docker.config.docker.composeCommand": "Command to use for Docker Compose actions (e.g. `docker-compose`, `docker compose`, etc.). If the executable path contains whitespace, it needs to be quoted appropriately. If unset, the extension will attempt to auto-detect the command to use.",
     "vscode-docker.config.docker.enableDockerComposeLanguageService": "Whether or not to enable the preview Docker Compose Language Service. Changing requires restart to take effect.",
+    "vscode-docker.config.docker.diagnosticLogging": "Set to true to enable detailed diagnostic logging for the Docker extension. Changing requires restart to take effect.",
     "vscode-docker.config.deprecated": "This setting has been deprecated and will be removed in a future release.",
     "vscode-docker.commands.compose.down": "Compose Down",
     "vscode-docker.commands.compose.restart": "Compose Restart",

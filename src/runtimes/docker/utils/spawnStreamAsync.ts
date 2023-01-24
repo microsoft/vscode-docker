@@ -5,8 +5,10 @@
 
 import { spawn, SpawnOptions } from 'child_process';
 import * as os from 'os';
+import * as stream from 'stream';
 import * as treeKill from 'tree-kill';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
+import { ext } from '../../../extensionVariables';
 import { IShell } from '../contracts/Shell';
 
 import { CancellationTokenLike } from '../typings/CancellationTokenLike';
@@ -229,7 +231,41 @@ export async function spawnStreamAsync(
     }
 
     if (options.onCommand) {
-        options.onCommand([command, ...args].join(' '));
+        options.onCommand([command, ...normalizedArgs].join(' '));
+    }
+
+    let stdOutPipe: NodeJS.WritableStream | undefined = options.stdOutPipe;
+    let stdErrPipe: NodeJS.WritableStream | undefined = options.stdErrPipe;
+    if (ext.diagnosticLogging) {
+        ext.outputChannel.appendLine([command, ...normalizedArgs].join(' '));
+
+        const diagnosticStdOutPipe = new stream.PassThrough();
+        diagnosticStdOutPipe.on('data', (chunk: Buffer) => {
+            try {
+                ext.outputChannel.appendLine(chunk.toString());
+            } catch {
+                // Do not throw on diagnostic errors
+            }
+        });
+
+        if (stdOutPipe) {
+            diagnosticStdOutPipe.pipe(stdOutPipe);
+        }
+        stdOutPipe = diagnosticStdOutPipe;
+
+        const diagnosticStdErrPipe = new stream.PassThrough();
+        diagnosticStdErrPipe.on('data', (chunk: Buffer) => {
+            try {
+                ext.outputChannel.appendLine('stderr: ' + chunk.toString());
+            } catch {
+                // Do not throw on diagnostic errors
+            }
+        });
+
+        if (stdErrPipe) {
+            diagnosticStdErrPipe.pipe(stdErrPipe);
+        }
+        stdErrPipe = diagnosticStdErrPipe;
     }
 
     const childProcess = spawn(
@@ -241,8 +277,8 @@ export async function spawnStreamAsync(
             // Ignore stdio streams if not needed to avoid backpressure issues
             stdio: [
                 options.stdInPipe ? 'pipe' : 'ignore',
-                options.stdOutPipe ? 'pipe' : 'ignore',
-                options.stdErrPipe ? 'pipe' : 'ignore',
+                stdOutPipe ? 'pipe' : 'ignore',
+                stdErrPipe ? 'pipe' : 'ignore',
             ],
         },
     );
@@ -251,23 +287,31 @@ export async function spawnStreamAsync(
         options.stdInPipe.pipe(childProcess.stdin);
     }
 
-    if (options.stdOutPipe && childProcess.stdout) {
-        childProcess.stdout.pipe(options.stdOutPipe);
+    if (stdOutPipe && childProcess.stdout) {
+        childProcess.stdout.pipe(stdOutPipe);
     }
 
-    if (options.stdErrPipe && childProcess.stderr) {
-        childProcess.stderr.pipe(options.stdErrPipe);
+    if (stdErrPipe && childProcess.stderr) {
+        childProcess.stderr.pipe(stdErrPipe);
     }
 
     return new Promise<void>((resolve, reject) => {
         const disposable = cancellationToken.onCancellationRequested(() => {
             disposable.dispose();
-            options.stdOutPipe?.end();
-            options.stdErrPipe?.end();
+            stdOutPipe?.end();
+            stdErrPipe?.end();
             childProcess.removeAllListeners();
 
             if (childProcess.pid) {
                 treeKill(childProcess.pid);
+            }
+
+            if (ext.diagnosticLogging) {
+                try {
+                    ext.outputChannel.appendLine('error: Command cancelled');
+                } catch {
+                    // Do not throw on diagnostic errors
+                }
             }
 
             reject(new CancellationError('Command cancelled', cancellationToken));
@@ -276,6 +320,15 @@ export async function spawnStreamAsync(
         // Reject the promise on an error event
         childProcess.on('error', (err) => {
             disposable.dispose();
+
+            if (ext.diagnosticLogging) {
+                try {
+                    ext.outputChannel.appendLine(`error: ${err.message}`);
+                } catch {
+                    // Do not throw on diagnostic errors
+                }
+            }
+
             reject(err);
         });
 
@@ -285,8 +338,24 @@ export async function spawnStreamAsync(
             if (code === 0) {
                 resolve();
             } else if (signal) {
+                if (ext.diagnosticLogging) {
+                    try {
+                        ext.outputChannel.appendLine(`error: Process exited due to signal ${signal}`);
+                    } catch {
+                        // Do not throw on diagnostic errors
+                    }
+                }
+
                 reject(new ChildProcessError(`Process exited due to signal ${signal}`, code, signal));
             } else {
+                if (ext.diagnosticLogging) {
+                    try {
+                        ext.outputChannel.appendLine(`error: Process exited with code ${code}`);
+                    } catch {
+                        // Do not throw on diagnostic errors
+                    }
+                }
+
                 reject(new ChildProcessError(`Process exited with code ${code}`, code, signal));
             }
         });

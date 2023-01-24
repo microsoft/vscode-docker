@@ -2244,6 +2244,12 @@
                     "type": "boolean",
                     "default": true,
                     "description": "%vscode-docker.config.docker.enableDockerComposeLanguageService%"
+                },
+                "docker.diagnosticLogging": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%vscode-docker.config.docker.diagnosticLogging%",
+                    "scope": "machine"
                 }
             }
         },
