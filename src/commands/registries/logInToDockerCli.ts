@@ -30,7 +30,7 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
     }
 
     if (!username || !password) {
-        ext.outputChannel.warn(localize('vscode-docker.commands.registries.logIn.skipping', 'WARNING: Skipping login for "{0}" because it does not require authentication.', creds.registryPath));
+        ext.outputChannel.warn(localize('vscode-docker.commands.registries.logIn.skipping', 'Skipping login for "{0}" because it does not require authentication.', creds.registryPath));
     } else {
         const progressOptions: vscode.ProgressOptions = {
             location: vscode.ProgressLocation.Notification,
