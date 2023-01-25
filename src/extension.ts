@@ -26,7 +26,7 @@ import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
-import { isLinux } from './utils/osUtils';
+import { isLinux, isWindows } from './utils/osUtils';
 import { execAsync } from './utils/execAsync';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 
@@ -91,7 +91,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         if (ext.outputChannel.debugLoggingEnabled) {
             try {
-                ext.outputChannel.debug('\n---Process Environment---');
+                ext.outputChannel.debug('');
+                ext.outputChannel.debug('---Process Environment---');
                 for (const key in process.env) {
                     ext.outputChannel.debug(`${key}: ${process.env[key]}`);
                 }
@@ -192,7 +193,8 @@ function setEnvironmentVariableContributions(): void {
     ext.context.environmentVariableCollection.clear();
     ext.context.environmentVariableCollection.persistent = true;
 
-    ext.outputChannel.debug('\n---Docker Environment Settings---');
+    ext.outputChannel.debug('');
+    ext.outputChannel.debug('---Docker Environment Settings---');
     for (const key of Object.keys(settingValue)) {
         ext.outputChannel.debug(`${key}: ${settingValue[key]}`);
         ext.context.environmentVariableCollection.replace(key, settingValue[key]);
@@ -221,14 +223,6 @@ function registerDockerClients(): void {
 
         if (e.affectsConfiguration('docker.composeCommand')) {
             composeClient.reconfigure();
-        }
-
-        if (ext.diagnosticLogging && isLinux()) {
-            try {
-                await execAsync(`which ${dockerClient.commandName}`);
-            } catch {
-                // Do not throw for diagnostic logging
-            }
         }
     });
 }
