@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtTreeDataProvider, AzExtTreeItem, IAzExtOutputChannel, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
+import { AzExtTreeDataProvider, AzExtTreeItem, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
 import { ExtensionContext, TreeView } from 'vscode';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
