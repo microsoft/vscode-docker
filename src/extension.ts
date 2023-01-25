@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
-import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
+import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, IAzExtOutputChannel } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
@@ -28,6 +28,7 @@ import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurabl
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
 import { isLinux } from './utils/osUtils';
 import { execAsync } from './utils/execAsync';
+import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -44,19 +45,12 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
+
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
 
-    // Store whether diagnostic logging is enabled for the extension (requires extension reload after enabling or disabling)
-    ext.diagnosticLogging = vscode.workspace.getConfiguration('docker').get<boolean>('diagnosticLogging', false);
-
-    ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
+    ext.outputChannel = new AzExtLogOutputChannelWrapper(vscode.window.createOutputChannel('Docker', { log: true }), ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
-
-    if (ext.diagnosticLogging) {
-        ext.outputChannel.show(true);
-        ext.outputChannel.appendLine('---DIAGNOSTIC LOGGING ENABLED---');
-    }
 
     registerUIExtensionVariables(ext);
 }
@@ -95,6 +89,17 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
+        if (ext.outputChannel.debugLoggingEnabled) {
+            try {
+                ext.outputChannel.debug('\n---Process Environment---');
+                for (const key in process.env) {
+                    ext.outputChannel.debug(`${key}: ${process.env[key]}`);
+                }
+            } catch {
+                // Do not throw for diagnostic logging
+            }
+        }
+
         // Set up environment variables
         registerEnvironmentVariableContributions();
 
@@ -104,16 +109,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             ext.orchestratorManager = new OrchestratorRuntimeManager()
         );
 
-        if (ext.diagnosticLogging) {
-            try {
-                ext.outputChannel.appendLine(`DOCKER_HOST: ${process.env.DOCKER_HOST}`);
-            } catch {
-                // Do not throw for diagnostic logging
-            }
-        }
-
         // Additional diagnostic logging for Linux systems
-        if (ext.diagnosticLogging && isLinux()) {
+        if (ext.outputChannel.debugLoggingEnabled && isLinux()) {
             try {
                 await execAsync('uname -a');
             } catch {
@@ -195,7 +192,9 @@ function setEnvironmentVariableContributions(): void {
     ext.context.environmentVariableCollection.clear();
     ext.context.environmentVariableCollection.persistent = true;
 
+    ext.outputChannel.debug('\n---Docker Environment Settings---');
     for (const key of Object.keys(settingValue)) {
+        ext.outputChannel.debug(`${key}: ${settingValue[key]}`);
         ext.context.environmentVariableCollection.replace(key, settingValue[key]);
     }
 }

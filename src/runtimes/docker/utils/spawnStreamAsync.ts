@@ -234,38 +234,36 @@ export async function spawnStreamAsync(
         options.onCommand([command, ...normalizedArgs].join(' '));
     }
 
-    let stdOutPipe: NodeJS.WritableStream | undefined = options.stdOutPipe;
-    let stdErrPipe: NodeJS.WritableStream | undefined = options.stdErrPipe;
-    if (ext.diagnosticLogging) {
-        ext.outputChannel.appendLine([command, ...normalizedArgs].join(' '));
+    ext.outputChannel.debug([command, ...normalizedArgs].join(' '));
 
-        const diagnosticStdOutPipe = new stream.PassThrough();
-        diagnosticStdOutPipe.on('data', (chunk: Buffer) => {
+    let stdOutPipe: NodeJS.WritableStream | undefined = options.stdOutPipe;
+    if (ext.outputChannel.debugLoggingEnabled) {
+        const debugStdOutPipe = new stream.PassThrough();
+        debugStdOutPipe.on('data', (chunk: Buffer) => {
             try {
-                ext.outputChannel.appendLine(chunk.toString());
+                ext.outputChannel.debug(chunk.toString());
             } catch {
                 // Do not throw on diagnostic errors
             }
         });
 
         if (stdOutPipe) {
-            diagnosticStdOutPipe.pipe(stdOutPipe);
+            debugStdOutPipe.pipe(stdOutPipe);
         }
-        stdOutPipe = diagnosticStdOutPipe;
+        stdOutPipe = debugStdOutPipe;
+    }
 
-        const diagnosticStdErrPipe = new stream.PassThrough();
-        diagnosticStdErrPipe.on('data', (chunk: Buffer) => {
-            try {
-                ext.outputChannel.appendLine('stderr: ' + chunk.toString());
-            } catch {
-                // Do not throw on diagnostic errors
-            }
-        });
-
-        if (stdErrPipe) {
-            diagnosticStdErrPipe.pipe(stdErrPipe);
+    const stdErrPipe = new stream.PassThrough();
+    stdErrPipe.on('data', (chunk: Buffer) => {
+        try {
+            ext.outputChannel.error(chunk.toString());
+        } catch {
+            // Do not throw on diagnostic errors
         }
-        stdErrPipe = diagnosticStdErrPipe;
+    });
+
+    if (options.stdErrPipe) {
+        stdErrPipe.pipe(options.stdErrPipe);
     }
 
     const childProcess = spawn(
@@ -306,13 +304,7 @@ export async function spawnStreamAsync(
                 treeKill(childProcess.pid);
             }
 
-            if (ext.diagnosticLogging) {
-                try {
-                    ext.outputChannel.appendLine('error: Command cancelled');
-                } catch {
-                    // Do not throw on diagnostic errors
-                }
-            }
+            ext.outputChannel.debug('Command cancelled');
 
             reject(new CancellationError('Command cancelled', cancellationToken));
         });
@@ -321,13 +313,7 @@ export async function spawnStreamAsync(
         childProcess.on('error', (err) => {
             disposable.dispose();
 
-            if (ext.diagnosticLogging) {
-                try {
-                    ext.outputChannel.appendLine(`error: ${err.message}`);
-                } catch {
-                    // Do not throw on diagnostic errors
-                }
-            }
+            ext.outputChannel.error(err);
 
             reject(err);
         });
@@ -338,23 +324,11 @@ export async function spawnStreamAsync(
             if (code === 0) {
                 resolve();
             } else if (signal) {
-                if (ext.diagnosticLogging) {
-                    try {
-                        ext.outputChannel.appendLine(`error: Process exited due to signal ${signal}`);
-                    } catch {
-                        // Do not throw on diagnostic errors
-                    }
-                }
+                ext.outputChannel.warn(`Process exited due to signal ${signal}`);
 
                 reject(new ChildProcessError(`Process exited due to signal ${signal}`, code, signal));
             } else {
-                if (ext.diagnosticLogging) {
-                    try {
-                        ext.outputChannel.appendLine(`error: Process exited with code ${code}`);
-                    } catch {
-                        // Do not throw on diagnostic errors
-                    }
-                }
+                ext.outputChannel.error(`Process exited with code ${code}`);
 
                 reject(new ChildProcessError(`Process exited with code ${code}`, code, signal));
             }

@@ -29,7 +29,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
 
     public async execute(context: IAppServiceContainerWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
         const creatingNewApp: string = localize('vscode-docker.commands.registries.azure.deployImage.creatingWebApp', 'Creating web app "{0}"...', context.newSiteName);
-        ext.outputChannel.appendLine(creatingNewApp);
+        ext.outputChannel.info(creatingNewApp);
         progress.report({ message: creatingNewApp });
         const siteConfig = await this.getNewSiteConfig(context);
 

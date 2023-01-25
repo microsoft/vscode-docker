@@ -15,6 +15,7 @@ import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWithDefaultsImpl } from './runtimes/runners/runWithDefaults';
+import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 
 /**
  * Namespace for common variables used throughout the extension. They must be initialized in the activate() method of extension.ts
@@ -22,8 +23,7 @@ import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWit
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ext {
     export let context: ExtensionContext;
-    export let diagnosticLogging: boolean;
-    export let outputChannel: IAzExtOutputChannel;
+    export let outputChannel: AzExtLogOutputChannelWrapper;
 
     export let experimentationService: IExperimentationServiceAdapter;
     export let activityMeasurementService: IActivityMeasurementService;
