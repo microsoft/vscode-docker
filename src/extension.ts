@@ -27,7 +27,7 @@ import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManage
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
-import { logEnvironment, logSystemInfo } from './utils/diagnostics';
+import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -155,6 +155,8 @@ function registerEnvironmentVariableContributions(): void {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
+        logDockerEnvironment(ext.outputChannel);
+
         if (e.affectsConfiguration('docker.environment')) {
             setEnvironmentVariableContributions();
         }
@@ -167,7 +169,9 @@ function setEnvironmentVariableContributions(): void {
     ext.context.environmentVariableCollection.clear();
     ext.context.environmentVariableCollection.persistent = true;
 
-    logEnvironment(ext.outputChannel, settingValue, '--- Docker Environment Settings ---');
+    for (const key of Object.keys(settingValue)) {
+        ext.context.environmentVariableCollection.replace(key, settingValue[key]);
+    }
 }
 
 function registerDockerClients(): void {

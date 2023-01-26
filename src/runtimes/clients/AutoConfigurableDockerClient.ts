@@ -20,6 +20,8 @@ export class AutoConfigurableDockerClient extends DockerClient implements AutoCo
         const dockerCommand = config.get<string | undefined>('dockerPath') || 'docker';
         this.commandName = dockerCommand;
 
+        ext.outputChannel.debug(`docker.dockerPath: ${this.commandName}`);
+
         logCommandPath(ext.outputChannel, this.commandName);
     }
 }

@@ -11,14 +11,12 @@ export function isLogLevelEnabled(outputChannel: vscode.LogOutputChannel, logLev
     return outputChannel && outputChannel.logLevel > 0 && outputChannel.logLevel <= logLevel;
 }
 
-export function logEnvironment(outputChannel: vscode.LogOutputChannel, environment: NodeJS.ProcessEnv, title?: string): void {
+export function logProcessEnvironment(outputChannel: vscode.LogOutputChannel): void {
     if (isLogLevelEnabled(outputChannel, vscode.LogLevel.Debug)) {
         try {
-            if (title) {
-                outputChannel.debug(title);
-            }
+            outputChannel.debug(`--- Process Environment (${Object.getOwnPropertyNames(process.env).length}) ---`);
 
-            for (const key in environment) {
+            for (const key in process.env) {
                 outputChannel.debug(`${key}: ${process.env[key]}`);
             }
         } catch {
@@ -27,10 +25,40 @@ export function logEnvironment(outputChannel: vscode.LogOutputChannel, environme
     }
 }
 
+export function logDockerEnvironment(outputChannel: vscode.LogOutputChannel): void {
+    if (isLogLevelEnabled(outputChannel, vscode.LogLevel.Debug)) {
+        try {
+            const settingValue: NodeJS.ProcessEnv = vscode.workspace.getConfiguration('docker').get<NodeJS.ProcessEnv>('environment', {});
+
+            outputChannel.debug(`--- Docker Environment (${Object.getOwnPropertyNames(settingValue).length}) ---`);
+            for (const key in settingValue) {
+                outputChannel.debug(`${key}: ${settingValue[key]}`);
+            }
+        } catch {
+            // Do not throw for diagnostic logging
+        }
+    }
+}
+
+let loggedSystemInfo: boolean = false;
+let systemInfoDisposable: vscode.Disposable;
 export function logSystemInfo(outputChannel: vscode.LogOutputChannel): void {
-    logEnvironment(outputChannel, process.env, '--- Process Environment ---');
+    if (loggedSystemInfo) {
+        return;
+    }
 
     if (isLogLevelEnabled(outputChannel, vscode.LogLevel.Debug)) {
+        loggedSystemInfo = true;
+
+        if (systemInfoDisposable) {
+            systemInfoDisposable.dispose();
+            systemInfoDisposable = null;
+        }
+
+        logProcessEnvironment(outputChannel);
+
+        logDockerEnvironment(outputChannel);
+
         // Linux specific system diagnostic logging
         if (isLinux()) {
             outputChannel.debug('--- System Info ---');
@@ -46,6 +74,12 @@ export function logSystemInfo(outputChannel: vscode.LogOutputChannel): void {
                 // Do not throw for diagnostic logging
             }
         }
+    } else {
+        systemInfoDisposable = outputChannel.onDidChangeLogLevel((logLevel) => {
+            if (logLevel > vscode.LogLevel.Off && logLevel <= vscode.LogLevel.Debug) {
+                logSystemInfo(outputChannel);
+            }
+        });
     }
 }
 
