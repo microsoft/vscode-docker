@@ -155,9 +155,8 @@ function registerEnvironmentVariableContributions(): void {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
-        logDockerEnvironment(ext.outputChannel);
-
         if (e.affectsConfiguration('docker.environment')) {
+            logDockerEnvironment(ext.outputChannel);
             setEnvironmentVariableContributions();
         }
     });
@@ -186,7 +185,7 @@ function registerDockerClients(): void {
     );
 
     // Register an event to watch for changes to config, reconfigure if needed
-    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, async (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
