@@ -5,10 +5,8 @@
 
 import { spawn, SpawnOptions } from 'child_process';
 import * as os from 'os';
-import * as stream from 'stream';
 import * as treeKill from 'tree-kill';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
-import { ext } from '../../../extensionVariables';
 import { IShell } from '../contracts/Shell';
 
 import { CancellationTokenLike } from '../typings/CancellationTokenLike';
@@ -234,38 +232,6 @@ export async function spawnStreamAsync(
         options.onCommand([command, ...normalizedArgs].join(' '));
     }
 
-    ext.outputChannel.debug([command, ...normalizedArgs].join(' '));
-
-    let stdOutPipe: NodeJS.WritableStream | undefined = options.stdOutPipe;
-    if (ext.outputChannel.debugLoggingEnabled) {
-        const debugStdOutPipe = new stream.PassThrough();
-        debugStdOutPipe.on('data', (chunk: Buffer) => {
-            try {
-                ext.outputChannel.debug(chunk.toString());
-            } catch {
-                // Do not throw on diagnostic errors
-            }
-        });
-
-        if (stdOutPipe) {
-            debugStdOutPipe.pipe(stdOutPipe);
-        }
-        stdOutPipe = debugStdOutPipe;
-    }
-
-    const stdErrPipe = new stream.PassThrough();
-    stdErrPipe.on('data', (chunk: Buffer) => {
-        try {
-            ext.outputChannel.error(chunk.toString());
-        } catch {
-            // Do not throw on diagnostic errors
-        }
-    });
-
-    if (options.stdErrPipe) {
-        stdErrPipe.pipe(options.stdErrPipe);
-    }
-
     const childProcess = spawn(
         command,
         normalizedArgs,
@@ -275,8 +241,8 @@ export async function spawnStreamAsync(
             // Ignore stdio streams if not needed to avoid backpressure issues
             stdio: [
                 options.stdInPipe ? 'pipe' : 'ignore',
-                stdOutPipe ? 'pipe' : 'ignore',
-                stdErrPipe ? 'pipe' : 'ignore',
+                options.stdOutPipe ? 'pipe' : 'ignore',
+                options.stdErrPipe ? 'pipe' : 'ignore',
             ],
         },
     );
@@ -285,26 +251,24 @@ export async function spawnStreamAsync(
         options.stdInPipe.pipe(childProcess.stdin);
     }
 
-    if (stdOutPipe && childProcess.stdout) {
-        childProcess.stdout.pipe(stdOutPipe);
+    if (options.stdOutPipe && childProcess.stdout) {
+        childProcess.stdout.pipe(options.stdOutPipe);
     }
 
-    if (stdErrPipe && childProcess.stderr) {
-        childProcess.stderr.pipe(stdErrPipe);
+    if (options.stdErrPipe && childProcess.stderr) {
+        childProcess.stderr.pipe(options.stdErrPipe);
     }
 
     return new Promise<void>((resolve, reject) => {
         const disposable = cancellationToken.onCancellationRequested(() => {
             disposable.dispose();
-            stdOutPipe?.end();
-            stdErrPipe?.end();
+            options.stdOutPipe?.end();
+            options.stdErrPipe?.end();
             childProcess.removeAllListeners();
 
             if (childProcess.pid) {
                 treeKill(childProcess.pid);
             }
-
-            ext.outputChannel.debug('Command cancelled');
 
             reject(new CancellationError('Command cancelled', cancellationToken));
         });
@@ -312,9 +276,6 @@ export async function spawnStreamAsync(
         // Reject the promise on an error event
         childProcess.on('error', (err) => {
             disposable.dispose();
-
-            ext.outputChannel.error(err);
-
             reject(err);
         });
 
@@ -324,12 +285,8 @@ export async function spawnStreamAsync(
             if (code === 0) {
                 resolve();
             } else if (signal) {
-                ext.outputChannel.warn(`Process exited due to signal ${signal}`);
-
                 reject(new ChildProcessError(`Process exited due to signal ${signal}`, code, signal));
             } else {
-                ext.outputChannel.error(`Process exited with code ${code}`);
-
                 reject(new ChildProcessError(`Process exited with code ${code}`, code, signal));
             }
         });

@@ -24,7 +24,7 @@ export class AzExtLogOutputChannelWrapper implements vscode.LogOutputChannel, IA
         return this._logOutputChannel.logLevel;
     }
 
-    public get debugLoggingEnabled() {
+    public get isDebugLoggingEnabled(): boolean {
         return isLogLevelEnabled(this, vscode.LogLevel.Debug);
     }
 

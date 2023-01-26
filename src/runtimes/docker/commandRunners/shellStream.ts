@@ -24,7 +24,7 @@ import {
     StreamSpawnOptions,
 } from '../utils/spawnStreamAsync';
 
-export type ShellStreamCommandRunnerOptions = Omit<StreamSpawnOptions, 'stdOutPipe'> & {
+export type ShellStreamCommandRunnerOptions = StreamSpawnOptions & {
     strict?: boolean;
 };
 
@@ -51,7 +51,19 @@ export class ShellStreamCommandRunnerFactory<TOptions extends ShellStreamCommand
                     accumulator = new AccumulatorStream();
                 }
 
-                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: accumulator });
+                // Determine the appropriate combination of streams that need to read from stdout
+                let stdOutPipe: NodeJS.WritableStream | undefined = accumulator;
+                if (accumulator && this.options.stdOutPipe) {
+                    const stdOutPassThrough = new stream.PassThrough();
+                    stdOutPassThrough.pipe(this.options.stdOutPipe);
+                    stdOutPassThrough.pipe(accumulator);
+
+                    stdOutPipe = stdOutPassThrough;
+                } else if (this.options.stdOutPipe) {
+                    stdOutPipe = this.options.stdOutPipe;
+                }
+
+                await spawnStreamAsync(command, args, { ...this.options, stdOutPipe: stdOutPipe });
 
                 throwIfCancellationRequested(this.options.cancellationToken);
 
