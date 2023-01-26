@@ -133,14 +133,16 @@ export async function spawnStreamWithDiagnosticsAsync(
         stdErrPipe.pipe(options.stdErrPipe);
     }
 
+    const onCommand = (command) => {
+        ext.outputChannel.debug(command);
+        if (typeof options?.onCommand === 'function') {
+            options.onCommand(command);
+        }
+    };
+
     options = {
         ...options,
-        onCommand: (command) => {
-            ext.outputChannel.debug(command);
-            if (typeof options.onCommand === 'function') {
-                options.onCommand(command);
-            }
-        },
+        onCommand,
         stdOutPipe,
         stdErrPipe,
     };
