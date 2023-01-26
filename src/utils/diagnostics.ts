@@ -48,3 +48,15 @@ export function logSystemInfo(outputChannel: vscode.LogOutputChannel): void {
         }
     }
 }
+
+export function logCommandPath(outputChannel: vscode.LogOutputChannel, command: string): void {
+    if (isLogLevelEnabled(outputChannel, vscode.LogLevel.Debug)) {
+        if (isLinux()) {
+            try {
+                execAsync(`which ${command}`).catch(() => {/* Do not throw errors */ });
+            } catch {
+                // Do not throw for diagnostic logging
+            }
+        }
+    }
+}
