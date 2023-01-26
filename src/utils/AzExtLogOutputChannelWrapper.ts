@@ -5,6 +5,7 @@
 
 import { IAzExtOutputChannel } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
+import { isLogLevelEnabled } from './diagnostics';
 
 export class AzExtLogOutputChannelWrapper implements vscode.LogOutputChannel, IAzExtOutputChannel {
     public readonly name: string;
@@ -24,10 +25,8 @@ export class AzExtLogOutputChannelWrapper implements vscode.LogOutputChannel, IA
     }
 
     public get debugLoggingEnabled() {
-        return this.logLevel > 0 && this.logLevel <= vscode.LogLevel.Debug;
+        return isLogLevelEnabled(this, vscode.LogLevel.Debug);
     }
-
-    private;
 
     appendLog(value: string, options?: { resourceName?: string; date?: Date; }): void {
         const enableOutputTimestampsSetting: string = 'enableOutputTimestamps';

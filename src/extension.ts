@@ -26,9 +26,8 @@ import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
-import { isLinux } from './utils/osUtils';
-import { execAsync } from './utils/execAsync';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
+import { logEnvironment, logSystemInfo } from './utils/diagnostics';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -72,6 +71,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             process.env.VSCODE_DOCKER_TEAM === '1' ? tas.TargetPopulation.Team : undefined // If VSCODE_DOCKER_TEAM isn't set, let @microsoft/vscode-azext-utils decide target population
         );
 
+        logSystemInfo(ext.outputChannel);
+
         // Disabled for now
         // (new SurveyManager()).activate();
 
@@ -89,18 +90,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             )
         );
 
-        if (ext.outputChannel.debugLoggingEnabled) {
-            try {
-                ext.outputChannel.debug('');
-                ext.outputChannel.debug('---Process Environment---');
-                for (const key in process.env) {
-                    ext.outputChannel.debug(`${key}: ${process.env[key]}`);
-                }
-            } catch {
-                // Do not throw for diagnostic logging
-            }
-        }
-
         // Set up environment variables
         registerEnvironmentVariableContributions();
 
@@ -109,21 +98,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             ext.runtimeManager = new ContainerRuntimeManager(),
             ext.orchestratorManager = new OrchestratorRuntimeManager()
         );
-
-        // Additional diagnostic logging for Linux systems
-        if (ext.outputChannel.debugLoggingEnabled && isLinux()) {
-            try {
-                await execAsync('uname -a');
-            } catch {
-                // Do not throw for diagnostic logging
-            }
-
-            try {
-                await execAsync('cat /etc/os-release');
-            } catch {
-                // Do not throw for diagnostic logging
-            }
-        }
 
         // Set up Docker clients
         registerDockerClients();
@@ -193,12 +167,7 @@ function setEnvironmentVariableContributions(): void {
     ext.context.environmentVariableCollection.clear();
     ext.context.environmentVariableCollection.persistent = true;
 
-    ext.outputChannel.debug('');
-    ext.outputChannel.debug('---Docker Environment Settings---');
-    for (const key of Object.keys(settingValue)) {
-        ext.outputChannel.debug(`${key}: ${settingValue[key]}`);
-        ext.context.environmentVariableCollection.replace(key, settingValue[key]);
-    }
+    logEnvironment(ext.outputChannel, settingValue, '--- Docker Environment Settings ---');
 }
 
 function registerDockerClients(): void {
