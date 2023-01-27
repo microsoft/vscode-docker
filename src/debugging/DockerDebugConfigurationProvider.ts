@@ -163,8 +163,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
 
                 if (portMappings.length > 0) {
-                    ext.outputChannel.appendLine(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
-                    ext.outputChannel.appendLine(portMappings.join('\n'));
+                    ext.outputChannel.info(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
+                    ext.outputChannel.info(portMappings.join('\n'));
                 }
             } catch {
                 // Best effort

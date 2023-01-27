@@ -21,7 +21,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         const armContainerRegistry = await getArmContainerRegistry();
         const client = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         const creating: string = localize('vscode-docker.tree.registries.azure.createWizard.creating', 'Creating registry "{0}"...', newRegistryName);
-        ext.outputChannel.appendLine(creating);
+        ext.outputChannel.info(creating);
         progress.report({ message: creating });
 
         const location: AzExtLocation = await azExtAzureUtils.LocationListStep.getLocation(context);
@@ -49,7 +49,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         }
 
         const created = localize('vscode-docker.tree.registries.azure.createWizard.created', 'Successfully created registry "{0}".', newRegistryName);
-        ext.outputChannel.appendLine(created);
+        ext.outputChannel.info(created);
     }
 
     public shouldExecute(context: IAzureRegistryWizardContext): boolean {

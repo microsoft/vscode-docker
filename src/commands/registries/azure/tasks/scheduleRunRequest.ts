@@ -65,7 +65,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         }
 
         const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootUri, tarFilePath);
-        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code from {0}', tarFilePath));
+        ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.uploaded', 'Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
         if (requestType === 'DockerBuildRequest') {
@@ -87,11 +87,11 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         }
 
         // Schedule the run and Clean up.
-        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
+        ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.setUp', 'Set up run request'));
 
         const client = await node.getClient(context);
         const run = await client.registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
-        ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
+        ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.scheduledRun', 'Scheduled run {0}', run.runId));
 
         void streamLogs(context, node, run);
 
@@ -134,21 +134,21 @@ async function quickPickImageName(context: IActionContext, rootFolder: vscode.Wo
 }
 
 async function uploadSourceCode(client: ContainerRegistryManagementClient, registryName: string, resourceGroupName: string, rootFolder: vscode.Uri, tarFilePath: string): Promise<string> {
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
+    ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.sendingSource', '   Sending source code to temp file'));
     const source: string = rootFolder.fsPath;
     let items = await fse.readdir(source);
     items = items.filter(i => !(i in vcsIgnoreList));
     // tslint:disable-next-line:no-unsafe-any
     tar.c({ cwd: source }, items).pipe(fse.createWriteStream(tarFilePath));
 
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.gettingBuildSourceUploadUrl', '   Getting build source upload URL'));
+    ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.gettingBuildSourceUploadUrl', '   Getting build source upload URL'));
     const sourceUploadLocation = await client.registries.getBuildSourceUploadUrl(resourceGroupName, registryName);
     const uploadUrl: string = sourceUploadLocation.uploadUrl;
     const relativePath: string = sourceUploadLocation.relativePath;
 
     const storageBlob = await getStorageBlob();
     const blobClient = new storageBlob.BlockBlobClient(uploadUrl);
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.creatingBlockBlob', '   Creating block blob'));
+    ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.creatingBlockBlob', '   Creating block blob'));
     await blobClient.uploadFile(tarFilePath);
 
     return relativePath;
@@ -185,7 +185,7 @@ async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, 
                 const content = bufferToString(contentBuffer);
 
                 if (content) {
-                    ext.outputChannel.appendLine(content);
+                    ext.outputChannel.info(content);
                 }
 
                 if (properties?.metadata?.complete) {
@@ -202,7 +202,7 @@ function getTempSourceArchivePath(): string {
     /* tslint:disable-next-line:insecure-random */
     const id: number = Math.floor(Math.random() * Math.pow(10, idPrecision));
     const archive = `sourceArchive${id}.tar.gz`;
-    ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.tasks.settingUpTempFile', 'Setting up temp file with \'{0}\'', archive));
+    ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.tasks.settingUpTempFile', 'Setting up temp file with \'{0}\'', archive));
     const tarFilePath: string = path.join(os.tmpdir(), archive);
     return tarFilePath;
 }

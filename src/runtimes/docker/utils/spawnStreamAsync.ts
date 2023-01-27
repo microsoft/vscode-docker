@@ -229,7 +229,7 @@ export async function spawnStreamAsync(
     }
 
     if (options.onCommand) {
-        options.onCommand([command, ...args].join(' '));
+        options.onCommand([command, ...normalizedArgs].join(' '));
     }
 
     const childProcess = spawn(

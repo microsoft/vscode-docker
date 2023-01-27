@@ -65,11 +65,11 @@ async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
         return false;
     }
 
-    ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.acquiringScript', 'Acquiring latest VsDbg install script...'));
+    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.acquiringScript', 'Acquiring latest VsDbg install script...'));
     await streamToFile(acquisition.url, acquisition.scriptPath);
 
     await ext.context.globalState.update(scriptAcquiredDateKey, Date.now());
-    ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.scriptAcquired', 'Script acquired.'));
+    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.scriptAcquired', 'Script acquired.'));
     return true;
 }
 
@@ -85,13 +85,13 @@ async function executeAcquisitionScriptIfNecessary(runtime: VsDbgRuntime, versio
 
     const command = acquisition.getShellCommand(runtime, version);
 
-    ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.installingDebugger', 'Installing VsDbg, Runtime = {0}, Version = {1}...', runtime, version));
-    ext.outputChannel.appendLine(command);
+    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.installingDebugger', 'Installing VsDbg, Runtime = {0}, Version = {1}...', runtime, version));
+    ext.outputChannel.info(command);
 
     await execAsync(command, {}, (output: string) => {
-        ext.outputChannel.append(output);
+        ext.outputChannel.info(output);
     });
 
     await ext.context.globalState.update(scriptExecutedDateKey, Date.now());
-    ext.outputChannel.appendLine(localize('vscode-docker.debugging.netCore.vsDbgHelper.debuggerInstalled', 'VsDbg installed, Runtime = {0}, Version = {1}...', runtime, version));
+    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.debuggerInstalled', 'VsDbg installed, Runtime = {0}, Version = {1}...', runtime, version));
 }

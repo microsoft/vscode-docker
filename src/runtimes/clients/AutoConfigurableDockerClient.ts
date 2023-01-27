@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
+import { logCommandPath } from '../../utils/diagnostics';
 import { DockerClient } from '../docker';
 import { AutoConfigurableClient } from './AutoConfigurableClient';
 
@@ -17,5 +19,9 @@ export class AutoConfigurableDockerClient extends DockerClient implements AutoCo
         const config = vscode.workspace.getConfiguration('docker');
         const dockerCommand = config.get<string | undefined>('dockerPath') || 'docker';
         this.commandName = dockerCommand;
+
+        ext.outputChannel.debug(`docker.dockerPath: ${this.commandName}`);
+
+        logCommandPath(ext.outputChannel, this.commandName);
     }
 }

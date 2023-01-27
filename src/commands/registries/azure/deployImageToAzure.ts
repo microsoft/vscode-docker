@@ -67,7 +67,7 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
     const site: Site = nonNullProp(wizardContext, 'site');
     const siteUri: string = `https://${site.defaultHostName}`;
     const createdNewWebApp: string = localize('vscode-docker.commands.registries.azure.deployImage.created', 'Successfully created web app "{0}": {1}', site.name, siteUri);
-    ext.outputChannel.appendLine(createdNewWebApp);
+    ext.outputChannel.info(createdNewWebApp);
 
     const openSite: string = localize('vscode-docker.commands.registries.azure.deployImage.openSite', 'Open Site');
     // don't wait
