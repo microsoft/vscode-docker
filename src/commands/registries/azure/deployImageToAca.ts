@@ -5,7 +5,7 @@
 
 import * as semver from 'semver';
 import * as vscode from 'vscode';
-import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { DialogResponses, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { localize } from '../../../localize';
 import { ext } from '../../../extensionVariables';
@@ -15,6 +15,7 @@ import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegis
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
 import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
+import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
 const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum version that is needed
@@ -22,7 +23,7 @@ const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum versi
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
     image: string;
-    loginServer?: string;
+    registryName: string;
     username?: string;
     secret?: string;
 }
@@ -39,7 +40,7 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
     }
 
-    const commandOptions: DeployImageToAcaOptionsContract = {
+    const commandOptions: Partial<DeployImageToAcaOptionsContract> = {
         image: node.fullTag,
     };
 
@@ -49,23 +50,24 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
     if (registry instanceof AzureRegistryTreeItem) {
         // No additional work to do; ACA can handle this on its own
     } else {
-        const { auth, registryPath } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string }, registryPath: string };
+        const { auth } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string } };
 
-        if (!auth?.username || !auth?.password || !registryPath) {
+        if (!auth?.username || !auth?.password) {
             throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.noCredentials', 'No credentials found for registry "{0}".', registry.label));
         }
 
         if (registry instanceof DockerHubNamespaceTreeItem || registry instanceof DockerV2RegistryTreeItemBase) {
             // ACA preference for Docker Hub images to be prefixed with 'docker.io/...'
-            if (!/^docker.io\//.test(commandOptions.image)) {
+            if (!/^docker\.io\//i.test(commandOptions.image)) {
                 commandOptions.image = 'docker.io/' + commandOptions.image;
             }
         }
 
-        commandOptions.loginServer = registryPath;
         commandOptions.username = auth.username;
         commandOptions.secret = auth.password;
     }
+
+    commandOptions.registryName = nonNullProp(parseDockerLikeImageName(commandOptions.image), 'registry');
 
     // Don't wait
     void vscode.commands.executeCommand('containerApps.deployImageApi', commandOptions);

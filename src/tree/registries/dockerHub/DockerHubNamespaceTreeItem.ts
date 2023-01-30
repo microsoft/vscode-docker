@@ -11,8 +11,6 @@ import { IDockerCliCredentials, RegistryTreeItemBase } from "../RegistryTreeItem
 import { DockerHubAccountTreeItem } from "./DockerHubAccountTreeItem";
 import { DockerHubRepositoryTreeItem } from "./DockerHubRepositoryTreeItem";
 
-const dockerHubRegistryUrl: string = 'https://index.docker.io/v1/';
-
 export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
     public parent: DockerHubAccountTreeItem;
     public baseUrl: string = dockerHubUrl;
@@ -59,7 +57,7 @@ export class DockerHubNamespaceTreeItem extends RegistryTreeItemBase {
 
     public async getDockerCliCredentials(): Promise<IDockerCliCredentials> {
         return {
-            registryPath: dockerHubRegistryUrl,
+            registryPath: '',
             auth: {
                 username: this.parent.username,
                 password: await this.parent.getPassword()
