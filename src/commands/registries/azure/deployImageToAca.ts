@@ -57,7 +57,7 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
         }
 
         if (registry instanceof DockerHubNamespaceTreeItem || registry instanceof DockerV2RegistryTreeItemBase) {
-            // ACA preference for Docker Hub images to be prefixed with 'docker.io/...'
+            // Ensure Docker Hub images are prefixed with 'docker.io/...'
             if (!/^docker\.io\//i.test(commandOptions.image)) {
                 commandOptions.image = 'docker.io/' + commandOptions.image;
             }
