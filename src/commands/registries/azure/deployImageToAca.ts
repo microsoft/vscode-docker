@@ -13,7 +13,6 @@ import { registryExpectedContextValues } from '../../../tree/registries/registry
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
-import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 
@@ -56,7 +55,7 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
             throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.noCredentials', 'No credentials found for registry "{0}".', registry.label));
         }
 
-        if (registry instanceof DockerHubNamespaceTreeItem || registry instanceof DockerV2RegistryTreeItemBase) {
+        if (registry instanceof DockerHubNamespaceTreeItem) {
             // Ensure Docker Hub images are prefixed with 'docker.io/...'
             if (!/^docker\.io\//i.test(commandOptions.image)) {
                 commandOptions.image = 'docker.io/' + commandOptions.image;
