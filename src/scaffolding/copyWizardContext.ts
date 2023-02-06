@@ -11,8 +11,11 @@ export function copyWizardContext(wizardContext: Partial<ScaffoldingWizardContex
     }
 
     for (const prop of Object.keys(priorWizardContext)) {
-        // Skip telemetry + error handling
-        if (prop === 'errorHandling' || prop === 'telemetry') {
+        // Skip properties from IActionContext
+        if (prop === 'telemetry' ||
+            prop === 'errorHandling' ||
+            prop === 'ui' ||
+            prop === 'valuesToMask') {
             continue;
         }
 

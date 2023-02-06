@@ -97,6 +97,7 @@
         "onCommand:vscode-docker.registries.copyRemoteFullTag",
         "onCommand:vscode-docker.registries.deleteImage",
         "onCommand:vscode-docker.registries.deployImageToAzure",
+        "onCommand:vscode-docker.registries.deployImageToAca",
         "onCommand:vscode-docker.registries.disconnectRegistry",
         "onCommand:vscode-docker.registries.dockerHub.openInBrowser",
         "onCommand:vscode-docker.registries.help",
@@ -583,6 +584,11 @@
                     "command": "vscode-docker.registries.deployImageToAzure",
                     "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
                     "group": "regs_tag_1_general@4"
+                },
+                {
+                    "command": "vscode-docker.registries.deployImageToAca",
+                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2|GitLabV4);Tag;/ && isAzureAccountInstalled",
+                    "group": "regs_tag_1_general@6"
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
@@ -2595,6 +2601,11 @@
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
+                "command": "vscode-docker.registries.deployImageToAca",
+                "title": "%vscode-docker.commands.registries.deployImageToAca%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
                 "command": "vscode-docker.registries.disconnectRegistry",
                 "title": "%vscode-docker.commands.registries.disconnectRegistry%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
@@ -2869,7 +2880,8 @@
                         "id": "azDeploy",
                         "title": "%vscode-docker.walkthrough.dockerStart.azDeploy.title%",
                         "completionEvents": [
-                            "onCommand:vscode-docker.registries.deployImageToAzure"
+                            "onCommand:vscode-docker.registries.deployImageToAzure",
+                            "onCommand:vscode-docker.registries.deployImageToAca"
                         ],
                         "description": "%vscode-docker.walkthrough.dockerStart.azDeploy.description%",
                         "when": "isAzureAccountInstalled",
