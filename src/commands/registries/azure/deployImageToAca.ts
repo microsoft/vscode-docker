@@ -17,7 +17,7 @@ import { addImageTaggingTelemetry } from '../../images/tagImage';
 import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
-const minimumAcaExtensionVersion = '0.4.0'; // TODO: get the exact minimum version that is needed
+const minimumAcaExtensionVersion = '0.4.0';
 
 // The interface of the command options passed to the Azure Container Apps extension's deployImageToAca command
 interface DeployImageToAcaOptionsContract {
