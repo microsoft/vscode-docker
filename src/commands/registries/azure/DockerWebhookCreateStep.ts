@@ -37,10 +37,10 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
         if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
             const creatingNewWebhook: string = localize('vscode-docker.commands.registries.azure.dockerWebhook.creatingWebhook', 'Creating webhook for web app "{0}"...', context.newSiteName);
-            ext.outputChannel.appendLine(creatingNewWebhook);
+            ext.outputChannel.info(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(context, this._treeItem, context.site, appUri);
-            ext.outputChannel.appendLine(localize('vscode-docker.commands.registries.azure.dockerWebhook.createdWebhook', 'Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
+            ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.dockerWebhook.createdWebhook', 'Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks

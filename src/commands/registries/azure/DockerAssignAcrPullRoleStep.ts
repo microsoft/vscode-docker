@@ -22,7 +22,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
     public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
         const message: string = localize('vscode-docker.commands.registries.azure.deployImage.assigningPullRole', 'Granting permission for App Service to pull image from ACR...');
-        ext.outputChannel.appendLine(message);
+        ext.outputChannel.info(message);
         progress.report({ message: message });
 
         const azExtAzureUtils = await getAzExtAzureUtils();

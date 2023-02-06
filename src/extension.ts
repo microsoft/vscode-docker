@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
-import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createAzExtOutputChannel, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
+import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
@@ -26,6 +26,8 @@ import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
+import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
+import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -42,10 +44,11 @@ const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
 ];
 
+
 function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     ext.context = ctx;
 
-    ext.outputChannel = createAzExtOutputChannel('Docker', ext.prefix);
+    ext.outputChannel = new AzExtLogOutputChannelWrapper(vscode.window.createOutputChannel('Docker', { log: true }), ext.prefix);
     ctx.subscriptions.push(ext.outputChannel);
 
     registerUIExtensionVariables(ext);
@@ -67,6 +70,8 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
             ctx,
             process.env.VSCODE_DOCKER_TEAM === '1' ? tas.TargetPopulation.Team : undefined // If VSCODE_DOCKER_TEAM isn't set, let @microsoft/vscode-azext-utils decide target population
         );
+
+        logSystemInfo(ext.outputChannel);
 
         // Disabled for now
         // (new SurveyManager()).activate();
@@ -151,6 +156,7 @@ function registerEnvironmentVariableContributions(): void {
         actionContext.errorHandling.suppressDisplay = true;
 
         if (e.affectsConfiguration('docker.environment')) {
+            logDockerEnvironment(ext.outputChannel);
             setEnvironmentVariableContributions();
         }
     });

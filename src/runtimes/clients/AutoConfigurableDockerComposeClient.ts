@@ -57,7 +57,7 @@ export class AutoConfigurableDockerComposeClient extends DockerComposeClient imp
             // User has not set a compose command, so we will attempt to autodetect it
 
             try {
-                ext.outputChannel.appendLine('Attempting to autodetect Docker Compose command...');
+                ext.outputChannel.info('Attempting to autodetect Docker Compose command...');
                 await execAsync('docker compose version');
 
                 // If successful, then assume we can use compose V2

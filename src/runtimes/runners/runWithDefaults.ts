@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import * as stream from 'stream';
 import * as vscode from 'vscode';
 import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, NoShell, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
 import { ext } from '../../extensionVariables';
@@ -104,12 +105,43 @@ class DefaultEnvStreamCommandRunnerFactory<TOptions extends DefaultEnvStreamComm
     public constructor(options: TOptions) {
         const errAccumulator = new AccumulatorStream();
 
+        let stdOutPipe: NodeJS.WritableStream | undefined;
+        if (ext.outputChannel.isDebugLoggingEnabled) {
+            stdOutPipe = new stream.PassThrough();
+            stdOutPipe.on('data', (chunk: Buffer) => {
+                try {
+                    ext.outputChannel.debug(chunk.toString());
+                } catch {
+                    // Do not throw on diagnostic errors
+                }
+            });
+        }
+
+        const stdErrPipe = new stream.PassThrough();
+        stdErrPipe.on('data', (chunk: Buffer) => {
+            try {
+                ext.outputChannel.error(chunk.toString());
+            } catch {
+                // Do not throw on diagnostic errors
+            }
+        });
+        stdErrPipe.pipe(errAccumulator);
+
+        const onCommand = (command) => {
+            ext.outputChannel.debug(command);
+            if (typeof options?.onCommand === 'function') {
+                options.onCommand(command);
+            }
+        };
+
         super({
             ...options,
             env: withDockerEnvSettings(process.env),
             shell: false,
             shellProvider: new NoShell(),
-            stdErrPipe: errAccumulator,
+            onCommand,
+            stdOutPipe,
+            stdErrPipe,
             windowsVerbatimArguments: true,
             strict: true,
         });

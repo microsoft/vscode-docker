@@ -157,7 +157,7 @@ export class RefreshManager extends vscode.Disposable {
                         continue;
                     } else {
                         // Emit a message and rethrow to get telemetry
-                        ext.outputChannel.appendLine(
+                        ext.outputChannel.error(
                             localize('vscode-docker.tree.refreshManager.eventSetupFailure', 'Failed to set up event listener: {0}', error.message)
                         );
 
