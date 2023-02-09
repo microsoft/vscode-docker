@@ -1,3 +1,12 @@
+## 1.24.0 - 22 February 2023
+### Added
+* Support has been added for deploying a container image from an image registry (Azure Container Registry, Docker Hub, etc.) to Azure Container Apps. This feature also requires the [Azure Container Apps extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurecontainerapps). [#3535](https://github.com/microsoft/vscode-docker/issues/3535)
+* Some more advanced diagnostic logging is available in the Output window, by using the command "Developer: Set Log Level...", choosing Docker, and changing the log level to "Debug" or "Trace". [#3809](https://github.com/microsoft/vscode-docker/pull/3809)
+
+### Fixed
+* Fixed a longstanding issue with debugging some Python apps when workspaces were used (as opposed to workspace folders). [#3641](https://github.com/microsoft/vscode-docker/issues/3641)
+* By default, Python apps will now be scaffolded with Python 3.10 base images (up from Python 3.8). [#3736](https://github.com/microsoft/vscode-docker/issues/3736)
+
 ## 1.23.3 - 14 December 2022
 ### Fixed
 * Old versions of Docker Engine should no longer show "Invalid JSON" errors in the container view. [#3724](https://github.com/microsoft/vscode-docker/issues/3724)
