@@ -60,6 +60,16 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             const netCoreVersion = semver.coerce(netCoreVersionString);
             wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
             wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
+
+            // append '-preview' at the end of version string to support new .NET 8 preview release naming
+            if (netCoreVersion.major === 8) {
+                wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview`;
+                wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview`;
+            }
+
+            if (netCoreVersion.major >= 8) {
+                wizardContext.netCoreBaseImageDefaultUser = 'app';
+            }
         }
 
         if (!wizardContext.serviceName) {

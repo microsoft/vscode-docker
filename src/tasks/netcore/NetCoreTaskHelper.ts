@@ -231,6 +231,12 @@ export class NetCoreTaskHelper implements TaskHelper {
                 permissions: 'ro'
             };
 
+            const nugetDefaultUserVolume: DockerContainerVolume = {
+                localPath: nugetRootVolume.localPath, // Same local path as the root one
+                containerPath: runOptions.os === 'Windows' ? 'C:\\Users\\ContainerUser\\.nuget\\packages' : '/home/app/.nuget/packages',
+                permissions: 'ro'
+            };
+
             addVolumeWithoutConflicts(volumes, appVolume);
             addVolumeWithoutConflicts(volumes, srcVolume);
             addVolumeWithoutConflicts(volumes, debuggerVolume);
@@ -239,6 +245,9 @@ export class NetCoreTaskHelper implements TaskHelper {
             }
             if (await fse.pathExists(nugetUserVolume.localPath)) {
                 addVolumeWithoutConflicts(volumes, nugetUserVolume);
+            }
+            if (await fse.pathExists(nugetDefaultUserVolume.localPath)) {
+                addVolumeWithoutConflicts(volumes, nugetDefaultUserVolume);
             }
         }
 
