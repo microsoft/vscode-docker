@@ -67,6 +67,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
                 wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview`;
             }
 
+            // change default user to adapt to Debian 12
             if (netCoreVersion.major >= 8) {
                 wizardContext.netCoreBaseImageDefaultUser = 'app';
             }
