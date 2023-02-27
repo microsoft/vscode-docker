@@ -24,6 +24,7 @@ export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContex
     netCoreRuntimeBaseImage?: string;
     netCoreSdkBaseImage?: string;
     netCorePlatformOS?: PlatformOS;
+    netCoreBaseImageDefaultUser?: string;
 }
 
 export function getNetCoreSubWizardOptions(wizardContext: ScaffoldingWizardContext): IWizardOptions<NetCoreScaffoldingWizardContext> {
