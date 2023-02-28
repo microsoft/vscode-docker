@@ -7,7 +7,7 @@
 
 import * as semver from 'semver';
 import * as vscode from "vscode";
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 
 // Adapted from https://github.com/microsoft/vscode-python/blob/main/src/client/api.ts
 interface PythonExtensionAPI {
@@ -32,7 +32,7 @@ export namespace PythonExtensionHelper {
             return debuggerPath;
         }
 
-        throw new Error(localize('vscode-docker.tasks.pythonExt.noDebugger', 'Unable to find the debugger in the Python extension.'));
+        throw new Error(l10n.t('Unable to find the debugger in the Python extension.'));
     }
 
     export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
@@ -40,10 +40,10 @@ export namespace PythonExtensionHelper {
         const minPyExtensionVersion = new semver.SemVer('2020.11.367453362');
 
         const pyExt = vscode.extensions.getExtension(pyExtensionId);
-        const button = localize('vscode-docker.tasks.pythonExt.openExtension', 'Open Extension');
+        const button = l10n.t('Open Extension');
 
         if (!pyExt) {
-            const response = await vscode.window.showErrorMessage(localize('vscode-docker.tasks.pythonExt.pythonExtensionNeeded', 'For debugging Python apps in a container to work, the Python extension must be installed.'), button);
+            const response = await vscode.window.showErrorMessage(l10n.t('For debugging Python apps in a container to work, the Python extension must be installed.'), button);
 
             if (response === button) {
                 await vscode.commands.executeCommand('extension.open', pyExtensionId);
@@ -55,7 +55,7 @@ export namespace PythonExtensionHelper {
         const version = new semver.SemVer(pyExt.packageJSON.version);
 
         if (semver.lt(version, minPyExtensionVersion)) {
-            await vscode.window.showErrorMessage(localize('vscode-docker.tasks.pythonExt.pythonExtensionNotSupported', 'The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
+            await vscode.window.showErrorMessage(l10n.t('The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
             return undefined;
         }
 

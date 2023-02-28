@@ -6,7 +6,7 @@
 import * as fse from 'fs-extra';
 import { Request, RequestInit, Response, default as fetch } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 
 export const enum ErrorHandling {
     ThrowOnError,
@@ -87,7 +87,7 @@ export class HttpResponse<T> implements ResponseLike {
 
 export class HttpErrorResponse extends Error {
     public constructor(public readonly response: ResponseLike) {
-        super(localize('vscode-docker.utils.httpRequest', 'Request to {0} failed with status {1}: {2}', response.url, response.status, response.statusText));
+        super(l10n.t('Request to {0} failed with status {1}: {2}', response.url, response.status, response.statusText));
     }
 
     // This method lets parseError from @microsoft/vscode-azext-utils get the HTTP status code as the error code

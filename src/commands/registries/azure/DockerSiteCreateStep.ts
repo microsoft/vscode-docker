@@ -9,7 +9,7 @@ import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // Thes
 import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
 import { Progress } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { localize } from "../../../localize";
+import { l10n } from 'vscode';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
 import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
@@ -28,7 +28,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
     }
 
     public async execute(context: IAppServiceContainerWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const creatingNewApp: string = localize('vscode-docker.commands.registries.azure.deployImage.creatingWebApp', 'Creating web app "{0}"...', context.newSiteName);
+        const creatingNewApp: string = l10n.t('Creating web app "{0}"...', context.newSiteName);
         ext.outputChannel.info(creatingNewApp);
         progress.report({ message: creatingNewApp });
         const siteConfig = await this.getNewSiteConfig(context);
@@ -84,7 +84,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         else if (registryTI instanceof AzureRegistryTreeItem && context.customLocation) {
             const cred = await registryTI.tryGetAdminCredentials(context);
             if (!cred?.username || !cred?.passwords?.[0]?.value) {
-                throw new Error(localize('vscode-docker.commands.registries.azure.dockersitecreatestep.notAdminEnabled', 'Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));
+                throw new Error(l10n.t('Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));
             }
 
             username = cred.username;
@@ -103,12 +103,12 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
                 username = registryTI.cachedProvider.username;
                 password = await getRegistryPassword(registryTI.cachedProvider);
             } else {
-                throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeA', 'Unrecognized node type "{0}"', registryTI.constructor.name));
+                throw new RangeError(l10n.t('Unrecognized node type "{0}"', registryTI.constructor.name));
             }
 
             registryUrl = registryTI.baseUrl;
         } else {
-            throw new RangeError(localize('vscode-docker.commands.registries.azure.deployImage.unrecognizedNodeTypeB', 'Unrecognized node type "{0}"', registryTI.constructor.name));
+            throw new RangeError(l10n.t('Unrecognized node type "{0}"', registryTI.constructor.name));
         }
 
         if (username && password) {

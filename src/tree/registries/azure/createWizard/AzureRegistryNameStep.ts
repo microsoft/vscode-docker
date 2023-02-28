@@ -5,7 +5,7 @@
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import { AzureNameStep } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../../localize';
+import { l10n } from 'vscode';
 import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../../utils/lazyPackages';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
@@ -20,8 +20,8 @@ export class AzureRegistryNameStep extends AzureNameStep<IAzureRegistryWizardCon
         const armContainerRegistry = await getArmContainerRegistry();
         const client = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         context.newRegistryName = (await context.ui.showInputBox({
-            placeHolder: localize('vscode-docker.tree.registries.azure.createWizard.name', 'Registry name'),
-            prompt: localize('vscode-docker.tree.registries.azure.createWizard.namePrompt', 'Provide a registry name'),
+            placeHolder: l10n.t('Registry name'),
+            prompt: l10n.t('Provide a registry name'),
             /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             validateInput: (name: string) => validateRegistryName(name, client)
         })).trim();
@@ -40,9 +40,9 @@ async function validateRegistryName(name: string, client: ContainerRegistryManag
     const min = 5;
     const max = 50;
     if (name.length < min || name.length > max) {
-        return localize('vscode-docker.tree.registries.azure.createWizard.nameLength', 'The name must be between {0} and {1} characters.', min, max);
+        return l10n.t('The name must be between {0} and {1} characters.', min, max);
     } else if (name.match(/[^a-z0-9]/i)) {
-        return localize('vscode-docker.tree.registries.azure.createWizard.nameAlphanumeric', 'The name can only contain alphanumeric characters.');
+        return l10n.t('The name can only contain alphanumeric characters.');
     } else {
         const nameStatus = await client.registries.checkNameAvailability({ name, type: 'Microsoft.ContainerRegistry/registries' });
         return nameStatus.message;

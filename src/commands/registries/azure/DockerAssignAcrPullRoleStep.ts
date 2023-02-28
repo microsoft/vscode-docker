@@ -8,7 +8,7 @@ import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { Progress } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { localize } from "../../../localize";
+import { l10n } from 'vscode';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
@@ -21,7 +21,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
     }
 
     public async execute(context: IAppServiceWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
-        const message: string = localize('vscode-docker.commands.registries.azure.deployImage.assigningPullRole', 'Granting permission for App Service to pull image from ACR...');
+        const message: string = l10n.t('Granting permission for App Service to pull image from ACR...');
         ext.outputChannel.info(message);
         progress.report({ message: message });
 
@@ -41,7 +41,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(registry?.id)) {
             throw new Error(
-                localize('vscode-docker.commands.registries.deployImage.noRegistryId', 'Unable to get details from Container Registry {0}', registryTreeItem.baseUrl)
+                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.baseUrl)
             );
         }
 
@@ -50,7 +50,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(acrPullRoleDefinition?.id)) {
             throw new Error(
-                localize('vscode-docker.commands.registries.deployImage.noRoleDefinition', 'Unable to get AcrPull role definition on subscription {0}', context.subscriptionId)
+                l10n.t('Unable to get AcrPull role definition on subscription {0}', context.subscriptionId)
             );
         }
 
@@ -59,7 +59,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(siteInfo?.identity?.principalId)) {
             throw new Error(
-                localize('vscode-docker.commands.registries.deployImage.noPrincipalid', 'Unable to get identity principal ID for web site {0}', context.site.name)
+                l10n.t('Unable to get identity principal ID for web site {0}', context.site.name)
             );
         }
 
@@ -75,7 +75,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!config) {
             throw new Error(
-                localize('vscode-docker.commands.registries.deployImage.updateConfig', 'Unable to get configuration for web site {0}', context.site.name)
+                l10n.t('Unable to get configuration for web site {0}', context.site.name)
             );
         }
 

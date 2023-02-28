@@ -8,7 +8,7 @@ import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
@@ -19,8 +19,8 @@ import { TreePrefix } from "../TreePrefix";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, NetworkProperty> {
     public treePrefix: TreePrefix = 'networks';
-    public label: string = localize('vscode-docker.tree.networks.label', 'Networks');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.networks.configure', 'Configure networks explorer');
+    public label: string = l10n.t('Networks');
+    public configureExplorerTitle: string = l10n.t('Configure networks explorer');
     public childType: LocalChildType<ListNetworkItem> = NetworkTreeItem;
     public childGroupType: LocalChildGroupType<ListNetworkItem, NetworkProperty> = NetworkGroupTreeItem;
 

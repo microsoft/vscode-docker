@@ -5,7 +5,7 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 
 export interface NodePackage {
     main?: string;
@@ -52,5 +52,5 @@ export async function inferCommand(nodePackage: NodePackage | undefined, inspect
         }
     }
 
-    throw new Error(localize('vscode-docker.utils.node.noCommand', 'Unable to infer the command to run the application within the container. Set the \'dockerRun.command\' property and include the Node.js \'{0}\' argument.', inspectArgWithPort));
+    throw new Error(l10n.t('Unable to infer the command to run the application within the container. Set the \'dockerRun.command\' property and include the Node.js \'{0}\' argument.', inspectArgWithPort));
 }

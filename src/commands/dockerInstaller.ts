@@ -5,7 +5,7 @@
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../runtimes/runners/TaskCommandRunnerFactory';
 import { runtimeInstallStatusProvider } from '../utils/RuntimeInstallStatusProvider';
 import { streamToFile } from '../utils/httpRequest';
@@ -19,8 +19,8 @@ export abstract class DockerInstallerBase {
     public async downloadAndInstallDocker(context: IActionContext): Promise<void> {
         const shouldInstall: boolean = await this.preInstallCheck();
         if (shouldInstall) {
-            const downloadingMessage: string = localize('vscode-docker.commands.DockerInstallerBase.downloading', 'Downloading Docker installer...');
-            const installationMessage: string = localize('vscode-docker.commands.DockerInstallerBase.installationMessage', 'The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
+            const downloadingMessage: string = l10n.t('Downloading Docker installer...');
+            const installationMessage: string = l10n.t('The Docker Desktop installation is started. Complete the installation and then start Docker Desktop.');
             let downloadedFileName: string;
 
             context.telemetry.properties.stage = 'download';
@@ -29,8 +29,8 @@ export abstract class DockerInstallerBase {
                     { location: vscode.ProgressLocation.Notification, title: downloadingMessage },
                     async () => this.downloadInstaller());
             } catch (error) {
-                const message = localize('vscode-docker.commands.DockerInstallerBase.downloadFailed', 'Downloading the Docker Desktop installer failed. Do you want to manually download and install?');
-                const title = localize('vscode-docker.commands.DockerInstallerBase.download', 'Download');
+                const message = l10n.t('Downloading the Docker Desktop installer failed. Do you want to manually download and install?');
+                const title = l10n.t('Download');
                 this.handleError(context, message, title, this.downloadUrl);
                 throw error;
             }
@@ -42,8 +42,8 @@ export abstract class DockerInstallerBase {
             try {
                 await this.install(context, downloadedFileName, command);
             } catch (error) {
-                const message = `${localize('vscode-docker.commands.DockerInstallerBase.installFailed', 'Docker Desktop installation failed')}. ${error}`;
-                const title = localize('vscode-docker.commands.DockerInstallerBase.openInstallLink', 'Install Instruction');
+                const message = `${l10n.t('Docker Desktop installation failed')}. ${error}`;
+                const title = l10n.t('Install Instruction');
                 this.handleError(context, message, title, 'https://aka.ms/AA37qtj');
                 throw error;
             }
@@ -53,8 +53,8 @@ export abstract class DockerInstallerBase {
     private async preInstallCheck(): Promise<boolean> {
         let proceedInstall = true;
         if (await runtimeInstallStatusProvider.isRuntimeInstalledRealTimeCheck()) {
-            const reinstallMessage = localize('vscode-docker.commands.DockerInstallerBase.reInstall', 'Docker Desktop is already installed. Would you like to reinstall?');
-            const install = localize('vscode-docker.commands.DockerInstallerBase.reinstall', 'Reinstall');
+            const reinstallMessage = l10n.t('Docker Desktop is already installed. Would you like to reinstall?');
+            const install = l10n.t('Reinstall');
             const response = await vscode.window.showInformationMessage(reinstallMessage, ...[install]);
             proceedInstall = response !== undefined;
         }
@@ -87,7 +87,7 @@ export class WindowsDockerInstaller extends DockerInstallerBase {
     }
 
     protected async install(context: IActionContext, fileName: string): Promise<void> {
-        const title = localize('vscode-docker.commands.WindowsDockerInstaller.terminalTitle', 'Docker Install');
+        const title = l10n.t('Docker Install');
         const command = this.getInstallCommand(fileName);
 
         const taskCRF = new TaskCommandRunnerFactory({
@@ -109,7 +109,7 @@ export class MacDockerInstaller extends DockerInstallerBase {
     }
 
     protected async install(context: IActionContext, fileName: string): Promise<void> {
-        const title = localize('vscode-docker.commands.MacDockerInstaller.terminalTitle', 'Docker Install');
+        const title = l10n.t('Docker Install');
         const command = this.getInstallCommand(fileName);
 
         const taskCRF = new TaskCommandRunnerFactory({
@@ -125,11 +125,11 @@ export class MacDockerInstaller extends DockerInstallerBase {
 
 export async function showDockerInstallNotification(): Promise<void> {
     const installMessage = isLinux() ?
-        localize('vscode-docker.commands.dockerInstaller.installDockerInfo', 'Docker is not installed. Would you like to learn more about installing Docker?') :
-        localize('vscode-docker.commands.dockerInstaller.installDocker', 'Docker Desktop is not installed. Would you like to install it?');
+        l10n.t('Docker is not installed. Would you like to learn more about installing Docker?') :
+        l10n.t('Docker Desktop is not installed. Would you like to install it?');
 
-    const learnMore = localize('vscode-docker.commands.dockerInstaller.learnMore', 'Learn more');
-    const install = localize('vscode-docker.commands.dockerInstaller.install', 'Install');
+    const learnMore = l10n.t('Learn more');
+    const install = l10n.t('Install');
 
     const confirmationPrompt: vscode.MessageItem = isLinux() ? { title: learnMore } : { title: install };
     const response = await vscode.window.showInformationMessage(installMessage, ...[confirmationPrompt]);

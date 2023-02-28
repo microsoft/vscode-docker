@@ -9,7 +9,7 @@ import type { Webhook, WebhookCreateParameters } from '@azure/arm-containerregis
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
-import { localize } from "../../../localize";
+import { l10n } from 'vscode';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { AzureRepositoryTreeItem } from '../../../tree/registries/azure/AzureRepositoryTreeItem';
 import { DockerHubRepositoryTreeItem } from '../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem';
@@ -36,15 +36,15 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const siteClient = await parsedSite.createClient(context);
         const appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
         if (this._treeItem.parent instanceof AzureRepositoryTreeItem) {
-            const creatingNewWebhook: string = localize('vscode-docker.commands.registries.azure.dockerWebhook.creatingWebhook', 'Creating webhook for web app "{0}"...', context.newSiteName);
+            const creatingNewWebhook: string = l10n.t('Creating webhook for web app "{0}"...', context.newSiteName);
             ext.outputChannel.info(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(context, this._treeItem, context.site, appUri);
-            ext.outputChannel.info(localize('vscode-docker.commands.registries.azure.dockerWebhook.createdWebhook', 'Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
+            ext.outputChannel.info(l10n.t('Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
         } else if (this._treeItem.parent instanceof DockerHubRepositoryTreeItem) {
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
-            const dockerhubPrompt: string = localize('vscode-docker.commands.registries.azure.dockerWebhook.copyAndOpen', 'Copy & Open');
+            const dockerhubPrompt: string = l10n.t('Copy & Open');
             const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this._treeItem.parent.parent.namespace}/${this._treeItem.parent.repoName}/webHooks`;
 
             // NOTE: The response to the information message is not awaited but handled independently of the wizard steps.
@@ -54,7 +54,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
 
             /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
             vscode.window
-                .showInformationMessage(localize('vscode-docker.commands.registries.azure.dockerWebhook.cicd', 'To set up a CI/CD webhook, open the page "{0}" and enter the URI to the created web app in your dockerhub account', dockerhubUri), dockerhubPrompt)
+                .showInformationMessage(l10n.t('To set up a CI/CD webhook, open the page "{0}" and enter the URI to the created web app in your dockerhub account', dockerhubUri), dockerhubPrompt)
                 .then(response => {
                     if (response) {
                         void vscode.env.clipboard.writeText(appUri);

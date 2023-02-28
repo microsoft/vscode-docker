@@ -9,7 +9,7 @@ import * as path from 'path';
 import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import { isMac, isWindows } from '../../utils/osUtils';
 import { MessageItem } from 'vscode';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 import { execAsync } from '../../utils/execAsync';
 import { PlatformOS } from '../../utils/platform';
@@ -24,8 +24,8 @@ export async function trustCertificateIfNecessary(context: IActionContext): Prom
 
     if (isWindows()) {
         if (!(await isCertificateTrusted())) {
-            const trust: MessageItem = { title: localize('vscode-docker.debugging.netCore.trust', 'Trust') };
-            const message = localize('vscode-docker.debugging.netCore.notTrusted', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`, or click "Trust" below.');
+            const trust: MessageItem = { title: l10n.t('Trust') };
+            const message = l10n.t('The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`, or click "Trust" below.');
 
             // Don't wait
             void context.ui
@@ -39,7 +39,7 @@ export async function trustCertificateIfNecessary(context: IActionContext): Prom
         }
     } else if (isMac()) {
         if (!(await isCertificateTrusted())) {
-            const message = localize('vscode-docker.debugging.netCore.notTrustedRunManual', 'The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`.');
+            const message = l10n.t('The ASP.NET Core HTTPS development certificate is not trusted. To trust the certificate, run `dotnet dev-certs https --trust`.');
 
             // Don't wait
             void context.ui.showWarningMessage(
@@ -67,7 +67,7 @@ export function getHostSecretsFolders(): { hostCertificateFolder: string, hostUs
         appDataEnvironmentVariable = process.env.AppData;
 
         if (appDataEnvironmentVariable === undefined) {
-            throw new Error(localize('vscode-docker.debug.coreclr.sslManager.appDataUndefined', 'The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.'));
+            throw new Error(l10n.t('The environment variable \'AppData\' is not defined. This variable is used to locate the HTTPS certificate and user secrets folders.'));
         }
     }
 

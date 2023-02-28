@@ -6,7 +6,7 @@
 import { ContainerOS, VoidCommandResponse } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getDockerOSType } from '../../utils/osUtils';
@@ -17,7 +17,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.attachShellContainer.noContainers', 'No running containers are available to attach')
+            noItemFoundErrorMessage: l10n.t('No running containers are available to attach')
         });
     }
 
@@ -52,7 +52,7 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
     );
 
     const taskCRF = new TaskCommandRunnerFactory({
-        taskName: localize('vscode-docker.commands.containers.attachShellContainer.terminalTitle', 'Shell: {0}', node.containerName),
+        taskName: l10n.t('Shell: {0}', node.containerName),
         alwaysRunNew: true,
         focus: true,
     });

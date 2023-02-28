@@ -12,7 +12,7 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -162,7 +162,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 await updateBlazorManifest(context, runDefinition);
             }
         } catch (err) {
-            context.terminal.writeWarningLine(localize('vscode-docker.tasks.netCore.failedBlazorUpdate', 'Failed to update Blazor static web assets manifest. Static web assets may not work.\nThe error was: {0}', parseError(err).message));
+            context.terminal.writeWarningLine(l10n.t('Failed to update Blazor static web assets manifest. Static web assets may not work.\nThe error was: {0}', parseError(err).message));
         }
     }
 
@@ -173,7 +173,7 @@ export class NetCoreTaskHelper implements TaskHelper {
             result = resolveVariables(helperOptions.appProject, context.folder);
         } else {
             // Find a .csproj or .fsproj in the folder
-            const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, localize('vscode-docker.tasks.netCore.noCsproj', 'No .NET project file (.csproj or .fsproj) could be found.'));
+            const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, l10n.t('No .NET project file (.csproj or .fsproj) could be found.'));
             result = item.absoluteFilePath;
         }
 

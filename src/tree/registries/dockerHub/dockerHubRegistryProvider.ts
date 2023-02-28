@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { RegistryApi } from "../all/RegistryApi";
 import { IRegistryProvider } from "../IRegistryProvider";
 import { deleteRegistryPassword, setRegistryPassword } from '../registryPasswords';
@@ -16,11 +16,11 @@ export const dockerHubRegistryProvider: IRegistryProvider = {
     id: dockerHubRegistryProviderId,
     api: RegistryApi.DockerHubV2,
     connectWizardOptions: {
-        wizardTitle: localize('vscode-docker.tree.registries.dockerHub.signIn', 'Sign in to Docker Hub'),
+        wizardTitle: l10n.t('Sign in to Docker Hub'),
         includeUsername: true,
-        usernamePrompt: localize('vscode-docker.tree.registries.dockerHub.dockerID', 'Visit hub.docker.com to sign up for a Docker ID'),
-        usernamePlaceholder: localize('vscode-docker.tree.registries.dockerHub.enterID', 'Enter your Docker ID'),
-        passwordPrompt: localize('vscode-docker.tree.registries.dockerHub.enterPassword', 'Enter your password or personal access token'),
+        usernamePrompt: l10n.t('Visit hub.docker.com to sign up for a Docker ID'),
+        usernamePlaceholder: l10n.t('Enter your Docker ID'),
+        passwordPrompt: l10n.t('Enter your password or personal access token'),
         includePassword: true,
     },
     treeItemFactory: (parent, cachedProvider) => new DockerHubAccountTreeItem(parent, cachedProvider),

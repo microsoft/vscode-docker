@@ -5,12 +5,12 @@
 
 import { AzureWizardPromptStep } from '@microsoft/vscode-azext-utils';
 import { InputBoxOptions } from 'vscode';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
 export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
     public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
-        const prompt: string = context.usernamePrompt || (context.isUsernameOptional ? localize('vscode-docker.tree.registries.connectWizard.enterUsernameOptional', 'Enter your username, or press \'Enter\' for none') : localize('vscode-docker.tree.registries.connectWizard.enterUsernameRequired', 'Enter your username'));
+        const prompt: string = context.usernamePrompt || (context.isUsernameOptional ? l10n.t('Enter your username, or press \'Enter\' for none') : l10n.t('Enter your username'));
         const options: InputBoxOptions = {
             prompt,
             placeHolder: context.usernamePlaceholder,
@@ -30,9 +30,9 @@ export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistry
 
     private validateInput(context: IConnectRegistryWizardContext, value: string | undefined): string | undefined {
         if (!context.isUsernameOptional && !value) {
-            return localize('vscode-docker.tree.registries.connectWizard.usernameEmpty', 'Username cannot be empty.');
+            return l10n.t('Username cannot be empty.');
         } else if (context.existingProviders.find(rp => rp.url === context.url && rp.username === value)) {
-            return localize('vscode-docker.tree.registries.connectWizard.usernameConnected', 'Username "{0}" is already connected.', value);
+            return l10n.t('Username "{0}" is already connected.', value);
         } else {
             return undefined;
         }

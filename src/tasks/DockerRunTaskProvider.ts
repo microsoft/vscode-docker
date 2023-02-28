@@ -7,7 +7,7 @@ import { RunContainerBindMount } from '../runtimes/docker';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
@@ -90,7 +90,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
         if (!dockerRun.image) {
-            throw new Error(localize('vscode-docker.tasks.runProvider.noDockerImage', 'No Docker image name was provided or resolved.'));
+            throw new Error(l10n.t('No Docker image name was provided or resolved.'));
         }
     }
 

@@ -6,7 +6,7 @@
 import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { RequestOptionsLike, httpRequest } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
@@ -14,7 +14,7 @@ const refreshTokens: { [key: string]: string } = {};
 function parseResourceId(id: string): RegExpMatchArray {
     const matches: RegExpMatchArray | null = id.match(/\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/(.*)\/(.*)/i);
     if (matches === null || matches.length < 3) {
-        throw new Error(localize('vscode-docker.utils.azure.invalidResourceId', 'Invalid Azure Resource Id'));
+        throw new Error(l10n.t('Invalid Azure Resource Id'));
     }
     return matches;
 }

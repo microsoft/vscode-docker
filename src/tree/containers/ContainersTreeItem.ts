@@ -7,7 +7,7 @@ import { ListContainersItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
@@ -23,8 +23,8 @@ export type DockerContainerInfo = ListContainersItem & {
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
     public treePrefix: TreePrefix = 'containers';
-    public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
+    public label: string = l10n.t('Containers');
+    public configureExplorerTitle: string = l10n.t('Configure containers explorer');
 
     public childType: LocalChildType<DockerContainerInfo> = ContainerTreeItem;
     public childGroupType: LocalChildGroupType<DockerContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
@@ -92,7 +92,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         if (this.newContainerUser) {
-            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Tutorial: Get started with Docker'), 'https://aka.ms/getstartedwithdocker');
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, l10n.t('Tutorial: Get started with Docker'), 'https://aka.ms/getstartedwithdocker');
             dockerTutorialTreeItem.iconPath = new ThemeIcon('link-external');
             return [dockerTutorialTreeItem];
         }

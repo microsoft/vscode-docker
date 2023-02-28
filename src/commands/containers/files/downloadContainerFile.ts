@@ -7,7 +7,7 @@ import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-util
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { FileTreeItem } from '../../../tree/containers/files/FileTreeItem';
 import { multiSelectNodes } from '../../../utils/multiSelectNodes';
 
@@ -25,20 +25,20 @@ async function fileExists(file: vscode.Uri): Promise<boolean> {
 }
 
 const overwriteFile: vscode.MessageItem = {
-    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.overwriteFile', 'Overwrite File')
+    title: l10n.t('Overwrite File')
 };
 
 const skipFile: vscode.MessageItem = {
-    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.skipFile', 'Skip File')
+    title: l10n.t('Skip File')
 };
 
 const cancelDownload: vscode.MessageItem = {
-    title: localize('vscode-docker.commands.containers.files.downloadContainerFile.cancelDownload', 'Cancel')
+    title: l10n.t('Cancel')
 };
 
 export async function downloadContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.files.downloadContainerFile.noFiles', 'No files are available to download.') },
+        { ...context, noItemFoundErrorMessage: l10n.t('No files are available to download.') },
         ext.containersTree,
         'containerFile',
         node,
@@ -50,8 +50,8 @@ export async function downloadContainerFile(context: IActionContext, node?: File
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
-            openLabel: localize('vscode-docker.commands.containers.files.downloadContainerFile.openLabel', 'Select'),
-            title: localize('vscode-docker.commands.containers.files.downloadContainerFile.openTitle', 'Select folder for download')
+            openLabel: l10n.t('Select'),
+            title: l10n.t('Select folder for download')
         });
 
     if (localFolderUris === undefined || localFolderUris.length === 0) {
@@ -74,7 +74,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
-            title: localize('vscode-docker.commands.containers.files.downloadContainerFile.opening', 'Downloading File(s)...'),
+            title: l10n.t('Downloading File(s)...'),
             cancellable: true
         },
         async (task, token) => {
@@ -87,7 +87,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
 
                 if (localFileExists) {
                     const result = await vscode.window.showWarningMessage(
-                        localize('vscode-docker.commands.containers.files.downloadContainerFile.existingFileWarning', 'The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
+                        l10n.t('The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
                         overwriteFile,
                         skipFile,
                         cancelDownload);

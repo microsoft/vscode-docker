@@ -6,7 +6,7 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 
 export async function copyFullTag(context: IActionContext, node: ImageTreeItem | undefined): Promise<string> {
@@ -14,7 +14,7 @@ export async function copyFullTag(context: IActionContext, node: ImageTreeItem |
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.images.copyFullTag.noImages', 'No images are available to copy tag')
+            noItemFoundErrorMessage: l10n.t('No images are available to copy tag')
         });
     }
     // eslint-disable-next-line @typescript-eslint/no-floating-promises

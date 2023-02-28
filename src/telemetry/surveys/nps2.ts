@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { Survey } from './SurveyManager';
 
 export const nps2: Survey = {
     id: 'nps2',
     buttons: new Map<string, string | undefined>([
-        [localize('vscode-docker.survey.nps.take', 'Take survey'), 'https://aka.ms/vscodedockernpsinproduct'],
-        [localize('vscode-docker.survey.nps.never', 'Don\'t ask again'), undefined],
+        [l10n.t('Take survey'), 'https://aka.ms/vscodedockernpsinproduct'],
+        [l10n.t('Don\'t ask again'), undefined],
     ]),
-    prompt: localize('vscode-docker.survey.nps.prompt', 'Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
+    prompt: l10n.t('Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
     activationDelayMs: 60 * 1000,
     isEligible: isNPSEligible,
 };

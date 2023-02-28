@@ -6,14 +6,14 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { FileTreeItem } from '../../../tree/containers/files/FileTreeItem';
 import { multiSelectNodes } from '../../../utils/multiSelectNodes';
 import { getCancelPromise } from '../../../utils/promiseUtils';
 
 export async function openContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.files.openContainerFile.noFiles', 'No files are available to open.') },
+        { ...context, noItemFoundErrorMessage: l10n.t('No files are available to open.') },
         ext.containersTree,
         'containerFile',
         node,
@@ -23,7 +23,7 @@ export async function openContainerFile(context: IActionContext, node?: FileTree
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
-            title: localize('vscode-docker.commands.containers.files.openContainerFile.opening', 'Opening File(s)...'),
+            title: l10n.t('Opening File(s)...'),
             cancellable: true
         },
         async (task, token) => {

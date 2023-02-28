@@ -8,7 +8,7 @@ import * as path from 'path';
 import { Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
@@ -81,13 +81,13 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
         if (!dockerBuild.context) {
-            throw new Error(localize('vscode-docker.tasks.buildProvider.noBuildContext', 'No Docker build context was provided or resolved.'));
+            throw new Error(l10n.t('No Docker build context was provided or resolved.'));
         } else if (!await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.context, context.folder)))) {
-            throw new Error(localize('vscode-docker.tasks.buildProvider.invalidBuildContext', 'The Docker build context \'{0}\' does not exist or could not be accessed.', dockerBuild.context));
+            throw new Error(l10n.t('The Docker build context \'{0}\' does not exist or could not be accessed.', dockerBuild.context));
         }
 
         if (dockerBuild.dockerfile && !await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerBuild.dockerfile, context.folder)))) {
-            throw new Error(localize('vscode-docker.tasks.buildProvider.invalidDockerfile', 'The Dockerfile \'{0}\' does not exist or could not be accessed.', dockerBuild.dockerfile));
+            throw new Error(l10n.t('The Dockerfile \'{0}\' does not exist or could not be accessed.', dockerBuild.dockerfile));
         }
     }
 }

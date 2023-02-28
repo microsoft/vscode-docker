@@ -6,7 +6,7 @@
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { MarkdownString, ThemeColor, ThemeIcon } from "vscode";
 import { ext } from '../../extensionVariables';
-import { localize } from "../../localize";
+import { l10n } from 'vscode';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";
@@ -47,7 +47,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
     }
 
     public get description(): string | undefined {
-        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.outdated ? localize('vscode-docker.tree.images.outdated', ' (Out of date)') : ''}`;
+        return `${ext.imagesRoot.getTreeItemDescription(this._item)}${this._item.outdated ? l10n.t(' (Out of date)') : ''}`;
     }
 
     public get iconPath(): ThemeIcon {

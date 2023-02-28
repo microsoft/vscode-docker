@@ -6,7 +6,7 @@
 import * as path from 'path';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { hasTask } from '../../../tasks/TaskHelper';
 import { getValidImageNameFromPath } from '../../../utils/getValidImageName';
 import { getNetCoreProjectInfo } from '../../../utils/netCoreUtils';
@@ -38,7 +38,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', wizardContext.artifact);
 
         if (projectInfo.length < 2) {
-            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noProjectInfo', 'Unable to determine project info for \'{0}\'', wizardContext.artifact));
+            throw new Error(l10n.t('Unable to determine project info for \'{0}\'', wizardContext.artifact));
         }
 
         if (!wizardContext.netCoreAssemblyName) {
@@ -51,7 +51,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             const regexMatch = /net(coreapp)?([\d.]+)/i.exec(this.targetFramework);
 
             if (!regexMatch || regexMatch.length < 3) {
-                throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noNetCoreVersion', 'Unable to determine .NET target framework version for \'{0}\'', wizardContext.artifact));
+                throw new Error(l10n.t('Unable to determine .NET target framework version for \'{0}\'', wizardContext.artifact));
             }
 
             const [, , netCoreVersionString] = regexMatch;
@@ -104,7 +104,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             wizardContext.errorHandling.suppressReportIssue = true;
             wizardContext.errorHandling.buttons = [
                 {
-                    title: localize('vscode-docker.scaffold.netCoreGatherInformationStep.openCSharpExt', 'Open Extension'),
+                    title: l10n.t('Open Extension'),
                     callback: async () => vscode.commands.executeCommand('extension.open', cSharpExtensionId),
                 }
             ];
@@ -127,7 +127,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             await vscode.window.withProgress(
                 {
                     location: vscode.ProgressLocation.Notification,
-                    title: localize('vscode-docker.scaffold.netCoreGatherInformationStep.activatingCSharp', 'Activating C# extension...')
+                    title: l10n.t('Activating C# extension...')
                 },
                 async () => {
                     // Await the C# extension initialization, which includes Omnisharp server init
@@ -151,9 +151,9 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
         const cSharpExtensionVersion: semver.SemVer | undefined = cSharpExtension ? new semver.SemVer((<{ version: string }>cSharpExtension.packageJSON).version) : undefined;
 
         if (!cSharpExtension || !cSharpExtensionVersion) {
-            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.noCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
+            throw new Error(l10n.t('Cannot generate Dockerfiles for a .NET project unless the C# extension is installed.'));
         } else if (semver.lt(cSharpExtensionVersion, minCSharpVersionString)) {
-            throw new Error(localize('vscode-docker.scaffold.netCoreGatherInformationStep.badVersionCSharpExtension', 'Cannot generate Dockerfiles for a .NET project unless version {0} or higher of the C# extension is installed.', minCSharpVersionString));
+            throw new Error(l10n.t('Cannot generate Dockerfiles for a .NET project unless version {0} or higher of the C# extension is installed.', minCSharpVersionString));
         }
 
         return await cSharpExtension.activate();

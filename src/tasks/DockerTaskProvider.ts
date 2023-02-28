@@ -7,7 +7,7 @@ import { IActionContext, callWithTelemetryAndErrorHandling, parseError } from '@
 import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
@@ -43,7 +43,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 ext.activityMeasurementService.recordActivity('overallnoedit');
 
                 if (!context.folder) {
-                    throw new Error(localize('vscode-docker.tasks.provider.noScope', 'Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));
+                    throw new Error(l10n.t('Unable to determine task scope to execute {0} task \'{1}\'. Please open a workspace folder.', this.telemetryName, task.name));
                 }
 
                 context.actionContext = actionContext;

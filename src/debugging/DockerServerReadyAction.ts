@@ -13,7 +13,7 @@ import * as util from 'util';
 import * as vscode from 'vscode';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { ResolvedDebugConfiguration } from './DebugHelper';
 
 const PATTERN = 'listening on.* (https?://\\S+|[0-9]+)'; // matches "listening on port 3000" or "Now listening on: https://localhost:5001"
@@ -53,7 +53,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
         const format = args.uriFormat || URI_FORMAT;
 
         if (!args || !args.containerName) {
-            throw new Error(localize('vscode-docker.debug.serverReady.noContainer', 'No container name was resolved or provided to DockerServerReadyAction.'));
+            throw new Error(l10n.t('No container name was resolved or provided to DockerServerReadyAction.'));
         }
 
         await callWithTelemetryAndErrorHandling('dockerServerReadyAction.serverReadyDetector.openExternalWithString', async (context: IActionContext) => {
@@ -66,7 +66,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 // nothing captured by reg exp -> use the uriFormat as the target url without substitution
                 // verify that format does not contain '%s'
                 if (format.indexOf('%s') >= 0) {
-                    const errMsg = localize('vscode-docker.debug.serverReady.noCapture', 'Format uri (\'{0}\') uses a substitution placeholder but pattern did not capture anything.', format);
+                    const errMsg = l10n.t('Format uri (\'{0}\') uses a substitution placeholder but pattern did not capture anything.', format);
                     void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
@@ -76,7 +76,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 // verify that format only contains a single '%s'
                 const s = format.split('%s');
                 if (s.length !== 2) {
-                    const errMsg = localize('vscode-docker.debug.serverReady.oneSubstitution', 'Format uri (\'{0}\') must contain exactly one substitution placeholder.', format);
+                    const errMsg = l10n.t('Format uri (\'{0}\') must contain exactly one substitution placeholder.', format);
                     void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
@@ -89,7 +89,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                 const containerPort = this.getContainerPort(captureString);
 
                 if (containerPort === undefined) {
-                    const errMsg = localize('vscode-docker.debug.serverReady.noCapturedPort', 'Captured string (\'{0}\') must contain a port number.', captureString);
+                    const errMsg = l10n.t('Captured string (\'{0}\') must contain a port number.', captureString);
                     void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
@@ -106,7 +106,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                     // There are exactly two substitutions (which is expected)...
                     captureString = util.format(format, containerProtocol, hostPort);
                 } else {
-                    const errMsg = localize('vscode-docker.debug.serverReady.twoSubstitutions', 'Format uri (\'{0}\') must contain exactly two substitution placeholders.', format);
+                    const errMsg = l10n.t('Format uri (\'{0}\') must contain exactly two substitution placeholders.', format);
                     void vscode.window.showErrorMessage(errMsg, { modal: true });
                     return;
                 }
@@ -140,7 +140,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
         const hostPort = containerInspectInfo?.ports.find(p => p.containerPort === containerPort)?.hostPort;
 
         if (!hostPort) {
-            throw new Error(localize('vscode-docker.debug.serverReady.noHostPortA', 'Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, containerName));
+            throw new Error(l10n.t('Could not determine host port mapped to container port {0} in container \'{1}\'.', containerPort, containerName));
         }
 
         return hostPort;
@@ -167,7 +167,7 @@ class ServerReadyDetector implements DockerServerReadyDetector {
                             webRoot: args.webRoot || WEB_ROOT
                         });
                 } else {
-                    const errMsg = localize('vscode-docker.debug.serverReady.noChrome', 'The action \'debugWithChrome\' requires the \'Debugger for Chrome\' extension.');
+                    const errMsg = l10n.t('The action \'debugWithChrome\' requires the \'Debugger for Chrome\' extension.');
                     void vscode.window.showErrorMessage(errMsg, { modal: true });
                 }
                 break;

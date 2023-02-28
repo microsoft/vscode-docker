@@ -8,7 +8,7 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { Task } from 'vscode';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerComposeOptions, DockerComposeTaskDefinitionBase } from './DockerComposeTaskDefinitionBase';
@@ -74,25 +74,25 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
 
     private async validateResolvedDefinition(context: DockerComposeTaskContext, dockerCompose: DockerComposeOptions): Promise<void> {
         if (dockerCompose.up && dockerCompose.down) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.bothUpAndDown', 'Both "up" and "down" properties are present in the docker-compose task.'));
+            throw new Error(l10n.t('Both "up" and "down" properties are present in the docker-compose task.'));
         }
 
         if (!dockerCompose.up && !dockerCompose.down) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.noUpOrDown', 'Neither "up" nor "down" properties are present in the docker-compose task.'));
+            throw new Error(l10n.t('Neither "up" nor "down" properties are present in the docker-compose task.'));
         }
 
         if (dockerCompose.up?.services && dockerCompose.up?.profiles) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.bothServicesAndProfiles', 'Both "services" and "profiles" are present in the docker-compose task\'s "up" property.'));
+            throw new Error(l10n.t('Both "services" and "profiles" are present in the docker-compose task\'s "up" property.'));
         }
 
         for (const file of dockerCompose.files) {
             if (!(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(file, context.folder))))) {
-                throw new Error(localize('vscode-docker.tasks.composeProvider.invalidFile', 'One or more docker-compose files does not exist or could not be accessed.'));
+                throw new Error(l10n.t('One or more docker-compose files does not exist or could not be accessed.'));
             }
         }
 
         if (dockerCompose.envFile && !(await fse.pathExists(path.resolve(context.folder.uri.fsPath, resolveVariables(dockerCompose.envFile, context.folder))))) {
-            throw new Error(localize('vscode-docker.tasks.composeProvider.invalidEnvFile', 'Environment file does not exist or could not be accessed.'));
+            throw new Error(l10n.t('Environment file does not exist or could not be accessed.'));
         }
     }
 

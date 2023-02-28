@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, IWizardOptions } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';
 import { ScaffoldDebuggingStep } from '../ScaffoldDebuggingStep';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
 import { NodeGatherInformationStep } from './NodeGatherInformationStep';
 
-const choosePackageFile = localize('vscode-docker.scaffold.platforms.node.choosePackage', 'Choose a package.json file');
+const choosePackageFile = l10n.t('Choose a package.json file');
 const nodeGlobPatterns = ['**/{[Pp][Aa][Cc][Kk][Aa][Gg][Ee].[Jj][Ss][Oo][Nn]}'];
-const noPackageFile = localize('vscode-docker.scaffold.platforms.node.noPackage', 'No package.json files were found in the workspace.');
+const noPackageFile = l10n.t('No package.json files were found in the workspace.');
 
 export interface NodeScaffoldingWizardContext extends ScaffoldingWizardContext {
     nodeCmdParts?: string[];

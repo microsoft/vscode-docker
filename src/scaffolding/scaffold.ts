@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { copyWizardContext } from './copyWizardContext';
 import { ChooseComposeStep } from './wizard/ChooseComposeStep';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
@@ -37,7 +37,7 @@ export async function scaffold(wizardContext: Partial<ScaffoldingWizardContext>,
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {
         promptSteps: promptSteps,
         executeSteps: executeSteps,
-        title: localize('vscode-docker.scaffold.addDockerFiles', 'Add Docker Files'),
+        title: l10n.t('Add Docker Files'),
     });
 
     await wizard.prompt();

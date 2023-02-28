@@ -9,13 +9,13 @@ import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils
 import { DockerUri } from './DockerUri';
 import { getDockerOSType } from '../../utils/osUtils';
 import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '../docker';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
-        super(localize('docker.files.containerFilesProvider.methodNotImplemented', 'Method not implemented.'));
+        super(l10n.t('Method not implemented.'));
     }
 }
 

@@ -10,7 +10,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { getDockerOSType } from '../../utils/osUtils';
 
@@ -19,7 +19,7 @@ export async function runAzureCliImage(context: IActionContext): Promise<void> {
     context.telemetry.properties.dockerOSType = osType;
 
     if (osType === "windows") {
-        const message = localize('vscode-docker.commands.images.runAzureCli.linuxOnly', 'Currently, you can only run the Azure CLI when running Linux based containers.');
+        const message = l10n.t('Currently, you can only run the Azure CLI when running Linux based containers.');
         if (await vscode.window.showErrorMessage(message, DialogResponses.learnMore) === DialogResponses.learnMore) {
             await vscode.env.openExternal(vscode.Uri.parse('https://docs.docker.com/docker-for-windows/#/switch-between-windows-and-linux-containers'));
         }

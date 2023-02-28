@@ -9,7 +9,7 @@ import { ConfigurationTarget, ThemeColor, ThemeIcon, WorkspaceConfiguration, wor
 import { showDockerInstallNotification } from "../commands/dockerInstaller";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
-import { localize } from "../localize";
+import { l10n } from 'vscode';
 import { runtimeInstallStatusProvider } from "../utils/RuntimeInstallStatusProvider";
 import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from "../utils/getVSCodeRemoteInfo";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
@@ -82,7 +82,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         return [new GenericTreeItem(this, {
-            label: localize('vscode-docker.tree.noItemsFound', 'No items found'),
+            label: l10n.t('No items found'),
             iconPath: new ThemeIcon('info'),
             contextValue: 'dockerNoItems'
         })];
@@ -224,31 +224,31 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
     public getSettingWizardInfoList(): ITreeSettingWizardInfo[] {
         return [
             {
-                label: localize('vscode-docker.tree.config.label.label', 'Label'),
+                label: l10n.t('Label'),
                 setting: labelKey,
                 currentValue: this.labelSetting,
-                description: localize('vscode-docker.tree.config.label.description', 'The primary property to display.'),
+                description: l10n.t('The primary property to display.'),
                 settingInfo: this.labelSettingInfo
             },
             {
-                label: localize('vscode-docker.tree.config.description.label', 'Description'),
+                label: l10n.t('Description'),
                 setting: descriptionKey,
                 currentValue: this.descriptionSetting,
-                description: localize('vscode-docker.tree.config.description.description', 'Any secondary properties to display.'),
+                description: l10n.t('Any secondary properties to display.'),
                 settingInfo: this.descriptionSettingInfo
             },
             {
-                label: localize('vscode-docker.tree.config.groupBy.label', 'Group By'),
+                label: l10n.t('Group By'),
                 setting: groupByKey,
                 currentValue: this.groupBySetting,
-                description: localize('vscode-docker.tree.config.groupBy.description', 'The property used for grouping.'),
+                description: l10n.t('The property used for grouping.'),
                 settingInfo: this.groupBySettingInfo
             },
             {
-                label: localize('vscode-docker.tree.config.sortBy.label', 'Sort By'),
+                label: l10n.t('Sort By'),
                 setting: sortByKey,
                 currentValue: this.sortBySetting,
-                description: localize('vscode-docker.tree.config.sortBy.description', 'The property used for sorting.'),
+                description: l10n.t('The property used for sorting.'),
                 settingInfo: this.sortBySettingInfo
             },
         ];
@@ -285,22 +285,22 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
     private async getDockerErrorTreeItems(context: IActionContext, error: unknown, dockerInstalled: boolean): Promise<AzExtTreeItem[]> {
         const parsedError = parseError(error);
         if (isCommandNotSupportedError(error)) {
-            return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.contextNotSupported', 'This view is not supported in the current context.'), contextValue: 'contextNotSupported' })];
+            return [new GenericTreeItem(this, { label: l10n.t('This view is not supported in the current context.'), contextValue: 'contextNotSupported' })];
         } else if (parsedError.isUserCancelledError) {
-            return [new GenericTreeItem(this, { label: localize('vscode-docker.tree.changingContexts', 'Changing context...'), contextValue: 'changingContexts' })];
+            return [new GenericTreeItem(this, { label: l10n.t('Changing context...'), contextValue: 'changingContexts' })];
         }
 
         const result: AzExtTreeItem[] = dockerInstalled
             ? [
-                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunning', 'Failed to connect. Is {0} running?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) }),
-                new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotRunningError', '  Error: {0}', parsedError.message), contextValue: 'connectionError' }),
-                new OpenUrlTreeItem(this, localize('vscode-docker.tree.additionalTroubleshooting', 'Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
+                new GenericTreeItem(this, { label: l10n.t('Failed to connect. Is {0} running?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) }),
+                new GenericTreeItem(this, { label: l10n.t('  Error: {0}', parsedError.message), contextValue: 'connectionError' }),
+                new OpenUrlTreeItem(this, l10n.t('Additional Troubleshooting...'), 'https://aka.ms/AA37qt2')
             ]
-            : [new GenericTreeItem(this, { label: localize('vscode-docker.tree.dockerNotInstalled', 'Failed to connect. Is {0} installed?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) })];
+            : [new GenericTreeItem(this, { label: l10n.t('Failed to connect. Is {0} installed?', (await ext.runtimeManager.getClient()).displayName), contextValue: 'connectionError', iconPath: new ThemeIcon('warning', new ThemeColor('problemsWarningIcon.foreground')) })];
 
         const remoteInfo: IVSCodeRemoteInfo = getVSCodeRemoteInfo(context);
         if (remoteInfo.extensionKind === DockerExtensionKind.workspace && remoteInfo.remoteKind === RemoteKind.devContainer) {
-            const ti = new OpenUrlTreeItem(this, localize('vscode-docker.tree.runningInDevContainer', 'Running Docker in a dev container...'), 'https://aka.ms/AA5xva6');
+            const ti = new OpenUrlTreeItem(this, l10n.t('Running Docker in a dev container...'), 'https://aka.ms/AA5xva6');
             result.push(ti);
         }
 

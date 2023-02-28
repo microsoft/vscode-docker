@@ -5,14 +5,14 @@
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function pullImage(context: IActionContext, node?: ImageTreeItem, nodes?: ImageTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: localize('vscode-docker.commands.images.pull.noImages', 'No images are available to pull') },
+        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: l10n.t('No images are available to pull') },
         ext.imagesTree,
         ImageTreeItem.contextValue,
         node,
@@ -24,7 +24,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
     const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory(
         {
-            taskName: localize('vscode-docker.commands.images.pull.terminalTitle', 'Pull images')
+            taskName: l10n.t('Pull images')
         }
     );
 
@@ -33,7 +33,7 @@ export async function pullImage(context: IActionContext, node?: ImageTreeItem, n
         if (/:<none>/i.test(n.fullTag)) {
             // Warn only once
             if (!noneTagWarningShown) {
-                void context.ui.showWarningMessage(localize('vscode-docker.commands.images.pull.noneTag', 'Images without tags will be skipped.'));
+                void context.ui.showWarningMessage(l10n.t('Images without tags will be skipped.'));
                 noneTagWarningShown = true;
             }
 

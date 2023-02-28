@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 import { TelemetryPromptStep } from './TelemetryPromptStep';
 
@@ -19,12 +19,12 @@ export class ChoosePortsStep extends TelemetryPromptStep<ScaffoldingWizardContex
 
         const opt: vscode.InputBoxOptions = {
             placeHolder: suggestedPorts.join(', '),
-            prompt: localize('vscode-docker.scaffold.choosePortsStep.whatPorts', 'What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.'),
+            prompt: l10n.t('What port(s) does your app listen on? Enter a comma-separated list, or empty for no exposed port.'),
             value: suggestedPorts.join(', '),
             validateInput: (value: string): string | undefined => {
                 const result = splitPorts(value);
                 if (!result) {
-                    return localize('vscode-docker.scaffold.choosePortsStep.portsFormat', 'Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.');
+                    return l10n.t('Ports must be a comma-separated list of positive integers (1 to 65535), or empty for no exposed port.');
                 }
 
                 return undefined;

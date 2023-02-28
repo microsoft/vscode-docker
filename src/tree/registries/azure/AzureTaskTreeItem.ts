@@ -6,7 +6,7 @@
 import type { Task as AcrTask, TaskRun as AcrTaskRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, nonNullValue, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";
@@ -32,7 +32,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
     }
 
     public get label(): string {
-        return this._task ? this.taskName : localize('vscode-docker.tree.registries.azure.runsWithoutTask', 'Runs without a task');
+        return this._task ? this.taskName : l10n.t('Runs without a task');
     }
 
     public get taskName(): string {
@@ -58,7 +58,7 @@ export class AzureTaskTreeItem extends AzExtParentTreeItem {
 
         if (clearCache && runListResult.length === 0 && this._task) {
             const ti = new GenericTreeItem(this, {
-                label: localize('vscode-docker.tree.registries.azure.runTask', 'Run Task...'),
+                label: l10n.t('Run Task...'),
                 commandId: 'vscode-docker.registries.azure.runTask',
                 contextValue: 'runTask'
             });

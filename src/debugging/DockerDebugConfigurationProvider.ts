@@ -7,7 +7,7 @@ import { IActionContext, callWithTelemetryAndErrorHandling, registerEvent } from
 import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, DebugSession, MessageItem, ProviderResult, WorkspaceFolder, commands, debug, window, workspace } from 'vscode';
 import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
@@ -43,12 +43,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        const add: MessageItem = { title: localize('vscode-docker.debug.configProvider.addDockerFiles', 'Add Docker Files') };
+        const add: MessageItem = { title: l10n.t('Add Docker Files') };
 
         // Prompt them to add Docker files since they probably haven't
         /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
         window.showErrorMessage(
-            localize('vscode-docker.debug.configProvider.toDebugAddDockerFiles', 'To debug in a Docker container on supported platforms, use the command "Docker: Add Docker Files to Workspace", or click "Add Docker Files".'),
+            l10n.t('To debug in a Docker container on supported platforms, use the command "Docker: Add Docker Files to Workspace", or click "Add Docker Files".'),
             ...[add])
             .then((result) => {
                 if (result === add) {
@@ -72,7 +72,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                     if (!folder) {
                         actionContext.errorHandling.suppressReportIssue = true;
-                        throw new Error(localize('vscode-docker.debug.configProvider.workspaceFolder', 'To debug with Docker you must first open a folder or workspace in VS Code.'));
+                        throw new Error(l10n.t('To debug with Docker you must first open a folder or workspace in VS Code.'));
                     }
                 }
 
@@ -83,7 +83,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
 
                 if (!debugConfiguration.request) {
-                    throw new Error(localize('vscode-docker.debug.configProvider.requestRequired', 'The property "request" must be specified in the debug config.'));
+                    throw new Error(l10n.t('The property "request" must be specified in the debug config.'));
                 }
 
                 const debugPlatform = getPlatform(debugConfiguration);
@@ -120,9 +120,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     private async validateResolvedConfiguration(resolvedConfiguration: ResolvedDebugConfiguration): Promise<void> {
         if (!resolvedConfiguration.type) {
-            throw new Error(localize('vscode-docker.debug.configProvider.noDebugType', 'No debug type was resolved.'));
+            throw new Error(l10n.t('No debug type was resolved.'));
         } else if (!resolvedConfiguration.request) {
-            throw new Error(localize('vscode-docker.debug.configProvider.noDebugRequest', 'No debug request was resolved.'));
+            throw new Error(l10n.t('No debug request was resolved.'));
         }
     }
 
@@ -130,7 +130,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         const helper = this.helpers[platform];
 
         if (!helper) {
-            throw new Error(localize('vscode-docker.debug.configProvider.unsupportedPlatform', 'The platform \'{0}\' is not currently supported for Docker debugging.', platform));
+            throw new Error(l10n.t('The platform \'{0}\' is not currently supported for Docker debugging.', platform));
         }
 
         return helper;
@@ -163,7 +163,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
 
                 if (portMappings.length > 0) {
-                    ext.outputChannel.info(localize('vscode-docker.debug.configProvider.portMappings', 'The application is listening on the following port(s) (Host => Container):'));
+                    ext.outputChannel.info(l10n.t('The application is listening on the following port(s) (Host => Container):'));
                     ext.outputChannel.info(portMappings.join('\n'));
                 }
             } catch {

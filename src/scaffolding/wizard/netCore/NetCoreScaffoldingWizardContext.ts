@@ -5,7 +5,7 @@
 
 import { AzureWizardPromptStep, IWizardOptions } from '@microsoft/vscode-azext-utils';
 import { CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN } from '../../../constants';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { PlatformOS } from '../../../utils/platform';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';
@@ -15,9 +15,9 @@ import { NetCoreChooseOsStep } from './NetCoreChooseOsStep';
 import { NetCoreGatherInformationStep } from './NetCoreGatherInformationStep';
 import { NetCoreTryGetRandomPortStep } from './NetCoreTryGetRandomPortStep';
 
-const chooseProjectFile = localize('vscode-docker.scaffold.platforms.netCore.chooseProject', 'Choose a project file');
+const chooseProjectFile = l10n.t('Choose a project file');
 const netCoreGlobPatterns = [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN];
-const noProjectFile = localize('vscode-docker.scaffold.platforms.netCore.noProject', 'No C# or F# project files were found in the workspace.');
+const noProjectFile = l10n.t('No C# or F# project files were found in the workspace.');
 
 export interface NetCoreScaffoldingWizardContext extends ScaffoldingWizardContext {
     netCoreAssemblyName?: string;

@@ -5,7 +5,7 @@
 
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
-import { localize } from "../../localize";
+import { l10n } from 'vscode';
 import { getThemedIconPath } from '../getThemedIconPath';
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
@@ -39,7 +39,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get readDocumentationTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.readDocumentation', 'Read Extension Documentation'),
+            l10n.t('Read Extension Documentation'),
             'https://aka.ms/helppanel_docs',
             new ThemeIcon('book')
         );
@@ -51,7 +51,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get watchVideosTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.watchVideos', 'Watch Extension Tutorial Videos'),
+            l10n.t('Watch Extension Tutorial Videos'),
             'https://aka.ms/helppanel_videos',
             new ThemeIcon('play-circle')
         );
@@ -63,7 +63,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get getStartedTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.getStarted', 'Get Started with Docker Tutorial'),
+            l10n.t('Get Started with Docker Tutorial'),
             'https://aka.ms/helppanel_getstarted',
             new ThemeIcon('star-empty')
         );
@@ -76,7 +76,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         const node = new GenericTreeItem(
             this,
             {
-                label: localize('views.help.openWalkthrough', 'Open Docker Extension Walkthrough'),
+                label: l10n.t('Open Docker Extension Walkthrough'),
                 contextValue: 'OpenWalkthrough',
                 commandId: 'vscode-docker.help.openWalkthrough',
                 iconPath: new ThemeIcon('extensions'),
@@ -91,7 +91,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
     private get reviewIssuesTreeItem(): AzExtTreeItem {
         const node = new OpenUrlTreeItem(
             this,
-            localize('views.help.reviewIssues', 'Review Issues'),
+            l10n.t('Review Issues'),
             'https://aka.ms/helppanel_reviewissues',
             new ThemeIcon('issues')
         );
@@ -104,7 +104,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         const node = new GenericTreeItem(
             this,
             {
-                label: localize('views.help.reportIssue', 'Report Issue'),
+                label: l10n.t('Report Issue'),
                 contextValue: 'Report Issue',
                 commandId: 'vscode-docker.help.reportIssue',
                 iconPath: new ThemeIcon('comment'),
@@ -120,7 +120,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
         const node = new GenericTreeItem(
             this,
             {
-                label: localize('views.help.installDocker', 'Install Docker'),
+                label: l10n.t('Install Docker'),
                 contextValue: 'Install Docker',
                 commandId: 'vscode-docker.installDocker',
                 iconPath: getThemedIconPath('docker'),

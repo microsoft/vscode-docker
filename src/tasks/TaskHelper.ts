@@ -9,7 +9,7 @@ import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -181,7 +181,7 @@ export async function getOfficialBuildTaskForDockerfile(context: IActionContext,
             return { label: t.name };
         });
 
-        const item = await context.ui.showQuickPick(items, { placeHolder: localize('vscode-docker.tasks.helper.chooseBuildDefinition', 'Choose the Docker Build definition.') });
+        const item = await context.ui.showQuickPick(items, { placeHolder: l10n.t('Choose the Docker Build definition.') });
         return buildTasks.find(t => t.name === item.label);
     }
 

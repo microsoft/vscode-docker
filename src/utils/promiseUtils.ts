@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 
 export async function delay(ms: number, token?: vscode.CancellationToken): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -58,7 +58,7 @@ export class TimeoutPromiseSource implements vscode.Disposable {
     private readonly emitter: vscode.EventEmitter<void>;
 
     public constructor(private readonly timeoutMs: number) {
-        this.cps = new CancellationPromiseSource(Error, localize('vscode-docker.utils.promiseUtils.timeout', 'Request timed out.'));
+        this.cps = new CancellationPromiseSource(Error, l10n.t('Request timed out.'));
         this.emitter = new vscode.EventEmitter<void>();
     }
 

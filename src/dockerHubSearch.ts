@@ -7,7 +7,7 @@
 
 import { URL } from "url";
 import { ociClientId } from "./constants";
-import { localize } from "./localize";
+import { l10n } from 'vscode';
 import { httpRequest } from "./utils/httpRequest";
 
 export function tagsForImage(image: IHubSearchResponseResult): string {
@@ -27,16 +27,16 @@ export function tagsForImage(image: IHubSearchResponseResult): string {
 
 /* eslint-disable @typescript-eslint/naming-convention */
 const popular = [
-    { "is_automated": false, "name": "redis", "is_trusted": false, "is_official": true, "star_count": 1300, "description": localize('vscode-docker.dockerHubSearch.redis', 'Redis is an open source key-value store that functions as a data structure server.') },
-    { "is_automated": false, "name": "ubuntu", "is_trusted": false, "is_official": true, "star_count": 2600, "description": localize('vscode-docker.dockerHubSearch.ubuntu', 'Ubuntu is a Debian-based Linux operating system based on free software.') },
-    { "is_automated": false, "name": "wordpress", "is_trusted": false, "is_official": true, "star_count": 582, "description": localize('vscode-docker.dockerHubSearch.wordPress', 'The WordPress rich content management system can utilize plugins, widgets, and themes.') },
-    { "is_automated": false, "name": "mysql", "is_trusted": false, "is_official": true, "star_count": 1300, "description": localize('vscode-docker.dockerHubSearch.mysql', 'MySQL is a widely used, open-source relational database management system (RDBMS).') },
-    { "is_automated": false, "name": "mongo", "is_trusted": false, "is_official": true, "star_count": 1100, "description": localize('vscode-docker.dockerHubSearch.mongodb', 'MongoDB document databases provide high availability and easy scalability.') },
-    { "is_automated": false, "name": "centos", "is_trusted": false, "is_official": true, "star_count": 1600, "description": localize('vscode-docker.dockerHubSearch.centos', 'The official build of CentOS.') },
-    { "is_automated": false, "name": "node", "is_trusted": false, "is_official": true, "star_count": 1200, "description": localize('vscode-docker.dockerHubSearch.node', 'Node.js is a JavaScript-based platform for server-side and networking applications.') },
-    { "is_automated": false, "name": "nginx", "is_trusted": false, "is_official": true, "star_count": 1600, "description": localize('vscode-docker.dockerHubSearch.nginx', 'Official build of Nginx.') },
-    { "is_automated": false, "name": "postgres", "is_trusted": false, "is_official": true, "star_count": 1200, "description": localize('vscode-docker.dockerHubSearch.postgres', 'The PostgreSQL object-relational database system provides reliability and data integrity.') },
-    { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": localize('vscode-docker.dockerHubSearch.aspNet', 'ASP.NET is an open source server-side Web application framework') }
+    { "is_automated": false, "name": "redis", "is_trusted": false, "is_official": true, "star_count": 1300, "description": l10n.t('Redis is an open source key-value store that functions as a data structure server.') },
+    { "is_automated": false, "name": "ubuntu", "is_trusted": false, "is_official": true, "star_count": 2600, "description": l10n.t('Ubuntu is a Debian-based Linux operating system based on free software.') },
+    { "is_automated": false, "name": "wordpress", "is_trusted": false, "is_official": true, "star_count": 582, "description": l10n.t('The WordPress rich content management system can utilize plugins, widgets, and themes.') },
+    { "is_automated": false, "name": "mysql", "is_trusted": false, "is_official": true, "star_count": 1300, "description": l10n.t('MySQL is a widely used, open-source relational database management system (RDBMS).') },
+    { "is_automated": false, "name": "mongo", "is_trusted": false, "is_official": true, "star_count": 1100, "description": l10n.t('MongoDB document databases provide high availability and easy scalability.') },
+    { "is_automated": false, "name": "centos", "is_trusted": false, "is_official": true, "star_count": 1600, "description": l10n.t('The official build of CentOS.') },
+    { "is_automated": false, "name": "node", "is_trusted": false, "is_official": true, "star_count": 1200, "description": l10n.t('Node.js is a JavaScript-based platform for server-side and networking applications.') },
+    { "is_automated": false, "name": "nginx", "is_trusted": false, "is_official": true, "star_count": 1600, "description": l10n.t('Official build of Nginx.') },
+    { "is_automated": false, "name": "postgres", "is_trusted": false, "is_official": true, "star_count": 1200, "description": l10n.t('The PostgreSQL object-relational database system provides reliability and data integrity.') },
+    { "is_automated": true, "name": "microsoft/aspnet", "is_trusted": true, "is_official": false, "star_count": 277, "description": l10n.t('ASP.NET is an open source server-side Web application framework') }
 ];
 /* eslint-enable @typescript-eslint/naming-convention */
 

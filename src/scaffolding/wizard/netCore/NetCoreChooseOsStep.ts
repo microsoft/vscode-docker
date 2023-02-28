@@ -5,7 +5,7 @@
 
 import * as vscode from 'vscode';
 import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { PlatformOS } from '../../../utils/platform';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
@@ -15,7 +15,7 @@ export class NetCoreChooseOsStep extends TelemetryPromptStep<NetCoreScaffoldingW
         const opt: vscode.QuickPickOptions = {
             matchOnDescription: true,
             matchOnDetail: true,
-            placeHolder: localize('vscode-docker.scaffold.chooseOsStep.selectOS', 'Select Operating System'),
+            placeHolder: l10n.t('Select Operating System'),
         };
 
         const OSes: PlatformOS[] = ['Linux', 'Windows'];
