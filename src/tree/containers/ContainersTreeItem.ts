@@ -3,19 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContainersItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
+import { l10n, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
-import { l10n } from 'vscode';
+import { ListContainersItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
-import { ContainerTreeItem } from "./ContainerTreeItem";
 import { TreePrefix } from "../TreePrefix";
+import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
+import { containerProperties, ContainerProperty, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
+import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;

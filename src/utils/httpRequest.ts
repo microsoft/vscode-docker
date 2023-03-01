@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { Request, RequestInit, Response, default as fetch } from 'node-fetch';
+import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { l10n } from 'vscode';
 

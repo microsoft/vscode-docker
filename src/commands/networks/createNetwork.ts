@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
 import { getDockerOSType } from '../../utils/osUtils';
 
 export async function createNetwork(context: IActionContext): Promise<void> {

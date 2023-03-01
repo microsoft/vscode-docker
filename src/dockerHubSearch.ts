@@ -6,8 +6,8 @@
 'use strict';
 
 import { URL } from "url";
-import { ociClientId } from "./constants";
 import { l10n } from 'vscode';
+import { ociClientId } from "./constants";
 import { httpRequest } from "./utils/httpRequest";
 
 export function tagsForImage(image: IHubSearchResponseResult): string {

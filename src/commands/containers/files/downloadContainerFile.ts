@@ -7,7 +7,6 @@ import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-util
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { l10n } from 'vscode';
 import { FileTreeItem } from '../../../tree/containers/files/FileTreeItem';
 import { multiSelectNodes } from '../../../utils/multiSelectNodes';
 
@@ -25,20 +24,20 @@ async function fileExists(file: vscode.Uri): Promise<boolean> {
 }
 
 const overwriteFile: vscode.MessageItem = {
-    title: l10n.t('Overwrite File')
+    title: vscode.l10n.t('Overwrite File')
 };
 
 const skipFile: vscode.MessageItem = {
-    title: l10n.t('Skip File')
+    title: vscode.l10n.t('Skip File')
 };
 
 const cancelDownload: vscode.MessageItem = {
-    title: l10n.t('Cancel')
+    title: vscode.l10n.t('Cancel')
 };
 
 export async function downloadContainerFile(context: IActionContext, node?: FileTreeItem, nodes?: FileTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: l10n.t('No files are available to download.') },
+        { ...context, noItemFoundErrorMessage: vscode.l10n.t('No files are available to download.') },
         ext.containersTree,
         'containerFile',
         node,
@@ -50,8 +49,8 @@ export async function downloadContainerFile(context: IActionContext, node?: File
             canSelectFiles: false,
             canSelectFolders: true,
             canSelectMany: false,
-            openLabel: l10n.t('Select'),
-            title: l10n.t('Select folder for download')
+            openLabel: vscode.l10n.t('Select'),
+            title: vscode.l10n.t('Select folder for download')
         });
 
     if (localFolderUris === undefined || localFolderUris.length === 0) {
@@ -74,7 +73,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
-            title: l10n.t('Downloading File(s)...'),
+            title: vscode.l10n.t('Downloading File(s)...'),
             cancellable: true
         },
         async (task, token) => {
@@ -87,7 +86,7 @@ export async function downloadContainerFile(context: IActionContext, node?: File
 
                 if (localFileExists) {
                     const result = await vscode.window.showWarningMessage(
-                        l10n.t('The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
+                        vscode.l10n.t('The file \'{0}\' already exists in folder \'{1}\'.', file.fileName, localFolderUri.fsPath),
                         overwriteFile,
                         skipFile,
                         cancelDownload);

@@ -6,7 +6,6 @@
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { l10n } from 'vscode';
 import { ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 import { TelemetryPromptStep } from './TelemetryPromptStep';
 
@@ -19,11 +18,11 @@ export class VerifyDockerfileStep<TWizardContext extends ScaffoldingWizardContex
                     callback: async () => {
                         void vscode.commands.executeCommand('vscode-docker.configure', wizardContext); // They have already answered several questions, so we can copy in the current wizard context to save time
                     },
-                    title: l10n.t('Add Docker Files'),
+                    title: vscode.l10n.t('Add Docker Files'),
                 }
             ];
 
-            throw new Error(l10n.t('No Dockerfile is present in the workspace. Please add Docker files before adding Compose files.'));
+            throw new Error(vscode.l10n.t('No Dockerfile is present in the workspace. Please add Docker files before adding Compose files.'));
         }
     }
 

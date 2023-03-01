@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
-import { ProgressLocation, window } from 'vscode';
+import { l10n, ProgressLocation, window } from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { l10n } from 'vscode';
 import type { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 

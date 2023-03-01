@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { selectLogsCommand } from '../selectCommandTemplate';

@@ -6,9 +6,8 @@
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { Uri, env, window } from "vscode";
+import { env, l10n, Uri, window } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { l10n } from 'vscode';
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';

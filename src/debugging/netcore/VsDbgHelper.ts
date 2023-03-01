@@ -6,11 +6,11 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
+import { execAsync } from '../../utils/execAsync';
 import { streamToFile } from '../../utils/httpRequest';
 import { isWindows } from '../../utils/osUtils';
-import { execAsync } from '../../utils/execAsync';
 
 type VsDbgVersion = 'latest'; // There are other versions but we don't use them
 type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'linux-arm64' | 'linux-musl-arm64' | 'win7-x64';

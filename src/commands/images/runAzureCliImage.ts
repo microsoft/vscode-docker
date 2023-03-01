@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RunContainerBindMount } from '../../runtimes/docker';
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
+import { RunContainerBindMount } from '../../runtimes/docker';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { getDockerOSType } from '../../utils/osUtils';
 

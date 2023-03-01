@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from "path";
 import * as vscode from 'vscode';
-import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
-import { l10n } from 'vscode';
 
 export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
@@ -97,10 +96,10 @@ export async function quickPickDockerFileItem(context: IActionContext, dockerFil
 
     while (!selectedDockerFile) {
         const dockerFiles: Item[] | undefined = await resolveFilesOfPattern(rootFolder, globPatterns);
-        const message = l10n.t('Choose a Dockerfile to build.');
+        const message = vscode.l10n.t('Choose a Dockerfile to build.');
         selectedDockerFile = await quickPickFileItem(context, dockerFiles, message);
         if (!selectedDockerFile) {
-            const msg = l10n.t('Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?');
+            const msg = vscode.l10n.t('Couldn\'t find a Dockerfile in your workspace. Would you like to add Docker files to the workspace?');
             await context.ui.showWarningMessage(msg, { stepName: msg }, DialogResponses.yes, DialogResponses.cancel);
             await vscode.commands.executeCommand('vscode-docker.configure');
             // Try again
@@ -125,7 +124,7 @@ export async function quickPickDockerComposeFileItem(context: IActionContext, ro
                 selectedComposeFile = await quickPickFileItem(context, composeFiles, message);
             }
         } else {
-            const msg = l10n.t('Couldn\'t find any docker-compose files in your workspace. Would you like to add Docker files to the workspace?');
+            const msg = vscode.l10n.t('Couldn\'t find any docker-compose files in your workspace. Would you like to add Docker files to the workspace?');
             await context.ui.showWarningMessage(msg, { stepName: msg }, DialogResponses.yes, DialogResponses.cancel);
             await vscode.commands.executeCommand('vscode-docker.configureCompose');
             // Try again
@@ -158,7 +157,7 @@ export async function quickPickYamlFileItem(context: IActionContext, fileUri: vs
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [YAML_GLOB_PATTERN]);
-    const fileItem: Item = await quickPickFileItem(context, items, l10n.t('Choose a .yaml file to run.'));
+    const fileItem: Item = await quickPickFileItem(context, items, vscode.l10n.t('Choose a .yaml file to run.'));
 
     if (!fileItem) {
         throw new Error(noYamlFileMessage);
@@ -172,7 +171,7 @@ export async function quickPickProjectFileItem(context: IActionContext, fileUri:
     }
 
     const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
-    const fileItem: Item = await quickPickFileItem(context, items, l10n.t('Choose a project file.'));
+    const fileItem: Item = await quickPickFileItem(context, items, vscode.l10n.t('Choose a project file.'));
 
     if (!fileItem) {
         throw new Error(noProjectFileMessage);

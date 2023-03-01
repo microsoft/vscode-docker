@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { WebSiteManagementClient, Site, SiteConfig, NameValuePair } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
+import type { NameValuePair, Site, SiteConfig, WebSiteManagementClient } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { CustomLocation } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
-import { Progress } from "vscode";
+import { l10n, Progress } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { l10n } from 'vscode';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
 import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';

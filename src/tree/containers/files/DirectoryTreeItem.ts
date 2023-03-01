@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import * as vscode from 'vscode';
 import { ContainerOS, ListFilesItem } from '../../../runtimes/docker';
-import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
 import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
-import { l10n } from 'vscode';
 
 export type DirectoryItemProvider = (path: string | undefined) => Promise<ListFilesItem[]>;
 
@@ -74,7 +73,7 @@ export class DirectoryTreeItem extends AzExtParentTreeItem {
                 return new FileTreeItem(this, name, itemUri.with({ fileType: vscode.FileType.File }));
 
             default:
-                throw new Error(l10n.t('Unrecognized directory item type.'));
+                throw new Error(vscode.l10n.t('Unrecognized directory item type.'));
         }
     }
 

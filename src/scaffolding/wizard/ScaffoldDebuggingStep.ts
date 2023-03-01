@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import { AzureWizardExecuteStep } from '@microsoft/vscode-azext-utils';
-import { Progress } from 'vscode';
+import * as path from 'path';
+import { l10n, Progress } from 'vscode';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider } from '../../debugging/DockerDebugScaffoldingProvider';
-import { l10n } from 'vscode';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
 import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizardContext';

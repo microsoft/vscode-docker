@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
-import { l10n } from 'vscode';
+import { l10n, ThemeIcon } from "vscode";
 
 export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
     public contextValue: string = 'connectedRegistries';

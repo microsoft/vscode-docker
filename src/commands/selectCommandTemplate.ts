@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PortBinding, VoidCommandResponse } from '../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { l10n } from 'vscode';
+import { PortBinding, VoidCommandResponse } from '../runtimes/docker';
 import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
 import { resolveVariables } from '../utils/resolveVariables';
 
@@ -163,7 +162,7 @@ export async function selectCommandTemplate(
     }
 
     if (!selectedTemplate) {
-        throw new Error(l10n.t('No command template was found for command \'{0}\'', command));
+        throw new Error(vscode.l10n.t('No command template was found for command \'{0}\'', command));
     }
 
     actionContext.telemetry.properties.isDefaultCommand = defaultTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
@@ -192,7 +191,7 @@ async function quickPickTemplate(templates: CommandTemplate[], templatePicker: T
     });
 
     const selection = await templatePicker(items, {
-        placeHolder: l10n.t('Choose a command template to execute')
+        placeHolder: vscode.l10n.t('Choose a command template to execute')
     });
 
     return selection.data;
@@ -227,7 +226,7 @@ function isMatchConstraintSatisfied(actionContext: IActionContext, matchContext:
         return matchContext.some(m => matcher.test(m));
     } catch {
         // Don't wait
-        void actionContext.ui.showWarningMessage(l10n.t('Invalid match expression \'{0}\'. This template will be skipped.', match));
+        void actionContext.ui.showWarningMessage(vscode.l10n.t('Invalid match expression \'{0}\'. This template will be skipped.', match));
     }
 
     return false;

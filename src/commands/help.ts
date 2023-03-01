@@ -6,7 +6,6 @@
 import { IActionContext, IAzureQuickPickOptions } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { extensionId } from '../constants';
-import { l10n } from 'vscode';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
     handler(): Promise<void>,
@@ -15,10 +14,10 @@ interface HelpMenuItem extends vscode.QuickPickItem {
 
 export async function help(context: IActionContext): Promise<void> {
     const items: HelpMenuItem[] = [
-        { label: l10n.t('Get started with Docker...'), handler: getStarted, telemetryID: 'getStarted' },
-        { label: l10n.t('Review Docker extension issues...'), handler: reviewIssues, telemetryID: 'reviewIssues' },
-        { label: l10n.t('Report Docker extension issue...'), handler: reportIssue, telemetryID: 'reportIssue' },
-        { label: l10n.t('Edit settings...'), handler: editSettings, telemetryID: 'editSettings' }
+        { label: vscode.l10n.t('Get started with Docker...'), handler: getStarted, telemetryID: 'getStarted' },
+        { label: vscode.l10n.t('Review Docker extension issues...'), handler: reviewIssues, telemetryID: 'reviewIssues' },
+        { label: vscode.l10n.t('Report Docker extension issue...'), handler: reportIssue, telemetryID: 'reportIssue' },
+        { label: vscode.l10n.t('Edit settings...'), handler: editSettings, telemetryID: 'editSettings' }
     ];
 
     const options: IAzureQuickPickOptions = { canPickMany: false, suppressPersistence: true };

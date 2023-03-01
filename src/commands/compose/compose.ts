@@ -6,7 +6,6 @@
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { Item, createFileItem, quickPickDockerComposeFileItem } from '../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
@@ -21,7 +20,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
     // If a file is chosen, get its workspace folder, otherwise, require the user to choose
     // If a file is chosen that is not in a workspace, it will automatically fall back to quickPickWorkspaceFolder
     const folder: vscode.WorkspaceFolder = (dockerComposeFileUri ? vscode.workspace.getWorkspaceFolder(dockerComposeFileUri) : undefined) ||
-        await quickPickWorkspaceFolder(context, l10n.t('To run Docker compose you must first open a folder or workspace in VS Code.'));
+        await quickPickWorkspaceFolder(context, vscode.l10n.t('To run Docker compose you must first open a folder or workspace in VS Code.'));
 
     let commandParameterFileUris: vscode.Uri[];
     if (selectedComposeFileUris && selectedComposeFileUris.length) {
@@ -74,19 +73,19 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
 }
 
 export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['up'], l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['up'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['upSubset'], l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['upSubset'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['down'], l10n.t('Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down'], vscode.l10n.t('Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['down', 'up'], l10n.t('Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
+    return await compose(context, ['down', 'up'], vscode.l10n.t('Choose Docker Compose file to restart'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 const serviceListPlaceholder = /\${serviceList}/i;

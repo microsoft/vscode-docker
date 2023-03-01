@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContextItem } from '../../runtimes/docker';
 import { AzExtTreeItem, IActionContext } from '@microsoft/vscode-azext-utils';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
-import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
+import { ext } from '../../extensionVariables';
+import { ListContextItem } from '../../runtimes/docker';
+import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
-import { ContextGroupTreeItem } from './ContextGroupTreeItem';
-import { ContextProperty, contextProperties } from "./ContextProperties";
-import { ContextTreeItem } from './ContextTreeItem';
 import { TreePrefix } from '../TreePrefix';
+import { ContextGroupTreeItem } from './ContextGroupTreeItem';
+import { contextProperties, ContextProperty } from "./ContextProperties";
+import { ContextTreeItem } from './ContextTreeItem';
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<ListContextItem, ContextProperty> {
     public treePrefix: TreePrefix = 'contexts';

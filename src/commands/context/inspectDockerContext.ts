@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from '@microsoft/vscode-azext-utils';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
 import { ContextTreeItem } from '../../tree/contexts/ContextTreeItem';
 
 export async function inspectDockerContext(actionContext: IActionContext, node?: ContextTreeItem): Promise<void> {

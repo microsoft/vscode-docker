@@ -6,16 +6,15 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { l10n } from 'vscode';
 import { convertToMB } from '../utils/convertToMB';
 
 export async function pruneSystem(context: IActionContext): Promise<void> {
-    const confirmPrune: string = l10n.t('Are you sure you want to remove all stopped containers, dangling images, unused networks, and unused volumes? Removing volumes may result in data loss!');
+    const confirmPrune: string = vscode.l10n.t('Are you sure you want to remove all stopped containers, dangling images, unused networks, and unused volumes? Removing volumes may result in data loss!');
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: 'Remove' });
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: l10n.t('Pruning system...') },
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Pruning system...') },
         async () => {
             const containersResult = await ext.runWithDefaults(client =>
                 client.pruneContainers({})
@@ -35,7 +34,7 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
                 imagesResult?.imageRefsDeleted?.length && Number.isInteger(imagesResult?.spaceReclaimed) &&
                 networksResult?.networksDeleted?.length &&
                 volumesResult?.volumesDeleted?.length && Number.isInteger(volumesResult?.spaceReclaimed)) {
-                message = l10n.t(
+                message = vscode.l10n.t(
                     'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.',
                     containersResult.containersDeleted.length,
                     imagesResult.imageRefsDeleted.length,
@@ -44,7 +43,7 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
                     convertToMB(containersResult.spaceReclaimed + imagesResult.spaceReclaimed + volumesResult.spaceReclaimed)
                 );
             } else {
-                message = l10n.t('Removed stopped containers, dangling images, unused networks, and unused volumes.');
+                message = vscode.l10n.t('Removed stopped containers, dangling images, unused networks, and unused volumes.');
             }
 
             // Don't wait

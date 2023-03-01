@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, UserCancelledError, parseError } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
+import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, IAzureQuickPickItem, parseError, UserCancelledError } from "@microsoft/vscode-azext-utils";
+import { l10n, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
-import { l10n } from 'vscode';
 import { TreePrefix } from "../TreePrefix";
 import { getRegistryProviders } from "./all/getRegistryProviders";
 import { ConnectedRegistriesTreeItem } from "./ConnectedRegistriesTreeItem";

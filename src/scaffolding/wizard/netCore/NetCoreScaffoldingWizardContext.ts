@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, IWizardOptions } from '@microsoft/vscode-azext-utils';
-import { CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN } from '../../../constants';
 import { l10n } from 'vscode';
+import { CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN } from '../../../constants';
 import { PlatformOS } from '../../../utils/platform';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { ChoosePortsStep } from '../ChoosePortsStep';

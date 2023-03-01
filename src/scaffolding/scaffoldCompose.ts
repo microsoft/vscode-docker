@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { l10n } from 'vscode';
+import * as vscode from 'vscode';
 import { copyWizardContext } from './copyWizardContext';
 import { ChoosePlatformStep } from './wizard/ChoosePlatformStep';
 import { ChooseWorkspaceFolderStep } from './wizard/ChooseWorkspaceFolderStep';
@@ -36,7 +35,7 @@ export async function scaffoldCompose(wizardContext: Partial<ScaffoldingWizardCo
     const wizard = new AzureWizard<ScaffoldingWizardContext>(wizardContext as ScaffoldingWizardContext, {
         promptSteps: promptSteps,
         executeSteps: executeSteps,
-        title: l10n.t('Add Docker Compose Files'),
+        title: vscode.l10n.t('Add Docker Compose Files'),
     });
 
     await wizard.prompt();

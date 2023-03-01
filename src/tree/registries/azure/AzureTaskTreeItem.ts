@@ -5,8 +5,7 @@
 
 import type { Task as AcrTask, TaskRun as AcrTaskRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext, nonNullValue, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
-import { l10n } from 'vscode';
+import { l10n, ThemeIcon } from "vscode";
 import { getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
 import { AzureTaskRunTreeItem } from "./AzureTaskRunTreeItem";

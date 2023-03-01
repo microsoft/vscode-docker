@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
-import { ext } from "../../extensionVariables";
 import { l10n } from 'vscode';
+import { ext } from "../../extensionVariables";
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {

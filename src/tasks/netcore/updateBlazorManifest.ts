@@ -5,8 +5,8 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import * as xml2js from 'xml2js';
 import { l10n } from 'vscode';
+import * as xml2js from 'xml2js';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';

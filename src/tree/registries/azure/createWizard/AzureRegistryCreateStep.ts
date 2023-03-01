@@ -5,9 +5,8 @@
 
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils';
 import { AzureWizardExecuteStep, nonNullProp, parseError } from '@microsoft/vscode-azext-utils';
-import { Progress } from 'vscode';
+import { l10n, Progress } from 'vscode';
 import { ext } from '../../../../extensionVariables';
-import { l10n } from 'vscode';
 import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../../utils/lazyPackages';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 

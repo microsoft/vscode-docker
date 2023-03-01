@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep } from '@microsoft/vscode-azext-utils';
-import { InputBoxOptions } from 'vscode';
-import { l10n } from 'vscode';
+import { InputBoxOptions, l10n } from 'vscode';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
 export class RegistryUsernameStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {

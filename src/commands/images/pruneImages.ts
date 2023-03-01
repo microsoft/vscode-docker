@@ -6,16 +6,15 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneImages(context: IActionContext): Promise<void> {
-    const confirmPrune: string = l10n.t('Are you sure you want to remove all dangling images?');
+    const confirmPrune: string = vscode.l10n.t('Are you sure you want to remove all dangling images?');
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: l10n.t('Remove') });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: vscode.l10n.t('Remove') });
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: l10n.t('Pruning images...') },
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Pruning images...') },
         async () => {
             const result = await ext.runWithDefaults(client =>
                 client.pruneImages({})
@@ -23,9 +22,9 @@ export async function pruneImages(context: IActionContext): Promise<void> {
 
             let message: string;
             if (result?.imageRefsDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
-                message = l10n.t('Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
+                message = vscode.l10n.t('Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
             } else {
-                message = l10n.t('Removed dangling images.');
+                message = vscode.l10n.t('Removed dangling images.');
             }
 
             // Don't wait

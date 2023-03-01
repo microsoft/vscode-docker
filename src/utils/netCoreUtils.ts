@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { parseError } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { ext } from '../extensionVariables';
 import { l10n } from 'vscode';
-import { getTempFileName } from './osUtils';
+import { ext } from '../extensionVariables';
 import { execAsync } from './execAsync';
-import { parseError } from '@microsoft/vscode-azext-utils';
+import { getTempFileName } from './osUtils';
 
 export async function getNetCoreProjectInfo(target: 'GetBlazorManifestLocations' | 'GetProjectProperties', project: string): Promise<string[]> {
     const targetsFile = path.join(ext.context.asAbsolutePath('resources'), 'netCore', `${target}.targets`);

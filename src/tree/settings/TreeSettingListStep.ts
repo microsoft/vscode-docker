@@ -5,7 +5,7 @@
 
 import { AzureWizardPromptStep, IAzureQuickPickItem } from "@microsoft/vscode-azext-utils";
 import { l10n } from 'vscode';
-import { ITreeSettingWizardInfo, ITreeSettingsWizardContext } from "./ITreeSettingsWizardContext";
+import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./ITreeSettingsWizardContext";
 
 export class TreeSettingListStep extends AzureWizardPromptStep<ITreeSettingsWizardContext> {
     public async prompt(context: ITreeSettingsWizardContext): Promise<void> {

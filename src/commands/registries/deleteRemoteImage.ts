@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
-import { ProgressLocation, window } from 'vscode';
+import { l10n, ProgressLocation, window } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { DockerV2TagTreeItem } from '../../tree/registries/dockerV2/DockerV2TagTreeItem';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
 

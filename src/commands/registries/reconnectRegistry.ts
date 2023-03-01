@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import { ext } from "../../extensionVariables";
 import { l10n } from 'vscode';
+import { ext } from "../../extensionVariables";
 import { RegistryConnectErrorTreeItem } from "../../tree/registries/RegistryConnectErrorTreeItem";
 
 export async function reconnectRegistry(context: IActionContext, node?: RegistryConnectErrorTreeItem): Promise<void> {

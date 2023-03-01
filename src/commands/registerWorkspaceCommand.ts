@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
-import { ConfigurationTarget, MessageItem, WorkspaceConfiguration, commands, workspace } from 'vscode';
+import { ConfigurationTarget, MessageItem, WorkspaceConfiguration, commands, workspace, l10n } from 'vscode';
 import { extensionId } from '../constants';
-import { l10n } from 'vscode';
 import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from '../utils/getVSCodeRemoteInfo';
 import { registerCommand } from './registerCommands';
 

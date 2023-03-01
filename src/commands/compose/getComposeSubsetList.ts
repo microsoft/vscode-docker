@@ -6,7 +6,6 @@
 import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { execAsync } from '../../utils/execAsync';
 
 // Matches an `up` or `down` and everything after it--so that it can be replaced with `config --services`, to get a service list using all of the files originally part of the compose command
@@ -23,16 +22,16 @@ export async function getComposeProfilesOrServices(context: IActionContext, work
     if (profiles?.length) {
         const profilesOrServices: IAzureQuickPickItem<SubsetType>[] = [
             {
-                label: l10n.t('Services'),
+                label: vscode.l10n.t('Services'),
                 data: 'services'
             },
             {
-                label: l10n.t('Profiles'),
+                label: vscode.l10n.t('Profiles'),
                 data: 'profiles'
             }
         ];
 
-        useProfiles = 'profiles' === (await context.ui.showQuickPick(profilesOrServices, { placeHolder: l10n.t('Do you want to start services or profiles?') })).data;
+        useProfiles = 'profiles' === (await context.ui.showQuickPick(profilesOrServices, { placeHolder: vscode.l10n.t('Do you want to start services or profiles?') })).data;
     }
 
     return {
@@ -65,7 +64,7 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
 
     if (!services?.length) {
         context.errorHandling.suppressReportIssue = true;
-        throw new Error(l10n.t('No services were found in the compose document(s). Did you mean to use profiles instead?'));
+        throw new Error(vscode.l10n.t('No services were found in the compose document(s). Did you mean to use profiles instead?'));
     }
 
     // Fetch the previously chosen services list. By default, all will be selected.
@@ -81,8 +80,8 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
 
 async function pickSubsets(context: IActionContext, type: SubsetType, allChoices: string[], previousChoices: string[]): Promise<string[]> {
     const label = type === 'profiles' ?
-        l10n.t('Choose profiles to start') :
-        l10n.t('Choose services to start');
+        vscode.l10n.t('Choose profiles to start') :
+        vscode.l10n.t('Choose services to start');
 
     const pickChoices: IAzureQuickPickItem<string>[] = allChoices.map(s => ({
         label: s,

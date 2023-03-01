@@ -6,16 +6,15 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneContainers(context: IActionContext): Promise<void> {
-    const confirmPrune: string = l10n.t('Are you sure you want to remove all stopped containers?');
+    const confirmPrune: string = vscode.l10n.t('Are you sure you want to remove all stopped containers?');
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: l10n.t('Remove') });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: vscode.l10n.t('Remove') });
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: l10n.t('Pruning containers...') },
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Pruning containers...') },
         async () => {
             const result = await ext.runWithDefaults(client =>
                 client.pruneContainers({})
@@ -23,9 +22,9 @@ export async function pruneContainers(context: IActionContext): Promise<void> {
 
             let message: string;
             if (result?.containersDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
-                message = l10n.t('Removed {0} stopped container(s) and reclaimed {1} MB of space.', result.containersDeleted.length, convertToMB(result.spaceReclaimed));
+                message = vscode.l10n.t('Removed {0} stopped container(s) and reclaimed {1} MB of space.', result.containersDeleted.length, convertToMB(result.spaceReclaimed));
             } else {
-                message = l10n.t('Removed stopped containers.');
+                message = vscode.l10n.t('Removed stopped containers.');
             }
 
             // Don't wait

@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerOS, VoidCommandResponse } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { ext } from '../../extensionVariables';
 import { l10n } from 'vscode';
+import { ext } from '../../extensionVariables';
+import { ContainerOS, VoidCommandResponse } from '../../runtimes/docker';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getDockerOSType } from '../../utils/osUtils';

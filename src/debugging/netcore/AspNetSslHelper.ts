@@ -3,15 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
-import { isMac, isWindows } from '../../utils/osUtils';
-import { MessageItem } from 'vscode';
-import { l10n } from 'vscode';
+import { l10n, MessageItem } from 'vscode';
 import { cryptoUtils } from '../../utils/cryptoUtils';
 import { execAsync } from '../../utils/execAsync';
+import { isMac, isWindows } from '../../utils/osUtils';
 import { PlatformOS } from '../../utils/platform';
 
 const knownConfiguredProjects = new Set<string>();

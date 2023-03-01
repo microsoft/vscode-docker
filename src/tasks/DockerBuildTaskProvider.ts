@@ -5,10 +5,9 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { Task } from 'vscode';
+import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { l10n } from 'vscode';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';

@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, nonNullProp, openReadOnlyContent } from "@microsoft/vscode-azext-utils";
-import { ext } from "../../../../extensionVariables";
 import { l10n } from 'vscode';
+import { ext } from "../../../../extensionVariables";
 import { AzureTaskRunTreeItem } from "../../../../tree/registries/azure/AzureTaskRunTreeItem";
-import { getStorageBlob } from "../../../../utils/lazyPackages";
 import { bufferToString } from "../../../../utils/execAsync";
+import { getStorageBlob } from "../../../../utils/lazyPackages";
 
 export async function viewAzureTaskLogs(context: IActionContext, node?: AzureTaskRunTreeItem): Promise<void> {
     if (!node) {

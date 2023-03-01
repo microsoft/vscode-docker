@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { MarkdownString, ThemeColor, ThemeIcon } from "vscode";
+import { l10n, MarkdownString, ThemeColor, ThemeIcon } from "vscode";
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { getTreeId } from "../LocalRootTreeItemBase";
 import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { getCommonPropertyValue } from "../settings/CommonProperties";

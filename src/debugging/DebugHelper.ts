@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { CancellationToken, ConfigurationTarget, DebugConfiguration, ExtensionContext, WorkspaceFolder, debug, workspace } from 'vscode';
-import { l10n } from 'vscode';
+import { CancellationToken, ConfigurationTarget, debug, DebugConfiguration, ExtensionContext, l10n, workspace, WorkspaceFolder } from 'vscode';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';

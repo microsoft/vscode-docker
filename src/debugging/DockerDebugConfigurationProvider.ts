@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, callWithTelemetryAndErrorHandling, registerEvent } from '@microsoft/vscode-azext-utils';
-import { CancellationToken, DebugConfiguration, DebugConfigurationProvider, DebugSession, MessageItem, ProviderResult, WorkspaceFolder, commands, debug, window, workspace } from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
 import { DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
-import { l10n } from 'vscode';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';

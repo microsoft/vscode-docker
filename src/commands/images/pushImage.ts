@@ -6,7 +6,6 @@
 import { IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { l10n } from 'vscode';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
@@ -18,7 +17,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: l10n.t('No images are available to push'),
+            noItemFoundErrorMessage: vscode.l10n.t('No images are available to push'),
         });
     }
 
@@ -51,7 +50,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
         const progressOptions: vscode.ProgressOptions = {
             location: vscode.ProgressLocation.Notification,
-            title: l10n.t('Fetching login credentials...'),
+            title: vscode.l10n.t('Fetching login credentials...'),
         };
 
         connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));

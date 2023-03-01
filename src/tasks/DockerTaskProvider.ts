@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, callWithTelemetryAndErrorHandling, parseError } from '@microsoft/vscode-azext-utils';
-import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
+import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from '@microsoft/vscode-azext-utils';
+import { CancellationToken, CustomExecution, l10n, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
 import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { l10n } from 'vscode';
 import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';

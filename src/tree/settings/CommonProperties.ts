@@ -5,8 +5,7 @@
 
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
-import { ThemeIcon } from 'vscode';
-import { l10n } from 'vscode';
+import { l10n, ThemeIcon } from 'vscode';
 import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 

@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
-import { ext } from "../../extensionVariables";
 import { l10n } from 'vscode';
+import { ext } from "../../extensionVariables";
 import { VolumeTreeItem } from "../../tree/volumes/VolumeTreeItem";
 
 export async function inspectVolume(context: IActionContext, node?: VolumeTreeItem): Promise<void> {

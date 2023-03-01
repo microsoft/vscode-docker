@@ -5,9 +5,8 @@
 
 import type { TaskRunRequest } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import { window } from "vscode";
+import { l10n, window } from "vscode";
 import { ext } from "../../../../extensionVariables";
-import { l10n } from 'vscode';
 import { AzureTaskTreeItem } from "../../../../tree/registries/azure/AzureTaskTreeItem";
 
 export async function runAzureTask(context: IActionContext, node?: AzureTaskTreeItem): Promise<void> {

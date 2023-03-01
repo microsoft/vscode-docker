@@ -7,7 +7,7 @@ import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
 import { l10n } from 'vscode';
-import { RequestOptionsLike, httpRequest } from './httpRequest';
+import { httpRequest, RequestOptionsLike } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 

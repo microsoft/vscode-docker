@@ -5,7 +5,6 @@
 
 import { DialogResponses } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { l10n } from 'vscode';
 import { cloneObject } from './cloneObject';
 
 const oldSettingsMap = {
@@ -29,7 +28,7 @@ export async function migrateOldEnvironmentSettingsIfNeeded(): Promise<void> {
             // Prompt if we haven't already
             if (!alreadyPrompted) {
                 const response = await vscode.window.showWarningMessage(
-                    l10n.t('Some of your Docker extension settings have been renamed. Would you like us to migrate them for you?'),
+                    vscode.l10n.t('Some of your Docker extension settings have been renamed. Would you like us to migrate them for you?'),
                     DialogResponses.yes,
                     DialogResponses.no
                 );

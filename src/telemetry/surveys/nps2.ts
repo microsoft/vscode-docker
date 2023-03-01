@@ -4,16 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import { l10n } from 'vscode';
 import { Survey } from './SurveyManager';
 
 export const nps2: Survey = {
     id: 'nps2',
     buttons: new Map<string, string | undefined>([
-        [l10n.t('Take survey'), 'https://aka.ms/vscodedockernpsinproduct'],
-        [l10n.t('Don\'t ask again'), undefined],
+        [vscode.l10n.t('Take survey'), 'https://aka.ms/vscodedockernpsinproduct'],
+        [vscode.l10n.t('Don\'t ask again'), undefined],
     ]),
-    prompt: l10n.t('Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
+    prompt: vscode.l10n.t('Would you be willing to take a quick feedback survey about the Docker Extension for VS Code?'),
     activationDelayMs: 60 * 1000,
     isEligible: isNPSEligible,
 };

@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { l10n, ThemeColor, ThemeIcon } from "vscode";
 import { ListContainersItem } from "../../runtimes/docker";
-import { ThemeColor, ThemeIcon } from "vscode";
-import { l10n } from 'vscode';
 import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 

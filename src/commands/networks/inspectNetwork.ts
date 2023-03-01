@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
-import { ext } from "../../extensionVariables";
 import { l10n } from 'vscode';
+import { ext } from "../../extensionVariables";
 import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
