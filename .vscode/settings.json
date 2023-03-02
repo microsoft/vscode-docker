@@ -4,7 +4,8 @@
     "files.insertFinalNewline": true,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll": true
+        "source.fixAll": true,
+        "source.organizeImports": true
     },
     "typescript.preferences.importModuleSpecifier": "relative",
     "files.associations": {
