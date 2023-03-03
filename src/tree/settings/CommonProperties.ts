@@ -52,7 +52,7 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
             icon = 'watch';
             break;
         case 'Label':
-            icon = 'watch';
+            icon = 'symbol-class';
             break;
         default:
             throw new RangeError(l10n.t('Unexpected property "{0}".', property));
@@ -61,7 +61,7 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
     return new ThemeIcon(icon);
 }
 
-export const NonLabelGroupName = l10n.t('ungrouped');
+export const NonLabelGroupName = l10n.t('others');
 
 export function getLabel(containerLabels: Labels): string {
     if (!containerLabels) {

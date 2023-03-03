@@ -1746,7 +1746,6 @@
                 },
                 "docker.containers.groupByLabel": {
                     "type": "string",
-                    "default": "com.docker.swarm.node.id",
                     "description": "%vscode-docker.config.docker.containers.groupByLabel%"
                 },
                 "docker.containers.description": {

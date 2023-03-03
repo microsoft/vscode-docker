@@ -14,7 +14,7 @@ import { runtimeInstallStatusProvider } from "../utils/RuntimeInstallStatusProvi
 import { DatedDockerImage } from "./images/ImagesTreeItem";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
-import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
+import { CommonGroupBy, CommonProperty, CommonSortBy, NonLabelGroupName, sortByProperties } from "./settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSettingInfo";
 import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./settings/ITreeSettingsWizardContext";
 import { TreeSettingListStep } from "./settings/TreeSettingListStep";
@@ -132,7 +132,17 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
     public compareChildrenImpl(ti1: AzExtTreeItem, ti2: AzExtTreeItem): number {
         if (this.failedToConnect) {
             return 0; // children are already sorted
-        } else {
+        }
+        else if (this.groupBySetting === 'Label'
+            && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
+            && (ti1.label === NonLabelGroupName || ti2.label === NonLabelGroupName)) {
+            if (ti1.label === ti2.label) {
+                return 0;
+            } else {
+                return ti1.label === NonLabelGroupName ? 1 : -1;
+            }
+        }
+        else {
             if (ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType) {
                 if (this.groupBySetting === 'CreatedTime' && ti2.maxCreatedTime !== ti1.maxCreatedTime) {
                     return ti2.maxCreatedTime - ti1.maxCreatedTime;
