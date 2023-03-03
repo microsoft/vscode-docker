@@ -5,8 +5,7 @@
 
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
-import { ThemeIcon } from 'vscode';
-import { localize } from '../../localize';
+import { l10n, ThemeIcon } from 'vscode';
 import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
@@ -22,12 +21,12 @@ export const commonProperties: ITreePropertyInfo<Exclude<CommonProperty, 'Size'>
 
 export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
     property: 'None',
-    description: localize('vscode-docker.tree.settings.none', 'No grouping')
+    description: l10n.t('No grouping')
 };
 
 export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
-    { property: 'CreatedTime', description: localize('vscode-docker.tree.settings.createdTime', 'Sort by newest') },
-    { property: 'Label', description: localize('vscode-docker.tree.settings.label', 'Sort alphabetically by label') }
+    { property: 'CreatedTime', description: l10n.t('Sort by newest') },
+    { property: 'Label', description: l10n.t('Sort alphabetically by label') }
 ];
 
 export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
@@ -37,7 +36,7 @@ export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }
         case 'Size':
             return Number.isInteger(item?.size) ? `${convertToMB(item.size)} MB` : '';
         default:
-            throw new RangeError(localize('vscode-docker.tree.settings.unexpected1', 'Unexpected property "{0}".', property));
+            throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
 }
 
@@ -48,7 +47,7 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
             icon = 'watch';
             break;
         default:
-            throw new RangeError(localize('vscode-docker.tree.settings.unexpected2', 'Unexpected property "{0}".', property));
+            throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
 
     return new ThemeIcon(icon);

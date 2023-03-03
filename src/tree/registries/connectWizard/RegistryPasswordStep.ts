@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { IConnectRegistryWizardContext } from './IConnectRegistryWizardContext';
 
 export class RegistryPasswordStep extends AzureWizardPromptStep<IConnectRegistryWizardContext> {
     public async prompt(context: IConnectRegistryWizardContext): Promise<void> {
-        const prompt: string = context.passwordPrompt || localize('vscode-docker.tree.registries.connectWizard.enterPassword', 'Enter your password');
+        const prompt: string = context.passwordPrompt || l10n.t('Enter your password');
         context.secret = await context.ui.showInputBox({ prompt, validateInput, password: true });
     }
 
@@ -20,7 +20,7 @@ export class RegistryPasswordStep extends AzureWizardPromptStep<IConnectRegistry
 
 function validateInput(value: string | undefined): string | undefined {
     if (!value) {
-        return localize('vscode-docker.tree.registries.connectWizard.passwordEmpty', 'Password cannot be empty.');
+        return l10n.t('Password cannot be empty.');
     } else {
         return undefined;
     }

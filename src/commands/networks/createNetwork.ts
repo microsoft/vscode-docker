@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { getDockerOSType } from '../../utils/osUtils';
 
 export async function createNetwork(context: IActionContext): Promise<void> {
 
     const name = await context.ui.showInputBox({
         value: '',
-        prompt: localize('vscode-docker.commands.networks.create.promptName', 'Name of the network')
+        prompt: l10n.t('Name of the network')
     });
 
     const osType = await getDockerOSType();
@@ -32,7 +32,7 @@ export async function createNetwork(context: IActionContext): Promise<void> {
         drivers,
         {
             canPickMany: false,
-            placeHolder: localize('vscode-docker.commands.networks.create.promptDriver', 'Select the network driver to use (default is "bridge").')
+            placeHolder: l10n.t('Select the network driver to use (default is "bridge").')
         }
     );
 

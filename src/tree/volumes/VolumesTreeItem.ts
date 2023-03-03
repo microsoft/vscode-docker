@@ -3,22 +3,22 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListVolumeItem } from "../../runtimes/docker";
 import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { ListVolumeItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
-import { VolumeProperty, volumeProperties } from "./VolumeProperties";
-import { VolumeTreeItem } from "./VolumeTreeItem";
 import { TreePrefix } from "../TreePrefix";
+import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
+import { volumeProperties, VolumeProperty } from "./VolumeProperties";
+import { VolumeTreeItem } from "./VolumeTreeItem";
 
 export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, VolumeProperty> {
     public treePrefix: TreePrefix = 'volumes';
-    public label: string = localize('vscode-docker.tree.volumes.label', 'Volumes');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.volumes.configure', 'Configure volumes explorer');
+    public label: string = l10n.t('Volumes');
+    public configureExplorerTitle: string = l10n.t('Configure volumes explorer');
     public childType: LocalChildType<ListVolumeItem> = VolumeTreeItem;
     public childGroupType: LocalChildGroupType<ListVolumeItem, VolumeProperty> = VolumeGroupTreeItem;
 

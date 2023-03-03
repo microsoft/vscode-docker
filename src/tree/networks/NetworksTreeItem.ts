@@ -3,24 +3,23 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListNetworkItem } from "../../runtimes/docker";
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import { workspace } from "vscode";
+import { l10n, workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { ListNetworkItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
-import { NetworkProperty, networkProperties } from "./NetworkProperties";
-import { NetworkTreeItem } from "./NetworkTreeItem";
 import { TreePrefix } from "../TreePrefix";
+import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
+import { networkProperties, NetworkProperty } from "./NetworkProperties";
+import { NetworkTreeItem } from "./NetworkTreeItem";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, NetworkProperty> {
     public treePrefix: TreePrefix = 'networks';
-    public label: string = localize('vscode-docker.tree.networks.label', 'Networks');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.networks.configure', 'Configure networks explorer');
+    public label: string = l10n.t('Networks');
+    public configureExplorerTitle: string = l10n.t('Configure networks explorer');
     public childType: LocalChildType<ListNetworkItem> = NetworkTreeItem;
     public childGroupType: LocalChildGroupType<ListNetworkItem, NetworkProperty> = NetworkGroupTreeItem;
 

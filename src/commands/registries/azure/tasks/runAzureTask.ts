@@ -5,9 +5,8 @@
 
 import type { TaskRunRequest } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import { window } from "vscode";
+import { l10n, window } from "vscode";
 import { ext } from "../../../../extensionVariables";
-import { localize } from "../../../../localize";
 import { AzureTaskTreeItem } from "../../../../tree/registries/azure/AzureTaskTreeItem";
 
 export async function runAzureTask(context: IActionContext, node?: AzureTaskTreeItem): Promise<void> {
@@ -21,5 +20,5 @@ export async function runAzureTask(context: IActionContext, node?: AzureTaskTree
     await node.parent.refresh(context);
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(localize('vscode-docker.commands.registries.azure.tasks.runTaskScheduled', 'Successfully scheduled run "{0}" for task "{1}".', run.runId, node.taskName));
+    window.showInformationMessage(l10n.t('Successfully scheduled run "{0}" for task "{1}".', run.runId, node.taskName));
 }

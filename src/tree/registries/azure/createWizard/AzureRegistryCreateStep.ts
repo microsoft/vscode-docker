@@ -5,9 +5,8 @@
 
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils';
 import { AzureWizardExecuteStep, nonNullProp, parseError } from '@microsoft/vscode-azext-utils';
-import { Progress } from 'vscode';
+import { l10n, Progress } from 'vscode';
 import { ext } from '../../../../extensionVariables';
-import { localize } from '../../../../localize';
 import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../../utils/lazyPackages';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
@@ -20,7 +19,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
         const azExtAzureUtils = await getAzExtAzureUtils();
         const armContainerRegistry = await getArmContainerRegistry();
         const client = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
-        const creating: string = localize('vscode-docker.tree.registries.azure.createWizard.creating', 'Creating registry "{0}"...', newRegistryName);
+        const creating: string = l10n.t('Creating registry "{0}"...', newRegistryName);
         ext.outputChannel.info(creating);
         progress.report({ message: creating });
 
@@ -48,7 +47,7 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
             throw err;
         }
 
-        const created = localize('vscode-docker.tree.registries.azure.createWizard.created', 'Successfully created registry "{0}".', newRegistryName);
+        const created = l10n.t('Successfully created registry "{0}".', newRegistryName);
         ext.outputChannel.info(created);
     }
 

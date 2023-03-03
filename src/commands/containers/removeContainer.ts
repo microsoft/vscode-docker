@@ -6,13 +6,12 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function removeContainer(context: IActionContext, node?: ContainerTreeItem, nodes?: ContainerTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.containers.remove.noContainers', 'No containers are available to remove') },
+        { ...context, noItemFoundErrorMessage: vscode.l10n.t('No containers are available to remove') },
         ext.containersTree,
         ContainerTreeItem.allContextRegExp,
         node,
@@ -21,15 +20,15 @@ export async function removeContainer(context: IActionContext, node?: ContainerT
 
     let confirmRemove: string;
     if (nodes.length === 1) {
-        confirmRemove = localize('vscode-docker.commands.containers.remove.confirmSingle', 'Are you sure you want to remove container "{0}"?', nodes[0].label);
+        confirmRemove = vscode.l10n.t('Are you sure you want to remove container "{0}"?', nodes[0].label);
     } else {
-        confirmRemove = localize('vscode-docker.commands.containers.remove.confirmMulti', 'Are you sure you want to remove selected containers?');
+        confirmRemove = vscode.l10n.t('Are you sure you want to remove selected containers?');
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: localize('vscode-docker.commands.containers.remove.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: vscode.l10n.t('Remove') });
 
-    const removing: string = localize('vscode-docker.commands.containers.remove.removing', 'Removing container(s)...');
+    const removing: string = vscode.l10n.t('Removing container(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {
         await Promise.all(nodes.map(async n => await n.deleteTreeItem(context)));
     });

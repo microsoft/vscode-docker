@@ -4,18 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses } from '@microsoft/vscode-azext-utils';
-import { MessageItem, window } from 'vscode';
-import { localize } from '../localize';
+import { l10n, MessageItem, window } from 'vscode';
 import { DockerBuildTaskDefinition } from '../tasks/DockerBuildTaskProvider';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
-import { NetCoreTaskScaffoldingOptions, netCoreTaskHelper } from '../tasks/netcore/NetCoreTaskHelper';
+import { netCoreTaskHelper, NetCoreTaskScaffoldingOptions } from '../tasks/netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
 import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 import { addTask } from '../tasks/TaskHelper';
 import { PythonProjectType, PythonTarget } from '../utils/pythonUtils';
-import { DockerDebugScaffoldContext, addDebugConfiguration } from './DebugHelper';
+import { addDebugConfiguration, DockerDebugScaffoldContext } from './DebugHelper';
 import { DockerDebugConfiguration } from './DockerDebugConfigurationProvider';
-import { NetCoreDebugScaffoldingOptions, netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
+import { netCoreDebugHelper, NetCoreDebugScaffoldingOptions } from './netcore/NetCoreDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
 import { pythonDebugHelper } from './python/PythonDebugHelper';
 
@@ -100,7 +99,7 @@ export class DockerDebugScaffoldingProvider implements IDockerDebugScaffoldingPr
                 title: 'Overwrite'
             };
 
-            overwrite = (overwriteMessageItem === await window.showWarningMessage(localize('vscode-docker.debug.scaffoldProvider.confirm', 'Docker launch configurations and/or tasks already exist. Do you want to overwrite them?'), ...[overwriteMessageItem, DialogResponses.no]));
+            overwrite = (overwriteMessageItem === await window.showWarningMessage(l10n.t('Docker launch configurations and/or tasks already exist. Do you want to overwrite them?'), ...[overwriteMessageItem, DialogResponses.no]));
 
             if (overwrite) {
                 // Try again if needed

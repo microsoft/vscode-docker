@@ -6,11 +6,11 @@
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { execAsync } from '../../utils/execAsync';
 import { streamToFile } from '../../utils/httpRequest';
 import { isWindows } from '../../utils/osUtils';
-import { execAsync } from '../../utils/execAsync';
 
 type VsDbgVersion = 'latest'; // There are other versions but we don't use them
 type VsDbgRuntime = 'linux-x64' | 'linux-musl-x64' | 'linux-arm64' | 'linux-musl-arm64' | 'win7-x64';
@@ -65,11 +65,11 @@ async function getLatestAcquisitionScriptIfNecessary(): Promise<boolean> {
         return false;
     }
 
-    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.acquiringScript', 'Acquiring latest VsDbg install script...'));
+    ext.outputChannel.info(l10n.t('Acquiring latest VsDbg install script...'));
     await streamToFile(acquisition.url, acquisition.scriptPath);
 
     await ext.context.globalState.update(scriptAcquiredDateKey, Date.now());
-    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.scriptAcquired', 'Script acquired.'));
+    ext.outputChannel.info(l10n.t('Script acquired.'));
     return true;
 }
 
@@ -85,7 +85,7 @@ async function executeAcquisitionScriptIfNecessary(runtime: VsDbgRuntime, versio
 
     const command = acquisition.getShellCommand(runtime, version);
 
-    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.installingDebugger', 'Installing VsDbg, Runtime = {0}, Version = {1}...', runtime, version));
+    ext.outputChannel.info(l10n.t('Installing VsDbg, Runtime = {0}, Version = {1}...', runtime, version));
     ext.outputChannel.info(command);
 
     await execAsync(command, {}, (output: string) => {
@@ -93,5 +93,5 @@ async function executeAcquisitionScriptIfNecessary(runtime: VsDbgRuntime, versio
     });
 
     await ext.context.globalState.update(scriptExecutedDateKey, Date.now());
-    ext.outputChannel.info(localize('vscode-docker.debugging.netCore.vsDbgHelper.debuggerInstalled', 'VsDbg installed, Runtime = {0}, Version = {1}...', runtime, version));
+    ext.outputChannel.info(l10n.t('VsDbg installed, Runtime = {0}, Version = {1}...', runtime, version));
 }

@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IAzureQuickPickItem, IWizardOptions } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../localize';
+import * as vscode from 'vscode';
 import { AllPlatforms, Platform } from '../../utils/platform';
 import { ChoosePortsStep } from './ChoosePortsStep';
 import { GatherInformationStep } from './GatherInformationStep';
@@ -25,7 +24,7 @@ export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardCon
         const opt: vscode.QuickPickOptions = {
             matchOnDescription: true,
             matchOnDetail: true,
-            placeHolder: localize('vscode-docker.scaffold.choosePlatformStep.selectPlatform', 'Select Application Platform')
+            placeHolder: vscode.l10n.t('Select Application Platform')
         };
 
         const platforms = this.platformsList || AllPlatforms as readonly Platform[];
@@ -79,7 +78,7 @@ export class ChoosePlatformStep extends TelemetryPromptStep<ScaffoldingWizardCon
                 };
 
             default:
-                throw new Error(localize('vscode-docker.scaffold.choosePlatformStep.unexpectedPlatform', 'Unexpected platform'));
+                throw new Error(vscode.l10n.t('Unexpected platform'));
         }
     }
 

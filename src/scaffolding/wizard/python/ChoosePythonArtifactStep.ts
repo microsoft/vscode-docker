@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { Item, resolveFilesOfPattern } from '../../../utils/quickPickFile';
 import { ChooseArtifactStep } from '../ChooseArtifactStep';
 import { PythonScaffoldingWizardContext } from './PythonScaffoldingWizardContext';
@@ -20,9 +20,9 @@ const djangoExcludePattern = '{.[Vv][Ee][Nn][Vv]/**,**/[AaWw][Ss][Gg][Ii].[Pp][Y
 export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldingWizardContext> {
     public constructor() {
         super(
-            localize('vscode-docker.scaffold.choosePythonArtifactStep.promptText', 'Choose the app\'s entry point (e.g. manage.py, app.py)'),
+            l10n.t('Choose the app\'s entry point (e.g. manage.py, app.py)'),
             ['**/manage.py', '**/app.py', '**/*.[Pp][Yy]'], // Including manage.py and app.py here pushes them to the top of the pick list; resolveFilesOfPattern dedupes
-            localize('vscode-docker.scaffold.choosePythonArtifactStep.noItemsFound', 'No Python files were found.')
+            l10n.t('No Python files were found.')
         );
     }
 
@@ -41,7 +41,7 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
         });
 
         const enterModuleChoice: IAzureQuickPickItem = {
-            label: localize('vscode-docker.scaffold.choosePythonArtifactStep.chooseModule', 'Enter a Python module instead...'),
+            label: l10n.t('Enter a Python module instead...'),
             data: undefined,
         };
 
@@ -55,13 +55,13 @@ export class ChoosePythonArtifactStep extends ChooseArtifactStep<PythonScaffoldi
         if (result === enterModuleChoice) {
             // User wants a module target
             const module = await wizardContext.ui.showInputBox({
-                prompt: localize('vscode-docker.scaffold.choosePythonArtifactStep.enterModule', 'Enter a Python module name (e.g. myapp.manage)'),
+                prompt: l10n.t('Enter a Python module name (e.g. myapp.manage)'),
                 validateInput: (value: string): string | undefined => {
                     if (moduleRegex.test(value)) {
                         return undefined;
                     }
 
-                    return localize('vscode-docker.scaffold.choosePythonArtifactStep.moduleInvalid', 'Enter a valid Python module name (e.g. myapp.manage)');
+                    return l10n.t('Enter a valid Python module name (e.g. myapp.manage)');
                 },
             });
 

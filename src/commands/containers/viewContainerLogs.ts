@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { selectLogsCommand } from '../selectCommandTemplate';
@@ -15,7 +15,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.allContextRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.viewLogs.noContainers', 'No containers are available to view logs')
+            noItemFoundErrorMessage: l10n.t('No containers are available to view logs')
         });
     }
 
@@ -27,7 +27,7 @@ export async function viewContainerLogs(context: IActionContext, node?: Containe
     );
 
     const taskCRF = new TaskCommandRunnerFactory({
-        taskName: localize('vscode-docker.commands.containers.viewLogs.terminalTitle', 'Logs: {0}', node.containerName),
+        taskName: l10n.t('Logs: {0}', node.containerName),
         alwaysRunNew: true,
         focus: true,
     });

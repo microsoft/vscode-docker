@@ -3,19 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
-import { DockerUri } from './DockerUri';
-import { getDockerOSType } from '../../utils/osUtils';
-import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '../docker';
-import { localize } from '../../localize';
 import { ext } from '../../extensionVariables';
+import { getDockerOSType } from '../../utils/osUtils';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
+import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '../docker';
+import { DockerUri } from './DockerUri';
 
 class MethodNotImplementedError extends CommandNotSupportedError {
     public constructor() {
-        super(localize('docker.files.containerFilesProvider.methodNotImplemented', 'Method not implemented.'));
+        super(vscode.l10n.t('Method not implemented.'));
     }
 }
 

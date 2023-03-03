@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { AzureWizardExecuteStep, DialogResponses, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { getHandlebarsWithHelpers } from '../../utils/getHandlebarsWithHelpers';
 import { ScaffoldedFileType, ScaffoldingWizardContext } from './ScaffoldingWizardContext';
 
@@ -20,7 +19,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
     }
 
     public async execute(wizardContext: TWizardContext, progress: vscode.Progress<{ message?: string; increment?: number; }>): Promise<void> {
-        progress.report({ message: localize('vscode-docker.scaffold.scaffoldFileStep.progress', 'Creating \'{0}\'...', this.fileType) });
+        progress.report({ message: vscode.l10n.t('Creating \'{0}\'...', this.fileType) });
 
         const handlebars = await getHandlebarsWithHelpers();
 
@@ -88,7 +87,7 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
                 subPath = path.join('other', `${this.fileType}.template`);
                 break;
             default:
-                throw new Error(localize('vscode-docker.scaffold.scaffoldFileStep.unknownPlatform', 'Unknown platform \'{0}\'', wizardContext.platform));
+                throw new Error(vscode.l10n.t('Unknown platform \'{0}\'', wizardContext.platform));
         }
 
         return (settingsTemplatesPath && await this.scanUpwardForFile(path.join(settingsTemplatesPath, subPath))) ||
@@ -141,12 +140,12 @@ export class ScaffoldFileStep<TWizardContext extends ScaffoldingWizardContext> e
         }
 
         // Otherwise, prompt
-        const prompt = localize('vscode-docker.scaffold.scaffoldFileStep.prompt', 'Do you want to overwrite \'{0}\'?', this.fileType);
+        const prompt = vscode.l10n.t('Do you want to overwrite \'{0}\'?', this.fileType);
         const overwrite: vscode.MessageItem = {
-            title: localize('vscode-docker.scaffold.scaffoldFileStep.overwrite', 'Overwrite')
+            title: vscode.l10n.t('Overwrite')
         };
         const overwriteAll: vscode.MessageItem = {
-            title: localize('vscode-docker.scaffold.scaffoldFileStep.overwriteAll', 'Overwrite All')
+            title: vscode.l10n.t('Overwrite All')
         };
 
         const response = await wizardContext.ui.showWarningMessage(prompt, overwriteAll, overwrite, DialogResponses.cancel);

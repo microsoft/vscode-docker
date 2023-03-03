@@ -6,7 +6,6 @@
 import { IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import * as vscode from "vscode";
 import { ext } from "../../extensionVariables";
-import { localize } from "../../localize";
 import { AzureTaskRunTreeItem } from "../../tree/registries/azure/AzureTaskRunTreeItem";
 import { DockerV2TagTreeItem } from "../../tree/registries/dockerV2/DockerV2TagTreeItem";
 import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
@@ -15,7 +14,7 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Dock
     if (!node) {
         node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.registries.copyRemote.noImages', 'No remote images are available to copy the digest')
+            noItemFoundErrorMessage: vscode.l10n.t('No remote images are available to copy the digest')
         });
     }
 
@@ -24,10 +23,10 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Dock
         if (node.outputImage) {
             digest = nonNullProp(node.outputImage, 'digest');
         } else {
-            throw new Error(localize('vscode-docker.commands.registries.copyRemote.noOutputImage', 'Failed to find output image for this task run.'));
+            throw new Error(vscode.l10n.t('Failed to find output image for this task run.'));
         }
     } else {
-        await node.runWithTemporaryDescription(context, localize('vscode-docker.commands.registries.copyRemote.gettingDigest', 'Getting digest...'), async () => {
+        await node.runWithTemporaryDescription(context, vscode.l10n.t('Getting digest...'), async () => {
             digest = await (<DockerV2TagTreeItem>node).getDigest();
         });
     }

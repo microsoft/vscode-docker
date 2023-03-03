@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { l10n, ThemeColor, ThemeIcon } from "vscode";
 import { ListContainersItem } from "../../runtimes/docker";
-import { ThemeColor, ThemeIcon } from "vscode";
-import { localize } from "../../localize";
 import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
@@ -20,7 +19,7 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'Ports', exampleValue: '8080' },
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' },
-    { property: 'Compose Project Name', description: localize('vscode-docker.tree.containers.properties.composeProjectName', 'Value used to associate containers launched by a \'docker-compose up\' command') },
+    { property: 'Compose Project Name', description: l10n.t('Value used to associate containers launched by a \'docker-compose up\' command') },
 ];
 
 export function getContainerStateIcon(state: string): ThemeIcon {
@@ -61,7 +60,7 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
         case 'Status':
             // The rapidly-refreshing status during a container's first minute causes a lot of problems with excessive refreshing
             // This normalizes things like "10 seconds" and "Less than a second" to "Less than a minute", meaning the refreshes don't happen constantly
-            return item.status?.replace(/(\d+ seconds?)|(Less than a second)/i, localize('vscode-docker.tree.containers.lessThanMinute', 'Less than a minute'));
+            return item.status?.replace(/(\d+ seconds?)|(Less than a second)/i, l10n.t('Less than a minute'));
         case 'Compose Project Name':
             return getComposeProjectName(item);
         case 'Image':
@@ -71,7 +70,7 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
     }
 }
 
-export const NonComposeGroupName = localize('vscode-docker.tree.containers.otherContainers', 'Individual Containers');
+export const NonComposeGroupName = l10n.t('Individual Containers');
 
 export function getComposeProjectName(container: ListContainersItem): string {
     if (!container.labels) {

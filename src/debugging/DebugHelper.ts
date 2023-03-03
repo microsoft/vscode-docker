@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { CancellationToken, ConfigurationTarget, DebugConfiguration, ExtensionContext, WorkspaceFolder, debug, workspace } from 'vscode';
-import { localize } from '../localize';
+import { CancellationToken, ConfigurationTarget, debug, DebugConfiguration, ExtensionContext, l10n, workspace, WorkspaceFolder } from 'vscode';
 import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
@@ -95,7 +94,7 @@ export function resolveDockerServerReadyAction(debugConfiguration: DockerDebugCo
 
     if (numBrowserOptions > 1) {
         // Multiple user-provided options is not valid
-        throw new Error(localize('vscode-docker.debug.helper.oneBrowserAction', 'Only at most one of the \'launchBrowser\', \'serverReadyAction\', and \'dockerServerReadyAction\' properties may be set at a time.'));
+        throw new Error(l10n.t('Only at most one of the \'launchBrowser\', \'serverReadyAction\', and \'dockerServerReadyAction\' properties may be set at a time.'));
     } else if (numBrowserOptions === 1 && !debugConfiguration.dockerServerReadyAction) {
         // One user-provided option that is not DockerServerReadyAction--return nothing
         return undefined;

@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
+import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
-import { localize } from "../../localize";
 import { VolumeTreeItem } from "../../tree/volumes/VolumeTreeItem";
 
 export async function inspectVolume(context: IActionContext, node?: VolumeTreeItem): Promise<void> {
     if (!node) {
         await ext.volumesTree.refresh(context);
-        node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: localize('vscode-docker.commands.volumes.inspect.noVolumes', 'No volumes are available to inspect') });
+        node = await ext.volumesTree.showTreeItemPicker<VolumeTreeItem>(VolumeTreeItem.contextValue, { ...context, noItemFoundErrorMessage: l10n.t('No volumes are available to inspect') });
     }
 
     const inspectResult = await ext.runWithDefaults(client =>

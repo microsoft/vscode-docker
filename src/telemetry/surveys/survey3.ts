@@ -3,18 +3,18 @@
  *  Licensed under the MIT License. See License.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { Survey } from './SurveyManager';
 
 const minimumOverallSessions = 10;
 
 export const survey3: Survey = {
     id: 'survey3',
-    prompt: localize('vscode-docker.surveys.survey3.prompt', 'How can we make the Docker extension better?'),
+    prompt: l10n.t('How can we make the Docker extension better?'),
     buttons: new Map<string, string | undefined>([
-        [localize('vscode-docker.surveys.survey3.button.take', 'Take survey'), 'https://aka.ms/dockerextensionsurvey'],
-        [localize('vscode-docker.surveys.survey3.button.never', 'Don\'t ask again'), undefined],
+        [l10n.t('Take survey'), 'https://aka.ms/dockerextensionsurvey'],
+        [l10n.t('Don\'t ask again'), undefined],
     ]),
     activationDelayMs: 60 * 1000,
     isEligible: isEligible,

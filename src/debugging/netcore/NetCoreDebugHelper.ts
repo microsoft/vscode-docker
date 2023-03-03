@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { CommandLineArgs, composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
-import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { DebugConfiguration, MessageItem, ProgressLocation, window } from 'vscode';
+import { DebugConfiguration, l10n, MessageItem, ProgressLocation, window } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { CommandLineArgs, composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -17,10 +16,10 @@ import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
+import { installDebuggersIfNecessary, vsDbgInstallBasePath, VsDbgType } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -60,7 +59,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             case 'attach':
                 return this.resolveAttachDebugConfiguration(context, debugConfiguration);
             default:
-                throw Error(localize('vscode-docker.debug.netcore.unknownDebugRequest', 'Unknown request {0} specified in the debug config.', debugConfiguration.request));
+                throw Error(l10n.t('Unknown request {0} specified in the debug config.', debugConfiguration.request));
         }
     }
 
@@ -180,7 +179,7 @@ export class NetCoreDebugHelper implements DebugHelper {
     private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
         const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', helperOptions.appProject);
         if (projectInfo.length < 3) {
-            throw new Error(localize('vscode-docker.debug.netcore.unknownOutputPath', 'Unable to determine assembly output path.'));
+            throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
 
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
@@ -200,7 +199,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         await window.withProgress(
             {
                 location: ProgressLocation.Notification,
-                title: localize('vscode-docker.debug.netcore.acquiringDebuggers', 'Acquiring .NET Debugger...'),
+                title: l10n.t('Acquiring .NET Debugger...'),
             }, async () => {
                 if (platformOS === 'Windows') {
                     await installDebuggersIfNecessary([{ runtime: 'win7-x64', version: 'latest' }]);
@@ -274,12 +273,12 @@ export class NetCoreDebugHelper implements DebugHelper {
             const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
             if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
                 context.errorHandling.suppressReportIssue = true;
-                throw new Error(localize('vscode-docker.debug.netcore.isolationNotSupported', 'Attaching a debugger to a Hyper-V container is not supported.'));
+                throw new Error(l10n.t('Attaching a debugger to a Hyper-V container is not supported.'));
             }
         }
 
         const yesItem: MessageItem = DialogResponses.yes;
-        const message = localize('vscode-docker.debug.netcore.attachingRequiresDebugger', 'Attaching to container requires .NET debugger in the container. Do you want to copy the debugger to the container?');
+        const message = l10n.t('Attaching to container requires .NET debugger in the container. Do you want to copy the debugger to the container?');
         const install = (yesItem === await window.showInformationMessage(message, ...[DialogResponses.yes, DialogResponses.no]));
         if (!install) {
             throw new UserCancelledError();
@@ -293,7 +292,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         await window.withProgress({
             location: ProgressLocation.Notification,
-            title: localize('vscode-docker.debug.netcore.copyDebugger', 'Copying the .NET debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
+            title: l10n.t('Copying the .NET debugger to the container ({0} --> {1})...', vsDbgInstallBasePath, containerDebuggerDirectory),
         }, async () => {
             await ext.runWithDefaults(client =>
                 client.writeFile({
@@ -341,7 +340,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         await ext.containersTree.refresh(context);
         const containerItem: ContainerTreeItem = await ext.containersTree.showTreeItemPicker(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.debug.netcore.noContainers', 'No running containers are available to attach.')
+            noItemFoundErrorMessage: l10n.t('No running containers are available to attach.')
         });
         return containerItem.containerName;
     }

@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
+import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
 import { NetworkTreeItem } from "../../tree/networks/NetworkTreeItem";
 
 export async function inspectNetwork(context: IActionContext, node?: NetworkTreeItem): Promise<void> {
@@ -13,7 +13,7 @@ export async function inspectNetwork(context: IActionContext, node?: NetworkTree
         await ext.networksTree.refresh(context);
         node = await ext.networksTree.showTreeItemPicker<NetworkTreeItem>(NetworkTreeItem.allContextRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.networks.inspect.noNetworks', 'No networks are available to inspect')
+            noItemFoundErrorMessage: l10n.t('No networks are available to inspect')
         });
     }
 

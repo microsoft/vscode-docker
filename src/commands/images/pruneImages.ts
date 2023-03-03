@@ -6,16 +6,15 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneImages(context: IActionContext): Promise<void> {
-    const confirmPrune: string = localize('vscode-docker.commands.images.prune.confirm', 'Are you sure you want to remove all dangling images?');
+    const confirmPrune: string = vscode.l10n.t('Are you sure you want to remove all dangling images?');
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.images.prune.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: vscode.l10n.t('Remove') });
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.images.pruning', 'Pruning images...') },
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Pruning images...') },
         async () => {
             const result = await ext.runWithDefaults(client =>
                 client.pruneImages({})
@@ -23,9 +22,9 @@ export async function pruneImages(context: IActionContext): Promise<void> {
 
             let message: string;
             if (result?.imageRefsDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
-                message = localize('vscode-docker.commands.images.prune.removed', 'Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
+                message = vscode.l10n.t('Removed {0} dangling image(s) and reclaimed {1} MB of space.', result.imageRefsDeleted.length, convertToMB(result.spaceReclaimed));
             } else {
-                message = localize('vscode-docker.commands.images.prune.removed2', 'Removed dangling images.');
+                message = vscode.l10n.t('Removed dangling images.');
             }
 
             // Don't wait

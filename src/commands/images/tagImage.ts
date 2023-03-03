@@ -6,7 +6,6 @@
 import { IActionContext, TelemetryProperties } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
 
@@ -15,7 +14,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.images.tag.noImages', 'No images are available to tag')
+            noItemFoundErrorMessage: vscode.l10n.t('No images are available to tag')
         });
     }
 
@@ -33,7 +32,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
 export async function getTagFromUserInput(context: IActionContext, fullTag: string, baseImagePath?: string): Promise<string> {
     const opt: vscode.InputBoxOptions = {
         ignoreFocusOut: true,
-        prompt: localize('vscode-docker.commands.images.tag.tagAs', 'Tag image as...'),
+        prompt: vscode.l10n.t('Tag image as...'),
     };
 
     if (fullTag.includes('/')) {

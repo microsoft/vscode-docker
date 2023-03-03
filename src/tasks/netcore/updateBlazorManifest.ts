@@ -5,8 +5,8 @@
 
 import * as fse from 'fs-extra';
 import * as path from 'path';
+import { l10n } from 'vscode';
 import * as xml2js from 'xml2js';
-import { localize } from '../../localize';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
@@ -39,7 +39,7 @@ export async function updateBlazorManifest(context: DockerRunTaskContext, runDef
     const contents = await getNetCoreProjectInfo('GetBlazorManifestLocations', runDefinition.netCore.appProject);
 
     if (contents.length < 2) {
-        throw new Error(localize('vscode-docker.tasks.netCore.noBlazorManifest1', 'Unable to determine Blazor manifest locations from output file.'));
+        throw new Error(l10n.t('Unable to determine Blazor manifest locations from output file.'));
     }
 
     await transformBlazorManifest(context, contents[0].trim(), contents[1].trim(), runDefinition.dockerRun.volumes, runDefinition.dockerRun.os);
@@ -58,7 +58,7 @@ async function transformBlazorManifest(context: DockerRunTaskContext, inputManif
 
     os = os || 'Linux';
 
-    context.terminal.writeOutputLine(localize('vscode-docker.tasks.netCore.attemptingBlazorContainerize', 'Attempting to containerize Blazor static web assets manifest...'));
+    context.terminal.writeOutputLine(l10n.t('Attempting to containerize Blazor static web assets manifest...'));
 
     if (path.extname(inputManifest) === '.json') {
         await transformJsonBlazorManifest(inputManifest, outputManifest, volumes, os);
@@ -71,7 +71,7 @@ async function transformJsonBlazorManifest(inputManifest: string, outputManifest
     const manifest = <JsonManifest>await fse.readJson(inputManifest);
 
     if (!manifest?.ContentRoots) {
-        throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifestJson', 'Failed to parse Blazor static web assets manifest.'));
+        throw new Error(l10n.t('Failed to parse Blazor static web assets manifest.'));
     }
 
     if (!Array.isArray(manifest.ContentRoots)) {
@@ -92,7 +92,7 @@ async function transformXmlBlazorManifest(inputManifest: string, outputManifest:
     const manifest = <XmlManifest>await xml2js.parseStringPromise(contents);
 
     if (!manifest?.StaticWebAssets) {
-        throw new Error(localize('vscode-docker.tasks.netCore.failedBlazorManifest', 'Failed to parse Blazor static web assets manifest.'));
+        throw new Error(l10n.t('Failed to parse Blazor static web assets manifest.'));
     }
 
     if (!Array.isArray(manifest.StaticWebAssets.ContentRoot)) {

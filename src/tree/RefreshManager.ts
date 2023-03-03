@@ -7,7 +7,6 @@ import { AzExtTreeItem, callWithTelemetryAndErrorHandling, IActionContext, parse
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
 import { EventAction, EventType, isCancellationError } from '../runtimes/docker';
 import { debounce } from '../utils/debounce';
 import { AllTreePrefixes, TreePrefix } from './TreePrefix';
@@ -158,7 +157,7 @@ export class RefreshManager extends vscode.Disposable {
                     } else {
                         // Emit a message and rethrow to get telemetry
                         ext.outputChannel.error(
-                            localize('vscode-docker.tree.refreshManager.eventSetupFailure', 'Failed to set up event listener: {0}', error.message)
+                            vscode.l10n.t('Failed to set up event listener: {0}', error.message)
                         );
 
                         throw error;

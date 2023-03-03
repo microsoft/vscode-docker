@@ -5,8 +5,7 @@
 
 import type { Task } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
-import { localize } from '../../../localize';
+import { l10n, ThemeIcon } from "vscode";
 import { getAzExtAzureUtils } from "../../../utils/lazyPackages";
 import { OpenUrlTreeItem } from "../../OpenUrlTreeItem";
 import { AzureRegistryTreeItem } from "./AzureRegistryTreeItem";
@@ -39,7 +38,7 @@ export class AzureTasksTreeItem extends AzExtParentTreeItem {
         const taskListResult: Task[] = await azExtAzureUtils.uiUtils.listAllIterator(registryClient.tasks.list(registryTI.resourceGroup, registryTI.registryName));
 
         if (clearCache && taskListResult.length === 0) {
-            return [new OpenUrlTreeItem(this, localize('vscode-docker.tree.registries.azure.learnBuildTask', 'Learn how to create a build task...'), 'https://aka.ms/acr/task')];
+            return [new OpenUrlTreeItem(this, l10n.t('Learn how to create a build task...'), 'https://aka.ms/acr/task')];
         } else {
             const result: AzExtTreeItem[] = await this.createTreeItemsWithErrorHandling(
                 taskListResult,

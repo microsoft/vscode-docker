@@ -3,19 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContainersItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
+import { l10n, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { ListContainersItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { ContainerProperty, containerProperties, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
-import { ContainerTreeItem } from "./ContainerTreeItem";
 import { TreePrefix } from "../TreePrefix";
+import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
+import { containerProperties, ContainerProperty, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
+import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = ListContainersItem & {
     showFiles: boolean;
@@ -23,8 +22,8 @@ export type DockerContainerInfo = ListContainersItem & {
 
 export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInfo, ContainerProperty> {
     public treePrefix: TreePrefix = 'containers';
-    public label: string = localize('vscode-docker.tree.containers.label', 'Containers');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.containers.configure', 'Configure containers explorer');
+    public label: string = l10n.t('Containers');
+    public configureExplorerTitle: string = l10n.t('Configure containers explorer');
 
     public childType: LocalChildType<DockerContainerInfo> = ContainerTreeItem;
     public childGroupType: LocalChildGroupType<DockerContainerInfo, ContainerProperty> = ContainerGroupTreeItem;
@@ -92,7 +91,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
 
     protected getTreeItemForEmptyList(): AzExtTreeItem[] {
         if (this.newContainerUser) {
-            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, localize('vscode-docker.tree.container.gettingStarted', 'Tutorial: Get started with Docker'), 'https://aka.ms/getstartedwithdocker');
+            const dockerTutorialTreeItem = new OpenUrlTreeItem(this, l10n.t('Tutorial: Get started with Docker'), 'https://aka.ms/getstartedwithdocker');
             dockerTutorialTreeItem.iconPath = new ThemeIcon('link-external');
             return [dockerTutorialTreeItem];
         }

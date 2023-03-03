@@ -6,9 +6,8 @@
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { Uri, env, window } from "vscode";
+import { env, l10n, Uri, window } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { localize } from "../../../localize";
 import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
 import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
@@ -59,17 +58,17 @@ export async function deployImageToAzure(context: IActionContext, node?: RemoteT
         new DockerWebhookCreateStep(node),
     ];
 
-    const title = localize('vscode-docker.commands.registries.azure.deployImage.title', 'Create new web app');
+    const title = l10n.t('Create new web app');
     const wizard = new AzureWizard(wizardContext, { title, promptSteps, executeSteps });
     await wizard.prompt();
     await wizard.execute();
 
     const site: Site = nonNullProp(wizardContext, 'site');
     const siteUri: string = `https://${site.defaultHostName}`;
-    const createdNewWebApp: string = localize('vscode-docker.commands.registries.azure.deployImage.created', 'Successfully created web app "{0}": {1}', site.name, siteUri);
+    const createdNewWebApp: string = l10n.t('Successfully created web app "{0}": {1}', site.name, siteUri);
     ext.outputChannel.info(createdNewWebApp);
 
-    const openSite: string = localize('vscode-docker.commands.registries.azure.deployImage.openSite', 'Open Site');
+    const openSite: string = l10n.t('Open Site');
     // don't wait
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(createdNewWebApp, ...[openSite]).then((selection) => {

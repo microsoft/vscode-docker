@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DialogResponses, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
-import { DialogResponses, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { localize } from '../../../localize';
 import { ext } from '../../../extensionVariables';
-import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
-import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
+import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
 import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
+import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
+import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
+import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
-import { parseDockerLikeImageName } from '../../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
 const minimumAcaExtensionVersion = '0.4.0';
@@ -52,7 +51,7 @@ export async function deployImageToAca(context: IActionContext, node?: RemoteTag
         const { auth } = await registry.getDockerCliCredentials() as { auth?: { username?: string, password?: string } };
 
         if (!auth?.username || !auth?.password) {
-            throw new Error(localize('vscode-docker.commands.registries.azure.deployImageToAca.noCredentials', 'No credentials found for registry "{0}".', registry.label));
+            throw new Error(vscode.l10n.t('No credentials found for registry "{0}".', registry.label));
         }
 
         if (registry instanceof DockerHubNamespaceTreeItem) {
@@ -87,14 +86,13 @@ function isAcaExtensionInstalled(): boolean {
 }
 
 async function openAcaInstallPage(context: IActionContext): Promise<void> {
-    const message = localize(
-        'vscode-docker.commands.registries.azure.deployImageToAca.installAcaExtension',
+    const message = vscode.l10n.t(
         'Version {0} or higher of the Azure Container Apps extension is required to deploy to Azure Container Apps. Would you like to install it now?',
         minimumAcaExtensionVersion
     );
 
     const installButton: vscode.MessageItem = {
-        title: localize('vscode-docker.commands.registries.azure.deployImageToAca.install', 'Install'),
+        title: vscode.l10n.t('Install'),
     };
 
     const response = await context.ui.showWarningMessage(message, { modal: true }, installButton, DialogResponses.cancel);

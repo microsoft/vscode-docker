@@ -4,13 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { ThemeIcon } from "vscode";
-import { localize } from '../../localize';
+import { l10n, ThemeIcon } from "vscode";
 
 export class ConnectedRegistriesTreeItem extends AzExtParentTreeItem {
     public contextValue: string = 'connectedRegistries';
     public childTypeLabel: string = 'registry';
-    public label: string = localize('vscode-docker.tree.registries.connectedRegistriesLabel', 'Connected Registries');
+    public label: string = l10n.t('Connected Registries');
     public children: AzExtTreeItem[] = [];
 
     public constructor(parent: AzExtParentTreeItem | undefined) {

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions, VoidCommandResponse } from '../../runtimes/docker';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from '../../localize';
+import { CommonOrchestratorCommandOptions, IContainerOrchestratorClient, LogsCommandOptions, VoidCommandResponse } from '../../runtimes/docker';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ContainerGroupTreeItem } from '../../tree/containers/ContainerGroupTreeItem';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
@@ -45,7 +45,7 @@ async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerGroupTreeItem>(/composeGroup$/i, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.composeGroup.noComposeProjects', 'No Docker Compose projects are running.'),
+            noItemFoundErrorMessage: l10n.t('No Docker Compose projects are running.'),
         });
     }
 
@@ -56,7 +56,7 @@ async function composeGroup<TOptions extends CommonOrchestratorCommandOptions>(
 
     if (!workingDirectory || !orchestratorFiles || !projectName) {
         context.errorHandling.suppressReportIssue = true;
-        throw new Error(localize('vscode-docker.commands.containers.composeGroup.noCompose', 'Unable to determine compose project info for container group \'{0}\'.', node.label));
+        throw new Error(l10n.t('Unable to determine compose project info for container group \'{0}\'.', node.label));
     }
 
     const options: TOptions = {

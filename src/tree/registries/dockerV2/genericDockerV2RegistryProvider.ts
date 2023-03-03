@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize } from '../../../localize';
+import { l10n } from 'vscode';
 import { RegistryApi } from "../all/RegistryApi";
 import { basicOAuthProvider } from '../auth/BasicOAuthProvider';
 import { IRegistryProvider } from "../IRegistryProvider";
@@ -11,16 +11,16 @@ import { deleteRegistryPassword, setRegistryPassword } from '../registryPassword
 import { GenericDockerV2RegistryTreeItem } from "./GenericDockerV2RegistryTreeItem";
 
 export const genericDockerV2RegistryProvider: IRegistryProvider = {
-    label: localize('vscode-docker.tree.registries.v2.label', 'Generic Docker Registry'),
-    description: localize('vscode-docker.tree.registries.v2.description', '(Preview)'),
-    detail: localize('vscode-docker.tree.registries.v2.detail', 'Connect any generic private registry that supports the "Docker V2" api.'),
+    label: l10n.t('Generic Docker Registry'),
+    description: l10n.t('(Preview)'),
+    detail: l10n.t('Connect any generic private registry that supports the "Docker V2" api.'),
     id: 'genericDockerV2',
     api: RegistryApi.DockerV2,
     isSingleRegistry: true,
     connectWizardOptions: {
-        wizardTitle: localize('vscode-docker.tree.registries.v2.title', 'Connect Docker Registry'),
+        wizardTitle: l10n.t('Connect Docker Registry'),
         includeUrl: true,
-        urlPrompt: localize('vscode-docker.tree.registries.v2.urlPrompt', 'Enter the URL for the registry'),
+        urlPrompt: l10n.t('Enter the URL for the registry'),
         includeUsername: true,
         isUsernameOptional: true,
         includePassword: true,

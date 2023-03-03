@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { localize } from '../localize';
+import { l10n } from 'vscode';
 import { DockerExtensionKind, getVSCodeRemoteInfo } from '../utils/getVSCodeRemoteInfo';
 import { registerCommand } from './registerCommands';
 
@@ -26,6 +26,6 @@ async function verifyIsRunningLocally(context: IActionContext): Promise<void> {
 
     if (remoteInfo.extensionKind !== DockerExtensionKind.local) {
         context.errorHandling.suppressReportIssue = true;
-        throw new Error(localize('vscode-docker.commands.installDocker.noRemote', 'This command cannot be used in a remote session.'));
+        throw new Error(l10n.t('This command cannot be used in a remote session.'));
     }
 }

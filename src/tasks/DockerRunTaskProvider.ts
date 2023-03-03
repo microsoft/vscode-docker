@@ -3,18 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { RunContainerBindMount } from '../runtimes/docker';
-import { Task } from 'vscode';
+import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { localize } from '../localize';
+import { RunContainerBindMount } from '../runtimes/docker';
 import { cloneObject } from '../utils/cloneObject';
 import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
 import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
-import { DockerRunTaskContext, TaskHelper, getAssociatedDockerBuildTask, throwIfCancellationRequested } from './TaskHelper';
+import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -90,7 +89,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {
         if (!dockerRun.image) {
-            throw new Error(localize('vscode-docker.tasks.runProvider.noDockerImage', 'No Docker image name was provided or resolved.'));
+            throw new Error(l10n.t('No Docker image name was provided or resolved.'));
         }
     }
 

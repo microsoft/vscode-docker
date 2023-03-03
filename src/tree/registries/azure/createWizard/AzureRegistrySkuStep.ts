@@ -5,7 +5,7 @@
 
 import type { SkuName as AcrSkuName } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardPromptStep, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../../localize';
+import { l10n } from 'vscode';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
 export class AzureRegistrySkuStep extends AzureWizardPromptStep<IAzureRegistryWizardContext> {
@@ -13,7 +13,7 @@ export class AzureRegistrySkuStep extends AzureWizardPromptStep<IAzureRegistryWi
         const skus: AcrSkuName[] = ["Basic", "Standard", "Premium"];
         const picks: IAzureQuickPickItem<AcrSkuName>[] = skus.map(s => { return { label: s, data: s }; });
 
-        const placeHolder: string = localize('vscode-docker.tree.registries.azure.createWizard.selectSku', 'Select a SKU');
+        const placeHolder: string = l10n.t('Select a SKU');
         context.newRegistrySku = (await context.ui.showQuickPick(picks, { placeHolder })).data;
     }
 

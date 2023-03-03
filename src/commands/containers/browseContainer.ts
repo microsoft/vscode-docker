@@ -7,7 +7,6 @@ import { PortBinding } from '../../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, TelemetryProperties } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";
 
 type BrowseTelemetryProperties = TelemetryProperties & { possiblePorts?: string, selectedPort?: string };
@@ -77,7 +76,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         await ext.containersTree.refresh(context);
         node = await ext.containersTree.showTreeItemPicker<ContainerTreeItem>(ContainerTreeItem.runningContainerRegExp, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.containers.browseContainer.noContainers', 'No running containers are available to open in a browser')
+            noItemFoundErrorMessage: vscode.l10n.t('No running containers are available to open in a browser')
         });
     }
 
@@ -92,7 +91,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
     telemetryProperties.possiblePorts = browsablePorts.map(port => port.containerPort).toString();
 
     if (browsablePorts.length === 0) {
-        void context.ui.showWarningMessage(localize('vscode-docker.commands.containers.browseContainer.noPorts', 'No valid ports are available.'));
+        void context.ui.showWarningMessage(vscode.l10n.t('No valid ports are available.'));
         return;
     }
 
@@ -120,7 +119,7 @@ export async function browseContainer(context: IActionContext, node?: ContainerT
         items.sort((a, b) => a.data.containerPort - b.data.containerPort);
 
         /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-        const item = await context.ui.showQuickPick(items, { stepName: 'port', placeHolder: localize('vscode-docker.commands.containers.browseContainer.selectContainerPort', 'Select the container port to browse to.') });
+        const item = await context.ui.showQuickPick(items, { stepName: 'port', placeHolder: vscode.l10n.t('Select the container port to browse to.') });
 
         // NOTE: If the user cancels the prompt, then a UserCancelledError exception would be thrown.
 

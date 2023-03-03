@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
+import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
 import { ImageTreeItem } from "../../tree/images/ImageTreeItem";
 
 export async function inspectImage(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -13,7 +13,7 @@ export async function inspectImage(context: IActionContext, node?: ImageTreeItem
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: localize('vscode-docker.commands.images.inspect.noImages', 'No images are available to inspect')
+            noItemFoundErrorMessage: l10n.t('No images are available to inspect')
         });
     }
 

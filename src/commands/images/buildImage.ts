@@ -7,7 +7,6 @@ import { IActionContext, UserCancelledError } from "@microsoft/vscode-azext-util
 import * as path from "path";
 import * as vscode from "vscode";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
 import { TaskCommandRunnerFactory } from "../../runtimes/runners/TaskCommandRunnerFactory";
 import { getOfficialBuildTaskForDockerfile } from "../../tasks/TaskHelper";
 import { getValidImageNameFromPath } from "../../utils/getValidImageName";
@@ -32,7 +31,7 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
         rootFolder = vscode.workspace.getWorkspaceFolder(dockerFileUri);
     }
 
-    rootFolder = rootFolder || await quickPickWorkspaceFolder(context, localize('vscode-docker.commands.images.build.workspaceFolder', 'To build Docker files you must first open a folder or workspace in VS Code.'));
+    rootFolder = rootFolder || await quickPickWorkspaceFolder(context, vscode.l10n.t('To build Docker files you must first open a folder or workspace in VS Code.'));
 
     const dockerFileItem = await quickPickDockerFileItem(context, dockerFileUri, rootFolder);
     const task = await getOfficialBuildTaskForDockerfile(context, dockerFileItem.absoluteFilePath, rootFolder);

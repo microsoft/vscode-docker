@@ -3,9 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
-import { localize } from '../../../localize';
+import * as vscode from 'vscode';
 import { PlatformOS } from '../../../utils/platform';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetCoreScaffoldingWizardContext } from './NetCoreScaffoldingWizardContext';
@@ -15,7 +14,7 @@ export class NetCoreChooseOsStep extends TelemetryPromptStep<NetCoreScaffoldingW
         const opt: vscode.QuickPickOptions = {
             matchOnDescription: true,
             matchOnDetail: true,
-            placeHolder: localize('vscode-docker.scaffold.chooseOsStep.selectOS', 'Select Operating System'),
+            placeHolder: vscode.l10n.t('Select Operating System'),
         };
 
         const OSes: PlatformOS[] = ['Linux', 'Windows'];

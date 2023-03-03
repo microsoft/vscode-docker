@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
-import { localize } from '../../localize';
+import { l10n } from 'vscode';
 import { RegistryApi } from "./all/RegistryApi";
 import { azureRegistryProviderId } from "./azure/azureRegistryProvider";
 import { dockerHubRegistryProviderId } from "./dockerHub/dockerHubRegistryProvider";
@@ -54,7 +54,7 @@ function convertToRegExp(provider: Partial<ICachedRegistryProvider>, suffix: str
 function getCachedProvider(node: AzExtTreeItem & Partial<IRegistryProviderTreeItem>): ICachedRegistryProvider {
     while (!node.cachedProvider) {
         if (!node.parent) {
-            throw new Error(localize('vscode-docker.tree.registries.noCachedProvider', 'Failed to find cachedProvider'));
+            throw new Error(l10n.t('Failed to find cachedProvider'));
         } else {
             node = node.parent;
         }

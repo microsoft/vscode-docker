@@ -3,19 +3,18 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { localize } from "../../localize";
 import { convertToMB } from '../../utils/convertToMB';
 
 export async function pruneVolumes(context: IActionContext): Promise<void> {
-    const confirmPrune: string = localize('vscode-docker.commands.volumes.prune.confirm', 'Are you sure you want to remove all unused volumes? Removing volumes may result in data loss!');
+    const confirmPrune: string = vscode.l10n.t('Are you sure you want to remove all unused volumes? Removing volumes may result in data loss!');
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: localize('vscode-docker.commands.volumes.prune.remove', 'Remove') });
+    await context.ui.showWarningMessage(confirmPrune, { modal: true }, { title: vscode.l10n.t('Remove') });
 
     await vscode.window.withProgress(
-        { location: vscode.ProgressLocation.Notification, title: localize('vscode-docker.commands.volumes.pruning', 'Pruning volumes...') },
+        { location: vscode.ProgressLocation.Notification, title: vscode.l10n.t('Pruning volumes...') },
         async () => {
             const result = await ext.runWithDefaults(client =>
                 client.pruneVolumes({})
@@ -23,9 +22,9 @@ export async function pruneVolumes(context: IActionContext): Promise<void> {
 
             let message: string;
             if (result?.volumesDeleted?.length && Number.isInteger(result?.spaceReclaimed)) {
-                message = localize('vscode-docker.commands.volumes.prune.removed', 'Removed {0} unused volume(s) and reclaimed {1} MB of space.', result.volumesDeleted.length, convertToMB(result.spaceReclaimed));
+                message = vscode.l10n.t('Removed {0} unused volume(s) and reclaimed {1} MB of space.', result.volumesDeleted.length, convertToMB(result.spaceReclaimed));
             } else {
-                message = localize('vscode-docker.commands.volumes.prune.removed2', 'Removed unused volumes.');
+                message = vscode.l10n.t('Removed unused volumes.');
             }
 
             // Don't wait

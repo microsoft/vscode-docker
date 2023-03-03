@@ -3,19 +3,19 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesCommandOptions, ListImagesItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { l10n } from 'vscode';
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { ext } from "../../extensionVariables";
-import { localize } from '../../localize';
+import { ListImagesCommandOptions, ListImagesItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
+import { TreePrefix } from "../TreePrefix";
 import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
-import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImageProperties";
+import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
-import { TreePrefix } from "../TreePrefix";
 
 export interface DatedDockerImage extends ListImagesItem {
     outdated?: boolean;
@@ -28,13 +28,13 @@ export class ImagesTreeItem extends LocalRootTreeItemBase<DatedDockerImage, Imag
         super(parent);
         this.sortBySettingInfo.properties.push({
             property: 'Size',
-            description: localize('vscode-docker.tree.images.sortBySize', 'Sort by image size')
+            description: l10n.t('Sort by image size')
         });
     }
 
     public treePrefix: TreePrefix = 'images';
-    public label: string = localize('vscode-docker.tree.images.label', 'Images');
-    public configureExplorerTitle: string = localize('vscode-docker.tree.images.configure', 'Configure images explorer');
+    public label: string = l10n.t('Images');
+    public configureExplorerTitle: string = l10n.t('Configure images explorer');
 
     public childType: LocalChildType<DatedDockerImage> = ImageTreeItem;
     public childGroupType: LocalChildGroupType<DatedDockerImage, ImageProperty> = ImageGroupTreeItem;

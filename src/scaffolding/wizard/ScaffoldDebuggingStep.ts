@@ -3,12 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
 import { AzureWizardExecuteStep } from '@microsoft/vscode-azext-utils';
-import { Progress } from 'vscode';
+import * as path from 'path';
+import { l10n, Progress } from 'vscode';
 import { DockerDebugScaffoldContext } from '../../debugging/DebugHelper';
 import { dockerDebugScaffoldingProvider } from '../../debugging/DockerDebugScaffoldingProvider';
-import { localize } from '../../localize';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { NetCoreScaffoldingWizardContext } from './netCore/NetCoreScaffoldingWizardContext';
 import { PythonScaffoldingWizardContext } from './python/PythonScaffoldingWizardContext';
@@ -18,7 +17,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
     public readonly priority: number = 1000;
 
     public async execute(wizardContext: ScaffoldingWizardContext, progress: Progress<{ message?: string; increment?: number; }>): Promise<void> {
-        progress.report({ message: localize('vscode-docker.scaffold.scaffoldDebuggingStep.progress', 'Adding debug configuration and tasks...') });
+        progress.report({ message: l10n.t('Adding debug configuration and tasks...') });
 
         const scaffoldContext: DockerDebugScaffoldContext = {
             folder: wizardContext.workspaceFolder,
@@ -65,7 +64,7 @@ export class ScaffoldDebuggingStep extends AzureWizardExecuteStep<ScaffoldingWiz
                 break;
 
             default:
-                throw new Error(localize('vscode-docker.scaffold.scaffoldDebuggingStep.invalidPlatform', 'Invalid platform for debug config scaffolding.'));
+                throw new Error(l10n.t('Invalid platform for debug config scaffolding.'));
         }
     }
 

@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize } from "../../../localize";
+import { l10n } from 'vscode';
 import { ChooseArtifactStep } from "../ChooseArtifactStep";
 import { ScaffoldingWizardContext } from "../ScaffoldingWizardContext";
 
 export class ChooseJavaArtifactStep extends ChooseArtifactStep<ScaffoldingWizardContext> {
     public constructor() {
         super(
-            localize('vscode-docker.scaffold.chooseJavaArtifactStep.promptText', 'Choose a build metadata file (pom.xml or build.gradle)'),
+            l10n.t('Choose a build metadata file (pom.xml or build.gradle)'),
             ['**/[Pp][Oo][Mm].[Xx][Mm][Ll]', '**/[Bb][Uu][Ii][Ll][Dd].[Gg][Rr][Aa][Dd][Ll][Ee]'],
-            localize('vscode-docker.scaffold.chooseJavaArtifactStep.noItemsFound', 'No build metadata files were found.')
+            l10n.t('No build metadata files were found.')
         );
     }
 

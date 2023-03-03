@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Registry as AcrRegistry, ContainerRegistryManagementClient } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
+import type { ContainerRegistryManagementClient, Registry as AcrRegistry } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import { SubscriptionTreeItemBase } from '@microsoft/vscode-azext-azureutils'; // This can't be made lazy, so users of this class must be lazy
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, IActionContext, ICreateChildImplContext, ISubscriptionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { window } from 'vscode';
-import { localize } from '../../../localize';
+import { l10n, window } from 'vscode';
 import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { ICachedRegistryProvider } from "../ICachedRegistryProvider";
 import { IRegistryProviderTreeItem } from "../IRegistryProviderTreeItem";
@@ -60,7 +59,7 @@ export class SubscriptionTreeItem extends SubscriptionTreeItemBase implements IR
             executeSteps: [
                 new AzureRegistryCreateStep()
             ],
-            title: localize('vscode-docker.tree.registries.azure.createNew', 'Create new Azure Container Registry')
+            title: l10n.t('Create new Azure Container Registry')
         });
 
         await wizard.prompt();
