@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListImagesItem } from "../../runtimes/docker";
 import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
+import { ListImagesItem } from "../../runtimes/docker";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
-import { CommonGroupBy, CommonProperty, commonProperties, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
+import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 import { NormalizedImageNameInfo } from "./NormalizedImageNameInfo";
 
@@ -70,7 +70,7 @@ export function getImagePropertyValue(item: ListImagesItem, property: ImagePrope
             result = normalizedImageNameInfo.normalizedTag;
             break;
         default:
-            result = getCommonPropertyValue(item, property);
+            result = getCommonPropertyValue(item, property, 'images');
             break;
     }
 

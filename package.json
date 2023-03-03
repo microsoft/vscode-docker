@@ -1740,8 +1740,14 @@
                         "RepositoryNameAndTag",
                         "State",
                         "Status",
-                        "Tag"
+                        "Tag",
+                        "Label"
                     ]
+                },
+                "docker.containers.groupByLabel": {
+                    "type": "string",
+                    "default": "com.docker.swarm.node.id",
+                    "description": "%vscode-docker.config.docker.containers.groupByLabel%"
                 },
                 "docker.containers.description": {
                     "type": "array",

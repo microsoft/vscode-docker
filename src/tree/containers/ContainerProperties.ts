@@ -66,7 +66,7 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
         case 'Image':
             return item.image.originalName;
         default:
-            return getCommonPropertyValue(item, property);
+            return getCommonPropertyValue(item, property, 'containers');
     }
 }
 

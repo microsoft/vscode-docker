@@ -5,18 +5,21 @@
 
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
-import { l10n, ThemeIcon } from 'vscode';
+import { l10n, ThemeIcon, workspace } from 'vscode';
+import { Labels } from '../../runtimes/docker/contracts/ContainerClient';
 import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
+
 dayjs.extend(relativeTime);
 
-export type CommonProperty = 'CreatedTime' | 'Size';
+export type CommonProperty = 'CreatedTime' | 'Size' | 'Label';
 export type CommonGroupBy = 'None';
 export type CommonSortBy = 'CreatedTime' | 'Label' | 'Size';
 
 export const commonProperties: ITreePropertyInfo<Exclude<CommonProperty, 'Size'>>[] = [
     { property: 'CreatedTime', exampleValue: '2 hours ago' },
+    { property: 'Label', exampleValue: 'It\'s just a test mane' },
 ];
 
 export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
@@ -29,12 +32,14 @@ export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
     { property: 'Label', description: l10n.t('Sort alphabetically by label') }
 ];
 
-export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
+export function getCommonPropertyValue(item: { createdAt?: Date, size?: number, labels?: Labels }, property: CommonProperty, itemType: 'containers' | 'images' | 'networks' | 'volumes'): string {
     switch (property) {
         case 'CreatedTime':
             return !!(item?.createdAt) ? dayjs(item.createdAt).fromNow() : '';
         case 'Size':
             return Number.isInteger(item?.size) ? `${convertToMB(item.size)} MB` : '';
+        case 'Label':
+            return getLabel(item?.labels);
         default:
             throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
@@ -46,9 +51,37 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
         case 'CreatedTime':
             icon = 'watch';
             break;
+        case 'Label':
+            icon = 'watch';
+            break;
         default:
             throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
 
     return new ThemeIcon(icon);
 }
+
+export const NonLabelGroupName = l10n.t('ungrouped');
+
+export function getLabel(containerLabels: Labels): string {
+    if (!containerLabels) {
+        return NonLabelGroupName;
+    }
+
+    const labelName = workspace.getConfiguration('docker')?.get<string | undefined>('containers.groupByLabel', undefined);
+    if (!labelName) {
+        return NonLabelGroupName;
+    }
+
+    const labels = Object.keys(containerLabels).map(label => ({ label: label, value: containerLabels[label] }));
+
+    const composeProject = labels.find(l => l.label === labelName);
+    if (composeProject) {
+        return composeProject.value;
+    } else {
+        return NonLabelGroupName;
+    }
+}
+
+
+
