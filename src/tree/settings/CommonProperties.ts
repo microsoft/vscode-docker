@@ -10,7 +10,6 @@ import { Labels } from '../../runtimes/docker/contracts/ContainerClient';
 import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
-
 dayjs.extend(relativeTime);
 
 export type CommonProperty = 'CreatedTime' | 'Size';
@@ -27,10 +26,10 @@ export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
 };
 
 export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
-    { property: 'CreatedTime', description: l10n.t('Sort by newest') }
+    { property: 'CreatedTime', description: l10n.t('Sort by newest') },
 ];
 
-export function getCommonPropertyValue(item: { createdAt?: Date, size?: number}, property: CommonProperty): string {
+export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
     switch (property) {
         case 'CreatedTime':
             return !!(item?.createdAt) ? dayjs(item.createdAt).fromNow() : '';
