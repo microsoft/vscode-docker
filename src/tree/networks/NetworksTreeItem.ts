@@ -66,7 +66,7 @@ export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, Net
             case 'NetworkName':
                 return item.name;
             default:
-                return getCommonPropertyValue(item, property, 'networks');
+                return getCommonPropertyValue(item, property);
         }
     }
 }

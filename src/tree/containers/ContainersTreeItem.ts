@@ -9,7 +9,7 @@ import { ext } from "../../extensionVariables";
 import { ListContainersItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
-import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
+import { CommonGroupBy, groupByNoneProperty, NonLabelGroupName } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { TreePrefix } from "../TreePrefix";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
@@ -80,6 +80,15 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
                 return 0;
             } else {
                 return ti1.label === NonComposeGroupName ? 1 : -1;
+            }
+        }
+        if (this.groupBySetting === 'Label'
+            && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
+            && (ti1.label === NonLabelGroupName || ti2.label === NonLabelGroupName)) {
+            if (ti1.label === ti2.label) {
+                return 0;
+            } else {
+                return ti1.label === NonLabelGroupName ? 1 : -1;
             }
         }
         return super.compareChildrenImpl(ti1, ti2);

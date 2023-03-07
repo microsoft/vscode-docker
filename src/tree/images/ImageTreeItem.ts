@@ -97,7 +97,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
         const handlebarsContext = {
             ...imageInspection,
             normalizedName: this.fullTag,
-            normalizedSize: getCommonPropertyValue(this._item, 'Size', 'images'),
+            normalizedSize: getCommonPropertyValue(this._item, 'Size'),
             containers: associatedContainers
         };
         return resolveTooltipMarkdown(imageTooltipTemplate, handlebarsContext);

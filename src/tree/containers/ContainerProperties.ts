@@ -5,10 +5,10 @@
 
 import { l10n, ThemeColor, ThemeIcon } from "vscode";
 import { ListContainersItem } from "../../runtimes/docker";
-import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";
+import { commonProperties, CommonProperty, getCommonPropertyValue, getLabel } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
-export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status';
+export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status'| 'Label';
 
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     ...commonProperties,
@@ -20,6 +20,7 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' },
     { property: 'Compose Project Name', description: l10n.t('Value used to associate containers launched by a \'docker-compose up\' command') },
+    { property: 'Label', exampleValue: 'com.microsoft.created-by' },
 ];
 
 export function getContainerStateIcon(state: string): ThemeIcon {
@@ -65,8 +66,10 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
             return getComposeProjectName(item);
         case 'Image':
             return item.image.originalName;
+        case 'Label':
+            return getLabel(item?.labels, 'containers');
         default:
-            return getCommonPropertyValue(item, property, 'containers');
+            return getCommonPropertyValue(item, property);
     }
 }
 
@@ -87,3 +90,5 @@ export function getComposeProjectName(container: ListContainersItem): string {
         return NonComposeGroupName;
     }
 }
+
+

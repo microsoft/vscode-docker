@@ -13,13 +13,12 @@ import { ITreePropertyInfo } from './ITreeSettingInfo';
 
 dayjs.extend(relativeTime);
 
-export type CommonProperty = 'CreatedTime' | 'Size' | 'Label';
+export type CommonProperty = 'CreatedTime' | 'Size';
 export type CommonGroupBy = 'None';
 export type CommonSortBy = 'CreatedTime' | 'Label' | 'Size';
 
 export const commonProperties: ITreePropertyInfo<Exclude<CommonProperty, 'Size'>>[] = [
     { property: 'CreatedTime', exampleValue: '2 hours ago' },
-    { property: 'Label', exampleValue: 'com.microsoft.created-by' },
 ];
 
 export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
@@ -28,18 +27,15 @@ export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
 };
 
 export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
-    { property: 'CreatedTime', description: l10n.t('Sort by newest') },
-    { property: 'Label', description: l10n.t('Sort alphabetically by label') }
+    { property: 'CreatedTime', description: l10n.t('Sort by newest') }
 ];
 
-export function getCommonPropertyValue(item: { createdAt?: Date, size?: number, labels?: Labels }, property: CommonProperty, itemType: 'containers' | 'images' | 'networks' | 'volumes'): string {
+export function getCommonPropertyValue(item: { createdAt?: Date, size?: number}, property: CommonProperty): string {
     switch (property) {
         case 'CreatedTime':
             return !!(item?.createdAt) ? dayjs(item.createdAt).fromNow() : '';
         case 'Size':
             return Number.isInteger(item?.size) ? `${convertToMB(item.size)} MB` : '';
-        case 'Label':
-            return getLabel(item?.labels);
         default:
             throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
@@ -51,9 +47,6 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
         case 'CreatedTime':
             icon = 'watch';
             break;
-        case 'Label':
-            icon = 'symbol-class';
-            break;
         default:
             throw new RangeError(l10n.t('Unexpected property "{0}".', property));
     }
@@ -63,12 +56,12 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
 
 export const NonLabelGroupName = l10n.t('others');
 
-export function getLabel(containerLabels: Labels): string {
+export function getLabel(containerLabels: Labels, itemType: 'containers' | 'images'): string {
     if (!containerLabels) {
         return NonLabelGroupName;
     }
 
-    const labelName = workspace.getConfiguration('docker')?.get<string | undefined>('containers.groupByLabel', undefined);
+    const labelName = workspace.getConfiguration('docker')?.get<string | undefined>(`${itemType}.groupByLabel`, undefined);
     if (!labelName) {
         return NonLabelGroupName;
     }

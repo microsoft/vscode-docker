@@ -70,7 +70,7 @@ export function getImagePropertyValue(item: ListImagesItem, property: ImagePrope
             result = normalizedImageNameInfo.normalizedTag;
             break;
         default:
-            result = getCommonPropertyValue(item, property, 'images');
+            result = getCommonPropertyValue(item, property);
             break;
     }
 
