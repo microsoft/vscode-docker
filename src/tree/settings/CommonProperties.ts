@@ -27,6 +27,7 @@ export const groupByNoneProperty: ITreePropertyInfo<CommonGroupBy> = {
 
 export const sortByProperties: ITreePropertyInfo<CommonSortBy>[] = [
     { property: 'CreatedTime', description: l10n.t('Sort by newest') },
+    { property: 'Label', description: l10n.t('Sort alphabetically by label') }
 ];
 
 export function getCommonPropertyValue(item: { createdAt?: Date, size?: number }, property: CommonProperty): string {
