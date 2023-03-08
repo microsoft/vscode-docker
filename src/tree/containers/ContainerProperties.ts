@@ -90,4 +90,3 @@ export function getComposeProjectName(container: ListContainersItem): string {
         return NonComposeGroupName;
     }
 }
-
