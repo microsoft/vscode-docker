@@ -6,7 +6,7 @@
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { l10n, ThemeIcon, workspace } from 'vscode';
-import { Labels } from '../../runtimes/docker/contracts/ContainerClient';
+import { ListContainersItem } from '../../runtimes/docker';
 import { convertToMB } from '../../utils/convertToMB';
 import { ITreePropertyInfo } from './ITreeSettingInfo';
 
@@ -54,27 +54,11 @@ export function getCommonGroupIcon(property: CommonProperty | CommonGroupBy): Th
     return new ThemeIcon(icon);
 }
 
-export const NonLabelGroupName = l10n.t('others');
+export const NonLabelGroupName = l10n.t('Others');
 
-export function getLabel(containerLabels: Labels, itemType: 'containers' | 'images'): string {
-    if (!containerLabels) {
-        return NonLabelGroupName;
-    }
+export function getConfiguredLabelGroup(item: ListContainersItem, itemType: 'containers'): string {
+    const containerLabels = item?.labels;
 
     const labelName = workspace.getConfiguration('docker')?.get<string | undefined>(`${itemType}.groupByLabel`, undefined);
-    if (!labelName) {
-        return NonLabelGroupName;
-    }
-
-    const labels = Object.keys(containerLabels).map(label => ({ label: label, value: containerLabels[label] }));
-
-    const composeProject = labels.find(l => l.label === labelName);
-    if (composeProject) {
-        return composeProject.value;
-    } else {
-        return NonLabelGroupName;
-    }
+    return containerLabels?.[labelName] || NonLabelGroupName;
 }
-
-
-

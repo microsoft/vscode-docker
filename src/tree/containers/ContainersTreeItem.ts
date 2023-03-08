@@ -73,6 +73,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
         if (this.failedToConnect) {
             return 0; // children are already sorted
         }
+
         if (this.groupBySetting === 'Compose Project Name'
             && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
             && (ti1.label === NonComposeGroupName || ti2.label === NonComposeGroupName)) {
@@ -82,7 +83,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
                 return ti1.label === NonComposeGroupName ? 1 : -1;
             }
         }
-        if (this.groupBySetting === 'Label'
+        else if (this.groupBySetting === 'Label'
             && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
             && (ti1.label === NonLabelGroupName || ti2.label === NonLabelGroupName)) {
             if (ti1.label === ti2.label) {
@@ -91,6 +92,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
                 return ti1.label === NonLabelGroupName ? 1 : -1;
             }
         }
+
         return super.compareChildrenImpl(ti1, ti2);
     }
 

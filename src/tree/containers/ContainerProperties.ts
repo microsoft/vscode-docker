@@ -5,7 +5,7 @@
 
 import { l10n, ThemeColor, ThemeIcon } from "vscode";
 import { ListContainersItem } from "../../runtimes/docker";
-import { commonProperties, CommonProperty, getCommonPropertyValue, getLabel } from "../settings/CommonProperties";
+import { commonProperties, CommonProperty, getCommonPropertyValue, getConfiguredLabelGroup } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
 export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status'| 'Label';
@@ -67,7 +67,7 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
         case 'Image':
             return item.image.originalName;
         case 'Label':
-            return getLabel(item?.labels, 'containers');
+            return getConfiguredLabelGroup(item, 'containers');
         default:
             return getCommonPropertyValue(item, property);
     }
@@ -90,5 +90,4 @@ export function getComposeProjectName(container: ListContainersItem): string {
         return NonComposeGroupName;
     }
 }
-
 
