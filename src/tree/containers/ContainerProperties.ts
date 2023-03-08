@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { l10n, ThemeColor, ThemeIcon } from "vscode";
+import { l10n, ThemeColor, ThemeIcon, workspace } from "vscode";
 import { ListContainersItem } from "../../runtimes/docker";
-import { commonProperties, CommonProperty, getCommonPropertyValue, getConfiguredLabelGroup } from "../settings/CommonProperties";
+import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
 export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status'| 'Label';
@@ -63,30 +63,20 @@ export function getContainerPropertyValue(item: ListContainersItem, property: Co
             // This normalizes things like "10 seconds" and "Less than a second" to "Less than a minute", meaning the refreshes don't happen constantly
             return item.status?.replace(/(\d+ seconds?)|(Less than a second)/i, l10n.t('Less than a minute'));
         case 'Compose Project Name':
-            return getComposeProjectName(item);
+            return getLabelGroup(item, 'com.docker.compose.project', NonComposeGroupName);
         case 'Image':
             return item.image.originalName;
         case 'Label':
-            return getConfiguredLabelGroup(item, 'containers');
+            return getLabelGroup(item, workspace.getConfiguration('docker')?.get<string | undefined>('containers.groupByLabel', undefined), NonLabelGroupName);
         default:
             return getCommonPropertyValue(item, property);
     }
 }
 
 export const NonComposeGroupName = l10n.t('Individual Containers');
+export const NonLabelGroupName = l10n.t('Others');
 
-export function getComposeProjectName(container: ListContainersItem): string {
-    if (!container.labels) {
-        return NonComposeGroupName;
-    }
-
-    const labels = Object.keys(container.labels)
-        .map(label => ({ label: label, value: container.labels[label] }));
-
-    const composeProject = labels.find(l => l.label === 'com.docker.compose.project');
-    if (composeProject) {
-        return composeProject.value;
-    } else {
-        return NonComposeGroupName;
-    }
+export function getLabelGroup(container: ListContainersItem, label: string | undefined, defaultGroupName: string): string {
+    const containerLabels = container?.labels;
+    return containerLabels?.[label] || defaultGroupName;
 }
