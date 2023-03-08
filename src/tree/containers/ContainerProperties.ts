@@ -20,7 +20,7 @@ export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     { property: 'State', exampleValue: 'exited' },
     { property: 'Status', exampleValue: 'Exited (0) 2 hours ago' },
     { property: 'Compose Project Name', description: l10n.t('Value used to associate containers launched by a \'docker-compose up\' command') },
-    { property: 'Label', exampleValue: 'com.microsoft.created-by' },
+    { property: 'Label', exampleValue: 'com.microsoft.created-by=visual-studio-code' },
 ];
 
 export function getContainerStateIcon(state: string): ThemeIcon {
