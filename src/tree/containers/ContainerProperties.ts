@@ -77,6 +77,10 @@ export const NonComposeGroupName = l10n.t('Individual Containers');
 export const NonLabelGroupName = l10n.t('Others');
 
 export function getLabelGroup(container: ListContainersItem, label: string | undefined, defaultGroupName: string): string {
+    if (!label) {
+        return defaultGroupName;
+    }
+
     const containerLabels = container?.labels;
     return containerLabels?.[label] || defaultGroupName;
 }
