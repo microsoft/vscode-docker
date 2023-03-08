@@ -45,6 +45,7 @@ export class ContainerGroupTreeItem extends LocalGroupTreeItemBase<DockerContain
             case 'State':
                 return getContainerStateIcon(this.group);
             case 'Image':
+            case 'Label':
                 return new ThemeIcon('multiple-windows');
             default:
                 return getCommonGroupIcon(this.parent.groupBySetting);
