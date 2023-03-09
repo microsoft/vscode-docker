@@ -188,8 +188,7 @@ async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, 
                         for await (const line of lineReader) {
                             const sanitizedLine = line
                                 // eslint-disable-next-line no-control-regex
-                                .replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F]/g, '') // Remove non-printing control characters
-                                .replace(/^\d{4}\/\d{2}\/\d{2}\s\d{2}:\d{2}:\d{2}\s/, ''); // Remove the redundant timestamps at the beginning of some lines. Their format is "YYYY/MM/DD HH:MM:SS"
+                                .replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F]/g, ''); // Remove non-printing control characters
                             ext.outputChannel.info(sanitizedLine);
                         }
                     }
