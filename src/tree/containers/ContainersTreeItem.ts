@@ -13,7 +13,7 @@ import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { TreePrefix } from "../TreePrefix";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { containerProperties, ContainerProperty, getContainerPropertyValue, NonComposeGroupName } from "./ContainerProperties";
+import { containerProperties, ContainerProperty, getContainerPropertyValue, NonComposeGroupName, NonLabelGroupName } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = ListContainersItem & {
@@ -73,6 +73,7 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
         if (this.failedToConnect) {
             return 0; // children are already sorted
         }
+
         if (this.groupBySetting === 'Compose Project Name'
             && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
             && (ti1.label === NonComposeGroupName || ti2.label === NonComposeGroupName)) {
@@ -82,6 +83,16 @@ export class ContainersTreeItem extends LocalRootTreeItemBase<DockerContainerInf
                 return ti1.label === NonComposeGroupName ? 1 : -1;
             }
         }
+        else if (this.groupBySetting === 'Label'
+            && ti1 instanceof this.childGroupType && ti2 instanceof this.childGroupType
+            && (ti1.label === NonLabelGroupName || ti2.label === NonLabelGroupName)) {
+            if (ti1.label === ti2.label) {
+                return 0;
+            } else {
+                return ti1.label === NonLabelGroupName ? 1 : -1;
+            }
+        }
+
         return super.compareChildrenImpl(ti1, ti2);
     }
 

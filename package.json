@@ -1745,8 +1745,13 @@
                         "RepositoryNameAndTag",
                         "State",
                         "Status",
-                        "Tag"
+                        "Tag",
+                        "Label"
                     ]
+                },
+                "docker.containers.groupByLabel": {
+                    "type": "string",
+                    "description": "%vscode-docker.config.docker.containers.groupByLabel%"
                 },
                 "docker.containers.description": {
                     "type": "array",
