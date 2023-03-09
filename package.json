@@ -66,6 +66,14 @@
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
                 {
+                    "command": "vscode-docker.containers.composeGroup.start",
+                    "when": "config.docker.containers.groupBy == 'Compose Project Name'"
+                },
+                {
+                    "command": "vscode-docker.containers.composeGroup.stop",
+                    "when": "config.docker.containers.groupBy == 'Compose Project Name'"
+                },
+                {
                     "command": "vscode-docker.containers.composeGroup.restart",
                     "when": "never"
                 },
