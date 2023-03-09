@@ -38,6 +38,7 @@ import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
 import { pushImage } from "./images/pushImage";
 import { removeImage } from "./images/removeImage";
+import { removeImageGroup } from "./images/removeImageGroup";
 import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { hideDanglingImages, setInitialDanglingContextValue, showDanglingImages } from "./images/showDanglingImages";
@@ -151,6 +152,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.images.pull', pullImage);
     registerWorkspaceCommand('vscode-docker.images.push', pushImage);
     registerCommand('vscode-docker.images.remove', removeImage);
+    registerCommand('vscode-docker.images.group.remove', removeImageGroup);
     registerWorkspaceCommand('vscode-docker.images.run', runImage);
     registerWorkspaceCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
     registerWorkspaceCommand('vscode-docker.images.runInteractive', runImageInteractive);
