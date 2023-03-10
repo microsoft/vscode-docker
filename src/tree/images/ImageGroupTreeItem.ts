@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AzExtTreeItem } from "@microsoft/vscode-azext-utils";
 import { ThemeIcon } from "vscode";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
-import { ImageProperty, getImageGroupIcon } from "./ImageProperties";
+import { getImageGroupIcon, ImageProperty } from "./ImageProperties";
 import { DatedDockerImage } from "./ImagesTreeItem";
 
 export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage, ImageProperty> {
@@ -15,5 +16,13 @@ export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage,
 
     public get iconPath(): ThemeIcon {
         return getImageGroupIcon(this.parent.groupBySetting);
+    }
+
+    getImages(): AzExtTreeItem[] | undefined {
+        const items: AzExtTreeItem[] = super.ChildTreeItems;
+        if (!items || items.length === 0) {
+            return undefined;
+        }
+        return items;
     }
 }
