@@ -99,7 +99,7 @@ export function withNamedArg(
                 if (arg) {
                     const normalizedArg = shouldQuote ? quoted(arg) : escaped(arg);
                     if (assignValue) {
-                        return withArg(`${name}=${normalizedArg}`)(allArgs);
+                        return withArg(`${name}=${normalizedArg?.value}`)(allArgs);
                     }
 
                     return withArg(name, normalizedArg)(allArgs);
