@@ -18,7 +18,7 @@ export async function removeImageGroup(context: IActionContext, node?: ImageGrou
         nodes
     );
 
-    const confirmRemove = vscode.l10n.t('Are you sure you want to remove imagr group"{0}"? If there are other tags or child images for images within this group, only the tags will be removed.', node.label);
+    const confirmRemove = vscode.l10n.t('Are you sure you want to remove the selected image groups? If there are other tags or child images for images within this group, only the tags will be removed.');
 
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage (confirmRemove, { modal: true }, { title: 'Remove' });

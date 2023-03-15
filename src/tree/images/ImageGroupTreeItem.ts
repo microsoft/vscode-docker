@@ -20,6 +20,19 @@ export class ImageGroupTreeItem extends LocalGroupTreeItemBase<DatedDockerImage,
     }
 
     public async deleteTreeItemImpl(context: IActionContext): Promise<void> {
-        this.ChildTreeItems.forEach(async i => await i.deleteTreeItem(context));
+        const images = this.ChildTreeItems;
+        const errors = [];
+
+        for (const image of images) {
+            try {
+                await image.deleteTreeItem(context);
+            } catch (error) {
+                errors.push(error);
+            }
+        }
+
+        if (errors.length > 0) {
+            throw new Error(errors.join());
+        }
     }
 }
