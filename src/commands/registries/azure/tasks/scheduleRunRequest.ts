@@ -8,12 +8,12 @@ import { IActionContext, IAzureQuickPickItem, nonNullProp } from '@microsoft/vsc
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
+import * as readline from 'readline';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
 import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
-import { bufferToString } from "../../../../utils/execAsync";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
@@ -169,27 +169,37 @@ async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, 
     await new Promise<void>((resolve, reject) => {
         const timer = setInterval(
             async () => {
-                if (!exists && !(exists = await blobClient.exists())) {
-                    totalChecks++;
-                    if (totalChecks >= maxBlobChecks) {
-                        clearInterval(timer);
-                        reject('Not found');
+                try {
+                    if (!exists && !(exists = await blobClient.exists())) {
+                        totalChecks++;
+                        if (totalChecks >= maxBlobChecks) {
+                            clearInterval(timer);
+                            reject('Not found');
+                        }
                     }
-                }
 
-                const contentBuffer = await blobClient.downloadToBuffer(byteOffset);
-                const properties = await blobClient.getProperties();
+                    const properties = await blobClient.getProperties();
+                    if (properties.contentLength > byteOffset) {
+                        // New data available
+                        const response = await blobClient.download(byteOffset);
+                        byteOffset += response.contentLength;
 
-                byteOffset += contentBuffer.length;
-                const content = bufferToString(contentBuffer);
+                        const lineReader = readline.createInterface(response.readableStreamBody);
+                        for await (const line of lineReader) {
+                            const sanitizedLine = line
+                                // eslint-disable-next-line no-control-regex
+                                .replace(/[\x00-\x09\x0B-\x0C\x0E-\x1F]/g, ''); // Remove non-printing control characters
+                            ext.outputChannel.info(sanitizedLine);
+                        }
+                    }
 
-                if (content) {
-                    ext.outputChannel.info(content);
-                }
-
-                if (properties?.metadata?.complete) {
+                    if (properties.metadata?.complete) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                } catch (err) {
                     clearInterval(timer);
-                    resolve();
+                    reject(err);
                 }
             },
             blobCheckInterval

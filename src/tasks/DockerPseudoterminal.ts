@@ -3,15 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
 import { PromiseCommandResponse, Shell, VoidCommandResponse } from '../runtimes/docker';
-import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, WorkspaceFolder, workspace } from 'vscode';
-import { resolveVariables } from '../utils/resolveVariables';
 import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
+import { resolveVariables } from '../utils/resolveVariables';
+import { withDockerEnvSettings } from '../utils/withDockerEnvSettings';
 import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { DockerTaskExecutionContext } from './TaskHelper';
-import { withDockerEnvSettings } from '../utils/withDockerEnvSettings';
 
 const DEFAULT = '0m';
 const DEFAULTBOLD = '0;1m';
@@ -113,9 +113,9 @@ export class DockerPseudoterminal implements Pseudoterminal {
             },
             (output: string, err: boolean) => {
                 if (err) {
-                    this.writeError(output);
+                    this.writeErrorLine(output);
                 } else {
-                    this.writeOutput(output);
+                    this.writeOutputLine(output);
                 }
             }
         );
