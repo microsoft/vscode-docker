@@ -76,7 +76,7 @@ export class ImageTreeItem extends ToolTipTreeItem {
         }
 
         await ext.runWithDefaults(client =>
-            client.removeImages({ imageRefs: [ref] })
+            client.removeImages({ imageRefs: [ref], force: true  })
         );
     }
 
