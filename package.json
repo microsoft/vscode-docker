@@ -74,10 +74,6 @@
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
                 {
-                    "command": "vscode-docker.containers.group.remove",
-                    "when": "never"
-                },
-                {
                     "command": "vscode-docker.containers.composeGroup.restart",
                     "when": "never"
                 },
@@ -139,6 +135,10 @@
                 },
                 {
                     "command": "vscode-docker.images.group.remove",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.group.remove",
                     "when": "never"
                 }
             ],
