@@ -18,7 +18,12 @@ export async function removeImageGroup(context: IActionContext, node?: ImageGrou
         nodes
     );
 
-    const confirmRemove = vscode.l10n.t('Are you sure you want to remove the selected image groups? If there are other tags or child images for images within this group, only the tags will be removed.');
+    let confirmRemove: string;
+    if (nodes.length === 1) {
+        confirmRemove = vscode.l10n.t('Are you sure you want to remove image group "{0}"? If there are other tags or child images under the selected group, only the tag will be removed.', nodes[0].group);
+    } else {
+        confirmRemove = vscode.l10n.t('Are you sure you want to remove the selected image groups? If there are other tags or child images under the selected groups, only the tags will be removed.');
+    }
 
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage (confirmRemove, { modal: true }, { title: vscode.l10n.t('Remove') });

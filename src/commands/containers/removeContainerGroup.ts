@@ -11,7 +11,7 @@ import { multiSelectNodes } from '../../utils/multiSelectNodes';
 
 export async function removeContainerGroup(context: IActionContext, node?: ContainerGroupTreeItem, nodes?: ContainerGroupTreeItem[]): Promise<void> {
     nodes = await multiSelectNodes(
-        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: vscode.l10n.t('No container group are available to remove') },
+        { ...context, suppressCreatePick: true, noItemFoundErrorMessage: vscode.l10n.t('No container groups are available to remove') },
         ext.containersTree,
         node?.contextValue,
         node,
