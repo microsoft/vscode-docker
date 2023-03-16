@@ -210,6 +210,7 @@
     "vscode-docker.commands.containers.prune": "Prune...",
     "vscode-docker.commands.containers.refresh": "Refresh",
     "vscode-docker.commands.containers.remove": "Remove...",
+    "vscode-docker.commands.containers.group.remove": "Remove...",
     "vscode-docker.commands.containers.restart": "Restart",
     "vscode-docker.commands.containers.select": "Select container",
     "vscode-docker.commands.containers.start": "Start",

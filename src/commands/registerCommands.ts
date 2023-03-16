@@ -19,6 +19,7 @@ import { openContainerFile } from "./containers/files/openContainerFile";
 import { inspectContainer } from "./containers/inspectContainer";
 import { pruneContainers } from "./containers/pruneContainers";
 import { removeContainer } from "./containers/removeContainer";
+import { removeContainerGroup } from "./containers/removeContainerGroup";
 import { restartContainer } from "./containers/restartContainer";
 import { selectContainer } from "./containers/selectContainer";
 import { startContainer } from "./containers/startContainer";
@@ -130,6 +131,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.containers.openFile', openContainerFile);
     registerCommand('vscode-docker.containers.prune', pruneContainers);
     registerCommand('vscode-docker.containers.remove', removeContainer);
+    registerCommand('vscode-docker.containers.group.remove', removeContainerGroup);
     registerCommand('vscode-docker.containers.restart', restartContainer);
     registerCommand('vscode-docker.containers.select', selectContainer);
     registerCommand('vscode-docker.containers.start', startContainer);

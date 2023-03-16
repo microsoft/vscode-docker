@@ -74,6 +74,10 @@
                     "when": "config.docker.containers.groupBy == 'Compose Project Name'"
                 },
                 {
+                    "command": "vscode-docker.containers.group.remove",
+                    "when": "never"
+                },
+                {
                     "command": "vscode-docker.containers.composeGroup.restart",
                     "when": "never"
                 },
@@ -374,6 +378,11 @@
                     "command": "vscode-docker.containers.remove",
                     "when": "view == dockerContainers && viewItem =~ /container$/i",
                     "group": "containers_2_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.containers.group.remove",
+                    "when": "view == dockerContainers && viewItem =~ /containerGroup$/i",
+                    "group": "containers_group_1_destructive@1"
                 },
                 {
                     "command": "vscode-docker.containers.composeGroup.logs",
@@ -2262,6 +2271,11 @@
             {
                 "command": "vscode-docker.containers.remove",
                 "title": "%vscode-docker.commands.containers.remove%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
+                "command": "vscode-docker.containers.group.remove",
+                "title": "%vscode-docker.commands.containers.group.remove%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
