@@ -289,7 +289,6 @@
     "vscode-docker.commands.category.docker": "Docker",
     "vscode-docker.commands.category.dockerContainers": "Docker Containers",
     "vscode-docker.commands.category.dockerImages": "Docker Images",
-    "vscode-docker.commands.category.dockerImageGroups": "Docker Image Groups",
     "vscode-docker.commands.category.dockerNetworks": "Docker Networks",
     "vscode-docker.commands.category.azureContainerRegistry": "Azure Container Registry",
     "vscode-docker.commands.category.dockerRegistries": "Docker Registries",

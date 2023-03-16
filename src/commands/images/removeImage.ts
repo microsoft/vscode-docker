@@ -26,7 +26,7 @@ export async function removeImage(context: IActionContext, node?: ImageTreeItem,
     }
 
     // no need to check result - cancel will throw a UserCancelledError
-    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: 'Remove' });
+    await context.ui.showWarningMessage(confirmRemove, { modal: true }, { title: vscode.l10n.t('Remove') });
 
     const removing: string = vscode.l10n.t('Removing image(s)...');
     await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: removing }, async () => {
