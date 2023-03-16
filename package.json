@@ -132,6 +132,14 @@
                 {
                     "command": "vscode-docker.images.hideDangling",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.images.group.remove",
+                    "when": "never"
+                },
+                {
+                    "command": "vscode-docker.containers.group.remove",
+                    "when": "never"
                 }
             ],
             "editor/context": [
@@ -372,6 +380,11 @@
                     "group": "containers_2_destructive@1"
                 },
                 {
+                    "command": "vscode-docker.containers.group.remove",
+                    "when": "view == dockerContainers && viewItem =~ /containerGroup$/i",
+                    "group": "containers_group_1_destructive@1"
+                },
+                {
                     "command": "vscode-docker.containers.composeGroup.logs",
                     "when": "view == dockerContainers && viewItem =~ /composeGroup$/i",
                     "group": "composeGroup_1_general@1"
@@ -435,6 +448,11 @@
                     "command": "vscode-docker.images.remove",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_3_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.images.group.remove",
+                    "when": "view == dockerImages && viewItem =~ /imageGroup$/i",
+                    "group": "images_group_1_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
@@ -2256,6 +2274,11 @@
                 "category": "%vscode-docker.commands.category.dockerContainers%"
             },
             {
+                "command": "vscode-docker.containers.group.remove",
+                "title": "%vscode-docker.commands.containers.group.remove%",
+                "category": "%vscode-docker.commands.category.dockerContainers%"
+            },
+            {
                 "command": "vscode-docker.containers.restart",
                 "title": "%vscode-docker.commands.containers.restart%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
@@ -2368,6 +2391,11 @@
             {
                 "command": "vscode-docker.images.remove",
                 "title": "%vscode-docker.commands.images.remove%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
+            },
+            {
+                "command": "vscode-docker.images.group.remove",
+                "title": "%vscode-docker.commands.images.group.remove%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {
