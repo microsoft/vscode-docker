@@ -332,6 +332,10 @@ export type BuildImageCommandOptions = CommonCommandOptions & {
      */
     imageIdFile?: string;
     /**
+     * Target platform for the image build
+     */
+    platform?: string;
+    /**
      * Additional custom options to pass
      */
     customOptions?: string;
