@@ -52,6 +52,7 @@
     "vscode-docker.tasks.docker-build.dockerBuild.dockerfile": "Path to the Dockerfile used for the build.",
     "vscode-docker.tasks.docker-build.dockerBuild.labels.description": "Labels applied to the Docker image used for debugging.",
     "vscode-docker.tasks.docker-build.dockerBuild.labels.includeDefaults": "Whether to include the default set of labels defined by the Docker extension",
+    "vscode-docker.tasks.docker-build.dockerBuild.platform": "Target platform for the image build",
     "vscode-docker.tasks.docker-build.dockerBuild.tag": "Tag applied to the Docker image used for debugging.",
     "vscode-docker.tasks.docker-build.dockerBuild.target": "Docker build target (stage) used for debugging.",
     "vscode-docker.tasks.docker-build.dockerBuild.pull": "Whether or not to pull new base images before building.",

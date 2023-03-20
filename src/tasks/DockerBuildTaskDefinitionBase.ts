@@ -10,6 +10,7 @@ export interface DockerBuildOptions {
     context?: string;
     dockerfile?: string;
     labels?: DockerLabels;
+    platform?: string;
     tag?: string;
     target?: string;
     pull?: boolean;

@@ -74,6 +74,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     dockerfile: unresolveWorkspaceFolder(context.dockerfile, context.folder),
                     /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
+                    platform: 'linux/amd64',
                     pull: true
                 },
                 netCore: {

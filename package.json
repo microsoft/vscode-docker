@@ -949,6 +949,10 @@
                                     "type": "string"
                                 }
                             },
+                            "platform": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.platform%"
+                            },
                             "tag": {
                                 "type": "string",
                                 "description": "%vscode-docker.tasks.docker-build.dockerBuild.tag%"
