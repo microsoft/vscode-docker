@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DialogResponses, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
@@ -13,6 +13,7 @@ import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/D
 import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
 import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
 import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { installExtension } from '../../../utils/installExtension';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
@@ -91,17 +92,7 @@ async function openAcaInstallPage(context: IActionContext): Promise<void> {
         minimumAcaExtensionVersion
     );
 
-    const installButton: vscode.MessageItem = {
-        title: vscode.l10n.t('Install'),
-    };
+    await installExtension(context, acaExtensionId, message);
 
-    const response = await context.ui.showWarningMessage(message, { modal: true }, installButton, DialogResponses.cancel);
-
-    if (response !== installButton) {
-        throw new UserCancelledError('installAcaExtensionDeclined');
-    }
-
-    await vscode.commands.executeCommand('extension.open', acaExtensionId);
-
-    throw new UserCancelledError('installAcaExtensionOpened');
+    throw new UserCancelledError('installAcaExtensionAccepted');
 }
