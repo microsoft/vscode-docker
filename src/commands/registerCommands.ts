@@ -34,6 +34,7 @@ import { help } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
+import { generateSbom } from "./images/generateSbom";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
@@ -160,6 +161,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.images.runInteractive', runImageInteractive);
     registerCommand('vscode-docker.images.tag', tagImage);
     registerCommand('vscode-docker.images.copyFullTag', copyFullTag);
+    registerCommand('vscode-docker.images.sbom', generateSbom);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
     registerCommand('vscode-docker.networks.create', createNetwork);

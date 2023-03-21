@@ -455,6 +455,11 @@
                     "group": "images_group_1_destructive@1"
                 },
                 {
+                    "command": "vscode-docker.images.sbom",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_4_general@1"
+                },
+                {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",
                     "when": "view == dockerRegistries && viewItem == azure;DockerV2;RegistryProvider;",
                     "group": "inline"
@@ -2421,6 +2426,11 @@
             {
                 "command": "vscode-docker.images.copyFullTag",
                 "title": "%vscode-docker.commands.images.copyFullTag%",
+                "category": "%vscode-docker.commands.category.dockerImages%"
+            },
+            {
+                "command": "vscode-docker.images.sbom",
+                "title": "%vscode-docker.commands.images.sbom%",
                 "category": "%vscode-docker.commands.category.dockerImages%"
             },
             {

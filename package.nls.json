@@ -242,6 +242,7 @@
     "vscode-docker.commands.images.runInteractive": "Run Interactive",
     "vscode-docker.commands.images.tag": "Tag...",
     "vscode-docker.commands.images.copyFullTag": "Copy Full Tag",
+    "vscode-docker.commands.images.sbom": "Generate Sbom",
     "vscode-docker.commands.installDocker": "Install Docker",
     "vscode-docker.commands.networks.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.networks.create": "Create...",

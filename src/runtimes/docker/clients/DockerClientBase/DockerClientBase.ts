@@ -651,6 +651,18 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#endregion
 
+    //#region InspectImages Command
+
+    async imageGenerateSbom(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>> {
+        return {
+            command: this.commandName,
+            args: this.getInspectImagesCommandArgs(options),
+            parse: (output, strict) => this.parseInspectImagesCommandOutput(options, output, strict),
+        };
+    }
+
+    //#endregion
+
     //#endregion
 
     //#region Container Commands
