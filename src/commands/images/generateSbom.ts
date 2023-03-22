@@ -3,14 +3,24 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { IActionContext, openReadOnlyJson } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 
-export async function generateSbom(context: IActionContext, node?: ImageTreeItem): Promise<string> {
+export async function generateSbom(context: IActionContext, node?: ImageTreeItem): Promise<void> {
+    if (!node) {
+        await ext.imagesTree.refresh(context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: vscode.l10n.t('No images are available for generating sbom')
+        });
+    }
 
+    const generating: string = vscode.l10n.t('Generating sbom...');
+    const sbomResult = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: generating }, async () => {
+        await ext.runWithDefaults(client => client.imageGenerateSbom({ imageRef: node.imageId }));
+    });
 
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    vscode.env.clipboard.writeText(node.fullTag);
-    return node.fullTag;
+    await openReadOnlyJson(node, JSON.parse(sbomResult[0].raw));
 }

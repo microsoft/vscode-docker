@@ -609,6 +609,30 @@ type InspectImagesCommand = {
     inspectImages(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>>;
 };
 
+export type ImageSbomItem = {
+    /**
+     * The RAW inspect output
+     */
+    raw: string;
+};
+/**
+ * Options for inspecting images
+ */
+export type ImageGenerateSbomCommandOptions = CommonCommandOptions & {
+    /**
+     * The image names/IDs/etc. to inspect, passed directly to the CLI
+     */
+    imageRef: string;
+};
+
+type ImageGenerateSbomCommand = {
+    /**
+     * Generate a CommandResponse for pruning images
+     * @param options Command options
+     */
+    imageGenerateSbom(options: ImageGenerateSbomCommandOptions): Promise<PromiseCommandResponse<Array<ImageSbomItem>>>;
+};
+
 //#endregion
 
 //#region Container commands
@@ -1863,6 +1887,7 @@ export interface IContainersClient extends
     TagImageCommand,
     InspectImagesCommand,
     PushImageCommand,
+    ImageGenerateSbomCommand,
     // Container Commands
     RunContainerCommand,
     ExecContainerCommand,

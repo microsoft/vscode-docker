@@ -445,6 +445,11 @@
                     "group": "images_2_general@5"
                 },
                 {
+                    "command": "vscode-docker.images.sbom",
+                    "when": "view == dockerImages && viewItem == image",
+                    "group": "images_2_general@6"
+                },
+                {
                     "command": "vscode-docker.images.remove",
                     "when": "view == dockerImages && viewItem == image",
                     "group": "images_3_destructive@1"
@@ -453,11 +458,6 @@
                     "command": "vscode-docker.images.group.remove",
                     "when": "view == dockerImages && viewItem =~ /imageGroup$/i",
                     "group": "images_group_1_destructive@1"
-                },
-                {
-                    "command": "vscode-docker.images.sbom",
-                    "when": "view == dockerImages && viewItem == image",
-                    "group": "images_4_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.selectSubscriptions",

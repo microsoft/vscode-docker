@@ -16,6 +16,8 @@ import {
     EventStreamCommandOptions,
     ExecContainerCommandOptions,
     IContainersClient,
+    ImageGenerateSbomCommandOptions,
+    ImageSbomItem,
     InfoCommandOptions,
     InfoItem,
     InspectContainersCommandOptions,
@@ -651,13 +653,37 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     //#endregion
 
-    //#region InspectImages Command
+    //#region ImagesGenerateSbom Command
 
-    async imageGenerateSbom(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>> {
+    /**
+     * Generate the command line arguments for invoking a pull image command on
+     * a Docker-like client
+     * @param options Pull image command options
+     * @returns Command line arguments for pulling a container image
+     */
+    protected getGenerateSbomCommandArgs(options: ImageGenerateSbomCommandOptions): CommandLineArgs {
+        return composeArgs(
+            withArg('sbom'),
+            withNamedArg('--format', 'spdx-json'),
+            withArg(options.imageRef),
+        )();
+    }
+
+    protected async parseImageGenerateSbomCommandOutput(
+        options: ImageGenerateSbomCommandOptions,
+        output: string,
+        strict: boolean,
+    ): Promise<Array<ImageSbomItem>> {
+        const sboms = new Array<ImageSbomItem>();
+        sboms.push({raw: output});
+        return sboms;
+    }
+
+    async imageGenerateSbom(options: ImageGenerateSbomCommandOptions): Promise<PromiseCommandResponse<Array<ImageSbomItem>>> {
         return {
             command: this.commandName,
-            args: this.getInspectImagesCommandArgs(options),
-            parse: (output, strict) => this.parseInspectImagesCommandOutput(options, output, strict),
+            args: this.getGenerateSbomCommandArgs(options),
+            parse: (output, strict) => this.parseImageGenerateSbomCommandOutput(options, output, strict),
         };
     }
 
