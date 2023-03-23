@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { FileType, ShellQuotedString } from 'vscode';
+import { DockerClientInfo } from '../clients/DockerClientBase/DockerInfoRecord';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from './CommandRunner';
 import { IShell } from './Shell';
 
@@ -145,6 +146,10 @@ export type InfoItem = {
      * The OS type for the container runtime
      */
     osType?: ContainerOS;
+    /**
+     * Docker Client info record
+     */
+    clientInfo?: DockerClientInfo;
     /**
      * The raw JSON from the info record
      */

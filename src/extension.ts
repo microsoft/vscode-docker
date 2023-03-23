@@ -4,30 +4,31 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
-import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
+import { callWithTelemetryAndErrorHandling, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { registerDebugProvider } from './debugging/DebugHelper';
-import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
+import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { DockerPlugins } from './runtimes/docker/clients/DockerClientBase/DockerInfoRecord';
+import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
+import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
+import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
-import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
-import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
-import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
-import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
-import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -100,7 +101,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         );
 
         // Set up Docker clients
-        registerDockerClients();
+        await registerDockerClients();
 
         // Set up container filesystem provider
         ctx.subscriptions.push(
@@ -173,7 +174,7 @@ function setEnvironmentVariableContributions(): void {
     }
 }
 
-function registerDockerClients(): void {
+async function registerDockerClients(): Promise<void> {
     // Create the clients
     const dockerClient = new AutoConfigurableDockerClient();
     const composeClient = new AutoConfigurableDockerComposeClient();
@@ -184,8 +185,11 @@ function registerDockerClients(): void {
         ext.orchestratorManager.registerRuntimeClient(composeClient)
     );
 
+    // Sets context value for whether Docker version supports sbom
+    await checkDockerVersionForSbom();
+
     // Register an event to watch for changes to config, reconfigure if needed
-    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
+    registerEvent('docker.command.changed', vscode.workspace.onDidChangeConfiguration, async (actionContext: IActionContext, e: vscode.ConfigurationChangeEvent) => {
         actionContext.telemetry.suppressAll = true;
         actionContext.errorHandling.suppressDisplay = true;
 
@@ -195,6 +199,10 @@ function registerDockerClients(): void {
 
         if (e.affectsConfiguration('docker.composeCommand')) {
             composeClient.reconfigure();
+        }
+
+        if (e.affectsConfiguration('docker.dockerPath')) {
+            await checkDockerVersionForSbom();
         }
     });
 }
@@ -352,3 +360,22 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
 }
 
 //#endregion Language services
+
+const hasSbomContextKey = 'vscode-docker:hasSbom';
+async function checkDockerVersionForSbom(): Promise<void> {
+
+    let hasSbom:boolean = false;
+    const info = await ext.runWithDefaults(client =>
+        client.info({})
+    );
+
+    const dockerPlugins: DockerPlugins[] = info.clientInfo?.Plugins;
+    if (!dockerPlugins || dockerPlugins.length === 0) {
+        hasSbom = false;
+    }
+    else {
+        hasSbom = dockerPlugins.some((plugin: DockerPlugins) => plugin.Name === 'sbom');
+    }
+
+    void vscode.commands.executeCommand('setContext', hasSbomContextKey, hasSbom);
+}

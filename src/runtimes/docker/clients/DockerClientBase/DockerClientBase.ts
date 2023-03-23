@@ -152,6 +152,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         return {
             operatingSystem: info.OperatingSystem,
             osType: info.OSType,
+            clientInfo: info.ClientInfo,
             raw: output,
         };
     }

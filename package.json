@@ -446,7 +446,7 @@
                 },
                 {
                     "command": "vscode-docker.images.sbom",
-                    "when": "view == dockerImages && viewItem == image",
+                    "when": "view == dockerImages && viewItem == image && vscode-docker:hasSbom",
                     "group": "images_2_general@6"
                 },
                 {
