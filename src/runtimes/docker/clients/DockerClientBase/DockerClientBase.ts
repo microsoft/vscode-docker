@@ -664,7 +664,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     protected getGenerateSbomCommandArgs(options: ImageGenerateSbomCommandOptions): CommandLineArgs {
         return composeArgs(
             withArg('sbom'),
-            withNamedArg('--format', 'spdx-json'),
+            withNamedArg('--format', 'spdx-json', {shouldQuote: false}),
             withArg(options.imageRef),
         )();
     }
