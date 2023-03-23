@@ -201,9 +201,7 @@ async function registerDockerClients(): Promise<void> {
             composeClient.reconfigure();
         }
 
-        if (e.affectsConfiguration('docker.dockerPath')) {
-            await checkDockerVersionForSbom();
-        }
+        await checkDockerVersionForSbom();
     });
 }
 
