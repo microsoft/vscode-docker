@@ -14,11 +14,11 @@ export async function generateSbom(context: IActionContext, node?: ImageTreeItem
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
             ...context,
-            noItemFoundErrorMessage: vscode.l10n.t('No images are available for generating sbom')
+            noItemFoundErrorMessage: vscode.l10n.t('No images are available for generating Software Bill of Materials')
         });
     }
 
-    const generating: string = vscode.l10n.t('Generating sbom...');
+    const generating: string = vscode.l10n.t('Generating Software Bill of Materials...');
 
     let sbomResult: ImageSbomItem[];
     await vscode.window.withProgress( { location: vscode.ProgressLocation.Notification, title: generating }, async () => {
