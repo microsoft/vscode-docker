@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { FileType, ShellQuotedString } from 'vscode';
-import { DockerClientInfo } from '../clients/DockerClientBase/DockerInfoRecord';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from './CommandRunner';
 import { IShell } from './Shell';
 
@@ -135,6 +134,14 @@ type CheckInstallCommand = {
 
 export type InfoCommandOptions = CommonCommandOptions & {
     // Intentionally empty for now
+};
+
+export type DockerPlugins = {
+    Name?: string;
+};
+
+export type DockerClientInfo = {
+    Plugins?: DockerPlugins[];
 };
 
 export type InfoItem = {
@@ -614,28 +621,22 @@ type InspectImagesCommand = {
     inspectImages(options: InspectImagesCommandOptions): Promise<PromiseCommandResponse<Array<InspectImagesItem>>>;
 };
 
-export type ImageSbomItem = {
-    /**
-     * The RAW inspect output
-     */
-    raw: string;
-};
 /**
  * Options for inspecting images
  */
-export type ImageGenerateSbomCommandOptions = CommonCommandOptions & {
+export type SbomForImageCommandOptions = CommonCommandOptions & {
     /**
      * The image names/IDs/etc. to inspect, passed directly to the CLI
      */
     imageRef: string;
 };
 
-type ImageGenerateSbomCommand = {
+type SbomForImageCommand = {
     /**
      * Generate a CommandResponse for pruning images
      * @param options Command options
      */
-    imageGenerateSbom(options: ImageGenerateSbomCommandOptions): Promise<PromiseCommandResponse<Array<ImageSbomItem>>>;
+    sbomForImage(options: SbomForImageCommandOptions): Promise<PromiseCommandResponse<string>>;
 };
 
 //#endregion
@@ -1892,7 +1893,7 @@ export interface IContainersClient extends
     TagImageCommand,
     InspectImagesCommand,
     PushImageCommand,
-    ImageGenerateSbomCommand,
+    SbomForImageCommand,
     // Container Commands
     RunContainerCommand,
     ExecContainerCommand,

@@ -6,7 +6,6 @@
 import { IActionContext, openReadOnlyJson } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
-import { ImageSbomItem } from '../../runtimes/docker';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 
 export async function generateSbom(context: IActionContext, node?: ImageTreeItem): Promise<void> {
@@ -20,10 +19,10 @@ export async function generateSbom(context: IActionContext, node?: ImageTreeItem
 
     const generating: string = vscode.l10n.t('Generating Software Bill of Materials...');
 
-    let sbomResult: ImageSbomItem[];
+    let sbomResult: string;
     await vscode.window.withProgress( { location: vscode.ProgressLocation.Notification, title: generating }, async () => {
-        sbomResult = await ext.runWithDefaults(client => client.imageGenerateSbom({ imageRef: node.imageId }));
+        sbomResult = await ext.runWithDefaults(client => client.sbomForImage({ imageRef: node.imageId }));
     });
 
-    await openReadOnlyJson(node, JSON.parse(sbomResult[0].raw));
+    await openReadOnlyJson(node, JSON.parse(sbomResult));
 }

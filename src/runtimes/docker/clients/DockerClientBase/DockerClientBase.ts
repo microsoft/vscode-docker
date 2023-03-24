@@ -16,8 +16,6 @@ import {
     EventStreamCommandOptions,
     ExecContainerCommandOptions,
     IContainersClient,
-    ImageGenerateSbomCommandOptions,
-    ImageSbomItem,
     InfoCommandOptions,
     InfoItem,
     InspectContainersCommandOptions,
@@ -62,8 +60,7 @@ import {
     RemoveNetworksCommandOptions,
     RemoveVolumesCommandOptions,
     RestartContainersCommandOptions,
-    RunContainerCommandOptions,
-    StartContainersCommandOptions,
+    RunContainerCommandOptions, SbomForImageCommandOptions, StartContainersCommandOptions,
     StatPathCommandOptions,
     StatPathItem,
     StopContainersCommandOptions,
@@ -657,12 +654,12 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     //#region ImagesGenerateSbom Command
 
     /**
-     * Generate the command line arguments for invoking a pull image command on
-     * a Docker-like client
-     * @param options Pull image command options
-     * @returns Command line arguments for pulling a container image
+     * Generate the command line arguments for invoking the generation of an image wide
+     * Software Bill of Rights on a Docker-like client
+     * @param options generate Software Bill of Rights command options
+     * @returns Command line arguments for generating Software Bill of Rights on an image
      */
-    protected getGenerateSbomCommandArgs(options: ImageGenerateSbomCommandOptions): CommandLineArgs {
+    protected getGenerateSbomCommandArgs(options: SbomForImageCommandOptions): CommandLineArgs {
         return composeArgs(
             withArg('sbom'),
             withNamedArg('--format', 'spdx-json', {shouldQuote: false}),
@@ -671,16 +668,14 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     }
 
     protected async parseImageGenerateSbomCommandOutput(
-        options: ImageGenerateSbomCommandOptions,
+        options: SbomForImageCommandOptions,
         output: string,
         strict: boolean,
-    ): Promise<Array<ImageSbomItem>> {
-        const sboms = new Array<ImageSbomItem>();
-        sboms.push({raw: output});
-        return sboms;
+    ): Promise<string> {
+        return output;
     }
 
-    async imageGenerateSbom(options: ImageGenerateSbomCommandOptions): Promise<PromiseCommandResponse<Array<ImageSbomItem>>> {
+    async sbomForImage(options: SbomForImageCommandOptions): Promise<PromiseCommandResponse<string>> {
         return {
             command: this.commandName,
             args: this.getGenerateSbomCommandArgs(options),

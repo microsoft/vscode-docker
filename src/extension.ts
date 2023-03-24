@@ -17,7 +17,7 @@ import { ext } from './extensionVariables';
 import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
 import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
-import { DockerPlugins } from './runtimes/docker/clients/DockerClientBase/DockerInfoRecord';
+import { DockerPlugins } from './runtimes/docker';
 import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { registerTaskProviders } from './tasks/TaskHelper';
