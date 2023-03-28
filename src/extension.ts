@@ -4,30 +4,30 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
-import { IActionContext, UserCancelledError, callWithTelemetryAndErrorHandling, createExperimentationService, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables } from '@microsoft/vscode-azext-utils';
+import { callWithTelemetryAndErrorHandling, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
 import * as tas from 'vscode-tas-client';
 import { registerCommands } from './commands/registerCommands';
 import { registerDebugProvider } from './debugging/DebugHelper';
-import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { DockerExtensionApi } from './DockerExtensionApi';
 import { DockerfileCompletionItemProvider } from './dockerfileCompletionItemProvider';
 import { ext } from './extensionVariables';
+import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
+import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
+import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
 import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
+import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
+import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
-import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
-import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { AutoConfigurableDockerClient } from './runtimes/clients/AutoConfigurableDockerClient';
-import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConfigurableDockerComposeClient';
-import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
-import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -39,6 +39,7 @@ export interface ComposeVersionKeys {
 
 let dockerfileLanguageClient: LanguageClient;
 let composeLanguageClient: LanguageClient;
+let dockerContextStatusBarItem: vscode.StatusBarItem;
 
 const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
@@ -117,6 +118,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
 
         registerTrees();
         registerCommands();
+
+        // Don't wait
+        void registerContextStatusBarItems(ctx);
 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
@@ -197,6 +201,30 @@ function registerDockerClients(): void {
             composeClient.reconfigure();
         }
     });
+}
+
+async function registerContextStatusBarItems({ subscriptions }: vscode.ExtensionContext) {
+    // Register the status bar item for the current context
+    const dockerContextUseCommand = 'vscode-docker.contexts.use';
+
+    dockerContextStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    dockerContextStatusBarItem.command = dockerContextUseCommand;
+    dockerContextStatusBarItem.name = vscode.l10n.t('Current Docker Contexts');
+
+    async function updateStatusBar() {
+        const currentContext = await ext.runtimeManager.contextManager.getCurrentContext();
+        const currentContextName = currentContext ? `Context: ${currentContext.name}` : 'No context selected'; // add a default value for when no context is selected
+        dockerContextStatusBarItem.text = currentContextName;
+        dockerContextStatusBarItem.tooltip = vscode.l10n.t('vscode-docker.contexts.use.tooltip', currentContextName);
+        dockerContextStatusBarItem.show();
+    }
+
+    subscriptions.push(dockerContextStatusBarItem,
+        vscode.workspace.onDidChangeConfiguration(updateStatusBar),
+        ext.runtimeManager.contextManager.onContextChanged(updateStatusBar));
+
+    // Don't wait
+    void updateStatusBar();
 }
 
 //#region Language services
