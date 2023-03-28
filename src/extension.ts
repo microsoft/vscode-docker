@@ -202,7 +202,6 @@ function registerDockerClients(): void {
         }
 
         if (e.affectsConfiguration('docker.contexts.showInStatusBar')) {
-            dockerContextStatusBarItem.dispose();
             // Don't wait
             void registerContextStatusBarItems(ext.context);
         }
@@ -216,6 +215,7 @@ async function registerContextStatusBarItems({ subscriptions }: vscode.Extension
     // if it's undefined, it means there is no context set, so we don't need to show the status bar item
     // if user don't want context to clutter up status bar, we don't need to show
     if (!currentContext || !showInStatusBar) {
+        dockerContextStatusBarItem?.dispose();
         return;
     }
 
