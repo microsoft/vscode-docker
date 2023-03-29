@@ -6,8 +6,9 @@
 import { IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from "../extensionVariables";
+import { ListContextItem } from '../runtimes/docker/contracts/ContainerClient';
 
-const dockerContextStatusBarSetting: string = 'contexts.showInStatusBar';
+const dockerContextStatusBarSetting = 'contexts.showInStatusBar';
 
 export function registerDockerContextStatusBarEvent(ctx: vscode.ExtensionContext): void {
     // Register an event to watch for changes to config, reconfigure if needed
@@ -24,13 +25,13 @@ export function registerDockerContextStatusBarEvent(ctx: vscode.ExtensionContext
 }
 
 export async function registerDockerContextStatusBarItems({ subscriptions }: vscode.ExtensionContext): Promise<void> {
-    const currentDockerContext = await ext.runtimeManager.contextManager.getCurrentContext();
-    const showInStatusBar = vscode.workspace.getConfiguration('docker').get(dockerContextStatusBarSetting, true);
 
-    // if it's undefined, it means there is no context set, so we don't need to show the status bar item
-    // if user don't want context to clutter up status bar, we don't need to show
+    const config = vscode.workspace.getConfiguration('docker');
+    let currentDockerContext: ListContextItem | undefined;
+
     // if dockerContextStatusBarItem is created, then we dispose
-    if (!currentDockerContext || !showInStatusBar) {
+    if (!config.get(dockerContextStatusBarSetting, false) ||
+        !(currentDockerContext = await ext.runtimeManager.contextManager.getCurrentContext())) { // Intentional assignment and boolean check
         ext.dockerContextStatusBarItem?.dispose();
         return;
     }
@@ -43,6 +44,7 @@ export async function registerDockerContextStatusBarItems({ subscriptions }: vsc
     ext.dockerContextStatusBarItem.name = vscode.l10n.t('Docker Contexts');
 
     async function updateStatusBar() {
+        currentDockerContext = await ext.runtimeManager.contextManager.getCurrentContext();
         const currentContextName = `Context: ${currentDockerContext.name}`;
         ext.dockerContextStatusBarItem.text = currentContextName;
         ext.dockerContextStatusBarItem.tooltip = vscode.l10n.t('Change Docker Context');
