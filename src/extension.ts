@@ -28,6 +28,7 @@ import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionList
 import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
+import { registerDockerContextStatusBarEvent, registerDockerContextStatusBarItems } from './utils/registerDockerContextStatusBarItems';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -39,7 +40,6 @@ export interface ComposeVersionKeys {
 
 let dockerfileLanguageClient: LanguageClient;
 let composeLanguageClient: LanguageClient;
-let dockerContextStatusBarItem: vscode.StatusBarItem;
 
 const DOCUMENT_SELECTOR: DocumentSelector = [
     { language: 'dockerfile', scheme: 'file' }
@@ -119,8 +119,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerTrees();
         registerCommands();
 
-        // Don't wait
-        void registerContextStatusBarItems(ctx);
+        // Set up docker context status bar items
+        void registerDockerContextStatusBarItems(ctx);
+        registerDockerContextStatusBarEvent(ctx);
 
         registerDebugProvider(ctx);
         registerTaskProviders(ctx);
@@ -200,47 +201,7 @@ function registerDockerClients(): void {
         if (e.affectsConfiguration('docker.composeCommand')) {
             composeClient.reconfigure();
         }
-
-        if (e.affectsConfiguration('docker.contexts.showInStatusBar')) {
-            // Don't wait
-            void registerContextStatusBarItems(ext.context);
-        }
     });
-}
-
-async function registerContextStatusBarItems({ subscriptions }: vscode.ExtensionContext) {
-    const currentContext = await ext.runtimeManager.contextManager.getCurrentContext();
-    const showInStatusBar = vscode.workspace.getConfiguration('docker').get('contexts.showInStatusBar', false);
-
-    // if it's undefined, it means there is no context set, so we don't need to show the status bar item
-    // if user don't want context to clutter up status bar, we don't need to show
-    if (!currentContext || !showInStatusBar) {
-        dockerContextStatusBarItem?.dispose();
-        return;
-    }
-
-    const dockerContextUseCommand = 'vscode-docker.contexts.use';
-
-    // Register the status bar item for the current context
-    dockerContextStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 20);
-    dockerContextStatusBarItem.command = dockerContextUseCommand;
-    dockerContextStatusBarItem.name = vscode.l10n.t('Docker Contexts');
-
-    async function updateStatusBar() {
-        const currentContextName = `Context: ${currentContext.name}`;
-        dockerContextStatusBarItem.text = currentContextName;
-        dockerContextStatusBarItem.tooltip = vscode.l10n.t('Change Docker Context');
-        dockerContextStatusBarItem.show();
-    }
-
-    subscriptions.push(
-        dockerContextStatusBarItem,
-        vscode.workspace.onDidChangeConfiguration(updateStatusBar),
-        ext.runtimeManager.contextManager.onContextChanged(updateStatusBar)
-    );
-
-    // Don't wait
-    void updateStatusBar();
 }
 
 //#region Language services

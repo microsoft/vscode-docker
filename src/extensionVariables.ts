@@ -4,8 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeDataProvider, AzExtTreeItem, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
-import { ExtensionContext, TreeView } from 'vscode';
+import { ExtensionContext, StatusBarItem, TreeView } from 'vscode';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
+import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
+import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWithDefaultsImpl } from './runtimes/runners/runWithDefaults';
 import { IActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
@@ -13,8 +15,6 @@ import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
 import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
-import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { runWithDefaults as runWithDefaultsImpl, streamWithDefaults as streamWithDefaultsImpl } from './runtimes/runners/runWithDefaults';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 
 /**
@@ -62,4 +62,6 @@ export namespace ext {
     export let orchestratorManager: OrchestratorRuntimeManager;
     export const runWithDefaults = runWithDefaultsImpl;
     export const streamWithDefaults = streamWithDefaultsImpl;
+
+    export let dockerContextStatusBarItem: StatusBarItem;
 }
