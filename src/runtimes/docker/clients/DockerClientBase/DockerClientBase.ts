@@ -81,7 +81,7 @@ import {
     withFlagArg,
     withNamedArg,
     withQuotedArg,
-    withVerbatimArg
+    withVerbatimArg,
 } from "../../utils/commandLineBuilder";
 import { CommandNotSupportedError } from '../../utils/CommandNotSupportedError';
 import { dayjs } from '../../utils/dayjs';
@@ -352,6 +352,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     : options.disableContentTrust),
             withDockerLabelsArg(options.labels),
             withNamedArg('--iidfile', options.imageIdFile),
+            withNamedArg('--platform', options.platform),
             withDockerBuildArg(options.args),
             withVerbatimArg(options.customOptions),
             withQuotedArg(options.path),
@@ -758,7 +759,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withDockerFilterArg(options.networks?.map((network) => `network=${network}`)),
             withDockerNoTruncArg,
             withDockerJsonFormatArg,
-            withDockerIgnoreSizeArg
+            withDockerIgnoreSizeArg,
         )();
     }
 

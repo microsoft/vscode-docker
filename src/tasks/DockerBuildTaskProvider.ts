@@ -59,6 +59,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
             tags: [options.tag],
             stage: options.target,
+            platform: options.platform,
             customOptions: options.customOptions,
             path: options.context,
         });
