@@ -28,7 +28,7 @@ import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionList
 import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
-import { registerDockerContextStatusBarEvent, registerDockerContextStatusBarItems } from './utils/registerDockerContextStatusBarItems';
+import { registerDockerContextStatusBarEvent } from './utils/registerDockerContextStatusBarItems';
 
 export type KeyInfo = { [keyName: string]: string };
 
@@ -120,7 +120,6 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         registerCommands();
 
         // Set up docker context status bar items
-        void registerDockerContextStatusBarItems(ctx);
         registerDockerContextStatusBarEvent(ctx);
 
         registerDebugProvider(ctx);
