@@ -63,8 +63,8 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             if (netCoreVersion.major === 8) {
                 if (wizardContext.netCorePlatformOS === 'Windows') {
                     // append '-preview-nanoserver-ltsc2022' for windows base images for .NET 8's new naming convention
-                    wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview-nanoserver-ltsc2022`;
-                    wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview-nanoserver-ltsc2022`;
+                    wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview-nanoserver-1809`;
+                    wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview-nanoserver-1809`;
                 } else {
                     // append '-preview' for everything else
                     wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview`;
