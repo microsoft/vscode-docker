@@ -1,3 +1,16 @@
+## 1.25.0 - 10 April 2023
+
+### Added
+* Support has been added for removing image / container group(s). [#3492](https://github.com/microsoft/vscode-docker/issues/3492)
+* Support has been added for `--platform` flag in docker-build task. [#3870](https://github.com/microsoft/vscode-docker/issues/3870)
+* Support has been added for grouping containers by custom label. [#3837](https://github.com/microsoft/vscode-docker/issues/3837)
+
+### Fixed
+* Compose start / stop options no longer show when Docker is not in compose group mode. [#3495](https://github.com/microsoft/vscode-docker/issues/3495)
+* Terminal output is improved when debugging .NET projects. [#3691](https://github.com/microsoft/vscode-docker/issues/3691)
+* Log streaming is improved by resembling actual streaming. [#3616](https://github.com/microsoft/vscode-docker/issues/3616)
+* The slower loading time for containers has been improved by adding the `--size=false` flag. [#3865](https://github.com/microsoft/vscode-docker/pull/3865)
+
 ## 1.24.0 - 22 February 2023
 ### Added
 * Support has been added for deploying a container image from an image registry (Azure Container Registry, Docker Hub, etc.) to Azure Container Apps. This feature also requires the [Azure Container Apps extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-azurecontainerapps). [#3535](https://github.com/microsoft/vscode-docker/issues/3535)
