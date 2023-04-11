@@ -7,4 +7,4 @@ resources:
       endpoint: GitHub
 
 extends:
-  template: azure-pipelines/main@templates
+  template: azure-pipelines/main.yml@templates
