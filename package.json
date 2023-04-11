@@ -2901,7 +2901,7 @@
         "watch": "webpack --watch",
         "build": "webpack --mode production --devtool hidden-source-map",
         "ci-build": "npm test",
-        "package": "npm run build && vsce package",
+        "package": "vsce package",
         "ci-package": "npm test && vsce package",
         "lint": "eslint --max-warnings 0 src --ext ts",
         "test": "node ./out/test/runTest.js",

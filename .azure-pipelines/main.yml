@@ -1,3 +1,7 @@
+trigger:
+  - main
+  - bmw/pipelines # todo
+
 resources:
   repositories:
     - repository: templates
