@@ -4,6 +4,7 @@ resources:
       type: github
       name: microsoft/vscode-azuretools
       ref: bmw/pipelines
+      endpoint: GitHub
 
 extends:
   template: azure-pipelines/main@templates
