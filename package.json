@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.24.1-alpha",
+    "version": "1.25.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -948,6 +948,31 @@
                                 "additionalProperties": {
                                     "type": "string"
                                 }
+                            },
+                            "platform": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string",
+                                        "enum": [
+                                            "linux/amd64",
+                                            "linux/386",
+                                            "linux/arm64",
+                                            "linux/arm",
+                                            "darwin/amd64",
+                                            "darwin/386",
+                                            "darwin/arm64",
+                                            "darwin/arm",
+                                            "windows/amd64",
+                                            "windows/386",
+                                            "windows/arm64",
+                                            "windows/arm"
+                                        ]
+                                    }
+                                ],
+                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.platform%"
                             },
                             "tag": {
                                 "type": "string",

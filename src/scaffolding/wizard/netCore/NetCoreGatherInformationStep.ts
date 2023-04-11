@@ -60,10 +60,16 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
             wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
 
-            // append '-preview' at the end of version string to support new .NET 8 preview release naming
             if (netCoreVersion.major === 8) {
-                wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview`;
-                wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview`;
+                if (wizardContext.netCorePlatformOS === 'Windows') {
+                    // append '-preview-nanoserver-ltsc2022' for windows base images for .NET 8's new naming convention
+                    wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview-nanoserver-1809`;
+                    wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview-nanoserver-1809`;
+                } else {
+                    // append '-preview' for everything else
+                    wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview`;
+                    wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview`;
+                }
             }
 
             // change default user to adapt to Debian 12
