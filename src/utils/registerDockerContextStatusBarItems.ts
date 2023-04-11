@@ -19,39 +19,45 @@ export function registerDockerContextStatusBarEvent(ctx: vscode.ExtensionContext
 
         if (e.affectsConfiguration('docker.contexts.showInStatusBar')) {
             // Don't wait
-            void registerDockerContextStatusBarItems();
+            void scheduleUpdateStatusBar();
         }
     });
 
     ctx.subscriptions.push(
         ext.dockerContextStatusBarItem,
-        ext.runtimeManager.contextManager.onContextChanged(registerDockerContextStatusBarItems)
+        ext.runtimeManager.contextManager.onContextChanged(scheduleUpdateStatusBar)
     );
 
-    void registerDockerContextStatusBarItems();
+    // Don't wait
+    void scheduleUpdateStatusBar();
 }
 
-export async function registerDockerContextStatusBarItems() {
+export async function showStatusBarItemIfNeeded() {
 
     const config = vscode.workspace.getConfiguration('docker');
     let currentDockerContext: ListContextItem | undefined;
+    // if dockerContextStatusBarItem is created, then we dispose
+    ext.dockerContextStatusBarItem?.dispose();
 
     if (!config.get(dockerContextStatusBarSetting, false) ||
         !(currentDockerContext = await ext.runtimeManager.contextManager.getCurrentContext())) { // Intentional assignment and boolean check
-        ext.dockerContextStatusBarItem?.dispose();
         return;
     }
 
     const dockerContextUseCommand = 'vscode-docker.contexts.use';
 
-    // if dockerContextStatusBarItem is created, then we dispose
-    ext.dockerContextStatusBarItem?.dispose();
-
-    // Register the status bar item for the current context
     ext.dockerContextStatusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 20);
     ext.dockerContextStatusBarItem.command = dockerContextUseCommand;
     ext.dockerContextStatusBarItem.name = vscode.l10n.t('Docker Contexts');
     ext.dockerContextStatusBarItem.text = currentDockerContext.name;
     ext.dockerContextStatusBarItem.tooltip = vscode.l10n.t('Change Docker Context');
     ext.dockerContextStatusBarItem.show();
+}
+
+let updatePromise: Promise<void> | undefined;
+function scheduleUpdateStatusBar(): Promise<void> {
+    if (!updatePromise) {
+        updatePromise = showStatusBarItemIfNeeded().finally(() => updatePromise = undefined);
+    }
+    return updatePromise;
 }
