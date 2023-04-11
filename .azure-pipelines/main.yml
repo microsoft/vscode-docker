@@ -27,3 +27,4 @@ jobs:
   - template: common/build.yml
     parameters:
       dockerUnavailable: 1 # Docker not available on MacOS agents (https://docs.microsoft.com/en-us/azure/devops/pipelines/languages/docker)
+  environment: build
