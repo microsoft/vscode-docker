@@ -1,5 +1,5 @@
 jobs:
-- job: Windows
+- deployment: Windows
   pool:
     vmImage: windows-latest
   steps:
@@ -7,8 +7,9 @@ jobs:
   - template: common/setup.yml
   - template: common/governance.yml   # Force governance before test to avoid false-positives.
   - template: common/build.yml
+  environment: build
 
-- job: Linux
+- deployment: Linux
   pool:
     vmImage: ubuntu-latest
   steps:
@@ -17,8 +18,9 @@ jobs:
   - template: common/publish-vsix.yml # Only publish vsix from linux build since we use this to release and want to stay consistent
   variables:
     Codeql.Enabled: $[in(variables['Build.Reason'], 'Schedule')] # Enable CodeQL only on scheduled builds because it is slow
+  environment: build
 
-- job: macOS
+- deployment: macOS
   pool:
     vmImage: macOS-latest
   steps:
