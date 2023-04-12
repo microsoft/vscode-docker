@@ -2905,7 +2905,7 @@
         "ci-package": "npm test && vsce package",
         "lint": "eslint --max-warnings 0 src --ext ts",
         "test": "node ./out/test/runTest.js",
-        "pretest": "tsc -p ./ && npm run lint && npm run build",
+        "pretest": "tsc -p ./",
         "test-watch": "tsc -watch -p ./"
     },
     "extensionDependencies": [

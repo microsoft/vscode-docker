@@ -1,7 +1,9 @@
+# Trigger the build whenever `main` is updated
 trigger:
   - main
   - bmw/pipelines # todo
 
+# Grab the base templates from https://github.com/microsoft/vscode-azuretools
 resources:
   repositories:
     - repository: templates
@@ -10,5 +12,6 @@ resources:
       ref: bmw/pipelines
       endpoint: GitHub
 
+# Use those templates
 extends:
   template: azure-pipelines/main.yml@templates
