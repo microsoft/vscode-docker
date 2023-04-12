@@ -1,4 +1,5 @@
 <PoliCheckExclusions>
+    <!-- More info at https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/sdl-azdo-extension/policheck-build-task#excluding-files-or-folders-from-the-policheck-scan -->
     <!--Each of these exclusions is a folder name -if \[name]\exists in the file path, it will be skipped -->
     <Exclusion Type="FolderPathFull">NODE_MODULES|BACKUPTEMPLATES|.VSCODE-TEST|DIST</Exclusion>
     <!--Each of these exclusions is a folder name -if any folder or file starts with "\[name]", it will be skipped -->
