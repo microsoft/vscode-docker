@@ -1883,6 +1883,11 @@
                         "DockerEndpoint"
                     ]
                 },
+                "docker.contexts.showInStatusBar": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "%vscode-docker.config.docker.contexts.showInStatusBar%"
+                },
                 "docker.images.groupBy": {
                     "type": "string",
                     "default": "Repository",
