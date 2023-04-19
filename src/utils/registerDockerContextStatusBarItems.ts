@@ -32,7 +32,7 @@ export function registerDockerContextStatusBarEvent(ctx: vscode.ExtensionContext
     void scheduleUpdateStatusBar();
 }
 
-export async function showStatusBarItemIfNeeded() {
+async function showStatusBarItemIfNeeded() {
 
     const config = vscode.workspace.getConfiguration('docker');
     let currentDockerContext: ListContextItem | undefined;
