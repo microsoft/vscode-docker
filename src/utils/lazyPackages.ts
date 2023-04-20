@@ -5,8 +5,9 @@
 
 import { ext } from '../extensionVariables';
 
-export async function getArmAuth(): Promise<typeof import('@azure/arm-authorization')> {
-    return await import('@azure/arm-authorization');
+// Switch back to `@azure/arm-authorization` when https://github.com/Azure/azure-sdk-for-js/issues/21210 is fixed
+export async function getArmAuth(): Promise<typeof import('@azure/arm-authorization-profile-2020-09-01-hybrid')> {
+    return await import('@azure/arm-authorization-profile-2020-09-01-hybrid');
 }
 
 export async function getArmContainerRegistry(): Promise<typeof import('@azure/arm-containerregistry')> {
