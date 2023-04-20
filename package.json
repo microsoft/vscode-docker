@@ -2951,7 +2951,7 @@
         "@microsoft/compose-language-service": "^0.1.2",
         "@microsoft/vscode-azext-azureappservice": "^1.0.1",
         "@microsoft/vscode-azext-azureutils": "^1.1.4",
-        "@microsoft/vscode-azext-utils": "^1.2.1",
+        "@microsoft/vscode-azext-utils": "^1.2.2",
         "dayjs": "^1.10.4",
         "dockerfile-language-server-nodejs": "^0.9.0",
         "fs-extra": "^10.0.0",
