@@ -18,7 +18,6 @@
         "noImplicitAny": false, // TODO
         "noImplicitOverride": false, // TODO
         "strictNullChecks": false, // TODO
-        "skipLibCheck": true, // Some of the libraries use types that we don't have and don't need
     },
     "exclude": [
         "node_modules",
