@@ -146,7 +146,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                 runOptions.entrypoint = runOptions.entrypoint || '/bin/sh';
             }
             else if (runOptions.os === 'Windows') {
-                runOptions.entrypoint = runOptions.entrypoint || 'cmd';
+                runOptions.entrypoint = runOptions.entrypoint || 'cmd.exe';
             }
         }
 
