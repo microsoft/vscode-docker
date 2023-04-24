@@ -43,7 +43,7 @@ export interface NetCoreTaskScaffoldingOptions {
 
 const UserSecretsRegex = /UserSecretsId/i;
 
-export class NetCoreTaskHelper implements TaskHelper {
+export class NetCoreTaskHelper extends TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NetCoreTaskScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
@@ -126,6 +126,7 @@ export class NetCoreTaskHelper implements TaskHelper {
         /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
+        buildOptions.useSdkBuild = buildOptions.useSdkBuild || false;
         /* eslint-enable no-template-curly-in-string */
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
 

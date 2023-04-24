@@ -15,6 +15,7 @@ export interface DockerBuildOptions {
     target?: string;
     pull?: boolean;
     customOptions?: string;
+    useSdkBuild?: boolean;
 }
 
 export interface DockerBuildTaskDefinitionBase extends TaskDefinitionBase {

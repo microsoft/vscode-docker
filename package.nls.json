@@ -60,6 +60,7 @@
     "vscode-docker.tasks.docker-build.platform": "The target platform for the application.",
     "vscode-docker.tasks.docker-build.netCore.description": "Options for building .NET projects in Docker.",
     "vscode-docker.tasks.docker-build.netCore.appProject": "The .NET project (.csproj, .fsproj, etc.) to build.",
+    "vscode-docker.tasks.docker-build.netCore.useSdkBuild": "Whether to use the .NET Core SDK to build the project.",
     "vscode-docker.tasks.docker-build.node.description": "Options for building Node.js applications in Docker.",
     "vscode-docker.tasks.docker-build.node.package": "The path to the package.json for the application.",
     "vscode-docker.tasks.docker-build.python.description": "Options for building Python applications in Docker.",

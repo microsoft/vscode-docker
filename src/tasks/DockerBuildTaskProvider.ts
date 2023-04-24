@@ -7,14 +7,12 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { ext } from '../extensionVariables';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreBuildTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeBuildTaskDefinition } from './node/NodeTaskHelper';
-import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
 import { DockerBuildTaskContext, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerBuildTaskDefinition extends NetCoreBuildTaskDefinition, NodeBuildTaskDefinition {
@@ -49,28 +47,10 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
         await this.validateResolvedDefinition(context, definition.dockerBuild);
 
-        const client = await ext.runtimeManager.getClient();
-
-        const options = definition.dockerBuild;
-        const command = await client.buildImage({
-            pull: options.pull,
-            file: options.dockerfile,
-            args: options.buildArgs,
-            labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
-            tags: [options.tag],
-            stage: options.target,
-            platform: options.platform,
-            customOptions: options.customOptions,
-            path: options.context,
-        });
-
-        const runner = context.terminal.getCommandRunner({
-            folder: context.folder,
-            token: context.cancellationToken,
-        });
-
-        await runner(command);
-        throwIfCancellationRequested(context);
+        if (helper) {
+            await helper.build(context, definition);
+            throwIfCancellationRequested(context);
+        }
 
         context.imageName = definition.dockerBuild.tag;
 

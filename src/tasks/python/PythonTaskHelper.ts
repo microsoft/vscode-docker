@@ -26,7 +26,7 @@ export interface PythonRunTaskDefinition extends DockerRunTaskDefinitionBase {
     python?: PythonTaskRunOptions;
 }
 
-export class PythonTaskHelper implements TaskHelper {
+export class PythonTaskHelper extends TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext): Promise<DockerBuildTaskDefinition[]> {
         return [
             {

@@ -1010,6 +1010,11 @@
                             "appProject": {
                                 "type": "string",
                                 "description": "%vscode-docker.tasks.docker-build.netCore.appProject%"
+                            },
+                            "useSdkBuild": {
+                                "type": "boolean",
+                                "description": "%vscode-docker.tasks.docker-build.netCore.useSdkBuild%",
+                                "default": false
                             }
                         },
                         "required": [

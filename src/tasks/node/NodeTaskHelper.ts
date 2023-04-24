@@ -34,7 +34,7 @@ export interface NodeRunTaskDefinition extends DockerRunTaskDefinitionBase {
     node?: NodeTaskRunOptions;
 }
 
-export class NodeTaskHelper implements TaskHelper {
+export class NodeTaskHelper extends TaskHelper {
     public async provideDockerBuildTasks(context: DockerTaskScaffoldContext, options?: NodeScaffoldingOptions): Promise<DockerBuildTaskDefinition[]> {
         return [
             {
