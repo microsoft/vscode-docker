@@ -141,9 +141,6 @@ export class NetCoreTaskHelper implements TaskHelper {
         runOptions.containerName = runOptions.containerName || getDefaultContainerName(context.folder.name);
         runOptions.os = runOptions.os || 'Linux';
         runOptions.image = inferImageName(runDefinition as DockerRunTaskDefinition, context, context.folder.name, 'dev');
-        if (runDefinition.netCore?.enableDebugging) {
-            runOptions.entrypoint = runOptions.entrypoint || '/bin/sh';
-        }
 
         const ssl = !!helperOptions.configureSsl; // SSL will be enabled only if helperOptions.configureSsl is explicitly true
         context.actionContext.telemetry.properties.netCoreSslSetting = helperOptions.configureSsl === undefined ? 'undefined' : helperOptions.configureSsl.toString();
