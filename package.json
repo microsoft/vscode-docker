@@ -1062,7 +1062,7 @@
                             },
                             "entrypoint": {
                                 "type": "string",
-                                "description": "vscode-docker.tasks.docker-run.dockerRun.entrypoint"
+                                "description": "%vscode-docker.tasks.docker-run.dockerRun.entrypoint%"
                             },
                             "containerName": {
                                 "type": "string",
