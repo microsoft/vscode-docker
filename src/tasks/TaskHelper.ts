@@ -5,7 +5,7 @@
 
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
-import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, WorkspaceFolder, l10n, tasks, workspace } from 'vscode';
+import { CancellationToken, ConfigurationTarget, QuickPickItem, Task, WorkspaceFolder, l10n, tasks, workspace } from 'vscode';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
@@ -14,15 +14,11 @@ import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidIm
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
-import { DockerBuildTask, DockerBuildTaskDefinition, DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerComposeTaskProvider } from './DockerComposeTaskProvider';
+import { DockerBuildTask, DockerBuildTaskDefinition } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
-import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
+import { DockerRunTask, DockerRunTaskDefinition } from './DockerRunTaskProvider';
 import { TaskDefinitionBase, defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
-import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { nodeTaskHelper } from './node/NodeTaskHelper';
-import { pythonTaskHelper } from './python/PythonTaskHelper';
 
 export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
 
@@ -94,35 +90,6 @@ export abstract class TaskHelper {
     preRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
     abstract getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
     postRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
-}
-
-export function registerTaskProviders(ctx: ExtensionContext): void {
-    const helpers = {
-        netCore: netCoreTaskHelper,
-        node: nodeTaskHelper,
-        python: pythonTaskHelper
-    };
-
-    ctx.subscriptions.push(
-        tasks.registerTaskProvider(
-            'docker-build',
-            new DockerBuildTaskProvider(helpers)
-        )
-    );
-
-    ctx.subscriptions.push(
-        tasks.registerTaskProvider(
-            'docker-run',
-            new DockerRunTaskProvider(helpers)
-        )
-    );
-
-    ctx.subscriptions.push(
-        tasks.registerTaskProvider(
-            'docker-compose',
-            new DockerComposeTaskProvider()
-        )
-    );
 }
 
 export function hasTask(taskLabel: string, folder: WorkspaceFolder): boolean {
