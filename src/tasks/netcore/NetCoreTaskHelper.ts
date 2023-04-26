@@ -26,6 +26,7 @@ export interface NetCoreTaskOptions {
     appProject?: string;
     configureSsl?: boolean;
     enableDebugging?: boolean;
+    useSdkBuild?: boolean;
 }
 
 export interface NetCoreBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
@@ -126,7 +127,6 @@ export class NetCoreTaskHelper extends TaskHelper {
         /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
         buildOptions.dockerfile = buildOptions.dockerfile || path.join('${workspaceFolder}', 'Dockerfile');
-        buildOptions.useSdkBuild = buildOptions.useSdkBuild || false;
         /* eslint-enable no-template-curly-in-string */
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
 
