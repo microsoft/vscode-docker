@@ -68,7 +68,13 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
     private async buildWithDotnetSdk(context: DockerBuildTaskContext): Promise<void> {
         const sdkBuildCommand = 'dotnet publish --os linux --arch x64 -c Release -p:PublishProfile=DefaultContainer';
-        void context.terminal.executeCommandInTerminal(sdkBuildCommand);
+        await context.terminal.executeCommandInTerminal(
+            sdkBuildCommand,
+            {
+                folder: context.folder,
+                token: context.cancellationToken,
+            }
+        );
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
