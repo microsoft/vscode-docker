@@ -19,7 +19,7 @@ import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConf
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { registerTaskProviders } from "./tasks/registerTaskProviders";
+import { registerTaskProviders } from './tasks/registerTaskProviders';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
