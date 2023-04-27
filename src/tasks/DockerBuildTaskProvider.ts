@@ -30,12 +30,6 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
 
     // TODO: Skip if image is freshly built
     protected async executeTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<void> {
-
-        if (task.definition.netCore?.useSdkBuild) {
-            await this.buildWithDotnetSdk(context);
-            return;
-        }
-
         const definition = cloneObject(task.definition);
         definition.dockerBuild = definition.dockerBuild || {};
 
@@ -64,17 +58,6 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             await helper.postBuild(context, definition);
         }
 
-    }
-
-    private async buildWithDotnetSdk(context: DockerBuildTaskContext): Promise<void> {
-        const sdkBuildCommand = 'dotnet publish --os linux --arch x64 -c Release -p:PublishProfile=DefaultContainer';
-        await context.terminal.executeCommandInTerminal(
-            sdkBuildCommand,
-            {
-                folder: context.folder,
-                token: context.cancellationToken,
-            }
-        );
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
