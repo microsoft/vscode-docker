@@ -133,6 +133,14 @@ export class NetCoreTaskHelper extends TaskHelper {
         return buildOptions;
     }
 
+    public async build(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition) {
+        if (buildDefinition.netCore?.useSdkBuild) {
+            await this.buildWithDotnetSdk(context); // build with .NET SDK
+        } else {
+            await super.build(context, buildDefinition); // Dockerfile build
+        }
+    }
+
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: NetCoreRunTaskDefinition): Promise<DockerRunOptions> {
         const runOptions = runDefinition.dockerRun;
         const helperOptions = runDefinition.netCore || {};
@@ -287,6 +295,13 @@ export class NetCoreTaskHelper extends TaskHelper {
         }
 
         return volumes;
+    }
+
+    private async buildWithDotnetSdk(context: DockerBuildTaskContext): Promise<void> {
+        //reference: https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container
+        const publishFlag = NetCoreTaskHelper.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
+        const sdkBuildCommand = `dotnet publish --os linux --arch x64 -c Release ${publishFlag}`;
+        void context.terminal.executeCommandInTerminal(sdkBuildCommand);
     }
 }
 
