@@ -101,11 +101,16 @@ export class DockerPseudoterminal implements Pseudoterminal {
         const resolvedQuotedArgs = resolveVariables(quotedArgs, options.folder);
         const commandLine = [options.commandResponse.command, ...resolvedQuotedArgs].join(' ');
 
+        return await this.execAsyncInTerminal(commandLine, options);
+    }
+
+    public async execAsyncInTerminal(command: string, options?: ExecAsyncInTerminalOptions): Promise<ExecAsyncOutput> {
+
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
+        this.write(`> ${command} <\r\n\r\n`, DEFAULTBOLD);
 
         return await execAsync(
-            commandLine,
+            command,
             {
                 cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
                 env: withDockerEnvSettings({ ...process.env, ...this.resolvedDefinition.options?.env }),
@@ -121,36 +126,13 @@ export class DockerPseudoterminal implements Pseudoterminal {
         );
     }
 
-    public async executeCommandInTerminal(command: string, options?: ExecuteCommandInTerminalOptions): Promise<ExecAsyncOutput> {
-
-        // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${command} <\r\n\r\n`, DEFAULTBOLD);
-
-        return await execAsync(
-            command,
-            {
-                cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
-                cancellationToken: options.token,
-            },
-            (output: string, err: boolean) => {
-                if (err) {
-                    this.writeErrorLine(output);
-                } else {
-                    this.writeOutputLine(output);
-                }
-            }
-        );
-    }
-
 }
 
-type ExecuteCommandResponseInTerminalOptions = {
+type ExecuteCommandResponseInTerminalOptions = ExecAsyncInTerminalOptions & {
     commandResponse: VoidCommandResponse | PromiseCommandResponse<unknown>;
-    folder: WorkspaceFolder;
-    token?: CancellationToken;
 };
 
-type ExecuteCommandInTerminalOptions = {
+type ExecAsyncInTerminalOptions = {
     folder: WorkspaceFolder;
     token?: CancellationToken;
 };

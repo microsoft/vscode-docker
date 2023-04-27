@@ -135,7 +135,7 @@ export class NetCoreTaskHelper extends TaskHelper {
 
     public async build(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition) {
         if (buildDefinition.netCore?.useSdkBuild) {
-            await this.buildWithDotnetSdk(context); // build with .NET SDK
+            await this.buildWithDotnetSdk(context, buildDefinition); // build with .NET SDK
         } else {
             await super.build(context, buildDefinition); // Dockerfile build
         }
@@ -297,11 +297,47 @@ export class NetCoreTaskHelper extends TaskHelper {
         return volumes;
     }
 
-    private async buildWithDotnetSdk(context: DockerBuildTaskContext): Promise<void> {
+    private async buildWithDotnetSdk(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
         //reference: https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container
         const publishFlag = NetCoreTaskHelper.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
-        const sdkBuildCommand = `dotnet publish --os linux --arch x64 -c Release ${publishFlag}`;
-        void context.terminal.executeCommandInTerminal(sdkBuildCommand);
+        const [runtimeOs, runtimeArch] = this.getOsAndArch(buildDefinition);
+        const [imageName, imageTag] = this.getImageNameAndTag(buildDefinition);
+
+        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Release -p:ContainerImageName=${imageName} -p:ContainerImageTag=${imageTag}`;
+        await context.terminal.execAsyncInTerminal(
+            sdkBuildCommand,
+            {
+                folder: context.folder,
+                token: context.cancellationToken,
+            }
+        );
+    }
+
+    private getImageNameAndTag(buildDefinition: DockerBuildTaskDefinition): [string, string] {
+        const imageFullName = buildDefinition.dockerBuild.tag;
+        const [imageName, imageTag] = imageFullName.split(':');
+        return [imageName, imageTag];
+    }
+
+    private getOsAndArch(buildDefinition: DockerBuildTaskDefinition): [string, string] {
+        let runtimeOs: string = "linux";
+        let runtimeArch: string = "x64";
+        if (buildDefinition.dockerBuild?.platform) {
+            const [dockerOs, dockerArch] = buildDefinition.dockerBuild.platform.split('/');
+            runtimeOs = dockerOs;
+            switch (dockerArch.toLowerCase()) {
+                case 'amd64':
+                    runtimeArch = 'x64';
+                    break;
+                case '386':
+                    runtimeArch = 'x86';
+                    break;
+                default:
+                    runtimeArch = dockerArch;
+                    break;
+            }
+        }
+        return [runtimeOs, runtimeArch];
     }
 }
 
