@@ -30,11 +30,11 @@ COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . art
 RUN dotnet restore "{{ workspaceRelative . artifact netCorePlatformOS }}"
 COPY . .
 WORKDIR "/src/{{ dirname (workspaceRelative . artifact 'Linux') 'Linux' }}"
-RUN dotnet build "{{ basename artifact }}" -c Release -o /app/build
+RUN dotnet build "{{ basename artifact }}" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "{{ basename artifact }}" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "{{ basename artifact }}" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
