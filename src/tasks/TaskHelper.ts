@@ -59,9 +59,15 @@ export interface DockerRunTaskContext extends DockerTaskExecutionContext {
 // This doesn't need to be extended so redefining for parity is simplest
 export type DockerComposeTaskContext = DockerTaskExecutionContext;
 
-export abstract class TaskHelper {
-    preBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
-    abstract getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions>;
+export class TaskHelper {
+    async preBuild(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
+        return;
+    }
+
+    async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions> {
+        return buildDefinition.dockerBuild || {};
+    }
+
     async build(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition) {
         const client = await ext.runtimeManager.getClient();
 
@@ -85,12 +91,22 @@ export abstract class TaskHelper {
 
         await runner(command);
     }
-    postBuild?(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void>;
+    async postBuild(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
+        return;
+    }
 
-    preRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
-    abstract getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions>;
-    postRun?(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void>;
+    async preRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
+        return;
+    }
+    async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
+        return runDefinition.options || {};
+    }
+    async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
+        return;
+    }
 }
+
+export const defaultTaskHelper = new TaskHelper();
 
 export function hasTask(taskLabel: string, folder: WorkspaceFolder): boolean {
     const workspaceTasks = workspace.getConfiguration('tasks', folder);

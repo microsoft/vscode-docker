@@ -11,7 +11,7 @@ import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
-import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
+import { defaultTaskHelper, DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 
 export abstract class DockerTaskProvider implements TaskProvider {
 
@@ -68,6 +68,6 @@ export abstract class DockerTaskProvider implements TaskProvider {
     protected abstract executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void>;
 
     protected getHelper(platform: DockerPlatform): TaskHelper {
-        return this.helpers[platform];
+        return this.helpers[platform] || defaultTaskHelper;
     }
 }
