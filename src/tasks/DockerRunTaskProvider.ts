@@ -31,7 +31,6 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
     // TODO: Skip if container is freshly started, but probably depends on language
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
         const definition = cloneObject(task.definition);
-        definition.dockerRun = definition.dockerRun || {};
 
         context.actionContext.telemetry.properties.containerOS = definition.dockerRun.os || 'Linux';
 
@@ -40,15 +39,11 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
 
         const helper = this.getHelper(context.platform);
 
-        if (helper && helper.preRun) {
-            await helper.preRun(context, definition);
-            throwIfCancellationRequested(context);
-        }
+        await helper.preRun(context, definition);
+        throwIfCancellationRequested(context);
 
-        if (helper) {
-            definition.dockerRun = await helper.getDockerRunOptions(context, definition);
-            throwIfCancellationRequested(context);
-        }
+        definition.dockerRun = await helper.getDockerRunOptions(context, definition);
+        throwIfCancellationRequested(context);
 
         await this.validateResolvedDefinition(context, definition.dockerRun);
 
@@ -82,9 +77,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
         context.containerId = await runner(command);
         throwIfCancellationRequested(context);
 
-        if (helper && helper.postRun) {
-            await helper.postRun(context, definition);
-        }
+        await helper.postRun(context, definition);
     }
 
     private async validateResolvedDefinition(context: DockerRunTaskContext, dockerRun: DockerRunOptions): Promise<void> {

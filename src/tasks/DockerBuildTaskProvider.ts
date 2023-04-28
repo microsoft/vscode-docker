@@ -31,33 +31,21 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
     // TODO: Skip if image is freshly built
     protected async executeTaskInternal(context: DockerBuildTaskContext, task: DockerBuildTask): Promise<void> {
         const definition = cloneObject(task.definition);
-        definition.dockerBuild = definition.dockerBuild || {};
-
         const helper = this.getHelper(context.platform);
 
-        if (helper && helper.preBuild) {
-            await helper.preBuild(context, definition);
-            throwIfCancellationRequested(context);
-        }
+        await helper.preBuild(context, definition);
+        throwIfCancellationRequested(context);
 
-        if (helper) {
-            definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
-            throwIfCancellationRequested(context);
-        }
+        definition.dockerBuild = await helper.getDockerBuildOptions(context, definition);
+        throwIfCancellationRequested(context);
 
         await this.validateResolvedDefinition(context, definition.dockerBuild);
-
-        if (helper) {
-            await helper.build(context, definition);
-            throwIfCancellationRequested(context);
-        }
+        await helper.build(context, definition);
+        throwIfCancellationRequested(context);
 
         context.imageName = definition.dockerBuild.tag;
 
-        if (helper && helper.postBuild) {
-            await helper.postBuild(context, definition);
-        }
-
+        await helper.postBuild(context, definition);
     }
 
     private async validateResolvedDefinition(context: DockerBuildTaskContext, dockerBuild: DockerBuildOptions): Promise<void> {
