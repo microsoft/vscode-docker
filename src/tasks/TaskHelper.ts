@@ -91,6 +91,7 @@ export class TaskHelper {
 
         await runner(command);
     }
+
     async postBuild(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
         return;
     }

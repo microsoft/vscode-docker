@@ -122,7 +122,7 @@ export class NetCoreTaskHelper extends TaskHelper {
     }
 
     public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NetCoreBuildTaskDefinition): Promise<DockerBuildOptions> {
-        const buildOptions = buildDefinition.dockerBuild;
+        const buildOptions = await super.getDockerBuildOptions(context, buildDefinition as DockerBuildTaskDefinition);
 
         /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
@@ -142,7 +142,7 @@ export class NetCoreTaskHelper extends TaskHelper {
     }
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: NetCoreRunTaskDefinition): Promise<DockerRunOptions> {
-        const runOptions = runDefinition.dockerRun;
+        const runOptions = await super.getDockerRunOptions(context, runDefinition as DockerRunTaskDefinition);
         const helperOptions = runDefinition.netCore || {};
 
         helperOptions.appProject = await NetCoreTaskHelper.inferAppProject(context, helperOptions); // This method internally checks the user-defined input first

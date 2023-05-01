@@ -83,7 +83,7 @@ export class NodeTaskHelper extends TaskHelper {
 
     public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: NodeBuildTaskDefinition): Promise<DockerBuildOptions> {
         const helperOptions = buildDefinition.node || {};
-        const buildOptions = buildDefinition.dockerBuild;
+        const buildOptions = await super.getDockerBuildOptions(context, buildDefinition as DockerBuildTaskDefinition);
 
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions.package, context.folder);
         const nodePackage = await readPackage(packagePath);
@@ -106,7 +106,7 @@ export class NodeTaskHelper extends TaskHelper {
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: NodeRunTaskDefinition): Promise<DockerRunOptions> {
         const helperOptions = runDefinition.node || {};
-        const runOptions = runDefinition.dockerRun;
+        const runOptions = await super.getDockerRunOptions(context, runDefinition as DockerRunTaskDefinition);
 
         const packagePath = NodeTaskHelper.inferPackagePath(helperOptions && helperOptions.package, context.folder);
 

@@ -90,7 +90,7 @@ export class PythonTaskHelper extends TaskHelper {
     }
 
     public async getDockerBuildOptions(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<DockerBuildOptions> {
-        const buildOptions = buildDefinition.dockerBuild;
+        const buildOptions = await super.getDockerBuildOptions(context, buildDefinition as DockerBuildTaskDefinition);
 
         /* eslint-disable no-template-curly-in-string */
         buildOptions.context = buildOptions.context || '${workspaceFolder}';
@@ -103,7 +103,7 @@ export class PythonTaskHelper extends TaskHelper {
     }
 
     public async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
-        const runOptions: DockerRunOptions = runDefinition.dockerRun;
+        const runOptions: DockerRunOptions = await super.getDockerRunOptions(context, runDefinition as DockerRunTaskDefinition);
         const launcherFolder: string = await PythonExtensionHelper.getLauncherFolderPath();
 
         runOptions.image = inferImageName(
