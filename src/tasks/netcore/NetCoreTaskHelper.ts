@@ -12,6 +12,7 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
+import { parseDockerLikeImageName } from '../../runtimes/docker/clients/DockerClientBase/parseDockerLikeImageName';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -303,9 +304,8 @@ export class NetCoreTaskHelper extends TaskHelper {
         //reference: https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container
         const publishFlag = NetCoreTaskHelper.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
         const [runtimeOs, runtimeArch] = this.getOsAndArch(buildDefinition);
-        const [imageName, imageTag] = this.getImageNameAndTag(buildDefinition);
-
-        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Debug -p:ContainerImageName=${imageName} -p:ContainerImageTag=${imageTag}`;
+        const imageNameInfo = parseDockerLikeImageName(buildDefinition.dockerBuild.tag);
+        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Debug -p:ContainerImageName=${imageNameInfo.image} -p:ContainerImageTag=${imageNameInfo.tag}`;
         await context.terminal.execAsyncInTerminal(
             sdkBuildCommand,
             {
@@ -313,12 +313,6 @@ export class NetCoreTaskHelper extends TaskHelper {
                 token: context.cancellationToken,
             }
         );
-    }
-
-    private getImageNameAndTag(buildDefinition: DockerBuildTaskDefinition): [string, string] {
-        const imageFullName = buildDefinition.dockerBuild.tag;
-        const [imageName, imageTag] = imageFullName.split(':');
-        return [imageName, imageTag];
     }
 
     private getOsAndArch(buildDefinition: DockerBuildTaskDefinition): [string, string] {
