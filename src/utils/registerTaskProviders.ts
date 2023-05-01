@@ -1,10 +1,10 @@
 import { ExtensionContext, tasks } from 'vscode';
-import { DockerBuildTaskProvider } from './DockerBuildTaskProvider';
-import { DockerComposeTaskProvider } from './DockerComposeTaskProvider';
-import { DockerRunTaskProvider } from './DockerRunTaskProvider';
-import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { nodeTaskHelper } from './node/NodeTaskHelper';
-import { pythonTaskHelper } from './python/PythonTaskHelper';
+import { DockerBuildTaskProvider } from '../tasks/DockerBuildTaskProvider';
+import { DockerComposeTaskProvider } from '../tasks/DockerComposeTaskProvider';
+import { DockerRunTaskProvider } from '../tasks/DockerRunTaskProvider';
+import { netCoreTaskHelper } from '../tasks/netcore/NetCoreTaskHelper';
+import { nodeTaskHelper } from '../tasks/node/NodeTaskHelper';
+import { pythonTaskHelper } from '../tasks/python/PythonTaskHelper';
 
 
 export function registerTaskProviders(ctx: ExtensionContext): void {

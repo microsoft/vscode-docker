@@ -19,7 +19,6 @@ import { AutoConfigurableDockerComposeClient } from './runtimes/clients/AutoConf
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { ContainerFilesProvider } from './runtimes/files/ContainerFilesProvider';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
-import { registerTaskProviders } from './tasks/registerTaskProviders';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
@@ -29,6 +28,7 @@ import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
 import { registerDockerContextStatusBarEvent } from './utils/registerDockerContextStatusBarItems';
+import { registerTaskProviders } from './utils/registerTaskProviders';
 
 export type KeyInfo = { [keyName: string]: string };
 
