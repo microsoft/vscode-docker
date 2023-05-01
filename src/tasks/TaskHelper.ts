@@ -99,9 +99,11 @@ export class TaskHelper {
     async preRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
         return;
     }
+
     async getDockerRunOptions(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<DockerRunOptions> {
         return runDefinition.options || {};
     }
+
     async postRun(context: DockerRunTaskContext, runDefinition: DockerRunTaskDefinition): Promise<void> {
         return;
     }
