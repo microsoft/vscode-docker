@@ -296,14 +296,16 @@ export class NetCoreTaskHelper extends TaskHelper {
 
         return volumes;
     }
-
+    /**
+     * @see {@link https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container} for further information
+     */
     private async buildWithDotnetSdk(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
         //reference: https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container
         const publishFlag = NetCoreTaskHelper.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
         const [runtimeOs, runtimeArch] = this.getOsAndArch(buildDefinition);
         const [imageName, imageTag] = this.getImageNameAndTag(buildDefinition);
 
-        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Release -p:ContainerImageName=${imageName} -p:ContainerImageTag=${imageTag}`;
+        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Debug -p:ContainerImageName=${imageName} -p:ContainerImageTag=${imageTag}`;
         await context.terminal.execAsyncInTerminal(
             sdkBuildCommand,
             {
