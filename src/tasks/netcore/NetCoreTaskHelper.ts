@@ -28,6 +28,7 @@ export interface NetCoreTaskOptions {
     configureSsl?: boolean;
     enableDebugging?: boolean;
     useSdkBuild?: boolean;
+    configuration?: string;
 }
 
 export interface NetCoreBuildTaskDefinition extends DockerBuildTaskDefinitionBase {
@@ -301,10 +302,11 @@ export class NetCoreTaskHelper extends TaskHelper {
      * @see {@link https://learn.microsoft.com/en-us/dotnet/core/docker/publish-as-container} for further information
      */
     private async buildWithDotnetSdk(context: DockerBuildTaskContext, buildDefinition: DockerBuildTaskDefinition): Promise<void> {
+        const configuration = buildDefinition.netCore?.configuration ? `-c ${buildDefinition.netCore?.configuration} ` : '';
         const publishFlag = NetCoreTaskHelper.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
         const [runtimeOs, runtimeArch] = this.getOsAndArch(buildDefinition);
         const imageNameInfo = parseDockerLikeImageName(buildDefinition.dockerBuild.tag);
-        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} -c Debug -p:ContainerImageName=${imageNameInfo.image} -p:ContainerImageTag=${imageNameInfo.tag}`;
+        const sdkBuildCommand = `dotnet publish --os ${runtimeOs} --arch ${runtimeArch} ${publishFlag} ${configuration}-p:ContainerImageName=${imageNameInfo.image} -p:ContainerImageTag=${imageNameInfo.tag}`;
         await context.terminal.execAsyncInTerminal(
             sdkBuildCommand,
             {

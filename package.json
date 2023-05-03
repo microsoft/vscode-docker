@@ -1015,6 +1015,21 @@
                                 "type": "boolean",
                                 "description": "%vscode-docker.tasks.docker-build.netCore.useSdkBuild%",
                                 "default": false
+                            },
+                            "configuration": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "string",
+                                        "enum": [
+                                            "Debug",
+                                            "Release"
+                                        ]
+                                    }
+                                ],
+                                "description": "%vscode-docker.tasks.docker-build.netCore.configuration%"
                             }
                         },
                         "required": [
