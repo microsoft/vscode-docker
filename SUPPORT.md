@@ -10,4 +10,5 @@ For help and questions about using this project, please [create a discussion](ht
 
 ## Microsoft Support Policy
 
-Support for this product is limited to the resources listed above.
+Support for this project is limited to the resources listed above.
+
