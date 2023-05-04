@@ -950,25 +950,68 @@
                                 }
                             },
                             "platform": {
-                                "anyOf": [
+                                "oneOf": [
                                     {
-                                        "type": "string"
+                                        "type": "object",
+                                        "properties": {
+                                            "os": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "linux",
+                                                            "darwin",
+                                                            "windows"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "string"
+                                                    }
+                                                ],
+                                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.platform.os%"
+                                            },
+                                            "architecture": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "amd64",
+                                                            "386",
+                                                            "arm64",
+                                                            "arm"
+                                                        ]
+                                                    },
+                                                    {
+                                                        "type": "string"
+                                                    }
+                                                ],
+                                                "description": "%vscode-docker.tasks.docker-build.dockerBuild.platform.architecture%"
+                                            }
+                                        }
                                     },
                                     {
                                         "type": "string",
-                                        "enum": [
-                                            "linux/amd64",
-                                            "linux/386",
-                                            "linux/arm64",
-                                            "linux/arm",
-                                            "darwin/amd64",
-                                            "darwin/386",
-                                            "darwin/arm64",
-                                            "darwin/arm",
-                                            "windows/amd64",
-                                            "windows/386",
-                                            "windows/arm64",
-                                            "windows/arm"
+                                        "anyOf": [
+                                            {
+                                                "type": "string",
+                                                "enum": [
+                                                    "linux/amd64",
+                                                    "linux/386",
+                                                    "linux/arm64",
+                                                    "linux/arm",
+                                                    "darwin/amd64",
+                                                    "darwin/386",
+                                                    "darwin/arm64",
+                                                    "darwin/arm",
+                                                    "windows/amd64",
+                                                    "windows/386",
+                                                    "windows/arm64",
+                                                    "windows/arm"
+                                                ]
+                                            },
+                                            {
+                                                "type": "string"
+                                            }
                                         ]
                                     }
                                 ],

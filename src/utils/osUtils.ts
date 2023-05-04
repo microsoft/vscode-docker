@@ -6,8 +6,8 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContainerOS } from '../runtimes/docker';
 import { ext } from '../extensionVariables';
+import { ContainerOS } from '../runtimes/docker';
 
 export async function getDockerOSType(): Promise<ContainerOS> {
     if (!isWindows()) {
@@ -42,4 +42,27 @@ export function isArm64Mac(): boolean {
 
 export function isLinux(): boolean {
     return os.platform() !== 'win32' && os.platform() !== 'darwin';
+}
+
+export function getNativeArchitecture(): string {
+    const arch = os.arch();
+    let archString: string = arch || 'x64';
+
+    switch (arch) {
+        case 'x64':
+            archString = 'amd64';
+            break;
+        case 'arm':
+            break;
+        case 'arm64':
+            break;
+        case 'ia32':
+            archString = '386';
+            break;
+        default:
+            archString = 'amd64';
+            break;
+    }
+
+    return archString;
 }

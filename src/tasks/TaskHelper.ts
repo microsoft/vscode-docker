@@ -5,7 +5,7 @@
 
 import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
-import { CancellationToken, ConfigurationTarget, ExtensionContext, l10n, QuickPickItem, Task, tasks, workspace, WorkspaceFolder } from 'vscode';
+import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, WorkspaceFolder, l10n, tasks, workspace } from 'vscode';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
@@ -18,10 +18,10 @@ import { DockerComposeTaskProvider } from './DockerComposeTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
-import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { TaskDefinitionBase } from './TaskDefinitionBase';
+import { NetCoreTaskScaffoldingOptions, netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
-import { TaskDefinitionBase } from './TaskDefinitionBase';
 
 export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
 
@@ -201,6 +201,25 @@ export function getDefaultImageName(nameHint: string, tag?: 'dev' | 'latest'): s
 export function getDefaultContainerName(nameHint: string, tag?: 'dev' | 'latest'): string {
     tag = tag || 'dev';
     return `${getValidImageName(nameHint)}-${tag}`;
+}
+
+export function getContainerOsString(options?: NetCoreTaskScaffoldingOptions): string {
+    const os = options.platformOS || 'Linux'; // platformOS should never be undefined
+    let osString: string = '';
+
+    switch (os) {
+        case 'Linux':
+            osString = 'linux';
+            break;
+        case 'Windows':
+            osString = 'windows';
+            break;
+        case 'Mac':
+            osString = 'darwin';
+            break;
+    }
+
+    return osString;
 }
 
 export async function recursiveFindTaskByType(allTasks: TaskDefinitionBase[], type: string, node: DebugConfigurationBase | TaskDefinitionBase): Promise<TaskDefinitionBase | undefined> {

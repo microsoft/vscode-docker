@@ -5,6 +5,7 @@
 
 import * as readline from 'readline';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
+import { getPlatformString } from '../../../../utils/getPlatformString';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -72,8 +73,9 @@ import {
     WriteFileCommandOptions
 } from "../../contracts/ContainerClient";
 import { CancellationTokenLike } from '../../typings/CancellationTokenLike';
-import { asIds } from '../../utils/asIds';
 import { CancellationError } from '../../utils/CancellationError';
+import { CommandNotSupportedError } from '../../utils/CommandNotSupportedError';
+import { asIds } from '../../utils/asIds';
 import {
     CommandLineArgs,
     composeArgs,
@@ -83,7 +85,6 @@ import {
     withQuotedArg,
     withVerbatimArg,
 } from "../../utils/commandLineBuilder";
-import { CommandNotSupportedError } from '../../utils/CommandNotSupportedError';
 import { dayjs } from '../../utils/dayjs';
 import { byteStreamToGenerator, stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { toArray } from '../../utils/toArray';
@@ -352,7 +353,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     : options.disableContentTrust),
             withDockerLabelsArg(options.labels),
             withNamedArg('--iidfile', options.imageIdFile),
-            withNamedArg('--platform', options.platform),
+            withNamedArg('--platform', getPlatformString(options)),
             withDockerBuildArg(options.args),
             withVerbatimArg(options.customOptions),
             withQuotedArg(options.path),
