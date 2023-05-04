@@ -66,6 +66,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         await authClient.roleAssignments.create(registry.id, randomUUID(), {
             principalId: siteInfo.identity.principalId,
             roleDefinitionId: acrPullRoleDefinition.id,
+            principalType: 'ServicePrincipal',
         });
 
         // 5. Set the web app to use the desired ACR image, which was not done in DockerSiteCreateStep. Get the config and then update it.
