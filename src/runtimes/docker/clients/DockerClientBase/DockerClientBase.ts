@@ -5,7 +5,6 @@
 
 import * as readline from 'readline';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
-import { getPlatformString } from '../../../../utils/getPlatformString';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -100,6 +99,7 @@ import { isDockerListImageRecord, normalizeDockerListImageRecord } from "./Docke
 import { isDockerListNetworkRecord, normalizeDockerListNetworkRecord } from './DockerListNetworkRecord';
 import { isDockerVersionRecord } from "./DockerVersionRecord";
 import { isDockerVolumeRecord } from './DockerVolumeRecord';
+import { getPlatformString } from './getPlatformString';
 import { parseDockerLikeLabels } from './parseDockerLikeLabels';
 import { parseListFilesCommandLinuxOutput, parseListFilesCommandWindowsOutput } from './parseListFilesCommandOutput';
 import { tryParseSize } from './tryParseSize';

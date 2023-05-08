@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { BuildImageCommandOptions } from "../runtimes/docker/contracts/ContainerClient";
+import { BuildImageCommandOptions } from "../../contracts/ContainerClient";
 
 /**
  * This method parses the `platform` field in tasks.json
