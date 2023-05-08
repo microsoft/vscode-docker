@@ -8,7 +8,7 @@
  * @param os pre-normalized OS name
  * @returns normalized OS name
  */
-export function getContainerOsString(os?: string): string {
+export function getContainerOsString(os?: string): 'linux' | 'windows' | 'darwin' {
 
     switch (os || 'Linux') {
         case 'Linux':
