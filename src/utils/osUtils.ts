@@ -45,24 +45,15 @@ export function isLinux(): boolean {
 }
 
 export function getNativeArchitecture(): 'amd64' | '386' | 'arm64' | 'arm' {
-    const arch = os.arch();
-    let archString: string = arch || 'x64';
-
-    switch (arch) {
-        case 'x64':
-            archString = 'amd64';
-            break;
+    switch (os.arch()) {
         case 'arm':
-            break;
+            return 'arm';
         case 'arm64':
-            break;
+            return 'arm64';
         case 'ia32':
-            archString = '386';
-            break;
+            return '386';
+        case 'x64':
         default:
-            archString = 'amd64';
-            break;
+            return 'amd64';
     }
-
-    return archString;
 }
