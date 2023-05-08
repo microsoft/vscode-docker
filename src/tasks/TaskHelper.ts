@@ -19,7 +19,7 @@ import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
-import { NetCoreTaskScaffoldingOptions, netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
+import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
 
@@ -201,25 +201,6 @@ export function getDefaultImageName(nameHint: string, tag?: 'dev' | 'latest'): s
 export function getDefaultContainerName(nameHint: string, tag?: 'dev' | 'latest'): string {
     tag = tag || 'dev';
     return `${getValidImageName(nameHint)}-${tag}`;
-}
-
-export function getContainerOsString(options?: NetCoreTaskScaffoldingOptions): string {
-    const os = options.platformOS || 'Linux'; // platformOS should never be undefined
-    let osString: string = '';
-
-    switch (os) {
-        case 'Linux':
-            osString = 'linux';
-            break;
-        case 'Windows':
-            osString = 'windows';
-            break;
-        case 'Mac':
-            osString = 'darwin';
-            break;
-    }
-
-    return osString;
 }
 
 export async function recursiveFindTaskByType(allTasks: TaskDefinitionBase[], type: string, node: DebugConfigurationBase | TaskDefinitionBase): Promise<TaskDefinitionBase | undefined> {
