@@ -44,7 +44,7 @@ export function isLinux(): boolean {
     return os.platform() !== 'win32' && os.platform() !== 'darwin';
 }
 
-export function getNativeArchitecture(): string {
+export function getNativeArchitecture(): 'amd64' | '386' | 'arm64' | 'arm' {
     const arch = os.arch();
     let archString: string = arch || 'x64';
 
