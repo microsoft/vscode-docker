@@ -85,6 +85,7 @@ import {
     withVerbatimArg,
 } from "../../utils/commandLineBuilder";
 import { dayjs } from '../../utils/dayjs';
+import { getPlatformString } from '../../utils/getPlatformString';
 import { byteStreamToGenerator, stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { toArray } from '../../utils/toArray';
 import { ConfigurableClient } from '../ConfigurableClient';
@@ -99,7 +100,6 @@ import { isDockerListImageRecord, normalizeDockerListImageRecord } from "./Docke
 import { isDockerListNetworkRecord, normalizeDockerListNetworkRecord } from './DockerListNetworkRecord';
 import { isDockerVersionRecord } from "./DockerVersionRecord";
 import { isDockerVolumeRecord } from './DockerVolumeRecord';
-import { getPlatformString } from './getPlatformString';
 import { parseDockerLikeLabels } from './parseDockerLikeLabels';
 import { parseListFilesCommandLinuxOutput, parseListFilesCommandWindowsOutput } from './parseListFilesCommandOutput';
 import { tryParseSize } from './tryParseSize';

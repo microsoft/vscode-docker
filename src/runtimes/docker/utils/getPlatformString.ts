@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { l10n } from "vscode";
-import { BuildImageCommandOptions } from "../../contracts/ContainerClient";
+import { BuildImageCommandOptions } from "../contracts/ContainerClient";
 
 /**
  * This method parses the `platform` field in tasks.json
@@ -14,7 +13,7 @@ export function getPlatformString(options: BuildImageCommandOptions): string {
     const platform = options?.platform;
 
     if (!platform) {
-        throw new Error(l10n.t("Platform is not specified."));
+        throw new Error("Platform is not specified.");
     }
 
     if (typeof platform === "string") {
@@ -24,7 +23,7 @@ export function getPlatformString(options: BuildImageCommandOptions): string {
         const architecture = platform.architecture ?? "";
 
         if (!os || !architecture) {
-            throw new Error(l10n.t("Platform is missing `os` or `architecture` or both properties."));
+            throw new Error("Platform is missing `os` or `architecture` or both properties.");
         }
 
         return `${os}/${architecture}`;
