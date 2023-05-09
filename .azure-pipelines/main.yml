@@ -18,7 +18,7 @@ resources:
     - repository: templates
       type: github
       name: microsoft/vscode-azuretools
-      ref: main
+      ref: bmw/ghpipelines
       endpoint: GitHub
 
 # Use those templates
