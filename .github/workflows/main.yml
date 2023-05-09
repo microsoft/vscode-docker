@@ -1,4 +1,4 @@
-name: Node CI Lint, Build and Test
+name: Node PR Lint, Build and Test
 
 on:
   workflow_dispatch:
@@ -8,5 +8,5 @@ on:
     branches: [main]
 
 jobs:
-  build_and_test:
+  Build:
     uses: microsoft/vscode-azuretools/.github/workflows/main.yml@bmw/ghpipelines
