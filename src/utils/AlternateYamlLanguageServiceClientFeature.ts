@@ -22,7 +22,7 @@ export class AlternateYamlLanguageServiceClientFeature implements StaticFeature,
         // If the RedHat YAML extension is present, we can disable many of the compose language service
         // features
         if (vscode.extensions.getExtension('redhat.vscode-yaml')) {
-            const yamlClientSettings: AlternateYamlLanguageServiceClientCapabilities = {
+            const altYamlClientCapabilities: AlternateYamlLanguageServiceClientCapabilities = {
                 syntaxValidation: true,
                 schemaValidation: true,
                 basicCompletions: true,
@@ -34,7 +34,7 @@ export class AlternateYamlLanguageServiceClientFeature implements StaticFeature,
 
             capabilities.experimental = {
                 ...capabilities.experimental,
-                alternateYamlLanguageService: yamlClientSettings,
+                alternateYamlLanguageService: altYamlClientCapabilities,
             };
         }
     }

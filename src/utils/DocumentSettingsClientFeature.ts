@@ -26,14 +26,14 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
     }
 
     public fillClientCapabilities(capabilities: ClientCapabilities): void {
-        const documentSettings: DocumentSettingsClientCapabilities = {
+        const docSettingsClientCapabilities: DocumentSettingsClientCapabilities = {
             notify: true,
             request: true,
         };
 
         capabilities.experimental = {
             ...capabilities.experimental,
-            documentSettings: documentSettings,
+            documentSettings: docSettingsClientCapabilities,
         };
     }
 
