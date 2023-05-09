@@ -9,15 +9,13 @@
  * @returns normalized OS name
  */
 export function getContainerOsString(os?: string): 'linux' | 'windows' | 'darwin' {
-
     switch (os || 'Linux') {
-        case 'Linux':
-            return 'linux';
         case 'Windows':
             return 'windows';
         case 'Mac':
             return 'darwin';
+        case 'Linux':
+        default:
+            return 'linux';
     }
-
-    return 'linux'; // should never happen
 }
