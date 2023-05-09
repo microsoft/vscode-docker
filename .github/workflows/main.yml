@@ -1,4 +1,4 @@
-name: Node CI Build and Test
+name: Node CI Lint, Build and Test
 
 on:
   workflow_dispatch:
