@@ -10,6 +10,8 @@ services:
     build:
       context: {{ workspaceRelative . dockerBuildContext }}
       dockerfile: {{ contextRelative . dockerfileDirectory }}/Dockerfile
+      args:
+        - configuration=Debug
 {{#if ports}}
     ports:
 {{#each ports}}

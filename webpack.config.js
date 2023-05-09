@@ -10,7 +10,6 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require('path');
-const fse = require('fs-extra');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
@@ -73,17 +72,8 @@ const config = {
         new CopyPlugin({
             patterns: [
                 './node_modules/@microsoft/vscode-azext-azureutils/resources/**/*.svg',
-                './node_modules/open/xdg-open*', // This script isn't included in the webpack but is needed by `open` on certain systems, so copy it in
             ],
         }),
-        {
-            // Webpack does not preserve the execute permission on the above xdg-open script, so apply it again within the bundle
-            apply: (compiler) => {
-                compiler.hooks.afterEmit.tapPromise('AzCodeCopyWorkaround', async () => {
-                    await fse.chmod('./dist/node_modules/open/xdg-open', '755');
-                });
-            },
-        },
     ],
     optimization: {
         minimizer: [

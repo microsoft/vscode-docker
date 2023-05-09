@@ -33,7 +33,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         const appSvcClient = await vscAzureAppService.createWebSiteClient(context);
 
         // If we're in `execute`, then `shouldExecute` passed and `this.tagTreeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
-        const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as AzureRegistryTreeItem;
+        const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as unknown as AzureRegistryTreeItem;
 
         // 1. Get the registry resource. We will need the ID.
         const registry = await crmClient.registries.get(registryTreeItem.resourceGroup, registryTreeItem.registryName);
@@ -45,7 +45,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         }
 
         // 2. Get the role definition for the AcrPull role. We will need the definition ID. This role is built-in and should always exist.
-        const acrPullRoleDefinition = (await authClient.roleDefinitions.list(registry.id, { filter: `roleName eq 'AcrPull'` }))[0];
+        const acrPullRoleDefinition = (await azExtAzureUtils.uiUtils.listAllIterator(authClient.roleDefinitions.list(registry.id, { filter: `roleName eq 'AcrPull'` })))[0];
 
         if (!(acrPullRoleDefinition?.id)) {
             throw new Error(
