@@ -950,7 +950,7 @@
                                 }
                             },
                             "platform": {
-                                "oneOf": [
+                                "anyOf": [
                                     {
                                         "type": "object",
                                         "properties": {
@@ -1008,11 +1008,11 @@
                                                     "windows/arm64",
                                                     "windows/arm"
                                                 ]
-                                            },
-                                            {
-                                                "type": "string"
                                             }
                                         ]
+                                    },
+                                    {
+                                        "type": "string"
                                     }
                                 ],
                                 "description": "%vscode-docker.tasks.docker-build.dockerBuild.platform%"
