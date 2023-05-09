@@ -5,10 +5,10 @@
 
 // Largely copied from https://github.com/microsoft/compose-language-service/blob/main/src/test/clientExtension/DocumentSettingsClientFeature.ts
 
+import { DocumentSettings, DocumentSettingsClientCapabilities, DocumentSettingsNotification, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
 import * as vscode from 'vscode';
 import { ClientCapabilities, FeatureState, StaticFeature } from 'vscode-languageclient';
 import { LanguageClient } from 'vscode-languageclient/node';
-import { DocumentSettings, DocumentSettingsNotification, DocumentSettingsNotificationParams, DocumentSettingsParams, DocumentSettingsRequest } from '@microsoft/compose-language-service/lib/client/DocumentSettings';
 
 /**
  * This class implements functionality to allow the language server to request information about an open document (including tab size and line endings), and also
@@ -26,14 +26,14 @@ export class DocumentSettingsClientFeature implements StaticFeature, vscode.Disp
     }
 
     public fillClientCapabilities(capabilities: ClientCapabilities): void {
-        const documentSettings = {
+        const documentSettings: DocumentSettingsClientCapabilities = {
             notify: true,
             request: true,
         };
 
         capabilities.experimental = {
             ...capabilities.experimental,
-            documentSettings,
+            documentSettings: documentSettings,
         };
     }
 
