@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerPlatform } from '../runtimes/docker';
 import { DockerLabels, TaskDefinitionBase } from './TaskDefinitionBase';
 
 export interface DockerBuildOptions {
@@ -11,7 +10,7 @@ export interface DockerBuildOptions {
     context?: string;
     dockerfile?: string;
     labels?: DockerLabels;
-    platform?: ContainerPlatform;
+    platform?: ContainerPlatform | string;
     tag?: string;
     target?: string;
     pull?: boolean;
@@ -21,3 +20,17 @@ export interface DockerBuildOptions {
 export interface DockerBuildTaskDefinitionBase extends TaskDefinitionBase {
     dockerBuild?: DockerBuildOptions;
 }
+
+/**
+ * Target platform for the image build
+ */
+export type ContainerPlatform = undefined | {
+    /**
+     * OS of target platform
+     */
+    os?: string;
+    /**
+     * Architecture of target platform
+     */
+    architecture?: string;
+};

@@ -8,6 +8,7 @@ import * as path from 'path';
 import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
+import { normalizePlatform } from '../runtimes/docker/utils/normalizePlatform';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerBuildOptions } from './DockerBuildTaskDefinitionBase';
@@ -59,7 +60,7 @@ export class DockerBuildTaskProvider extends DockerTaskProvider {
             labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
             tags: [options.tag],
             stage: options.target,
-            platform: options.platform,
+            platform: normalizePlatform(options.platform),
             customOptions: options.customOptions,
             path: options.context,
         });

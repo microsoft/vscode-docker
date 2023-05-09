@@ -353,7 +353,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     : options.disableContentTrust),
             withDockerLabelsArg(options.labels),
             withNamedArg('--iidfile', options.imageIdFile),
-            withNamedArg('--platform', getPlatformString(options)),
+            withNamedArg('--platform', getPlatformString(options?.platform)),
             withDockerBuildArg(options.args),
             withVerbatimArg(options.customOptions),
             withQuotedArg(options.path),

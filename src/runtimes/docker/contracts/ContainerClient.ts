@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { FileType, ShellQuotedString } from 'vscode';
+import { ContainerPlatform } from '../../../tasks/DockerBuildTaskDefinitionBase';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from './CommandRunner';
 import { IShell } from './Shell';
 
@@ -290,20 +291,6 @@ type LogoutCommand = {
 // #region Image Commands
 
 // Build Image Command Types
-
-/**
- * Target platform for the image build
- */
-export type ContainerPlatform = string | {
-    /**
-     * OS of target platform
-     */
-    os?: string;
-    /**
-     * Architecture of target platform
-     */
-    architecture?: string;
-};
 
 /**
  * Standard options for all supported runtimes when building an image
