@@ -1,6 +1,7 @@
 # Trigger the build whenever `main` is updated
 trigger:
   - main
+  - rel/*
 
 # Scheduled nightly build
 schedules:

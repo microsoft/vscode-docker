@@ -3,9 +3,13 @@ name: Node PR Lint, Build and Test
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
+      - rel/*
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - rel/*
 
 jobs:
   Build:
