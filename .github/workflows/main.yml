@@ -9,4 +9,4 @@ on:
 
 jobs:
   build_and_test:
-    uses: microsoft/vscode-azuretools/github/workflows/main.yml@bmw/ghpipelines
+    uses: microsoft/vscode-azuretools/github-actions/workflows/main.yml@bmw/ghpipelines
