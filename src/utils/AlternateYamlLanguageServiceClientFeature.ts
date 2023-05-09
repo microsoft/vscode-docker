@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// Largely copied from https://github.com/microsoft/compose-language-service/blob/main/src/test/clientExtension/AlternateYamlLanguageServiceClientFeature.ts
+
 import type { AlternateYamlLanguageServiceClientCapabilities } from '@microsoft/compose-language-service/lib/client/AlternateYamlLanguageServiceClientCapabilities';
 import * as vscode from 'vscode';
-import { ClientCapabilities, FeatureState, StaticFeature } from 'vscode-languageclient';
+import type { ClientCapabilities, FeatureState, StaticFeature } from 'vscode-languageclient';
 
 /**
  * This class will note the features covered by an alternate YAML language service,
@@ -27,7 +29,7 @@ export class AlternateYamlLanguageServiceClientFeature implements StaticFeature,
                 schemaValidation: true,
                 basicCompletions: true,
                 advancedCompletions: false, // YAML extension does not have advanced completions for compose docs
-                hover: true,
+                hover: false, // YAML extension provides hover, but the compose spec lacks descriptions -- https://github.com/compose-spec/compose-spec/issues/138
                 imageLinks: false, // YAML extension does not have image hyperlinks for compose docs
                 formatting: true,
             };
