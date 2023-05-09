@@ -18,7 +18,7 @@ resources:
     - repository: templates
       type: github
       name: microsoft/vscode-azuretools
-      ref: bmw/pipelines # TODO: update to main
+      ref: main
       endpoint: GitHub
 
 # Use those templates
