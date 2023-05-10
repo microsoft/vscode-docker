@@ -9,7 +9,7 @@
  * @returns normalized OS name
  */
 export function normalizeContainerOS(os?: string): ContainerOS {
-    switch (os?.toLocaleLowerCase() || 'linux') {
+    switch (os?.toLowerCase() || 'linux') {
         case 'windows':
             return 'windows';
         case 'mac':
