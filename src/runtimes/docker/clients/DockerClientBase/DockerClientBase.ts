@@ -85,7 +85,6 @@ import {
     withVerbatimArg,
 } from "../../utils/commandLineBuilder";
 import { dayjs } from '../../utils/dayjs';
-import { getPlatformString } from '../../utils/getPlatformString';
 import { byteStreamToGenerator, stringStreamToGenerator } from '../../utils/streamToGenerator';
 import { toArray } from '../../utils/toArray';
 import { ConfigurableClient } from '../ConfigurableClient';
@@ -114,6 +113,7 @@ import { withDockerLabelFilterArgs } from "./withDockerLabelFilterArgs";
 import { withDockerLabelsArg } from "./withDockerLabelsArg";
 import { withDockerMountsArg } from './withDockerMountsArg';
 import { withDockerNoTruncArg } from "./withDockerNoTruncArg";
+import { withDockerPlatformArg } from './withDockerPlatformArg';
 import { withDockerPortsArg } from './withDockerPortsArg';
 
 const LinuxStatArguments = '%f %h %g %u %s %X %Y %Z %n';
@@ -353,7 +353,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
                     : options.disableContentTrust),
             withDockerLabelsArg(options.labels),
             withNamedArg('--iidfile', options.imageIdFile),
-            withNamedArg('--platform', getPlatformString(options?.platform)),
+            withDockerPlatformArg(options.platform),
             withDockerBuildArg(options.args),
             withVerbatimArg(options.customOptions),
             withQuotedArg(options.path),
