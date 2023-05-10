@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { FileType, ShellQuotedString } from 'vscode';
-import { ContainerPlatform } from '../../../tasks/DockerBuildTaskDefinitionBase';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from './CommandRunner';
 import { IShell } from './Shell';
 
@@ -340,6 +339,20 @@ export type BuildImageCommandOptions = CommonCommandOptions & {
      * Additional custom options to pass
      */
     customOptions?: string;
+};
+
+/**
+ * Target platform for the image build
+ */
+export type ContainerPlatform = undefined | {
+    /**
+     * OS of target platform
+     */
+    os?: string;
+    /**
+     * Architecture of target platform
+     */
+    architecture?: string;
 };
 
 type BuildImageCommand = {

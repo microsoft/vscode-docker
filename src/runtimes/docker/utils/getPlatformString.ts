@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerPlatform } from "../../../tasks/DockerBuildTaskDefinitionBase";
+import { ContainerPlatform } from "..";
 
 /**
  * This method parses the `platform` field in tasks.json
