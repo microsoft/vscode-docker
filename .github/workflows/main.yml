@@ -13,4 +13,5 @@ on:
 
 jobs:
   Build:
-    uses: microsoft/vscode-azuretools/.github/workflows/main.yml@bmw/ghpipelines
+    uses: microsoft/vscode-azuretools/.github/workflows/main.yml@main
+
