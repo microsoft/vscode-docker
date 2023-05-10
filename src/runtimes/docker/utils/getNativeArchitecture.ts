@@ -32,17 +32,14 @@ export function getNativeArchitecture(): CpuArchitecture {
     }
 }
 
-export const AllCpuArchitecture = [
-    'amd64',
-    '386',
-    'arm64',
-    'arm',
-    'mips',
-    'mipsle',
-    'ppc64',
-    's390x'
-] as const;
+export type CpuArchitecture =
+    | 'amd64'
+    | '386'
+    | 'arm64'
+    | 'arm'
+    | 'mips'
+    | 'mipsle'
+    | 'ppc64'
+    | 's390x';
 
-type CpuArchitectureTuple = typeof AllCpuArchitecture;
-export type CpuArchitecture = CpuArchitectureTuple[number];
 

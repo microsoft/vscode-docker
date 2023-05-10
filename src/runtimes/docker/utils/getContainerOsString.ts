@@ -20,11 +20,8 @@ export function getContainerOSFromPlatformOS(os?: string): ContainerOS {
     }
 }
 
-export const AllContainerOS = [
-    'linux',
-    'windows',
-    'darwin'
-] as const;
-
-export type ContainerOS = typeof AllContainerOS[number];
+export type ContainerOS =
+    | 'linux'
+    | 'windows'
+    | 'darwin';
 
