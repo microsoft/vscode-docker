@@ -992,7 +992,7 @@
                                     },
                                     {
                                         "type": "string",
-                                        "anyOf": [
+                                        "oneOf": [
                                             {
                                                 "type": "string",
                                                 "enum": [
