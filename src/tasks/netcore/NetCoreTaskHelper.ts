@@ -12,8 +12,8 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
-import { getContainerOSFromPlatformOS } from "../../runtimes/docker/utils/getContainerOsString";
 import { getNativeArchitecture } from "../../runtimes/docker/utils/getNativeArchitecture";
+import { normalizeContainerOS } from "../../runtimes/docker/utils/normalizeContainerOS";
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -77,7 +77,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     /* eslint-disable-next-line no-template-curly-in-string */
                     context: '${workspaceFolder}',
                     platform: {
-                        os: getContainerOSFromPlatformOS(options?.platformOS),
+                        os: normalizeContainerOS(options?.platformOS),
                         architecture: getNativeArchitecture()
                     },
                     pull: true

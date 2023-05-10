@@ -8,13 +8,13 @@
  * @param os pre-normalized OS name
  * @returns normalized OS name
  */
-export function getContainerOSFromPlatformOS(os?: string): ContainerOS {
-    switch (os || 'Linux') {
-        case 'Windows':
+export function normalizeContainerOS(os?: string): ContainerOS {
+    switch (os?.toLocaleLowerCase() || 'linux') {
+        case 'windows':
             return 'windows';
-        case 'Mac':
+        case 'mac':
             return 'darwin';
-        case 'Linux':
+        case 'linux':
         default:
             return 'linux';
     }

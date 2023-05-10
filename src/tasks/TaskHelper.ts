@@ -9,6 +9,7 @@ import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { ContainerPlatform } from '../runtimes/docker';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -252,4 +253,27 @@ async function findTaskByLabel(allTasks: TaskDefinitionBase[], label: string): P
 
 async function findTaskByType(allTasks: TaskDefinitionBase[], type: string): Promise<TaskDefinitionBase | undefined> {
     return allTasks.find(t => t.type === type);
+}
+
+/**
+ * Normalizes a platform string or object to a standardized `ContainerPlatform` object.
+ *
+ * @param platform The platform string or object to normalize.
+ * @returns A standardized `ContainerPlatform` object.
+ * @throws An error if the platform string is malformed.
+ */
+export function normalizePlatform(platform: string | ContainerPlatform): ContainerPlatform {
+
+    if (platform && typeof platform === 'string') {
+        const [os, ...architectureParts] = platform.split('/');
+        const architecture = architectureParts.join('/');
+
+        if (!os || !architecture) {
+            throw new Error('Platform string is malformed. It should be in the format "{os}/{architecture}".');
+        }
+
+        return { os, architecture };
+    }
+
+    return platform as ContainerPlatform || {};
 }
