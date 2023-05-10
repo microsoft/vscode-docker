@@ -9,7 +9,7 @@ import * as os from 'os';
  * Returns native architecture of the current machine
  * @returns native architecture of the current machine
  */
-export function getNativeArchitecture(): 'amd64' | '386' | 'arm64' | 'arm' {
+export function getNativeArchitecture(): CpuArchitecture {
     switch (os.arch()) {
         case 'arm':
             return 'arm';
@@ -17,8 +17,32 @@ export function getNativeArchitecture(): 'amd64' | '386' | 'arm64' | 'arm' {
             return 'arm64';
         case 'ia32':
             return '386';
+        case 'mips':
+            return 'mips';
+        case 'mipsel':
+            return 'mipsle';
+        case 'ppc':
+        case 'ppc64':
+            return 'ppc64';
+        case 's390x':
+            return 's390x';
         case 'x64':
         default:
             return 'amd64';
     }
 }
+
+export const AllCpuArchitecture = [
+    'amd64',
+    '386',
+    'arm64',
+    'arm',
+    'mips',
+    'mipsle',
+    'ppc64',
+    's390x'
+] as const;
+
+type CpuArchitectureTuple = typeof AllCpuArchitecture;
+export type CpuArchitecture = CpuArchitectureTuple[number];
+
