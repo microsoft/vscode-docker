@@ -8,7 +8,7 @@
  * @param os pre-normalized OS name
  * @returns normalized OS name
  */
-export function getContainerOsString(os?: string): 'linux' | 'windows' | 'darwin' {
+export function getContainerOSFromPlatformOS(os?: string): ContainerOS {
     switch (os || 'Linux') {
         case 'Windows':
             return 'windows';
@@ -19,3 +19,12 @@ export function getContainerOsString(os?: string): 'linux' | 'windows' | 'darwin
             return 'linux';
     }
 }
+
+export const AllContainerOS = [
+    'linux',
+    'windows',
+    'darwin'
+] as const;
+
+export type ContainerOS = typeof AllContainerOS[number];
+
