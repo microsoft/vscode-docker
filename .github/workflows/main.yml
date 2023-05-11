@@ -1,12 +1,22 @@
-name: Node CI Build and Test
+name: Node PR Lint, Build and Test
 
 on:
+  # Trigger when manually run
   workflow_dispatch:
+
+  # Trigger on pushes to `main` or `rel/*`
   push:
-    branches: [main]
+    branches:
+      - main
+      - rel/*
+
+  # Trigger on pull requests to `main` or `rel/*`
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - rel/*
 
 jobs:
-  build_and_test:
-    uses: microsoft/vscode-azuretools/.github/workflows/main.yml@bmw/ghpipelines
+  Build:
+    # Use template from https://github.com/microsoft/vscode-azuretools/blob/main/.github/workflows/main.yml
+    uses: microsoft/vscode-azuretools/.github/workflows/main.yml@main
