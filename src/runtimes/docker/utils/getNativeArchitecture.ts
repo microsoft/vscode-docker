@@ -13,7 +13,8 @@ export type CpuArchitecture =
     | 'mips'
     | 'mipsle'
     | 'ppc64'
-    | 's390x';
+    | 's390x'
+    | string;
 
 /**
  * Returns native architecture of the current machine
