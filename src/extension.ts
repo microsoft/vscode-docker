@@ -23,6 +23,7 @@ import { registerTaskProviders } from './tasks/TaskHelper';
 import { ActivityMeasurementService } from './telemetry/ActivityMeasurementService';
 import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
+import { AlternateYamlLanguageServiceClientFeature } from './utils/AlternateYamlLanguageServiceClientFeature';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
@@ -340,6 +341,7 @@ function activateComposeLanguageClient(ctx: vscode.ExtensionContext): void {
         );
         composeLanguageClient.registerProposedFeatures();
         composeLanguageClient.registerFeature(new DocumentSettingsClientFeature(composeLanguageClient));
+        composeLanguageClient.registerFeature(new AlternateYamlLanguageServiceClientFeature());
 
         registerEvent('compose-langserver-event', composeLanguageClient.onTelemetry, (context: IActionContext, evtArgs: TelemetryEvent) => {
             context.telemetry.properties.langServerEventName = evtArgs.eventName;
