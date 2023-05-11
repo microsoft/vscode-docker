@@ -21,25 +21,18 @@ export type CpuArchitecture =
  * @returns native architecture of the current machine
  */
 export function getNativeArchitecture(): CpuArchitecture {
-    switch (os.arch()) {
-        case 'arm':
-            return 'arm';
-        case 'arm64':
-            return 'arm64';
+    const arch = os.arch() || 'amd64';
+    switch (arch) {
         case 'ia32':
             return '386';
-        case 'mips':
-            return 'mips';
         case 'mipsel':
             return 'mipsle';
         case 'ppc':
-        case 'ppc64':
             return 'ppc64';
-        case 's390x':
-            return 's390x';
         case 'x64':
-        default:
             return 'amd64';
+        default:
+            return arch;
     }
 }
 
