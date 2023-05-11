@@ -262,7 +262,7 @@ async function findTaskByType(allTasks: TaskDefinitionBase[], type: string): Pro
  * @returns A standardized `ContainerPlatform` object.
  * @throws An error if the platform string is malformed.
  */
-export function normalizePlatform(platform: string | ContainerPlatform): ContainerPlatform {
+export function normalizePlatform(platform: string | ContainerPlatform): ContainerPlatform | undefined {
 
     if (platform && typeof platform === 'string') {
         const [os, ...architectureParts] = platform.split('/');
@@ -275,5 +275,5 @@ export function normalizePlatform(platform: string | ContainerPlatform): Contain
         return { os, architecture };
     }
 
-    return platform as ContainerPlatform || {};
+    return platform as ContainerPlatform || undefined;
 }
