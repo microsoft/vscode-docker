@@ -1,4 +1,4 @@
-# Trigger the build whenever `main` is updated
+# Trigger the build whenever `main` or `rel/*` is updated
 trigger:
   - main
   - rel/*
