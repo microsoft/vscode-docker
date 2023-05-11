@@ -5,6 +5,16 @@
 
 import * as os from 'os';
 
+export type CpuArchitecture =
+    | 'amd64'
+    | '386'
+    | 'arm64'
+    | 'arm'
+    | 'mips'
+    | 'mipsle'
+    | 'ppc64'
+    | 's390x';
+
 /**
  * Returns native architecture of the current machine
  * @returns native architecture of the current machine
@@ -31,15 +41,4 @@ export function getNativeArchitecture(): CpuArchitecture {
             return 'amd64';
     }
 }
-
-export type CpuArchitecture =
-    | 'amd64'
-    | '386'
-    | 'arm64'
-    | 'arm'
-    | 'mips'
-    | 'mipsle'
-    | 'ppc64'
-    | 's390x';
-
 

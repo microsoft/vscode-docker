@@ -292,6 +292,20 @@ type LogoutCommand = {
 // Build Image Command Types
 
 /**
+ * Target platform for the image build
+ */
+export type ContainerPlatform = undefined | {
+    /**
+     * OS of target platform
+     */
+    os?: string;
+    /**
+     * Architecture of target platform
+     */
+    architecture?: string;
+};
+
+/**
  * Standard options for all supported runtimes when building an image
  */
 export type BuildImageCommandOptions = CommonCommandOptions & {
@@ -339,20 +353,6 @@ export type BuildImageCommandOptions = CommonCommandOptions & {
      * Additional custom options to pass
      */
     customOptions?: string;
-};
-
-/**
- * Target platform for the image build
- */
-export type ContainerPlatform = undefined | {
-    /**
-     * OS of target platform
-     */
-    os?: string;
-    /**
-     * Architecture of target platform
-     */
-    architecture?: string;
 };
 
 type BuildImageCommand = {
