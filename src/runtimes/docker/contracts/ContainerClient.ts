@@ -294,7 +294,7 @@ type LogoutCommand = {
 /**
  * Target platform for the image build
  */
-export type ContainerPlatform = undefined | {
+export type ContainerPlatform = {
     /**
      * OS of target platform
      */
