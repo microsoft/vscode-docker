@@ -12,7 +12,7 @@ schedules:
       include:
         - main
 
-# Grab the base templates from https://github.com/microsoft/vscode-azuretools
+# Grab the base templates from https://github.com/microsoft/vscode-azuretools/tree/main/azure-pipelines
 resources:
   repositories:
     - repository: templates
