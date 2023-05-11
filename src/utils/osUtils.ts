@@ -6,8 +6,8 @@
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContainerOS } from '../runtimes/docker';
 import { ext } from '../extensionVariables';
+import { ContainerOS } from '../runtimes/docker';
 
 export async function getDockerOSType(): Promise<ContainerOS> {
     if (!isWindows()) {
