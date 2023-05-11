@@ -11,12 +11,9 @@
 export function normalizeContainerOS(os?: string): string {
     os = os?.toLowerCase() || 'linux'; // default to linux if not specified (null/undefined or empty string)
     switch (os) {
-        case 'windows':
-            return 'windows';
         case 'mac':
+        case 'macos':
             return 'darwin';
-        case 'linux':
-            return 'linux';
         default:
             return os;
     }
