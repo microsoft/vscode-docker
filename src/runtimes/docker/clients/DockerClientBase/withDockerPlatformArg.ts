@@ -6,12 +6,15 @@
 import { ContainerPlatform } from "../../contracts/ContainerClient";
 import { withNamedArg } from "../../utils/commandLineBuilder";
 import { getNativeArchitecture } from "../../utils/getNativeArchitecture";
+import { normalizeContainerOS } from "../../utils/normalizeContainerOS";
 
 export function formatDockerPlatform(platform: ContainerPlatform): string | undefined {
     if (!platform?.os && !platform?.architecture) {
         return undefined;
     }
-    const { os = 'linux', architecture = getNativeArchitecture() } = platform;
+    const os = normalizeContainerOS(platform?.os);
+    const architecture = platform?.architecture || getNativeArchitecture();
+
     return `${os}/${architecture}`;
 }
 
