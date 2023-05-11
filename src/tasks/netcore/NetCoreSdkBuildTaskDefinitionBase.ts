@@ -3,26 +3,15 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerPlatform } from "../../runtimes/docker";
 import { TaskDefinitionBase } from "../TaskDefinitionBase";
 
 export interface NetCoreSdkBuildOptions {
-    /**
-     * Name of image to build
-     */
-    imageName?: string;
+    tag?: string;
 
-    /**
-     * Tag of image to build
-     */
-    imageTag?: string;
-
-    platform?: string; // TODO: Change platform to object
+    platform?: ContainerPlatform;
 
     configuration?: string;
-
-    arcitecture?: string;
-
-    os?: string;
 }
 
 export interface NetCoreSdkBuildDefinitionBase extends TaskDefinitionBase {
