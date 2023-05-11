@@ -12,8 +12,7 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
-import { getNativeArchitecture } from "../../runtimes/docker/utils/getNativeArchitecture";
-import { normalizeContainerOS } from "../../runtimes/docker/utils/normalizeContainerOS";
+import { getNativeArchitecture, normalizeContainerOS } from '../../runtimes/docker';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
