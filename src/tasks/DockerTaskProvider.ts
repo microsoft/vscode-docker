@@ -11,11 +11,11 @@ import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
-import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
+import { DockerTaskExecutionContext, DockerTaskProviderName, NetCoreSdkTaskProviderName, TaskHelper } from './TaskHelper';
 
 export abstract class DockerTaskProvider implements TaskProvider {
 
-    protected constructor(private readonly telemetryName: DockerTaskProviderName, protected readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
+    protected constructor(private readonly telemetryName: DockerTaskProviderName | NetCoreSdkTaskProviderName, protected readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
         return []; // Intentionally empty, so that resolveTask gets used

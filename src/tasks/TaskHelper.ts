@@ -20,11 +20,14 @@ import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
+import { NetCoreSdkBuildProvider } from './netcore/NetCoreSdkBuildTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
 
 export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
+
+export type NetCoreSdkTaskProviderName = 'dotnet-sdk-build';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
@@ -98,6 +101,13 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
         tasks.registerTaskProvider(
             'docker-compose',
             new DockerComposeTaskProvider()
+        )
+    );
+
+    ctx.subscriptions.push(
+        tasks.registerTaskProvider(
+            'dotnet-sdk-build',
+            new NetCoreSdkBuildProvider()
         )
     );
 }

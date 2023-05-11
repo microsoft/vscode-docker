@@ -19,6 +19,10 @@ export interface NetCoreSdkBuildOptions {
     platform?: string; // TODO: Change platform to object
 
     configuration?: string;
+
+    arcitecture?: string;
+
+    os?: string;
 }
 
 export interface NetCoreSdkBuildDefinitionBase extends TaskDefinitionBase {
