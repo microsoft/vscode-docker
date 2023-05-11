@@ -11,13 +11,14 @@ export type CpuArchitecture =
     | 'arm64'
     | 'arm'
     | 'mips'
-    | 'mipsle'
+    | 'mipsle' // This is not a typo. Node.js uses `mipsel`, but Golang uses `mipsle`.
     | 'ppc64'
     | 's390x'
     | string;
 
 /**
  * Returns native architecture of the current machine
+ * See {@link https://go.dev/doc/install/source#environment}
  * @returns native architecture of the current machine
  */
 export function getNativeArchitecture(): CpuArchitecture {
