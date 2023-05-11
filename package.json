@@ -992,22 +992,17 @@
                                     },
                                     {
                                         "type": "string",
-                                        "oneOf": [
-                                            {
-                                                "type": "string",
-                                                "enum": [
-                                                    "linux/amd64",
-                                                    "linux/386",
-                                                    "linux/arm64",
-                                                    "linux/arm",
-                                                    "darwin/amd64",
-                                                    "darwin/arm64",
-                                                    "windows/amd64",
-                                                    "windows/386",
-                                                    "windows/arm64",
-                                                    "windows/arm"
-                                                ]
-                                            }
+                                        "enum": [
+                                            "linux/amd64",
+                                            "linux/386",
+                                            "linux/arm64",
+                                            "linux/arm",
+                                            "darwin/amd64",
+                                            "darwin/arm64",
+                                            "windows/amd64",
+                                            "windows/386",
+                                            "windows/arm64",
+                                            "windows/arm"
                                         ]
                                     },
                                     {
