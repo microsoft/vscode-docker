@@ -3,60 +3,81 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Task } from "vscode";
-import { composeArgs, getNativeArchitecture, withArg, withNamedArg } from "../../runtimes/docker";
-import { cloneObject } from "../../utils/cloneObject";
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import * as fse from 'fs-extra';
+import { CancellationToken, ProviderResult, ShellExecution, Task, TaskProvider, TaskScope } from "vscode";
+import { ext } from '../../extensionVariables';
+import { Shell, composeArgs, getNativeArchitecture, withArg, withNamedArg } from "../../runtimes/docker";
 import { getDockerOSType } from "../../utils/osUtils";
-import { DockerTaskProvider } from "../DockerTaskProvider";
-import { DockerTaskContext, DockerTaskExecutionContext, getDefaultImageName, throwIfCancellationRequested } from "../TaskHelper";
-import { NetCoreSdkBuildDefinitionBase, NetCoreSdkBuildOptions } from "./NetCoreSdkBuildTaskDefinitionBase";
+import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-export interface NetCoreSdkBuildTask extends Task {
-    definition: NetCoreSdkBuildDefinitionBase;
-}
+const netSdkTelemetryName = 'dotnet-sdk-build';
 
-export class NetCoreSdkBuildProvider extends DockerTaskProvider {
+export class NetCoreSdkBuildProvider implements TaskProvider {
 
-    public constructor() { super('dotnet-sdk-build', undefined); }
+    provideTasks(token: CancellationToken): ProviderResult<Task[]> {
 
-    protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
-        const buildDefinition = cloneObject(task.definition);
-        buildDefinition.netcoreSdkBuild = await this.getDotnetSdkBuildOptions(context, buildDefinition);
+        return callWithTelemetryAndErrorHandling(`${netSdkTelemetryName}-execute`, async (actionContext: IActionContext) => {
+            actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
+            actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
-        throwIfCancellationRequested(context);
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            ext.activityMeasurementService.recordActivity('overallnoedit');
 
-        const sdkBuildCommand = composeArgs(
-            withArg('dotnet', 'publish'),
-            withNamedArg('-os', buildDefinition.netcoreSdkBuild.platform?.os),
-            withNamedArg('-arch', buildDefinition.netcoreSdkBuild.platform?.architecture),
-            withNamedArg('-c', buildDefinition.netcoreSdkBuild.configuration),
-            // TODO: add more options
-        )();
+            const netSdkBuildCommandPromise = this.getNetSdkBuildCommand(actionContext);
+            const netSdkBuildCommand = await netSdkBuildCommandPromise;
+            return netSdkBuildCommandPromise.then(netSdkBuildCommand => {
+                return [
+                    new Task(
+                        { type: 'dotnet-sdk-build' },
+                        TaskScope.Workspace,
+                        'debug',
+                        'dotnet-sdk-build',
+                        new ShellExecution(netSdkBuildCommand),
+                    )
+                ];
+            });
+        });
 
-        const commandLine = sdkBuildCommand.join(' ');
-        await context.terminal.execAsyncInTerminal(
-            commandLine,
-            {
-                folder: context.folder,
-                token: context.cancellationToken,
-            }
+    }
+
+    resolveTask(task: Task, token: CancellationToken): ProviderResult<Task> {
+        return task;
+    }
+
+    async getNetSdkBuildCommand(context: IActionContext) {
+
+        const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
+        const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
+
+        // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
+        const publishFlag = this.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
+
+        const folderName = await quickPickWorkspaceFolder(
+            context,
+            `Unable to determine task scope to execute task ${netSdkTelemetryName}. Please open a workspace folder.`
         );
 
-        throwIfCancellationRequested(context);
+        const args = composeArgs(
+            withArg('dotnet', 'publish'),
+            withNamedArg('-os', await getDockerOSType()),
+            withNamedArg('-arch', getNativeArchitecture()), // TODO: change this to adhere to .NET Core SDK conventions
+            withArg(publishFlag),
+            withNamedArg('-c', configuration),
+            withNamedArg('-p:ContainerImageName', folderName.name, { assignValue: true }),
+            withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true }),
+        )();
+
+        // If there is a shell provider, apply its quoting, otherwise just flatten arguments into strings
+        // const normalizedArgs: string[] = args.map(arg => typeof arg === 'string' ? arg : arg.value);
+        const quotedArgs = Shell.getShellOrDefault().quote(args);
+        return quotedArgs.join(' ');
+
     }
 
-    public async getDotnetSdkBuildOptions(context: DockerTaskContext, buildDefinition: NetCoreSdkBuildDefinitionBase): Promise<NetCoreSdkBuildOptions> {
-
-        const buildOptions = buildDefinition.netcoreSdkBuild || {};
-
-        buildOptions.platform = {
-            architecture: buildOptions.platform?.architecture || getNativeArchitecture(),
-            os: buildOptions.platform?.os || await getDockerOSType()
-        };
-
-        buildOptions.configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
-        buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
-
-        return buildOptions;
+    private async isWebApp(): Promise<boolean> {
+        const projectContents = await fse.readFile('${workspaceFolder}/dotnet.csproj');
+        return /Sdk\s*=\s*"Microsoft\.NET\.Sdk\.Web"/ig.test(projectContents.toString());
     }
+
 }

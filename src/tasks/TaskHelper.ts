@@ -27,8 +27,6 @@ import { pythonTaskHelper } from './python/PythonTaskHelper';
 
 export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
 
-export type NetCoreSdkTaskProviderName = 'dotnet-sdk-build';
-
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
     platform?: DockerPlatform;
