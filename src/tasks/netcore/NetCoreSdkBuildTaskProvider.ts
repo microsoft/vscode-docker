@@ -30,6 +30,7 @@ export class NetCoreSdkBuildProvider extends DockerTaskProvider {
             withNamedArg('-os', buildDefinition.netcoreSdkBuild.platform?.os),
             withNamedArg('-arch', buildDefinition.netcoreSdkBuild.platform?.architecture),
             withNamedArg('-c', buildDefinition.netcoreSdkBuild.configuration),
+            // TODO: add more options
         )();
 
         const commandLine = sdkBuildCommand.join(' ');
@@ -53,7 +54,7 @@ export class NetCoreSdkBuildProvider extends DockerTaskProvider {
             os: buildOptions.platform?.os || await getDockerOSType()
         };
 
-        buildOptions.configuration = 'Debug'; // intentionally default to Debug configuration for now
+        buildOptions.configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
         buildOptions.tag = buildOptions.tag || getDefaultImageName(context.folder.name);
 
         return buildOptions;
