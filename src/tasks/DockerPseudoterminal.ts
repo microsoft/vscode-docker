@@ -52,9 +52,9 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.closeEmitter.fire(code || 0);
     }
 
-    public getCommandRunner(options: Omit<ExecuteCommandResponseInTerminalOptions, 'commandResponse'>): <T>(commandResponse: VoidCommandResponse | PromiseCommandResponse<T>) => Promise<T> {
+    public getCommandRunner(options: Omit<ExecuteCommandInTerminalOptions, 'commandResponse'>): <T>(commandResponse: VoidCommandResponse | PromiseCommandResponse<T>) => Promise<T> {
         return async <T>(commandResponse: VoidCommandResponse | PromiseCommandResponse<T>) => {
-            const output = await this.executeCommandResponseInTerminal({
+            const output = await this.executeCommandInTerminal({
                 ...options,
                 commandResponse: commandResponse,
             });
@@ -96,21 +96,16 @@ export class DockerPseudoterminal implements Pseudoterminal {
         this.writeEmitter.fire(`\x1b[${color}${message}\x1b[0m`);
     }
 
-    private async executeCommandResponseInTerminal(options: ExecuteCommandResponseInTerminalOptions): Promise<ExecAsyncOutput> {
+    private async executeCommandInTerminal(options: ExecuteCommandInTerminalOptions): Promise<ExecAsyncOutput> {
         const quotedArgs = Shell.getShellOrDefault().quote(options.commandResponse.args);
         const resolvedQuotedArgs = resolveVariables(quotedArgs, options.folder);
         const commandLine = [options.commandResponse.command, ...resolvedQuotedArgs].join(' ');
 
-        return await this.execAsyncInTerminal(commandLine, options);
-    }
-
-    public async execAsyncInTerminal(command: string, options?: ExecAsyncInTerminalOptions): Promise<ExecAsyncOutput> {
-
         // Output what we're doing, same style as VSCode does for ShellExecution/ProcessExecution
-        this.write(`> ${command} <\r\n\r\n`, DEFAULTBOLD);
+        this.write(`> ${commandLine} <\r\n\r\n`, DEFAULTBOLD);
 
         return await execAsync(
-            command,
+            commandLine,
             {
                 cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
                 env: withDockerEnvSettings({ ...process.env, ...this.resolvedDefinition.options?.env }),
@@ -125,14 +120,10 @@ export class DockerPseudoterminal implements Pseudoterminal {
             }
         );
     }
-
 }
 
-type ExecuteCommandResponseInTerminalOptions = ExecAsyncInTerminalOptions & {
+type ExecuteCommandInTerminalOptions = {
     commandResponse: VoidCommandResponse | PromiseCommandResponse<unknown>;
-};
-
-type ExecAsyncInTerminalOptions = {
     folder: WorkspaceFolder;
     token?: CancellationToken;
 };
