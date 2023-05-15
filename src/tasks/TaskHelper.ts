@@ -20,8 +20,8 @@ import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
+import { NetSdkBuildTaskProvider } from './netSdk/NetSdkBuildTaskProvider';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
-import { NetSdkBuildTaskProvider } from './netcore/NetSdkBuildTaskProvider';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
 
