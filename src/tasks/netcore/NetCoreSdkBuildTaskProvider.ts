@@ -74,10 +74,10 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
-            withNamedArg('-os', await this.normalizeOsToRid()),
-            withNamedArg('-arch', await this.normalizeArchitectureToRid()), // TODO: change this to adhere to .NET Core SDK conventions
+            withNamedArg('--os', await this.normalizeOsToRid()),
+            withNamedArg('--arch', await this.normalizeArchitectureToRid()),
             withArg(publishFlag),
-            withNamedArg('-c', configuration),
+            withNamedArg('--configuration', configuration),
             withNamedArg('-p:ContainerImageName', folderName.name, { assignValue: true }),
             withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true }),
         )();
