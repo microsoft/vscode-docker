@@ -12,7 +12,7 @@ import { Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
-const netSdkTelemetryName = 'dotnet-sdk-build';
+const netSdkTaskName = 'dotnet-sdk-build';
 
 /**
  * Native architecture of the current machine in the RID format
@@ -28,11 +28,11 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export class NetCoreSdkBuildProvider implements TaskProvider {
+export class NetSdkBuildTaskProvider implements TaskProvider {
 
     provideTasks(token: CancellationToken): ProviderResult<Task[]> {
 
-        return callWithTelemetryAndErrorHandling(`${netSdkTelemetryName}-execute`, async (actionContext: IActionContext) => {
+        return callWithTelemetryAndErrorHandling(`${netSdkTaskName}-execute`, async (actionContext: IActionContext) => {
             actionContext.errorHandling.suppressDisplay = true; // Suppress display. VSCode already has a modal popup and we don't want focus taken away from Terminal window.
             actionContext.errorHandling.rethrow = true; // Rethrow to hit the try/catch outside this block.
 
@@ -43,10 +43,10 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
             return await netSdkBuildCommandPromise.then(netSdkBuildCommand => {
                 return [
                     new Task(
-                        { type: 'dotnet-sdk-build' },
+                        { type: netSdkTaskName },
                         TaskScope.Workspace,
                         'debug',
-                        'dotnet-sdk-build',
+                        netSdkTaskName,
                         new ShellExecution(netSdkBuildCommand),
                     )
                 ];
@@ -59,7 +59,7 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
         return task; // we can just return the task as-is
     }
 
-    async getNetSdkBuildCommand(context: IActionContext) {
+    private async getNetSdkBuildCommand(context: IActionContext) {
 
         const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
         const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
@@ -69,7 +69,7 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
 
         const folderName = await quickPickWorkspaceFolder(
             context,
-            `Unable to determine task scope to execute task ${netSdkTelemetryName}. Please open a workspace folder.`
+            `Unable to determine task scope to execute task ${netSdkTaskName}. Please open a workspace folder.`
         );
 
         const args = composeArgs(
@@ -82,11 +82,8 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
             withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true }),
         )();
 
-        // If there is a shell provider, apply its quoting, otherwise just flatten arguments into strings
-        // const normalizedArgs: string[] = args.map(arg => typeof arg === 'string' ? arg : arg.value);
         const quotedArgs = Shell.getShellOrDefault().quote(args);
         return quotedArgs.join(' ');
-
     }
 
     private async isWebApp(): Promise<boolean> {
@@ -99,13 +96,10 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
      * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
      */
     private async normalizeOsToRid(): Promise<'linux' | 'win'> {
-        const osType = await getDockerOSType();
-        switch (osType) {
-            case 'windows':
-                return 'win';
-            default:
-                return osType;
+        if (await getDockerOSType() === 'windows') {
+            return 'win';
         }
+        return 'linux';
     }
 
     /**
