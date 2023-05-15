@@ -5,13 +5,28 @@
 
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
+import * as os from 'os';
 import { CancellationToken, ProviderResult, ShellExecution, Task, TaskProvider, TaskScope } from "vscode";
 import { ext } from '../../extensionVariables';
-import { Shell, composeArgs, getNativeArchitecture, withArg, withNamedArg } from "../../runtimes/docker";
+import { Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 
 const netSdkTelemetryName = 'dotnet-sdk-build';
+
+/**
+ * Native architecture of the current machine in the RID format
+ * {@link https://github.com/dotnet/runtime/blob/main/src/libraries/Microsoft.NETCore.Platforms/src/runtime.json}
+ */
+export type RidCpuArchitecture =
+    | 'x64'
+    | 'x86'
+    | 'arm64'
+    | 'arm'
+    | 'ppc64le'
+    | 'mips64'
+    | 's390x'
+    | string;
 
 export class NetCoreSdkBuildProvider implements TaskProvider {
 
@@ -25,8 +40,7 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
             ext.activityMeasurementService.recordActivity('overallnoedit');
 
             const netSdkBuildCommandPromise = this.getNetSdkBuildCommand(actionContext);
-            const netSdkBuildCommand = await netSdkBuildCommandPromise;
-            return netSdkBuildCommandPromise.then(netSdkBuildCommand => {
+            return await netSdkBuildCommandPromise.then(netSdkBuildCommand => {
                 return [
                     new Task(
                         { type: 'dotnet-sdk-build' },
@@ -42,7 +56,7 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
     }
 
     resolveTask(task: Task, token: CancellationToken): ProviderResult<Task> {
-        return task;
+        return task; // we can just return the task as-is
     }
 
     async getNetSdkBuildCommand(context: IActionContext) {
@@ -60,8 +74,8 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
-            withNamedArg('-os', await getDockerOSType()),
-            withNamedArg('-arch', getNativeArchitecture()), // TODO: change this to adhere to .NET Core SDK conventions
+            withNamedArg('-os', await this.normalizeOsToRid()),
+            withNamedArg('-arch', await this.normalizeArchitectureToRid()), // TODO: change this to adhere to .NET Core SDK conventions
             withArg(publishFlag),
             withNamedArg('-c', configuration),
             withNamedArg('-p:ContainerImageName', folderName.name, { assignValue: true }),
@@ -79,5 +93,35 @@ export class NetCoreSdkBuildProvider implements TaskProvider {
         const projectContents = await fse.readFile('${workspaceFolder}/dotnet.csproj');
         return /Sdk\s*=\s*"Microsoft\.NET\.Sdk\.Web"/ig.test(projectContents.toString());
     }
+
+    /**
+     * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
+     * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
+     */
+    private async normalizeOsToRid(): Promise<'linux' | 'win'> {
+        const osType = await getDockerOSType();
+        switch (osType) {
+            case 'windows':
+                return 'win';
+            default:
+                return osType;
+        }
+    }
+
+    /**
+     * This method normalizes the native architecture to match the .NET Core SDK conventions.
+     * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
+     */
+    private async normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
+        const architecture = os.arch();
+        switch (architecture) {
+            case 'x32':
+            case 'ia32':
+                return 'x86';
+            default:
+                return architecture;
+        }
+    }
+
 
 }
