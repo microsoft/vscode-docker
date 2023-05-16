@@ -1,5 +1,8 @@
-## 1.25.0 - 10 April 2023
+## 1.25.1 - 16 May 2023
+### Fixed
+* The extension was not activating when a Dockerfile was opened. [#3928](https://github.com/microsoft/vscode-docker/pull/3928)
 
+## 1.25.0 - 10 April 2023
 ### Added
 * Support has been added for removing image / container group(s). [#3492](https://github.com/microsoft/vscode-docker/issues/3492)
 * Support has been added for `--platform` flag in docker-build task. [#3870](https://github.com/microsoft/vscode-docker/issues/3870)
