@@ -42,6 +42,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
         const add: MessageItem = { title: l10n.t('Add Docker Files') };
 
         // Prompt them to add Docker files since they probably haven't
@@ -59,8 +61,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return [];
     }
 
+    private async showWizardContext(): Promise<void> {
+        // 1) Getting the value
+        await window.showQuickPick(['explorer', 'search', 'scm', 'debug', 'extensions'], { placeHolder: 'Select the view to show when opening a window.' });
+    }
+
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-        return callWithTelemetryAndErrorHandling(
+
+        let wizardContextPromise: Promise<void> | null = null;
+
+        // Start executing showWizardContext and store the promise
+        if (!wizardContextPromise) {
+            wizardContextPromise = this.showWizardContext();
+        }
+
+        return wizardContextPromise.then(() => callWithTelemetryAndErrorHandling(
             debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -78,7 +93,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 if (debugConfiguration.type === undefined) {
                     // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
                     // VSCode subsequently will call provideDebugConfigurations which will show an error message
-                    return null;
+                    return undefined;
                 }
 
                 if (!debugConfiguration.request) {
@@ -99,7 +114,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     debugConfiguration
                 );
             }
-        );
+        ));
     }
 
     private async resolveDebugConfigurationInternal(context: DockerDebugContext, originalConfiguration: DockerDebugConfiguration): Promise<DockerDebugConfiguration | undefined> {
