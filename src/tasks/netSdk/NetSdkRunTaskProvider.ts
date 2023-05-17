@@ -47,5 +47,3 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         return Promise.resolve();
     }
 }
-
-

@@ -68,8 +68,9 @@ export class NetSdkTaskHelper {
         });
 
         const quotedArgs = Shell.getShellOrDefault().quote(command.args);
+        const commandLine = [client.commandName, ...quotedArgs].join(' ');
 
-        return quotedArgs.join(' ');
+        return commandLine;
     }
 
     public async isWebApp(): Promise<boolean> {
