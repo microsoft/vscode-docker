@@ -20,13 +20,13 @@ import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from './DockerRunTaskDefinitionBase';
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
-import { NetSdkBuildTaskProvider } from './netSdk/NetSdkBuildTaskProvider';
+import { NetSdkRunTaskProvider } from './netSdk/NetSdkRunTaskProvider';
 import { netTaskHelper } from './netSdk/NetSdkTaskHelper';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
 
-export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose';
+export type DockerTaskProviderName = 'docker-build' | 'docker-run' | 'docker-compose' | 'dotnet-sdk-run';
 
 export interface DockerTaskContext {
     folder: WorkspaceFolder;
@@ -105,8 +105,8 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
 
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
-            'dotnet-image-build',
-            new NetSdkBuildTaskProvider(netTaskHelper)
+            'dotnet-sdk-run',
+            new NetSdkRunTaskProvider(netTaskHelper)
         )
     );
 }

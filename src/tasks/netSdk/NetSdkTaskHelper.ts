@@ -6,6 +6,7 @@
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import { ext } from "../../extensionVariables";
 import { Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
@@ -24,7 +25,8 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export const netSdkTaskName = 'dotnet-image-build';
+export const netSdkBuildTaskSymbol = 'dotnet-sdk-build';
+export const netSdkRunTaskSymbol = 'dotnet-sdk-run';
 
 export class NetSdkTaskHelper {
 
@@ -36,10 +38,7 @@ export class NetSdkTaskHelper {
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
         const publishFlag = this.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
-        const folderName = await quickPickWorkspaceFolder(
-            context,
-            `Unable to determine task scope to execute task ${netSdkTaskName}. Please open a workspace folder.`
-        );
+        const folderName = await this.getFolderName(context);
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
@@ -52,6 +51,24 @@ export class NetSdkTaskHelper {
         )();
 
         const quotedArgs = Shell.getShellOrDefault().quote(args);
+        return quotedArgs.join(' ');
+    }
+
+    public async getNetSdkRunCommand(context: IActionContext): Promise<string> {
+        const client = await ext.runtimeManager.getClient();
+        const folderName = await this.getFolderName(context);
+
+        const command = await client.runContainer({
+            detached: true,
+            publishAllPorts: true,
+            name: folderName.name,
+            environmentVariables: {},
+            removeOnExit: false, // TODO: confirm with team
+            imageRef: `${folderName.name}:dev`,
+        });
+
+        const quotedArgs = Shell.getShellOrDefault().quote(command.args);
+
         return quotedArgs.join(' ');
     }
 
@@ -84,6 +101,13 @@ export class NetSdkTaskHelper {
             default:
                 return architecture;
         }
+    }
+
+    public async getFolderName(context: IActionContext) {
+        return await quickPickWorkspaceFolder(
+            context,
+            `Unable to determine task scope to execute task ${netSdkBuildTaskSymbol}. Please open a workspace folder.`
+        );
     }
 }
 

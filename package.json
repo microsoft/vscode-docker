@@ -1502,7 +1502,7 @@
                 ]
             },
             {
-                "type": "dotnet-image-build"
+                "type": "dotnet-sdk-run"
             }
         ],
         "languages": [
