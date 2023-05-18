@@ -64,7 +64,7 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             environmentVariables: options.env,
             environmentFiles: options.envFiles,
             labels: getAggregateLabels(options.labels, defaultVsCodeLabels),
-            mounts: this.getMounts(options.volumes),
+            mounts: getMounts(options.volumes),
             ports: options.ports,
             addHost: options.extraHosts,
             entrypoint: options.entrypoint,
@@ -92,15 +92,15 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             throw new Error(l10n.t('No Docker image name was provided or resolved.'));
         }
     }
+}
 
-    private getMounts(volumes?: DockerContainerVolume[]): RunContainerBindMount[] | undefined {
-        return volumes?.map(v => {
-            return {
-                source: v.localPath,
-                destination: v.containerPath,
-                readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
-                type: 'bind',
-            };
-        });
-    }
+export function getMounts(volumes?: DockerContainerVolume[]): RunContainerBindMount[] | undefined {
+    return volumes?.map(v => {
+        return {
+            source: v.localPath,
+            destination: v.containerPath,
+            readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
+            type: 'bind',
+        };
+    });
 }

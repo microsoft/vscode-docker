@@ -6,10 +6,16 @@
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import * as fse from 'fs-extra';
 import * as os from 'os';
+import { WorkspaceFolder } from "vscode";
+import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
+import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
+import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
+import { getMounts } from "../DockerRunTaskProvider";
+import { defaultVsCodeLabels } from "../TaskDefinitionBase";
+import { addVolumeWithoutConflicts } from "../TaskHelper";
 
 /**
  * Native architecture of the current machine in the RID format
@@ -63,8 +69,10 @@ export class NetSdkTaskHelper {
             publishAllPorts: true,
             name: folderName.name,
             environmentVariables: {},
-            removeOnExit: false, // TODO: confirm with team
+            removeOnExit: true,
             imageRef: `${folderName.name}:dev`,
+            labels: defaultVsCodeLabels,
+            mounts: await this.getMounts(),
         });
 
         const quotedArgs = Shell.getShellOrDefault().quote(command.args);
@@ -73,7 +81,7 @@ export class NetSdkTaskHelper {
         return commandLine;
     }
 
-    public async isWebApp(): Promise<boolean> {
+    private async isWebApp(): Promise<boolean> {
         const projectContents = await fse.readFile('${workspaceFolder}/dotnet.csproj');
         return /Sdk\s*=\s*"Microsoft\.NET\.Sdk\.Web"/ig.test(projectContents.toString());
     }
@@ -82,7 +90,7 @@ export class NetSdkTaskHelper {
      * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
      * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
      */
-    public async normalizeOsToRid(): Promise<'linux' | 'win'> {
+    private async normalizeOsToRid(): Promise<'linux' | 'win'> {
         if (await getDockerOSType() === 'windows') {
             return 'win';
         }
@@ -93,7 +101,7 @@ export class NetSdkTaskHelper {
      * This method normalizes the native architecture to match the .NET Core SDK conventions.
      * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
      */
-    public async normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
+    private async normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
         const architecture = os.arch();
         switch (architecture) {
             case 'x32':
@@ -104,11 +112,25 @@ export class NetSdkTaskHelper {
         }
     }
 
-    public async getFolderName(context: IActionContext) {
+    private async getFolderName(context: IActionContext): Promise<WorkspaceFolder> {
         return await quickPickWorkspaceFolder(
             context,
             `Unable to determine task scope to execute task ${netSdkBuildTaskSymbol}. Please open a workspace folder.`
         );
+    }
+
+    private async getMounts(): Promise<RunContainerBindMount[] | undefined> {
+        const volumes: DockerContainerVolume[] = [];
+        const isLinux = await getDockerOSType() === 'linux';
+
+        const debuggerVolume: DockerContainerVolume = {
+            localPath: vsDbgInstallBasePath,
+            containerPath: isLinux ? 'C:\\remote_debugger' : '/remote_debugger',
+            permissions: 'ro'
+        };
+
+        addVolumeWithoutConflicts(volumes, debuggerVolume);
+        return getMounts(volumes);
     }
 }
 
