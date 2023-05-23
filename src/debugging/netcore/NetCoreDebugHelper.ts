@@ -11,7 +11,6 @@ import { ext } from '../../extensionVariables';
 import { CommandLineArgs, ContainerOS, VoidCommandResponse, composeArgs, withArg, withQuotedArg } from '../../runtimes/docker';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
-import { IsolationMode, getIsolationMode } from '../../utils/getIsolationMode';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
 import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
@@ -268,8 +267,11 @@ export class NetCoreDebugHelper implements DebugHelper {
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
         if (containerOS === 'windows') {
-            const isolationMode = await getIsolationMode(containerName);
-            if (isolationMode === IsolationMode.hyperv) {
+            const inspectInfo = (await ext.runWithDefaults(client =>
+                client.inspectContainers({ containers: [containerName] })
+            ))?.[0];
+
+            if (inspectInfo?.isolation === 'hyperv') {
                 context.errorHandling.suppressReportIssue = true;
                 throw new Error(l10n.t('Attaching a debugger to a Hyper-V container is not supported.'));
             }

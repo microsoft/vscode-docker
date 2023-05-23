@@ -5,7 +5,6 @@
 
 import * as readline from 'readline';
 import { ShellQuotedString, ShellQuoting } from 'vscode';
-import { IsolationMode, getIsolationMode } from '../../../../utils/getIsolationMode';
 import { GeneratorCommandResponse, PromiseCommandResponse, VoidCommandResponse } from '../../contracts/CommandRunner';
 import {
     BuildImageCommandOptions,
@@ -1714,12 +1713,6 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     }
 
     async writeFile(options: WriteFileCommandOptions): Promise<VoidCommandResponse> {
-        if (options.operatingSystem === 'windows') {
-            if (await getIsolationMode(options.container) === IsolationMode.hyperv) {
-                throw new CommandNotSupportedError('Writing files is not supported on Windows Hyper-V containers.');
-            }
-        }
-
         return {
             command: this.commandName,
             args: this.getWriteFileCommandArgs(options),
