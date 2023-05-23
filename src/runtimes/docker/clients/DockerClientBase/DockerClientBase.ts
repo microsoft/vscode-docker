@@ -1715,7 +1715,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
 
     async writeFile(options: WriteFileCommandOptions): Promise<VoidCommandResponse> {
         if (options.operatingSystem === 'windows') {
-            if(await getIsolationMode(options.container) === IsolationMode.hyperv) {
+            if (await getIsolationMode(options.container) === IsolationMode.hyperv) {
                 throw new CommandNotSupportedError('Writing files is not supported on Windows Hyper-V containers.');
             }
         }

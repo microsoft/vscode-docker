@@ -1107,6 +1107,10 @@ export type InspectContainersItem = {
      */
     image: ImageNameInfo;
     /**
+     * Isolation Mode of the container
+     */
+    isolation?: string;
+    /**
      * The status of the container
      */
     status?: string;

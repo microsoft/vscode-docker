@@ -52,6 +52,7 @@ export type DockerInspectContainerConfig = {
 
 export type DockerInspectContainerHostConfig = {
     PublishAllPorts?: boolean | null;
+    Isolation?: string | null;
 };
 
 export type DockerInspectContainerNetworkSettings = {
@@ -153,6 +154,7 @@ export function normalizeDockerInspectContainerRecord(container: DockerInspectCo
         name: container.Name,
         imageId: container.Image,
         image: parseDockerLikeImageName(container.Config.Image),
+        isolation: container.HostConfig?.Isolation,
         status: container.State?.Status,
         environmentVariables,
         networks,

@@ -15,7 +15,6 @@ export async function getIsolationMode(containerName: string): Promise<string> {
     const inspectInfo = (await ext.runWithDefaults(client =>
         client.inspectContainers({ containers: [containerName] })
     ))?.[0];
-    const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
 
-    return containerInfo?.HostConfig?.Isolation;
+    return inspectInfo?.isolation;
 }
