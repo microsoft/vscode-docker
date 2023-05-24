@@ -61,21 +61,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         return [];
     }
 
-    private async showWizardContext(): Promise<void> {
+    private async showWizardContext(): Promise<string> {
         // 1) Getting the value
-        await window.showQuickPick(['explorer', 'search', 'scm', 'debug', 'extensions'], { placeHolder: 'Select the view to show when opening a window.' });
+        return await window.showQuickPick(['Dockerfile', '.NET Container (Debug only)'], { placeHolder: 'Select how you want to debug your .NET project' });
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
 
-        let wizardContextPromise: Promise<void> | null = null;
+        let wizardContextPromise: Promise<string> | null = null;
 
         // Start executing showWizardContext and store the promise
         if (!wizardContextPromise) {
             wizardContextPromise = this.showWizardContext();
         }
 
-        return wizardContextPromise.then(() => callWithTelemetryAndErrorHandling(
+        return wizardContextPromise.then((wizardContext) => callWithTelemetryAndErrorHandling(
             debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
                 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -90,10 +90,21 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     }
                 }
 
-                if (debugConfiguration.type === undefined) {
+                // eslint-disable-next-line no-constant-condition
+                if (debugConfiguration.type === undefined
+                    && wizardContext === 'Dockerfile', '.NET Container (Debug only)') {
+
+                    debugConfiguration.type = 'docker';
+                    debugConfiguration.request = 'launch';
+                    debugConfiguration.name = 'Docker .NET Launch';
+                    debugConfiguration.platform = 'netCore';
+                    debugConfiguration.netCore = {
+                        appProject: "${workspaceFolder}/dotnet.csproj"
+                    };
+                    debugConfiguration.preLaunchTask = 'dotnet-sdk-run: sdk-debug';
+
                     // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
                     // VSCode subsequently will call provideDebugConfigurations which will show an error message
-                    return undefined;
                 }
 
                 if (!debugConfiguration.request) {

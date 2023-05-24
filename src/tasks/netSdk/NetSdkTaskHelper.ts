@@ -31,7 +31,6 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export const netSdkBuildTaskSymbol = 'dotnet-sdk-build';
 export const netSdkRunTaskSymbol = 'dotnet-sdk-run';
 
 export class NetSdkTaskHelper {
@@ -53,7 +52,7 @@ export class NetSdkTaskHelper {
             withArg(publishFlag),
             withNamedArg('--configuration', configuration),
             withNamedArg('-p:ContainerImageName', folderName.name, { assignValue: true }),
-            withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true }),
+            withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true })
         )();
 
         const quotedArgs = Shell.getShellOrDefault().quote(args);
@@ -67,12 +66,13 @@ export class NetSdkTaskHelper {
         const command = await client.runContainer({
             detached: true,
             publishAllPorts: true,
-            name: folderName.name,
+            name: `${folderName.name}-dev`,
             environmentVariables: {},
             removeOnExit: true,
             imageRef: `${folderName.name}:dev`,
             labels: defaultVsCodeLabels,
             mounts: await this.getMounts(),
+            customOptions: '--expose 8080',
         });
 
         const quotedArgs = Shell.getShellOrDefault().quote(command.args);
@@ -115,7 +115,7 @@ export class NetSdkTaskHelper {
     private async getFolderName(context: IActionContext): Promise<WorkspaceFolder> {
         return await quickPickWorkspaceFolder(
             context,
-            `Unable to determine task scope to execute task ${netSdkBuildTaskSymbol}. Please open a workspace folder.`
+            `Unable to determine task scope to execute task ${netSdkRunTaskSymbol}. Please open a workspace folder.`
         );
     }
 
@@ -125,7 +125,7 @@ export class NetSdkTaskHelper {
 
         const debuggerVolume: DockerContainerVolume = {
             localPath: vsDbgInstallBasePath,
-            containerPath: isLinux ? 'C:\\remote_debugger' : '/remote_debugger',
+            containerPath: isLinux ? '/remote_debugger' : 'C:\\remote_debugger',
             permissions: 'ro'
         };
 

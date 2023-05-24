@@ -3,7 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, ProviderResult, Task, TaskScope } from "vscode";
+import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskScope } from "vscode";
+import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
 import { NetSdkTaskHelper, netSdkRunTaskSymbol } from './NetSdkTaskHelper';
@@ -14,12 +15,24 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
     provideTasks(token: CancellationToken): ProviderResult<Task[]> {
         // provide the bare minimum: a task that will show up in the command palette
+        const problemMatchers = ["$myProblemMatcher"];
+
+        const task = new Task(
+            { type: netSdkRunTaskSymbol },
+            TaskScope.Workspace,
+            'sdk-debug',
+            netSdkRunTaskSymbol,
+            problemMatchers
+        );
+
         return [
             new Task(
                 { type: netSdkRunTaskSymbol },
                 TaskScope.Workspace,
-                'debug',
-                netSdkRunTaskSymbol
+                'sdk-debug',
+                netSdkRunTaskSymbol,
+                new CustomExecution(async (resolvedDefinition: TaskDefinition) => Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))),
+                problemMatchers
             )
         ];
     }
