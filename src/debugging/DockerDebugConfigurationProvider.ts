@@ -92,7 +92,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                 // eslint-disable-next-line no-constant-condition
                 if (debugConfiguration.type === undefined
-                    && wizardContext === 'Dockerfile', '.NET Container (Debug only)') {
+                    && wizardContext === '.NET Container (Debug only)') {
 
                     debugConfiguration.type = 'docker';
                     debugConfiguration.request = 'launch';
