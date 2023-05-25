@@ -6,9 +6,9 @@
 import { DialogResponses, IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as path from 'path';
-import { DebugConfiguration, l10n, MessageItem, ProgressLocation, window } from 'vscode';
+import { DebugConfiguration, MessageItem, ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { CommandLineArgs, composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '../../runtimes/docker';
+import { CommandLineArgs, ContainerOS, VoidCommandResponse, composeArgs, withArg, withQuotedArg } from '../../runtimes/docker';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -16,10 +16,10 @@ import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
-import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, inferContainerName, ResolvedDebugConfiguration, resolveDockerServerReadyAction } from '../DebugHelper';
+import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
-import { installDebuggersIfNecessary, vsDbgInstallBasePath, VsDbgType } from './VsDbgHelper';
+import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
@@ -270,8 +270,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             const inspectInfo = (await ext.runWithDefaults(client =>
                 client.inspectContainers({ containers: [containerName] })
             ))?.[0];
-            const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
-            if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
+
+            if (inspectInfo?.isolation === 'hyperv') {
                 context.errorHandling.suppressReportIssue = true;
                 throw new Error(l10n.t('Attaching a debugger to a Hyper-V container is not supported.'));
             }

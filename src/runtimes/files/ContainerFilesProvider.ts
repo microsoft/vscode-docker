@@ -96,13 +96,25 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
                 const dockerUri = DockerUri.parse(uri);
                 const containerOS = dockerUri.options?.containerOS || await getDockerOSType();
+                const containerId = dockerUri.containerId;
+
+                if (containerOS === 'windows') {
+                    const inspectInfo = (await ext.runWithDefaults(client =>
+                        client.inspectContainers({ containers: [containerId] })
+                    ))?.[0];
+
+                    if (inspectInfo?.isolation === 'hyperv') {
+                        throw new CommandNotSupportedError('Writing files is not supported on Windows Hyper-V containers.');
+                    }
+                }
+
                 const destDirectory = containerOS === 'windows' ?
                     path.win32.dirname(dockerUri.windowsPath) :
                     path.posix.dirname(dockerUri.path);
 
                 const fileStats = await ext.runWithDefaults(
                     client => client.statPath({
-                        container: dockerUri.containerId,
+                        container: containerId,
                         path: containerOS === 'windows' ? dockerUri.windowsPath : dockerUri.path,
                         operatingSystem: containerOS,
                     }),
@@ -117,7 +129,7 @@ export class ContainerFilesProvider extends vscode.Disposable implements vscode.
 
                 await ext.runWithDefaults(
                     client => client.writeFile({
-                        container: dockerUri.containerId,
+                        container: containerId,
                         path: destDirectory,
                         operatingSystem: containerOS,
                     }),
