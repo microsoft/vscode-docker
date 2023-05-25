@@ -636,6 +636,12 @@
             {
                 "type": "docker",
                 "label": "Docker: Debug in Container",
+                "languages": [
+                    "csharp",
+                    "razor",
+                    "qsharp",
+                    "aspnetcorerazor"
+                ],
                 "configurationAttributes": {
                     "launch": {
                         "properties": {

@@ -92,7 +92,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
                 // eslint-disable-next-line no-constant-condition
                 if (debugConfiguration.type === undefined
-                    && wizardContext === '.NET Container (Debug only)') {
+                    && wizardContext === '.NET Container (Debug only)') { // TODO: Add check for .NET project
 
                     debugConfiguration.type = 'docker';
                     debugConfiguration.request = 'launch';
@@ -106,6 +106,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
                     // VSCode subsequently will call provideDebugConfigurations which will show an error message
                 }
+                else if (debugConfiguration.type === undefined
+                    && wizardContext === 'Dockerfile') {
+                    await commands.executeCommand('vscode-docker.configure');
+                }
+
 
                 if (!debugConfiguration.request) {
                     throw new Error(l10n.t('The property "request" must be specified in the debug config.'));
