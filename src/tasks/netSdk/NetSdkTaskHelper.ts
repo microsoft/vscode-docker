@@ -73,6 +73,7 @@ export class NetSdkTaskHelper {
             labels: defaultVsCodeLabels,
             mounts: await this.getMounts(),
             customOptions: '--expose 8080',
+            entrypoint: '/bin/sh'
         });
 
         const quotedArgs = Shell.getShellOrDefault().quote(command.args);
