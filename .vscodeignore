@@ -26,3 +26,4 @@ typings/**
 webpack.config*
 .eslintignore
 .eslintrc.json
+.nvmrc
