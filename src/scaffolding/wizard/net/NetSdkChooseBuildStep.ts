@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
+import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { getFromWorkspaceState, updateWorkspaceState } from '../../../utils/StateUtils';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
+import { NetChooseBuildTypeContext } from './netContainerBuild';
 
 export const NetContainerBuildOptions = [
     'Use a Dockerfile',
@@ -15,10 +16,6 @@ export const NetContainerBuildOptions = [
 
 type NetContainerBuildOptionsTuple = typeof NetContainerBuildOptions;
 export type NetContainerBuildOptions = NetContainerBuildOptionsTuple[number];
-
-export interface NetChooseBuildTypeContext extends IActionContext {
-    containerBuildOptions?: NetContainerBuildOptions;
-}
 
 export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTypeContext> {
     public async prompt(wizardContext: NetChooseBuildTypeContext): Promise<void> {

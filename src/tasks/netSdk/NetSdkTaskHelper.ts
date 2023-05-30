@@ -4,18 +4,19 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import * as fse from 'fs-extra';
 import * as os from 'os';
-import { WorkspaceFolder } from "vscode";
+import { WorkspaceFolder, l10n } from "vscode";
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getDockerOSType } from "../../utils/osUtils";
+import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
 import { getMounts } from "../DockerRunTaskProvider";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { addVolumeWithoutConflicts } from "../TaskHelper";
+import { DockerTaskContext, DockerTaskExecutionContext, addVolumeWithoutConflicts } from "../TaskHelper";
+import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 
 /**
  * Native architecture of the current machine in the RID format
@@ -35,15 +36,17 @@ export const netSdkRunTaskSymbol = 'dotnet-sdk-run';
 
 export class NetSdkTaskHelper {
 
-    public async getNetSdkBuildCommand(context: IActionContext) {
+    public async getNetSdkBuildCommand(context: DockerTaskExecutionContext) {
 
         const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
         const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
-        const publishFlag = this.isWebApp ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
-        const folderName = await this.getFolderName(context);
+        const projPath = await this.inferProjPath(context);
+        const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
+
+        const folderName = await this.getFolderName(context.actionContext);
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
@@ -59,9 +62,9 @@ export class NetSdkTaskHelper {
         return quotedArgs.join(' ');
     }
 
-    public async getNetSdkRunCommand(context: IActionContext): Promise<string> {
+    public async getNetSdkRunCommand(context: DockerTaskExecutionContext): Promise<string> {
         const client = await ext.runtimeManager.getClient();
-        const folderName = await this.getFolderName(context);
+        const folderName = await this.getFolderName(context.actionContext);
 
         const command = await client.runContainer({
             detached: true,
@@ -80,11 +83,6 @@ export class NetSdkTaskHelper {
         const commandLine = [client.commandName, ...quotedArgs].join(' ');
 
         return commandLine;
-    }
-
-    private async isWebApp(): Promise<boolean> {
-        const projectContents = await fse.readFile('${workspaceFolder}/dotnet.csproj');
-        return /Sdk\s*=\s*"Microsoft\.NET\.Sdk\.Web"/ig.test(projectContents.toString());
     }
 
     /**
@@ -132,6 +130,11 @@ export class NetSdkTaskHelper {
 
         addVolumeWithoutConflicts(volumes, debuggerVolume);
         return getMounts(volumes);
+    }
+
+    private async inferProjPath(context: DockerTaskContext): Promise<string> {
+        const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, l10n.t('No .NET project file (.csproj or .fsproj) could be found.'));
+        return item.absoluteFilePath;
     }
 }
 

@@ -39,7 +39,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
 
-        const buildCommand = await this.helper.getNetSdkBuildCommand(context.actionContext);
+        const buildCommand = await this.helper.getNetSdkBuildCommand(context);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
@@ -48,7 +48,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
             }
         );
 
-        const runCommand = await this.helper.getNetSdkRunCommand(context.actionContext);
+        const runCommand = await this.helper.getNetSdkRunCommand(context);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {
