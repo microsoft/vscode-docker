@@ -18,9 +18,9 @@ resources:
     - repository: templates
       type: github
       name: microsoft/vscode-azuretools
-      ref: main
+      ref: bmw/monorepoBuild # TODO
       endpoint: GitHub
 
 # Use those templates
 extends:
-  template: azure-pipelines/main.yml@templates
+  template: azure-pipelines/jobs.yml@templates
