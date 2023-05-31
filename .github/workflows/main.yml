@@ -19,4 +19,4 @@ on:
 jobs:
   Build:
     # Use template from https://github.com/microsoft/vscode-azuretools/blob/main/.github/workflows/jobs.yml
-    uses: microsoft/vscode-azuretools/.github/workflows/jobs.yml@bmw/monorepoBuild # TODO
+    uses: microsoft/vscode-azuretools/.github/workflows/jobs.yml@main
