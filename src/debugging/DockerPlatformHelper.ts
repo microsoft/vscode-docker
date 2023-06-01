@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export type DockerPlatform = 'netCore' | 'node' | 'python';
+export type DockerPlatform = 'netCore' | 'node' | 'python' | 'netSdk';
 
 interface DockerPlatformConfiguration {
     platform?: DockerPlatform;
@@ -13,7 +13,9 @@ interface DockerPlatformConfiguration {
 }
 
 export function getPlatform<T extends DockerPlatformConfiguration>(configuration: T): DockerPlatform | undefined {
-    if (configuration.platform === 'netCore' || configuration.netCore !== undefined) {
+    if (configuration.platform === 'netSdk') {
+        return 'netSdk';
+    } else if (configuration.platform === 'netCore' || configuration.netCore !== undefined) {
         return 'netCore';
     } else if (configuration.platform === 'node' || configuration.node !== undefined) {
         return 'node';

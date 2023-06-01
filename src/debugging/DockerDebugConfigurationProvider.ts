@@ -7,12 +7,12 @@ import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent } from
 import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, ProviderResult, workspace, WorkspaceFolder } from 'vscode';
 import { CSPROJ_GLOB_PATTERN, DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
-import { NetChooseBuildTypeContext, netContainerBuild } from '../scaffolding/wizard/net/netContainerBuild';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { resolveFilesOfPattern } from '../utils/quickPickFile';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
 import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
+import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
 
 export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
@@ -44,7 +44,17 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
+
+        // let's only do NET SDK for now
+        // return callWithTelemetryAndErrorHandling(
+        //     'docker-provideDebugConfigurations', //TODO: change this later
+        //     async (actionContext: IActionContext) => {
+        //         return this.handleEmptyDebugConfig(folder, actionContext);
+        //     }
+        // );
+
         return [];
+
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
@@ -64,16 +74,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     }
                 }
 
-                // if the user has not created a launch.json yet, we will help them do that
                 if (debugConfiguration.type === undefined &&
                     debugConfiguration.request === undefined &&
                     debugConfiguration.name === undefined) {
-
-                    const useSDKBuild = await this.handleEmptyDebugConfig(debugConfiguration, folder, actionContext);
-
-                    if (!useSDKBuild) { // TODO: automatically launch right after scaffolding
-                        return undefined;
-                    }
+                    const netConfig = await this.handleEmptyDebugConfig(folder, actionContext);
+                    this.copyDebugConfiguration(netConfig[0], debugConfiguration);
                 }
 
                 if (!debugConfiguration.request) {
@@ -166,48 +171,42 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    /**
-     * If the user has an empty debug launch.json, then we will help them either scaffold docker files or configure for .NET Core
-     * @returns true if the user should use .NET SDK build
-     *          false if the user should scaffold docker files
-     */
-    private async handleEmptyDebugConfig(debugConfiguration: DockerDebugConfiguration, folder: WorkspaceFolder, actionContext: IActionContext): Promise<boolean> {
-
-        // Get a list of all the csproj files in the workspace
-        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN]);
-
-        // If there are no csproj files, then we assume it's not a .NET Core project -> scaffold docker files
-        if (!csProjUris || csProjUris.length === 0) {
-            await commands.executeCommand('vscode-docker.configure');
-            return false;
-        }
-        // If there are one or more .csproj file, then we assume it's a .NET Core project -> configure for .NET Core
-        else {
-            const netCoreBuildContext: NetChooseBuildTypeContext = {
-                ...actionContext,
-                scaffoldType: 'debugging',
-                workspaceFolder: folder,
-            };
-
-            await netContainerBuild(netCoreBuildContext);
-
-            if (netCoreBuildContext?.containerBuildOptions === 'Use .NET SDK') {
-                // set up for .NET SDK build
-                this.configureNetSdkBuild(debugConfiguration, netCoreBuildContext);
-                return true;
-            }
-            else {
-                await commands.executeCommand('vscode-docker.configure');
-                return false;
+    // write a method that takes in two DockerDebugConfiguration and copy the properties from the second one to the first one
+    private copyDebugConfiguration(from: DockerDebugConfiguration, to: DockerDebugConfiguration): void {
+        for (const key of Object.keys(from)) {
+            if (from[key] !== undefined) {
+                to[key] = from[key];
             }
         }
     }
 
-    private configureNetSdkBuild(debugConfiguration: DockerDebugConfiguration, context: NetChooseBuildTypeContext): void {
-        debugConfiguration.type = 'docker';
-        debugConfiguration.request = 'launch';
-        debugConfiguration.name = 'Docker .NET Launch';
-        debugConfiguration.platform = 'netCore';
-        debugConfiguration.preLaunchTask = 'dotnet-sdk-run: sdk-debug';
+    /**
+     * If the user has an empty debug launch.json, then we will:
+     *  1. check if it's a .NET Core project, if so, we will provide .NET Core debug configurations
+     *  2. otherwise, we will scaffold docker files
+     */
+    public async handleEmptyDebugConfig(folder: WorkspaceFolder, actionContext: IActionContext): Promise<DockerDebugConfiguration[]> {
+
+        // NOTE: we can not determine which helper it is by DockerDebugContext, so we need to basically check the
+        //       type of files inside the folder here. let's only do it for .NET Core for now, we can add more later
+
+        // check if it's a .NET Core project
+        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN]);
+        if (csProjUris) {
+            return await netSdkDebugHelper.provideDebugConfigurations(
+                {
+                    actionContext,
+                    dockerfile: undefined,
+                    folder: folder
+                },
+                {
+                    appProject: csProjUris[0].absoluteFilePath,
+                });
+        }
+        else {
+            // scaffold docker files
+            await commands.executeCommand('vscode-docker.configure');
+            return [];
+        }
     }
 }

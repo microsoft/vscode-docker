@@ -15,7 +15,7 @@ import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
 import { getMounts } from "../DockerRunTaskProvider";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskContext, DockerTaskExecutionContext, addVolumeWithoutConflicts } from "../TaskHelper";
+import { DockerTaskExecutionContext, addVolumeWithoutConflicts } from "../TaskHelper";
 import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 
 /**
@@ -43,7 +43,7 @@ export class NetSdkTaskHelper {
 
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
 
-        const projPath = await this.inferProjPath(context);
+        const projPath = await this.inferProjPath(context.actionContext, context.folder);
         const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
         const folderName = await this.getFolderName(context.actionContext);
@@ -85,6 +85,11 @@ export class NetSdkTaskHelper {
         return commandLine;
     }
 
+    public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
+        const item = await quickPickProjectFileItem(context, undefined, folder, l10n.t('No .NET project file (.csproj or .fsproj) could be found.'));
+        return item.absoluteFilePath;
+    }
+
     /**
      * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
      * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
@@ -111,7 +116,7 @@ export class NetSdkTaskHelper {
         }
     }
 
-    private async getFolderName(context: IActionContext): Promise<WorkspaceFolder> {
+    public async getFolderName(context: IActionContext): Promise<WorkspaceFolder> {
         return await quickPickWorkspaceFolder(
             context,
             `Unable to determine task scope to execute task ${netSdkRunTaskSymbol}. Please open a workspace folder.`
@@ -130,11 +135,6 @@ export class NetSdkTaskHelper {
 
         addVolumeWithoutConflicts(volumes, debuggerVolume);
         return getMounts(volumes);
-    }
-
-    private async inferProjPath(context: DockerTaskContext): Promise<string> {
-        const item = await quickPickProjectFileItem(context.actionContext, undefined, context.folder, l10n.t('No .NET project file (.csproj or .fsproj) could be found.'));
-        return item.absoluteFilePath;
     }
 }
 

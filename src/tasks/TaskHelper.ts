@@ -79,7 +79,8 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     const helpers = {
         netCore: netCoreTaskHelper,
         node: nodeTaskHelper,
-        python: pythonTaskHelper
+        python: pythonTaskHelper,
+        netSdk: undefined
     };
 
     ctx.subscriptions.push(
