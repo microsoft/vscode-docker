@@ -21,10 +21,10 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
         if (netCoreBuildContext?.containerBuildOptions === 'Use .NET SDK') {
             providers.push({
-                platform: 'netCore',
                 name: 'Docker .NET Launch',
                 type: 'docker',
                 request: 'launch',
+                platform: 'netSdk',
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
                     enableDebugging: true,

@@ -46,14 +46,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
 
         // let's only do NET SDK for now
-        // return callWithTelemetryAndErrorHandling(
-        //     'docker-provideDebugConfigurations', //TODO: change this later
-        //     async (actionContext: IActionContext) => {
-        //         return this.handleEmptyDebugConfig(folder, actionContext);
-        //     }
-        // );
-
-        return [];
+        return callWithTelemetryAndErrorHandling(
+            'docker-provideDebugConfigurations', //TODO: change this later
+            async (actionContext: IActionContext) => {
+                return this.handleEmptyDebugConfig(folder, actionContext);
+            }
+        );
 
     }
 
@@ -77,8 +75,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 if (debugConfiguration.type === undefined &&
                     debugConfiguration.request === undefined &&
                     debugConfiguration.name === undefined) {
-                    const netConfig = await this.handleEmptyDebugConfig(folder, actionContext);
-                    this.copyDebugConfiguration(netConfig[0], debugConfiguration);
+                    const newlyCreatedDebugConfig = await this.handleEmptyDebugConfig(folder, actionContext);
+                    this.copyDebugConfiguration(newlyCreatedDebugConfig, debugConfiguration);
+                    // if there is no debugConfiguration, we should return undefined to exit the debug session
+                    if (newlyCreatedDebugConfig.length === 0) {
+                        return undefined;
+                    }
                 }
 
                 if (!debugConfiguration.request) {
@@ -172,7 +174,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     // write a method that takes in two DockerDebugConfiguration and copy the properties from the second one to the first one
-    private copyDebugConfiguration(from: DockerDebugConfiguration, to: DockerDebugConfiguration): void {
+    private copyDebugConfiguration(fromArray: DockerDebugConfiguration[], to: DockerDebugConfiguration): void {
+        if (!fromArray || !fromArray[0]) {
+            return;
+        }
+
+        const from = fromArray[0];
         for (const key of Object.keys(from)) {
             if (from[key] !== undefined) {
                 to[key] = from[key];
@@ -185,7 +192,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
      *  1. check if it's a .NET Core project, if so, we will provide .NET Core debug configurations
      *  2. otherwise, we will scaffold docker files
      */
-    public async handleEmptyDebugConfig(folder: WorkspaceFolder, actionContext: IActionContext): Promise<DockerDebugConfiguration[]> {
+    private async handleEmptyDebugConfig(folder: WorkspaceFolder, actionContext: IActionContext): Promise<DockerDebugConfiguration[]> {
 
         // NOTE: we can not determine which helper it is by DockerDebugContext, so we need to basically check the
         //       type of files inside the folder here. let's only do it for .NET Core for now, we can add more later
@@ -200,11 +207,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     folder: folder
                 },
                 {
-                    appProject: csProjUris[0].absoluteFilePath,
+                    appProject: csProjUris[0]?.absoluteFilePath || '',
                 });
         }
+        // TODO: {potentially} in the future, we can add more support for ambient tasks for other types of projects
         else {
-            // scaffold docker files
+            // for now, we scaffold docker files
             await commands.executeCommand('vscode-docker.configure');
             return [];
         }
