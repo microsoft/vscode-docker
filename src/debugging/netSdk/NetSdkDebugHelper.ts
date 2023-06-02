@@ -28,6 +28,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
                     enableDebugging: true,
+                    appOutput: this.getAppOutput(context),
                 },
                 preLaunchTask: 'dotnet-sdk-run: sdk-debug',
             });
@@ -38,6 +39,10 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         return providers;
     }
 
+    private getAppOutput(context: DockerDebugScaffoldContext): string {
+        const folderName = context.folder.name || 'dotnet';
+        return `${folderName}.dll`;
+    }
 }
 
 export const netSdkDebugHelper = new NetSdkDebugHelper();
