@@ -9,13 +9,14 @@ import { WorkspaceFolder, l10n } from "vscode";
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
+import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
 import { getMounts } from "../DockerRunTaskProvider";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskExecutionContext, addVolumeWithoutConflicts } from "../TaskHelper";
+import { DockerTaskExecutionContext, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 
 /**
@@ -33,17 +34,16 @@ export type RidCpuArchitecture =
     | string;
 
 export const netSdkRunTaskSymbol = 'dotnet-sdk-run';
+const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
 export class NetSdkTaskHelper {
 
     public async getNetSdkBuildCommand(context: DockerTaskExecutionContext) {
 
         const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
-        const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
-
-        // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
 
         const projPath = await this.inferProjPath(context.actionContext, context.folder);
+        // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
         const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
         const folderName = await this.getFolderName(context.actionContext);
@@ -54,7 +54,7 @@ export class NetSdkTaskHelper {
             withNamedArg('--arch', await this.normalizeArchitectureToRid()),
             withArg(publishFlag),
             withNamedArg('--configuration', configuration),
-            withNamedArg('-p:ContainerImageName', folderName.name, { assignValue: true }),
+            withNamedArg('-p:ContainerImageName', getValidImageName(folderName.name), { assignValue: true }),
             withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true })
         )();
 
@@ -69,10 +69,10 @@ export class NetSdkTaskHelper {
         const command = await client.runContainer({
             detached: true,
             publishAllPorts: true,
-            name: `${folderName.name}-dev`,
+            name: getDefaultContainerName(folderName.name, imageTag),
             environmentVariables: {},
             removeOnExit: true,
-            imageRef: `${folderName.name}:dev`,
+            imageRef: getDefaultImageName(folderName.name, imageTag),
             labels: defaultVsCodeLabels,
             mounts: await this.getMounts(),
             customOptions: '--expose 8080',
@@ -86,8 +86,8 @@ export class NetSdkTaskHelper {
     }
 
     public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
-        const item = await quickPickProjectFileItem(context, undefined, folder, l10n.t('No .NET project file (.csproj or .fsproj) could be found.'));
-        return item.absoluteFilePath;
+        const item = await quickPickProjectFileItem(context, undefined, folder, l10n.t('No .csproj file could be found.'));
+        return item.absoluteFilePath || '';
     }
 
     /**
