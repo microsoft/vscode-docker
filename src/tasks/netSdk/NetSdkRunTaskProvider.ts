@@ -7,29 +7,29 @@ import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinitio
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NetSdkTaskHelper, netSdkRunTaskSymbol } from './NetSdkTaskHelper';
+import { NET_SDK_RUN_TASK_SYMBOL, NetSdkTaskHelper } from './NetSdkTaskHelper';
 
 const netSdkDebugTaskName = 'debug';
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
-    public constructor(protected readonly helper: NetSdkTaskHelper) { super(netSdkRunTaskSymbol, undefined); }
+    public constructor(protected readonly helper: NetSdkTaskHelper) { super(NET_SDK_RUN_TASK_SYMBOL, undefined); }
 
     provideTasks(token: CancellationToken): ProviderResult<Task[]> {
 
         // we need to initialize a task first so we can pass it into `DockerPseudoterminal`
         const task = new Task(
-            { type: netSdkRunTaskSymbol },
+            { type: NET_SDK_RUN_TASK_SYMBOL },
             TaskScope.Workspace,
             netSdkDebugTaskName,
-            netSdkRunTaskSymbol
+            NET_SDK_RUN_TASK_SYMBOL
         );
 
         return [
             new Task(
-                { type: netSdkRunTaskSymbol },
+                { type: NET_SDK_RUN_TASK_SYMBOL },
                 TaskScope.Workspace,
                 netSdkDebugTaskName,
-                netSdkRunTaskSymbol,
+                NET_SDK_RUN_TASK_SYMBOL,
                 new CustomExecution(
                     async (resolvedDefinition: TaskDefinition) => Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))
                 ),

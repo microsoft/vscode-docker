@@ -32,12 +32,13 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export const netSdkRunTaskSymbol = 'dotnet-container-sdk';
-const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
+export const NET_SDK_RUN_TASK_SYMBOL = 'dotnet-container-sdk';
+const IMAGE_TAG = 'dev'; // intentionally default to dev tag for phase 1 of this feature
+const ERR_MSG_NO_WORKSPACE_FOLDER = l10n.t(`Unable to determine task scope to execute task ${NET_SDK_RUN_TASK_SYMBOL}. Please open a workspace folder.`);
 
 export class NetSdkTaskHelper {
 
-    public async getNetSdkBuildCommand(context: DockerTaskExecutionContext) {
+    public async getNetSdkBuildCommand(context: DockerTaskExecutionContext): Promise<string> {
 
         const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
         const projPath = await this.inferProjPath(context.actionContext, context.folder);
@@ -45,7 +46,7 @@ export class NetSdkTaskHelper {
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
         const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
-        const folderName = await this.getFolderName(context.actionContext);
+        const folderName = await quickPickWorkspaceFolder(context.actionContext, ERR_MSG_NO_WORKSPACE_FOLDER);
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
@@ -54,7 +55,7 @@ export class NetSdkTaskHelper {
             withArg(publishFlag),
             withNamedArg('--configuration', configuration),
             withNamedArg('-p:ContainerImageName', getValidImageName(folderName.name), { assignValue: true }),
-            withNamedArg('-p:ContainerImageTag', imageTag, { assignValue: true })
+            withNamedArg('-p:ContainerImageTag', IMAGE_TAG, { assignValue: true })
         )();
 
         const quotedArgs = Shell.getShellOrDefault().quote(args);
@@ -63,15 +64,15 @@ export class NetSdkTaskHelper {
 
     public async getNetSdkRunCommand(context: DockerTaskExecutionContext): Promise<string> {
         const client = await ext.runtimeManager.getClient();
-        const folderName = await this.getFolderName(context.actionContext);
+        const folderName = await quickPickWorkspaceFolder(context.actionContext, ERR_MSG_NO_WORKSPACE_FOLDER);
 
         const command = await client.runContainer({
             detached: true,
             publishAllPorts: true,
-            name: getDefaultContainerName(folderName.name, imageTag),
+            name: getDefaultContainerName(folderName.name, IMAGE_TAG),
             environmentVariables: {},
             removeOnExit: true,
-            imageRef: getDefaultImageName(folderName.name, imageTag),
+            imageRef: getDefaultImageName(folderName.name, IMAGE_TAG),
             labels: defaultVsCodeLabels,
             mounts: await this.getRemoteDebuggerMount(),
             customOptions: '--expose 8080',
@@ -85,7 +86,8 @@ export class NetSdkTaskHelper {
     }
 
     public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
-        const item = await quickPickProjectFileItem(context, undefined, folder, l10n.t('No .csproj file could be found.'));
+        const noProjectFileErrMessage = l10n.t('No .csproj file could be found.');
+        const item = await quickPickProjectFileItem(context, undefined, folder, noProjectFileErrMessage);
         return item.absoluteFilePath || '';
     }
 
@@ -94,10 +96,8 @@ export class NetSdkTaskHelper {
      * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
      */
     private async normalizeOsToRid(): Promise<'linux' | 'win'> {
-        if (await getDockerOSType() === 'windows') {
-            return 'win';
-        }
-        return 'linux';
+        const dockerOsType = await getDockerOSType();
+        return dockerOsType === 'windows' ? 'win' : 'linux';
     }
 
     /**
@@ -115,13 +115,10 @@ export class NetSdkTaskHelper {
         }
     }
 
-    public async getFolderName(context: IActionContext): Promise<WorkspaceFolder> {
-        return await quickPickWorkspaceFolder(
-            context,
-            `Unable to determine task scope to execute task ${netSdkRunTaskSymbol}. Please open a workspace folder.`
-        );
-    }
-
+    /**
+     * This methods returns the mount for the remote debugger ONLY as the SDK built container will have
+     * everything it needs to run the app already inside.
+     */
     private async getRemoteDebuggerMount(): Promise<RunContainerBindMount[] | undefined> {
         const volumes: DockerContainerVolume[] = [];
         const isLinux = await getDockerOSType() === 'linux';
