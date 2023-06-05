@@ -21,7 +21,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
     public async prompt(wizardContext: NetChooseBuildTypeContext): Promise<void> {
 
         // get workspace momento storage
-        const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('containerBuildOptions');
+        const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions');
 
         // only remember if it was .NET SDK, otherwise prompt again
         if (containerBuildOptions === 'Use .NET SDK') {
@@ -42,7 +42,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
         wizardContext.containerBuildOptions = response.data;
 
         // update workspace momento storage
-        await updateWorkspaceState<NetContainerBuildOptions>('containerBuildOptions', wizardContext.containerBuildOptions);
+        await updateWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions', wizardContext.containerBuildOptions);
     }
 
     public shouldPrompt(wizardContext: NetChooseBuildTypeContext): boolean {
