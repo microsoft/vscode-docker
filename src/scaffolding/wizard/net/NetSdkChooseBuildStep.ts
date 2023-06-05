@@ -7,7 +7,7 @@ import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { getFromWorkspaceState, updateWorkspaceState } from '../../../utils/StateUtils';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
-import { NetChooseBuildTypeContext } from './netContainerBuild';
+import { NetChooseBuildTypeContext } from './NetContainerBuild';
 
 export const NetContainerBuildOptions = [
     'Use a Dockerfile',
@@ -24,7 +24,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
         const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('containerBuildOptions');
 
         // only remember if it was .NET SDK, otherwise prompt again
-        if (containerBuildOptions === 'Use .NET SDK') { // only remember if it was .NET SDK, otherwise prompt again
+        if (containerBuildOptions === 'Use .NET SDK') {
             wizardContext.containerBuildOptions = containerBuildOptions;
             return;
         }

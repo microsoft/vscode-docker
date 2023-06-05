@@ -1,5 +1,5 @@
 import { commands } from "vscode";
-import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/netContainerBuild";
+import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerDebugScaffoldContext } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
@@ -34,11 +34,6 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         }
 
         return providers;
-    }
-
-    private getAppOutput(context: DockerDebugScaffoldContext): string {
-        const folderName = context.folder.name || 'dotnet';
-        return `${folderName}.dll`;
     }
 }
 

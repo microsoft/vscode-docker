@@ -639,7 +639,6 @@
                 "languages": [
                     "csharp",
                     "razor",
-                    "qsharp",
                     "aspnetcorerazor"
                 ],
                 "configurationAttributes": {
