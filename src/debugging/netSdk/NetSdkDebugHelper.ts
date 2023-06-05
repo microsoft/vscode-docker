@@ -21,16 +21,13 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
         if (netCoreBuildContext?.containerBuildOptions === 'Use .NET SDK') {
             providers.push({
-                name: 'Docker .NET Launch',
+                name: 'Docker .NET Container SDK Launch',
                 type: 'docker',
                 request: 'launch',
-                platform: 'netSdk',
+                preLaunchTask: 'dotnet-container-sdk: debug',
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
-                    enableDebugging: true,
-                    appOutput: this.getAppOutput(context),
                 },
-                preLaunchTask: 'dotnet-sdk-run: sdk-debug',
             });
         } else {
             await commands.executeCommand('vscode-docker.configure');

@@ -1508,7 +1508,7 @@
                 ]
             },
             {
-                "type": "dotnet-sdk-run"
+                "type": "dotnet-container-sdk"
             }
         ],
         "languages": [

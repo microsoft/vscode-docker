@@ -33,7 +33,7 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export const netSdkRunTaskSymbol = 'dotnet-sdk-run';
+export const netSdkRunTaskSymbol = 'dotnet-container-sdk';
 const imageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
 export class NetSdkTaskHelper {
@@ -41,8 +41,8 @@ export class NetSdkTaskHelper {
     public async getNetSdkBuildCommand(context: DockerTaskExecutionContext) {
 
         const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
-
         const projPath = await this.inferProjPath(context.actionContext, context.folder);
+
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
         const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
