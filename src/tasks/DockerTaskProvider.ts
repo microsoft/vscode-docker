@@ -15,7 +15,7 @@ import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from '
 
 export abstract class DockerTaskProvider implements TaskProvider {
 
-    protected constructor(private readonly telemetryName: DockerTaskProviderName, protected readonly helpers?: { [key in DockerPlatform]: TaskHelper }) { }
+    protected constructor(private readonly telemetryName: DockerTaskProviderName, protected readonly helpers: { [key in DockerPlatform]: TaskHelper }) { }
 
     public provideTasks(token?: CancellationToken): ProviderResult<Task[]> {
         return []; // Intentionally empty, so that resolveTask gets used

@@ -6,14 +6,13 @@
 import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
 import { ext } from '../extensionVariables';
-import { RunContainerBindMount } from '../runtimes/docker';
 import { cloneObject } from '../utils/cloneObject';
-import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
+import { DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
 import { NetCoreRunTaskDefinition } from './netcore/NetCoreTaskHelper';
 import { NodeRunTaskDefinition } from './node/NodeTaskHelper';
 import { defaultVsCodeLabels, getAggregateLabels } from './TaskDefinitionBase';
-import { DockerRunTaskContext, getAssociatedDockerBuildTask, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
+import { DockerRunTaskContext, getAssociatedDockerBuildTask, getMounts, TaskHelper, throwIfCancellationRequested } from './TaskHelper';
 
 export interface DockerRunTaskDefinition extends NetCoreRunTaskDefinition, NodeRunTaskDefinition {
     label?: string;
@@ -92,15 +91,4 @@ export class DockerRunTaskProvider extends DockerTaskProvider {
             throw new Error(l10n.t('No Docker image name was provided or resolved.'));
         }
     }
-}
-
-export function getMounts(volumes?: DockerContainerVolume[]): RunContainerBindMount[] | undefined {
-    return volumes?.map(v => {
-        return {
-            source: v.localPath,
-            destination: v.containerPath,
-            readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
-            type: 'bind',
-        };
-    });
 }

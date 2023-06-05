@@ -14,9 +14,8 @@ import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
-import { getMounts } from "../DockerRunTaskProvider";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskExecutionContext, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
+import { DockerTaskExecutionContext, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, getMounts } from "../TaskHelper";
 import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 
 /**
@@ -74,7 +73,7 @@ export class NetSdkTaskHelper {
             removeOnExit: true,
             imageRef: getDefaultImageName(folderName.name, imageTag),
             labels: defaultVsCodeLabels,
-            mounts: await this.getMounts(),
+            mounts: await this.getRemoteDebuggerMount(),
             customOptions: '--expose 8080',
             entrypoint: '/bin/sh'
         });
@@ -123,7 +122,7 @@ export class NetSdkTaskHelper {
         );
     }
 
-    private async getMounts(): Promise<RunContainerBindMount[] | undefined> {
+    private async getRemoteDebuggerMount(): Promise<RunContainerBindMount[] | undefined> {
         const volumes: DockerContainerVolume[] = [];
         const isLinux = await getDockerOSType() === 'linux';
 
