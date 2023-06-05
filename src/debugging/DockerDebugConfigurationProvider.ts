@@ -45,7 +45,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
 
-        // let's only do NET SDK for now
         return callWithTelemetryAndErrorHandling(
             'docker-provideDebugConfigurations', //TODO: change this later
             async (actionContext: IActionContext) => {
@@ -56,7 +55,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
-
         return callWithTelemetryAndErrorHandling(
             debugConfiguration.request === 'attach' ? 'docker-attach' : 'docker-launch',
             async (actionContext: IActionContext) => {
@@ -173,7 +171,9 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         }
     }
 
-    // write a method that takes in two DockerDebugConfiguration and copy the properties from the second one to the first one
+    /**
+     * Copies the first debug configuration from the array to the second one.
+     */
     private copyDebugConfiguration(fromArray: DockerDebugConfiguration[], to: DockerDebugConfiguration): void {
         if (!fromArray || !fromArray[0]) {
             return;
@@ -194,8 +194,8 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
      */
     private async handleEmptyDebugConfig(folder: WorkspaceFolder, actionContext: IActionContext): Promise<DockerDebugConfiguration[]> {
 
-        // NOTE: we can not determine which helper it is by DockerDebugContext, so we need to basically check the
-        //       type of files inside the folder here. let's only do it for .NET Core for now, we can add more later
+        // NOTE: We can not determine the language from `DockerDebugContext`, so we need to check the
+        //       type of files inside the folder here to determine the language.
 
         // check if it's a .NET Core project
         const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN]);
@@ -210,11 +210,11 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     appProject: csProjUris[0]?.absoluteFilePath || '',
                 });
         }
-        // TODO: {potentially} in the future, we can add more support for ambient tasks for other types of projects
         else {
             // for now, we scaffold docker files
             await commands.executeCommand('vscode-docker.configure');
             return [];
         }
+        // TODO: (potentially) in the future, we can add more support for ambient tasks for other types of projects
     }
 }

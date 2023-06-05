@@ -10,10 +10,11 @@ interface DockerPlatformConfiguration {
     netCore?: unknown;
     node?: unknown;
     python?: unknown;
+    preLaunchTask?: string;
 }
 
 export function getPlatform<T extends DockerPlatformConfiguration>(configuration: T): DockerPlatform | undefined {
-    if (configuration.platform === 'netSdk') {
+    if (configuration.preLaunchTask === 'dotnet-container-sdk: debug' && configuration.netCore !== undefined) {
         return 'netSdk';
     } else if (configuration.platform === 'netCore' || configuration.netCore !== undefined) {
         return 'netCore';
