@@ -185,15 +185,15 @@ export class NetCoreDebugHelper implements DebugHelper {
         if (projectInfo.length < 3) {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
-        else if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask)
-            && projectInfo.length >= 5
-            && projectInfo[4] === 'true') { // if .NET has support for SDK Build
-            // fourth is output path and fifth is whether .NET supports SDK Containers
-            return projectInfo[3];
+
+        if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
+            if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
+                return projectInfo[3]; // fourth is output path and
+            }
+            throw new Error(l10n.t('Your current version of .NET SDK does not support Container build. Please update a newer version of .NET SDK.'));
         }
-        else {
-            return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
-        }
+
+        return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
     }
 
     private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
