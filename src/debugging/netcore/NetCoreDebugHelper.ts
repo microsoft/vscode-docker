@@ -188,9 +188,10 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
             if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
-                return projectInfo[3]; // fourth is output path and
+                return projectInfo[3]; // fourth is output path
             }
-            throw new Error(l10n.t('Your current version of .NET SDK does not support Container build. Please update a newer version of .NET SDK.'));
+
+            throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
         }
 
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
