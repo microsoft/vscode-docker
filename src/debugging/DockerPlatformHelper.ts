@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { netSdkDebugHelper } from "./netSdk/NetSdkDebugHelper";
+
 export type DockerPlatform = 'netCore' | 'node' | 'python' | 'netSdk';
 
 interface DockerPlatformConfiguration {
@@ -14,7 +16,7 @@ interface DockerPlatformConfiguration {
 }
 
 export function getPlatform<T extends DockerPlatformConfiguration>(configuration: T): DockerPlatform | undefined {
-    if (configuration.preLaunchTask === 'dotnet-container-sdk: debug' && configuration.netCore !== undefined) {
+    if (netSdkDebugHelper.isDotnetSdkBuild(configuration?.preLaunchTask) && configuration.netCore !== undefined) {
         return 'netSdk';
     } else if (configuration.platform === 'netCore' || configuration.netCore !== undefined) {
         return 'netCore';

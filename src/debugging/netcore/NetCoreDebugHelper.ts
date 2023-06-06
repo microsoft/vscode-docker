@@ -18,6 +18,7 @@ import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { netSdkDebugHelper } from '../netSdk/NetSdkDebugHelper';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
@@ -90,7 +91,9 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
+        const containerAppOutput = netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration?.preLaunchTask)
+            ? appOutput
+            : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
         const dockerServerReadyAction = resolveDockerServerReadyAction(
             debugConfiguration,
@@ -182,8 +185,8 @@ export class NetCoreDebugHelper implements DebugHelper {
         if (projectInfo.length < 3) {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
-        else if (debugConfiguration.preLaunchTask === 'dotnet-container-sdk: debug'
-            && projectInfo.length === 5
+        else if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask)
+            && projectInfo.length >= 5
             && projectInfo[4] === 'true') { // if .NET has support for SDK Build
             // fourth is output path and fifth is whether .NET supports SDK Containers
             return projectInfo[3];
