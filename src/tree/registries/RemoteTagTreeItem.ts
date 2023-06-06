@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
 import { AzExtTreeItem } from '@microsoft/vscode-azext-utils';
+import { default as dayjs } from 'dayjs';
+import { default as relativeTime } from 'dayjs/plugin/relativeTime';
 import { ThemeIcon } from 'vscode';
-import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 import { RemoteRepositoryTreeItemBase } from './RemoteRepositoryTreeItemBase';
+import { getRegistryContextValue, tagSuffix } from './registryContextValues';
 
 dayjs.extend(relativeTime);
 

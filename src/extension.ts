@@ -56,15 +56,12 @@ function initializeExtensionVariables(ctx: vscode.ExtensionContext): void {
     registerUIExtensionVariables(ext);
 }
 
-export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: { loadStartTime: number, loadEndTime: number | undefined }): Promise<unknown | undefined> {
-    perfStats.loadEndTime = Date.now();
-
+export async function activate(ctx: vscode.ExtensionContext): Promise<unknown | undefined> {
     initializeExtensionVariables(ctx);
 
     await callWithTelemetryAndErrorHandling('docker.activate', async (activateContext: IActionContext) => {
         activateContext.errorHandling.rethrow = true;
         activateContext.telemetry.properties.isActivationEvent = 'true';
-        activateContext.telemetry.measurements.mainFileLoad = (perfStats.loadEndTime - perfStats.loadStartTime) / 1000;
 
         // All of these internally handle telemetry opt-in
         ext.activityMeasurementService = new ActivityMeasurementService(ctx.globalState);
@@ -139,7 +136,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     return new DockerExtensionApi(ctx);
 }
 
-export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
+export async function deactivate(ctx: vscode.ExtensionContext): Promise<void> {
     await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
         AzureAccountExtensionListener.dispose();

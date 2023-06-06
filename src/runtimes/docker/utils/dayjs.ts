@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjsinner from 'dayjs';
-import * as customParseFormat from 'dayjs/plugin/customParseFormat';
-import * as utc from 'dayjs/plugin/utc';
+import { default as dayjsinner } from 'dayjs';
+import { default as customParseFormat } from 'dayjs/plugin/customParseFormat';
+import { default as utc } from 'dayjs/plugin/utc';
 
 dayjsinner.extend(customParseFormat);
 dayjsinner.extend(utc);

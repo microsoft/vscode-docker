@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
 import type { Run as AcrRun, ImageDescriptor } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { AzExtTreeItem, nonNullProp } from "@microsoft/vscode-azext-utils";
+import { default as dayjs } from 'dayjs';
+import { default as relativeTime } from 'dayjs/plugin/relativeTime';
 import { ThemeColor, ThemeIcon } from "vscode";
 import { AzureTaskTreeItem } from "./AzureTaskTreeItem";
 
