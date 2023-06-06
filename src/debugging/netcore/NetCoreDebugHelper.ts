@@ -68,7 +68,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
-        const appOutput = debugConfiguration.netCore?.appOutput || await this.inferAppOutput(debugConfiguration.netCore);
+        const appOutput = debugConfiguration.netCore?.appOutput || await this.inferAppOutput(debugConfiguration);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             // inferAppOutput is slow, give a chance to cancel
             return undefined;
@@ -176,13 +176,21 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', helperOptions.appProject);
+    private async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+
         if (projectInfo.length < 3) {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
-
-        return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
+        else if (debugConfiguration.preLaunchTask === 'dotnet-container-sdk: debug'
+            && projectInfo.length === 5
+            && projectInfo[4] === 'true') { // if .NET has support for SDK Build
+            // fourth is output path and fifth is whether .NET supports SDK Containers
+            return projectInfo[3];
+        }
+        else {
+            return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
+        }
     }
 
     private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
