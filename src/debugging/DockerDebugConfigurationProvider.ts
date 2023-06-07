@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
+import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, ProviderResult, workspace, WorkspaceFolder } from 'vscode';
 import { CSPROJ_GLOB_PATTERN, DockerOrchestration } from '../constants';
 import { ext } from '../extensionVariables';
@@ -208,12 +208,12 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 },
                 {
                     appProject: csProjUris[0]?.absoluteFilePath || '',
-                });
-        }
-        else {
+                }
+            );
+        } else {
             // for now, we scaffold docker files
             await commands.executeCommand('vscode-docker.configure');
-            return [];
+            throw new UserCancelledError();
         }
         // TODO: (potentially) in the future, we can add more support for ambient tasks for other types of projects
     }

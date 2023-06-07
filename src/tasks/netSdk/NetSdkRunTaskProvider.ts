@@ -3,38 +3,32 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, CustomExecution, ProviderResult, Task, TaskDefinition, TaskScope } from "vscode";
+import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope } from "vscode";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NET_SDK_RUN_TASK_SYMBOL, NetSdkTaskHelper } from './NetSdkTaskHelper';
+import { NetSdkRunTaskType, NetSdkTaskHelper } from './NetSdkTaskHelper';
 
-const netSdkDebugTaskName = 'debug';
+const NetSdkDebugTaskName = 'debug';
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
-    public constructor(protected readonly helper: NetSdkTaskHelper) { super(NET_SDK_RUN_TASK_SYMBOL, undefined); }
+    public constructor(protected readonly helper: NetSdkTaskHelper) { super(NetSdkRunTaskType, undefined); }
 
-    provideTasks(token: CancellationToken): ProviderResult<Task[]> {
+    public provideTasks(token: CancellationToken): Task[] {
 
         // we need to initialize a task first so we can pass it into `DockerPseudoterminal`
         const task = new Task(
-            { type: NET_SDK_RUN_TASK_SYMBOL },
+            { type: NetSdkRunTaskType },
             TaskScope.Workspace,
-            netSdkDebugTaskName,
-            NET_SDK_RUN_TASK_SYMBOL
+            NetSdkDebugTaskName,
+            NetSdkRunTaskType
         );
 
-        return [
-            new Task(
-                { type: NET_SDK_RUN_TASK_SYMBOL },
-                TaskScope.Workspace,
-                netSdkDebugTaskName,
-                NET_SDK_RUN_TASK_SYMBOL,
-                new CustomExecution(
-                    async (resolvedDefinition: TaskDefinition) => Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))
-                ),
-            )
-        ];
+        task.execution = new CustomExecution(async (resolvedDefinition: TaskDefinition) =>
+            Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))
+        );
+
+        return [task];
     }
 
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {

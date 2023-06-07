@@ -32,9 +32,9 @@ export type RidCpuArchitecture =
     | 's390x'
     | string;
 
-export const NET_SDK_RUN_TASK_SYMBOL = 'dotnet-container-sdk';
-const IMAGE_TAG = 'dev'; // intentionally default to dev tag for phase 1 of this feature
-const ERR_MSG_NO_WORKSPACE_FOLDER = l10n.t(`Unable to determine task scope to execute task ${NET_SDK_RUN_TASK_SYMBOL}. Please open a workspace folder.`);
+export const NetSdkRunTaskType = 'dotnet-container-sdk';
+const NetSdkDefaultImageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
+const ErrMsgNoWorkplaceFolder = l10n.t(`Unable to determine task scope to execute task ${NetSdkRunTaskType}. Please open a workspace folder.`);
 
 export class NetSdkTaskHelper {
 
@@ -46,7 +46,7 @@ export class NetSdkTaskHelper {
         // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
         const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
 
-        const folderName = await quickPickWorkspaceFolder(context.actionContext, ERR_MSG_NO_WORKSPACE_FOLDER);
+        const folderName = await quickPickWorkspaceFolder(context.actionContext, ErrMsgNoWorkplaceFolder);
 
         const args = composeArgs(
             withArg('dotnet', 'publish'),
@@ -55,7 +55,7 @@ export class NetSdkTaskHelper {
             withArg(publishFlag),
             withNamedArg('--configuration', configuration),
             withNamedArg('-p:ContainerImageName', getValidImageName(folderName.name), { assignValue: true }),
-            withNamedArg('-p:ContainerImageTag', IMAGE_TAG, { assignValue: true })
+            withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
         )();
 
         const quotedArgs = Shell.getShellOrDefault().quote(args);
@@ -64,15 +64,15 @@ export class NetSdkTaskHelper {
 
     public async getNetSdkRunCommand(context: DockerTaskExecutionContext): Promise<string> {
         const client = await ext.runtimeManager.getClient();
-        const folderName = await quickPickWorkspaceFolder(context.actionContext, ERR_MSG_NO_WORKSPACE_FOLDER);
+        const folderName = await quickPickWorkspaceFolder(context.actionContext, ErrMsgNoWorkplaceFolder);
 
         const command = await client.runContainer({
             detached: true,
             publishAllPorts: true,
-            name: getDefaultContainerName(folderName.name, IMAGE_TAG),
+            name: getDefaultContainerName(folderName.name, NetSdkDefaultImageTag),
             environmentVariables: {},
             removeOnExit: true,
-            imageRef: getDefaultImageName(folderName.name, IMAGE_TAG),
+            imageRef: getDefaultImageName(folderName.name, NetSdkDefaultImageTag),
             labels: defaultVsCodeLabels,
             mounts: await this.getRemoteDebuggerMount(),
             customOptions: '--expose 8080',
@@ -88,7 +88,7 @@ export class NetSdkTaskHelper {
     public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
         const noProjectFileErrMessage = l10n.t('No .csproj file could be found.');
         const item = await quickPickProjectFileItem(context, undefined, folder, noProjectFileErrMessage);
-        return item.absoluteFilePath || '';
+        return item.absoluteFilePath;
     }
 
     /**

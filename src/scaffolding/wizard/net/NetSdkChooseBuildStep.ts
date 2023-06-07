@@ -10,8 +10,8 @@ import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetChooseBuildTypeContext } from './NetContainerBuild';
 
 export const NetContainerBuildOptions = [
-    'Use a Dockerfile',
-    'Use .NET SDK'
+    vscode.l10n.t('Use a Dockerfile'),
+    vscode.l10n.t('Use .NET SDK')
 ] as const;
 
 type NetContainerBuildOptionsTuple = typeof NetContainerBuildOptions;
@@ -23,8 +23,8 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
         // get workspace momento storage
         const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions');
 
-        // only remember if it was .NET SDK, otherwise prompt again
-        if (containerBuildOptions === 'Use .NET SDK') {
+        // only remember if it was 'Use .NET SDK', otherwise prompt again
+        if (containerBuildOptions === NetContainerBuildOptions[1]) {
             wizardContext.containerBuildOptions = containerBuildOptions;
             return;
         }

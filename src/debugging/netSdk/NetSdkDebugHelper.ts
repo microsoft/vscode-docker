@@ -1,16 +1,17 @@
 import { commands } from "vscode";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
+import { NetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerDebugScaffoldContext } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
 import { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions } from "../netcore/NetCoreDebugHelper";
 
-const netContainerSdkBuildSymbol = 'dotnet-container-sdk: debug';
+const NetSdkTaskFullSymbol = 'dotnet-container-sdk: debug';
 export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
 
-        const providers: DockerDebugConfiguration[] = [];
+        const configurations: DockerDebugConfiguration[] = [];
 
         const netCoreBuildContext: NetChooseBuildTypeContext = {
             ...context.actionContext,
@@ -20,12 +21,12 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
         await netContainerBuild(netCoreBuildContext);
 
-        if (netCoreBuildContext?.containerBuildOptions === 'Use .NET SDK') {
-            providers.push({
+        if (netCoreBuildContext?.containerBuildOptions === NetContainerBuildOptions[1]) {
+            configurations.push({
                 name: 'Docker .NET Container SDK Launch',
                 type: 'docker',
                 request: 'launch',
-                preLaunchTask: netContainerSdkBuildSymbol,
+                preLaunchTask: NetSdkTaskFullSymbol,
                 netCore: {
                     appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
                 },
@@ -34,7 +35,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
             await commands.executeCommand('vscode-docker.configure');
         }
 
-        return providers;
+        return configurations;
     }
 
     /**
@@ -44,7 +45,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
      *          false otherwise
      */
     public isDotnetSdkBuild(preLaunchTask: string): boolean {
-        return preLaunchTask && preLaunchTask === netContainerSdkBuildSymbol;
+        return preLaunchTask === NetSdkTaskFullSymbol;
     }
 }
 
