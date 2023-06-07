@@ -46,7 +46,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
 
         return callWithTelemetryAndErrorHandling(
-            'docker-provideDebugConfigurations', //TODO: change this later
+            'provideDebugConfigurations',
             async (actionContext: IActionContext) => {
                 return this.handleEmptyDebugConfig(folder, actionContext);
             }
@@ -73,12 +73,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 if (debugConfiguration.type === undefined &&
                     debugConfiguration.request === undefined &&
                     debugConfiguration.name === undefined) {
+
                     const newlyCreatedDebugConfig = await this.handleEmptyDebugConfig(folder, actionContext);
-                    this.copyDebugConfiguration(newlyCreatedDebugConfig, debugConfiguration);
                     // if there is no debugConfiguration, we should return undefined to exit the debug session
-                    if (newlyCreatedDebugConfig.length === 0) {
+                    if (newlyCreatedDebugConfig.length === 0 || !newlyCreatedDebugConfig[0]) {
                         return undefined;
                     }
+
+                    debugConfiguration = newlyCreatedDebugConfig[0];
                 }
 
                 if (!debugConfiguration.request) {
@@ -167,22 +169,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 }
             } catch {
                 // Best effort
-            }
-        }
-    }
-
-    /**
-     * Copies the first debug configuration from the array to the second one.
-     */
-    private copyDebugConfiguration(fromArray: DockerDebugConfiguration[], to: DockerDebugConfiguration): void {
-        if (!fromArray || !fromArray[0]) {
-            return;
-        }
-
-        const from = fromArray[0];
-        for (const key of Object.keys(from)) {
-            if (from[key] !== undefined) {
-                to[key] = from[key];
             }
         }
     }

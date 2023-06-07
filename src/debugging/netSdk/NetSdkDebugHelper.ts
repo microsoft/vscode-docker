@@ -1,6 +1,6 @@
 import { commands } from "vscode";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
-import { NetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
+import { AllNetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerDebugScaffoldContext } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
@@ -21,7 +21,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
         await netContainerBuild(netCoreBuildContext);
 
-        if (netCoreBuildContext?.containerBuildOptions === NetContainerBuildOptions[1]) {
+        if (netCoreBuildContext?.containerBuildOptions === AllNetContainerBuildOptions[1]) {
             configurations.push({
                 name: 'Docker .NET Container SDK Launch',
                 type: 'docker',

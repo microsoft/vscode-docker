@@ -9,12 +9,12 @@ import { getFromWorkspaceState, updateWorkspaceState } from '../../../utils/Stat
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetChooseBuildTypeContext } from './NetContainerBuild';
 
-export const NetContainerBuildOptions = [
+export const AllNetContainerBuildOptions = [
     vscode.l10n.t('Use a Dockerfile'),
     vscode.l10n.t('Use .NET SDK')
 ] as const;
 
-type NetContainerBuildOptionsTuple = typeof NetContainerBuildOptions;
+type NetContainerBuildOptionsTuple = typeof AllNetContainerBuildOptions;
 export type NetContainerBuildOptions = NetContainerBuildOptionsTuple[number];
 
 export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTypeContext> {
@@ -24,7 +24,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
         const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions');
 
         // only remember if it was 'Use .NET SDK', otherwise prompt again
-        if (containerBuildOptions === NetContainerBuildOptions[1]) {
+        if (containerBuildOptions === AllNetContainerBuildOptions[1]) {
             wizardContext.containerBuildOptions = containerBuildOptions;
             return;
         }
@@ -35,7 +35,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
             placeHolder: vscode.l10n.t('How would you like to build your container image?'),
         };
 
-        const buildOptions = NetContainerBuildOptions as readonly NetContainerBuildOptions[];
+        const buildOptions = AllNetContainerBuildOptions as readonly NetContainerBuildOptions[];
         const items = buildOptions.map(p => <IAzureQuickPickItem<NetContainerBuildOptions>>{ label: p, data: p });
 
         const response = await wizardContext.ui.showQuickPick(items, opt);
