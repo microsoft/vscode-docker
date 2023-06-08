@@ -5,9 +5,12 @@
 
 import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
-import { getFromWorkspaceState, updateWorkspaceState } from '../../../utils/StateUtils';
+import { ext } from '../../../extensionVariables';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
 import { NetChooseBuildTypeContext } from './NetContainerBuild';
+
+/** Key to .NET Container Build Options workplace momento storage */
+export const NetContainerBuildOptionsKey = 'netContainerBuildOptions';
 
 export const AllNetContainerBuildOptions = [
     vscode.l10n.t('Use a Dockerfile'),
@@ -21,7 +24,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
     public async prompt(wizardContext: NetChooseBuildTypeContext): Promise<void> {
 
         // get workspace momento storage
-        const containerBuildOptions = await getFromWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions');
+        const containerBuildOptions = await ext.context.workspaceState.get<NetContainerBuildOptions>(NetContainerBuildOptionsKey);
 
         // only remember if it was 'Use .NET SDK', otherwise prompt again
         if (containerBuildOptions === AllNetContainerBuildOptions[1]) {
@@ -42,7 +45,7 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
         wizardContext.containerBuildOptions = response.data;
 
         // update workspace momento storage
-        await updateWorkspaceState<NetContainerBuildOptions>('netContainerBuildOptions', wizardContext.containerBuildOptions);
+        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, wizardContext.containerBuildOptions);
     }
 
     public shouldPrompt(wizardContext: NetChooseBuildTypeContext): boolean {

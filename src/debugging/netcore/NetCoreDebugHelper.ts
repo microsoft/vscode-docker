@@ -9,6 +9,7 @@ import * as path from 'path';
 import { DebugConfiguration, MessageItem, ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { CommandLineArgs, ContainerOS, VoidCommandResponse, composeArgs, withArg, withQuotedArg } from '../../runtimes/docker';
+import { NetContainerBuildOptionsKey } from '../../scaffolding/wizard/net/NetSdkChooseBuildStep';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -189,9 +190,10 @@ export class NetCoreDebugHelper implements DebugHelper {
         if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
             if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
                 return projectInfo[3]; // fourth is output path
+            } else {
+                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
+                throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
             }
-
-            throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
         }
 
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
