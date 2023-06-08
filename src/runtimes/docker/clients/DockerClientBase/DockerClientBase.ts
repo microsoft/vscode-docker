@@ -1713,10 +1713,6 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     }
 
     async writeFile(options: WriteFileCommandOptions): Promise<VoidCommandResponse> {
-        if (options.operatingSystem === 'windows') {
-            throw new CommandNotSupportedError('Writing files is not supported on Windows containers.');
-        }
-
         return {
             command: this.commandName,
             args: this.getWriteFileCommandArgs(options),

@@ -284,8 +284,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             const inspectInfo = (await ext.runWithDefaults(client =>
                 client.inspectContainers({ containers: [containerName] })
             ))?.[0];
-            const containerInfo = inspectInfo ? JSON.parse(inspectInfo.raw) : undefined;
-            if (containerInfo?.HostConfig?.Isolation === 'hyperv') {
+
+            if (inspectInfo?.isolation === 'hyperv') {
                 context.errorHandling.suppressReportIssue = true;
                 throw new Error(l10n.t('Attaching a debugger to a Hyper-V container is not supported.'));
             }
