@@ -44,7 +44,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
      * @returns true if the launch task is using the .NET SDK Container build
      *          false otherwise
      */
-    public isDotnetSdkBuild(preLaunchTask: string): boolean {
+    public isDotNetSdkBuild(preLaunchTask: string): boolean {
         return preLaunchTask === NetSdkTaskFullSymbol;
     }
 }

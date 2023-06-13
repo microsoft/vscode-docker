@@ -92,7 +92,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration?.preLaunchTask)
+        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration?.preLaunchTask)
             ? appOutput
             : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
@@ -187,7 +187,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
 
-        if (netSdkDebugHelper.isDotnetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
+        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
             if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
                 return projectInfo[3]; // fourth is output path
             } else {

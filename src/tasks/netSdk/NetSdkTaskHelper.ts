@@ -75,7 +75,7 @@ export class NetSdkTaskHelper {
             imageRef: getDefaultImageName(folderName.name, NetSdkDefaultImageTag),
             labels: defaultVsCodeLabels,
             mounts: await this.getRemoteDebuggerMount(),
-            customOptions: '--expose 8080',
+            exposes: [8080], // hard coded for now since the default port is 8080
             entrypoint: '/bin/sh'
         });
 
