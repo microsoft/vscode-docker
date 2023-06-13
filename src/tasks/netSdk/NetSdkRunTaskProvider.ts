@@ -7,12 +7,12 @@ import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope } f
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NetSdkRunTaskType, NetSdkTaskHelper } from './NetSdkTaskHelper';
+import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand } from './netSdkTaskUtils';
 
 const NetSdkDebugTaskName = 'debug';
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
-    public constructor(protected readonly helper: NetSdkTaskHelper) { super(NetSdkRunTaskType, undefined); }
+    public constructor() { super(NetSdkRunTaskType, undefined); }
 
     public provideTasks(token: CancellationToken): Task[] {
 
@@ -34,7 +34,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
 
         // use dotnet to build the image
-        const buildCommand = await this.helper.getNetSdkBuildCommand(context);
+        const buildCommand = await getNetSdkBuildCommand(context);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
@@ -44,7 +44,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         );
 
         // use docker run to run the image
-        const runCommand = await this.helper.getNetSdkRunCommand(context);
+        const runCommand = await getNetSdkRunCommand(context);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {

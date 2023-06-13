@@ -21,7 +21,6 @@ import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } 
 import { DockerRunTask, DockerRunTaskDefinition, DockerRunTaskProvider } from './DockerRunTaskProvider';
 import { TaskDefinitionBase } from './TaskDefinitionBase';
 import { NetSdkRunTaskProvider } from './netSdk/NetSdkRunTaskProvider';
-import { netTaskHelper } from './netSdk/NetSdkTaskHelper';
 import { netCoreTaskHelper } from './netcore/NetCoreTaskHelper';
 import { nodeTaskHelper } from './node/NodeTaskHelper';
 import { pythonTaskHelper } from './python/PythonTaskHelper';
@@ -107,7 +106,7 @@ export function registerTaskProviders(ctx: ExtensionContext): void {
     ctx.subscriptions.push(
         tasks.registerTaskProvider(
             'dotnet-container-sdk',
-            new NetSdkRunTaskProvider(netTaskHelper)
+            new NetSdkRunTaskProvider()
         )
     );
 }
