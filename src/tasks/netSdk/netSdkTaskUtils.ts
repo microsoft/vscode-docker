@@ -13,9 +13,8 @@ import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
-import { DockerContainerVolume } from "../DockerRunTaskDefinitionBase";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskExecutionContext, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, getMounts } from "../TaskHelper";
+import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 
 /**
@@ -117,17 +116,13 @@ async function normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
  * everything it needs to run the app already inside.
  */
 async function getRemoteDebuggerMount(): Promise<RunContainerBindMount[] | undefined> {
-    const volumes: DockerContainerVolume[] = [];
-    const isWindows = await getDockerOSType() === 'windows';
-
-    const debuggerVolume: DockerContainerVolume = {
-        localPath: vsDbgInstallBasePath,
-        containerPath: isWindows ? 'C:\\remote_debugger' : '/remote_debugger',
-        permissions: 'ro'
+    const debuggerVolume: RunContainerBindMount = {
+        type: 'bind',
+        source: vsDbgInstallBasePath,
+        destination: await getDockerOSType() === 'windows' ? 'C:\\remote_debugger' : '/remote_debugger',
+        readOnly: true
     };
-
-    addVolumeWithoutConflicts(volumes, debuggerVolume);
-    return getMounts(volumes);
+    return [debuggerVolume];
 }
 
 

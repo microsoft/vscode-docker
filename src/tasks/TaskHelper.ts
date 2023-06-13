@@ -9,7 +9,7 @@ import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
 import { DockerPlatform } from '../debugging/DockerPlatformHelper';
-import { ContainerPlatform, RunContainerBindMount } from '../runtimes/docker';
+import { ContainerPlatform } from '../runtimes/docker';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
 import { resolveVariables } from '../utils/resolveVariables';
@@ -285,15 +285,4 @@ export function normalizePlatform(platform: string | ContainerPlatform): Contain
     }
 
     return platform as ContainerPlatform || undefined;
-}
-
-export function getMounts(volumes?: DockerContainerVolume[]): RunContainerBindMount[] | undefined {
-    return volumes?.map(v => {
-        return {
-            source: v.localPath,
-            destination: v.containerPath,
-            readOnly: v.permissions === 'ro' || (v.permissions as unknown === 'ro,z'), // Maintain compatibility with old `ro,z` option as much as possible
-            type: 'bind',
-        };
-    });
 }
