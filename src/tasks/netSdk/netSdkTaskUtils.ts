@@ -118,11 +118,11 @@ async function normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
  */
 async function getRemoteDebuggerMount(): Promise<RunContainerBindMount[] | undefined> {
     const volumes: DockerContainerVolume[] = [];
-    const isLinux = await getDockerOSType() === 'linux';
+    const isWindows = await getDockerOSType() === 'windows';
 
     const debuggerVolume: DockerContainerVolume = {
         localPath: vsDbgInstallBasePath,
-        containerPath: isLinux ? '/remote_debugger' : 'C:\\remote_debugger',
+        containerPath: isWindows ? 'C:\\remote_debugger' : '/remote_debugger',
         permissions: 'ro'
     };
 
