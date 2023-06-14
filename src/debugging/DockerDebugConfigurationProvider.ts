@@ -70,9 +70,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     }
                 }
 
-                if (debugConfiguration.type === undefined &&
-                    debugConfiguration.request === undefined &&
-                    debugConfiguration.name === undefined) {
+                if (Object.keys(debugConfiguration).length === 0) {
 
                     const newlyCreatedDebugConfig = await this.handleEmptyDebugConfig(folder, actionContext);
                     // if there is no debugConfiguration, we should return undefined to exit the debug session
