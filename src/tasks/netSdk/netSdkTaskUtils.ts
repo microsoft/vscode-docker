@@ -72,7 +72,7 @@ export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): 
         imageRef: getDefaultImageName(folderName.name, NetSdkDefaultImageTag),
         labels: defaultVsCodeLabels,
         mounts: await getRemoteDebuggerMount(),
-        exposes: [8080], // hard coded for now since the default port is 8080
+        exposePorts: [8080], // hard coded for now since the default port is 8080
         entrypoint: '/bin/sh'
     });
 

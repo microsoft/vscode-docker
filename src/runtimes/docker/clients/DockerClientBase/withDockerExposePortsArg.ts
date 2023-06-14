@@ -5,6 +5,6 @@
 
 import { withNamedArg } from "../../utils/commandLineBuilder";
 
-export function withDockerExposesArg(ports?: Array<number>) {
-    return withNamedArg('--expose', ports.toString(), { shouldQuote: false });
+export function withDockerExposePortsArg(ports?: Array<number>) {
+    return withNamedArg('--expose', (ports || []).map(port => port.toString()), { shouldQuote: false });
 }

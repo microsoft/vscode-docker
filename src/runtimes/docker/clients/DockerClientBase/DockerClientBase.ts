@@ -106,7 +106,7 @@ import { withContainerPathArg } from './withContainerPathArg';
 import { withDockerAddHostArg } from './withDockerAddHostArg';
 import { withDockerBuildArg } from './withDockerBuildArg';
 import { withDockerEnvArg } from './withDockerEnvArg';
-import { withDockerExposesArg } from './withDockerExposesArg';
+import { withDockerExposePortsArg } from './withDockerExposePortsArg';
 import { withDockerBooleanFilterArg, withDockerFilterArg } from './withDockerFilterArg';
 import { withDockerIgnoreSizeArg } from './withDockerIgnoreSizeArg';
 import { withDockerJsonFormatArg } from "./withDockerJsonFormatArg";
@@ -684,7 +684,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withDockerEnvArg(options.environmentVariables),
             withNamedArg('--env-file', options.environmentFiles),
             withNamedArg('--entrypoint', options.entrypoint),
-            withDockerExposesArg(options.exposes),
+            withDockerExposePortsArg(options.exposePorts),
             withVerbatimArg(options.customOptions),
             withArg(options.imageRef),
             typeof options.command === 'string' ? withVerbatimArg(options.command) : withArg(...(toArray(options.command || []))),

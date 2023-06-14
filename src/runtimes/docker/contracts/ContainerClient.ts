@@ -747,7 +747,7 @@ export type RunContainerCommandOptions = CommonCommandOptions & {
     /**
      * Optional expose ports for the container
      */
-    exposes?: Array<number>;
+    exposePorts?: Array<number>;
     /**
      * Additional custom options to pass
      */
