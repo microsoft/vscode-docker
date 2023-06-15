@@ -12,6 +12,7 @@ import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './Do
 import { DockerPlatform } from './DockerPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
 import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
+import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
 import { pythonDebugHelper } from './python/PythonDebugHelper';
 
@@ -51,6 +52,7 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
                     netCore: netCoreDebugHelper,
                     node: nodeDebugHelper,
                     python: pythonDebugHelper,
+                    netSdk: netSdkDebugHelper
                 }
             )
         )

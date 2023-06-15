@@ -18,7 +18,7 @@ export function formatDockerPlatform(platform: ContainerPlatform): string | unde
     return `${os}/${architecture}`;
 }
 
-/**p
+/**
  * This method formats the `platform` flag for the Docker CLI.
  *
  * The `os` and `architecture` properties are extracted and used to create a new `ContainerPlatform`

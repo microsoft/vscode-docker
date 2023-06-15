@@ -640,6 +640,11 @@
             {
                 "type": "docker",
                 "label": "Docker: Debug in Container",
+                "languages": [
+                    "csharp",
+                    "razor",
+                    "aspnetcorerazor"
+                ],
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
@@ -1504,6 +1509,9 @@
                 "required": [
                     "dockerCompose"
                 ]
+            },
+            {
+                "type": "dotnet-container-sdk"
             }
         ],
         "languages": [
