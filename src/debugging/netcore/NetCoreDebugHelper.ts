@@ -9,6 +9,7 @@ import * as path from 'path';
 import { DebugConfiguration, MessageItem, ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { CommandLineArgs, ContainerOS, VoidCommandResponse, composeArgs, withArg, withQuotedArg } from '../../runtimes/docker';
+import { NetContainerBuildOptionsKey } from '../../scaffolding/wizard/net/NetSdkChooseBuildStep';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -18,6 +19,7 @@ import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
+import { netSdkDebugHelper } from '../netSdk/NetSdkDebugHelper';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
@@ -68,7 +70,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
-        const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
+        const appOutput = debugConfiguration.netCore?.appOutput || await this.inferAppOutput(debugConfiguration);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             // inferAppOutput is slow, give a chance to cancel
             return undefined;
@@ -90,7 +92,9 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
+        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration?.preLaunchTask)
+            ? appOutput
+            : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
         const dockerServerReadyAction = resolveDockerServerReadyAction(
             debugConfiguration,
@@ -176,10 +180,20 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', helperOptions.appProject);
+    private async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+
         if (projectInfo.length < 3) {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
+        }
+
+        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
+            if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
+                return projectInfo[3]; // fourth is output path
+            } else {
+                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
+                throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
+            }
         }
 
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
