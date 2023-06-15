@@ -16,9 +16,9 @@ export async function showDockerInstallNotification(): Promise<void> {
         const response = await vscode.window.showInformationMessage(learnMoreMessage, ...[confirmationPrompt]);
         if (response) {
             if (isWindows()) {
-                await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/docker-windows-download'));
+                await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/vscode/docker-windows-download'));
             } else if (isMac()) {
-                await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/docker-mac-download'));
+                await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/vscode/docker-mac-download'));
             } else {
                 await vscode.env.openExternal(vscode.Uri.parse('https://aka.ms/download-docker-linux-vscode'));
             }
