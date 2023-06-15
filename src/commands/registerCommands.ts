@@ -74,7 +74,6 @@ import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
-import { openDockerDownloadPage } from "./showDockerLearnMoreNotification";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
 import { inspectVolume } from "./volumes/inspectVolume";
 import { pruneVolumes } from "./volumes/pruneVolumes";
@@ -205,7 +204,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.contexts.remove', removeDockerContext);
     registerCommand('vscode-docker.contexts.use', useDockerContext);
 
-    registerCommand('vscode-docker.openDockerDownloadPage', openDockerDownloadPage);
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));
 }

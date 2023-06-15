@@ -2302,11 +2302,6 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.openDockerDownloadPage",
-                "title": "%vscode-docker.commands.openDockerDownloadPage%",
-                "category": "%vscode-docker.commands.category.docker%"
-            },
-            {
                 "command": "vscode-docker.containers.attachShell",
                 "title": "%vscode-docker.commands.containers.attachShell%",
                 "category": "%vscode-docker.commands.category.dockerContainers%"
