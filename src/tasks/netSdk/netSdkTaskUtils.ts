@@ -47,8 +47,8 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext)
 
     const args = composeArgs(
         withArg('dotnet', 'publish'),
-        withNamedArg('--os', await normalizeOsToRid()),
-        withNamedArg('--arch', await normalizeArchitectureToRid()),
+        withNamedArg('--os', await normalizeOsToRidOs()),
+        withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
         withArg(publishFlag),
         withNamedArg('--configuration', configuration),
         withNamedArg('-p:ContainerImageName', getValidImageName(folderName.name), { assignValue: true }),
@@ -91,7 +91,7 @@ async function inferProjPath(context: IActionContext, folder: WorkspaceFolder): 
  * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeOsToRid(): Promise<'linux' | 'win'> {
+async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
     const dockerOsType = await getDockerOSType();
     return dockerOsType === 'windows' ? 'win' : 'linux';
 }
@@ -100,7 +100,7 @@ async function normalizeOsToRid(): Promise<'linux' | 'win'> {
  * This method normalizes the native architecture to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeArchitectureToRid(): Promise<RidCpuArchitecture> {
+async function normalizeArchitectureToRidArchitecture(): Promise<RidCpuArchitecture> {
     const architecture = os.arch();
     switch (architecture) {
         case 'x32':
