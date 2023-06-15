@@ -247,7 +247,7 @@
     "vscode-docker.commands.images.runInteractive": "Run Interactive",
     "vscode-docker.commands.images.tag": "Tag...",
     "vscode-docker.commands.images.copyFullTag": "Copy Full Tag",
-    "vscode-docker.commands.installDocker": "Install Docker",
+    "vscode-docker.commands.openDockerDownloadPage": "Learn More About Installing Docker Desktop",
     "vscode-docker.commands.networks.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.networks.create": "Create...",
     "vscode-docker.commands.networks.inspect": "Inspect",

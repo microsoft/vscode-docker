@@ -5,7 +5,7 @@
 
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, parseError } from "@microsoft/vscode-azext-utils";
 import { ConfigurationTarget, ThemeColor, ThemeIcon, WorkspaceConfiguration, l10n, workspace } from "vscode";
-import { showDockerInstallNotification } from "../commands/showDockerInstallNotification";
+import { showDockerLearnMoreNotification } from "../commands/showDockerLearnMoreNotification";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
 import { ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem, isCommandNotSupportedError } from "../runtimes/docker";
@@ -323,7 +323,7 @@ export abstract class LocalRootTreeItemBase<TItem extends AnyContainerObject, TP
         if (!dockerInstallNotificationShownToUser && this._currentDockerStatus === 'NotInstalled') {
             dockerInstallNotificationShownToUser = true;
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            showDockerInstallNotification();
+            showDockerLearnMoreNotification();
         }
     }
 }

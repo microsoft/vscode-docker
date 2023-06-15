@@ -20,6 +20,7 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this.openWalkthroughTreeItem,
             this.reviewIssuesTreeItem,
             this.reportIssuesTreeItem,
+            this.learnMoreDownloadDockerTreeItem,
         ]);
     }
 
@@ -109,6 +110,22 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             }
         );
         node.id = '50';
+
+        return node;
+    }
+
+    private get learnMoreDownloadDockerTreeItem(): AzExtTreeItem {
+        const node = new GenericTreeItem(
+            this,
+            {
+                label: l10n.t('Docker Installation'),
+                contextValue: 'Docker Installation',
+                commandId: 'vscode-docker.openDockerDownloadPage',
+                iconPath: new ThemeIcon('link-external'),
+                includeInTreeItemPicker: true,
+            }
+        );
+        node.id = '60';
 
         return node;
     }
