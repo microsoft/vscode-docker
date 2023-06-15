@@ -4,22 +4,22 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, parseError } from "@microsoft/vscode-azext-utils";
-import { ConfigurationTarget, l10n, ThemeColor, ThemeIcon, workspace, WorkspaceConfiguration } from "vscode";
-import { showDockerInstallNotification } from "../commands/dockerInstaller";
+import { ConfigurationTarget, ThemeColor, ThemeIcon, WorkspaceConfiguration, l10n, workspace } from "vscode";
+import { showDockerInstallNotification } from "../commands/showDockerInstallNotification";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
-import { isCommandNotSupportedError, ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem } from "../runtimes/docker";
-import { DockerExtensionKind, getVSCodeRemoteInfo, IVSCodeRemoteInfo, RemoteKind } from "../utils/getVSCodeRemoteInfo";
+import { ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem, isCommandNotSupportedError } from "../runtimes/docker";
 import { runtimeInstallStatusProvider } from "../utils/RuntimeInstallStatusProvider";
-import { DatedDockerImage } from "./images/ImagesTreeItem";
+import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from "../utils/getVSCodeRemoteInfo";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";
 import { OpenUrlTreeItem } from "./OpenUrlTreeItem";
+import { TreePrefix } from "./TreePrefix";
+import { DatedDockerImage } from "./images/ImagesTreeItem";
 import { CommonGroupBy, CommonProperty, CommonSortBy, sortByProperties } from "./settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "./settings/ITreeSettingInfo";
-import { ITreeSettingsWizardContext, ITreeSettingWizardInfo } from "./settings/ITreeSettingsWizardContext";
+import { ITreeSettingWizardInfo, ITreeSettingsWizardContext } from "./settings/ITreeSettingsWizardContext";
 import { TreeSettingListStep } from "./settings/TreeSettingListStep";
 import { TreeSettingStep } from "./settings/TreeSettingStep";
-import { TreePrefix } from "./TreePrefix";
 
 type DockerStatus = 'NotInstalled' | 'Installed' | 'Running';
 
