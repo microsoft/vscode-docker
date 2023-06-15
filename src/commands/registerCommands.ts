@@ -44,14 +44,12 @@ import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { hideDanglingImages, setInitialDanglingContextValue, showDanglingImages } from "./images/showDanglingImages";
 import { tagImage } from "./images/tagImage";
-import { installDocker } from "./installDocker";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
 import { createNetwork } from "./networks/createNetwork";
 import { inspectNetwork } from "./networks/inspectNetwork";
 import { pruneNetworks } from "./networks/pruneNetworks";
 import { removeNetwork } from "./networks/removeNetwork";
 import { pruneSystem } from "./pruneSystem";
-import { registerLocalCommand } from "./registerLocalCommand";
 import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
@@ -205,8 +203,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.contexts.inspect', inspectDockerContext);
     registerCommand('vscode-docker.contexts.remove', removeDockerContext);
     registerCommand('vscode-docker.contexts.use', useDockerContext);
-
-    registerLocalCommand('vscode-docker.installDocker', installDocker);
 
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));

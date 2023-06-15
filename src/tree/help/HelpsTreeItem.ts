@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, GenericTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { l10n, ThemeIcon } from "vscode";
-import { getThemedIconPath } from '../getThemedIconPath';
+import { ThemeIcon, l10n } from "vscode";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
 
 export class HelpsTreeItem extends AzExtParentTreeItem {
@@ -21,7 +20,6 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             this.openWalkthroughTreeItem,
             this.reviewIssuesTreeItem,
             this.reportIssuesTreeItem,
-            this.installDockerTreeItem,
         ]);
     }
 
@@ -111,22 +109,6 @@ export class HelpsTreeItem extends AzExtParentTreeItem {
             }
         );
         node.id = '50';
-
-        return node;
-    }
-
-    private get installDockerTreeItem(): AzExtTreeItem {
-        const node = new GenericTreeItem(
-            this,
-            {
-                label: l10n.t('Install Docker'),
-                contextValue: 'Install Docker',
-                commandId: 'vscode-docker.installDocker',
-                iconPath: getThemedIconPath('docker'),
-                includeInTreeItemPicker: true,
-            }
-        );
-        node.id = '60';
 
         return node;
     }
