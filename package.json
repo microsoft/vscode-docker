@@ -43,6 +43,10 @@
         "menus": {
             "commandPalette": [
                 {
+                    "command": "vscode-docker.openDockerDownloadPage",
+                    "when": "never"
+                },
+                {
                     "command": "vscode-docker.containers.downloadFile",
                     "when": "never"
                 },
@@ -2298,8 +2302,8 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.installDocker",
-                "title": "%vscode-docker.commands.installDocker%",
+                "command": "vscode-docker.openDockerDownloadPage",
+                "title": "%vscode-docker.commands.openDockerDownloadPage%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
