@@ -3,6 +3,8 @@ trigger:
   - main
   - rel/*
 
+pr: none # Disable PR trigger
+
 # Scheduled nightly build
 schedules:
   - cron: "0 0 * * *"
