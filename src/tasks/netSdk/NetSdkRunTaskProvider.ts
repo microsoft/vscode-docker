@@ -3,11 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope } from "vscode";
+import * as path from "path";
+import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope, Uri } from "vscode";
+import { Item } from "../../utils/quickPickFile";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand } from './netSdkTaskUtils';
+import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand, inferProjPath } from './netSdkTaskUtils';
 
 const NetSdkDebugTaskName = 'debug';
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
@@ -32,6 +34,21 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
     }
 
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
+
+        // find the project path and set the project folder
+        const projPath: Item = await inferProjPath(context.actionContext, context.folder);
+        const folderUri = Uri.file(path.dirname(projPath.absoluteFilePath));
+        const folder = {
+            uri: folderUri,
+            name: path.basename(folderUri.fsPath),
+            index: 1,
+        };
+
+        if (!folder) {
+            throw new Error(`Failed to find workspace folder for ${projPath.absoluteFolderPath}`);
+        }
+
+        context.folder = folder;
 
         // use dotnet to build the image
         const buildCommand = await getNetSdkBuildCommand(context);

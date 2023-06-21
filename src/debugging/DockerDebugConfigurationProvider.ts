@@ -189,9 +189,6 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     actionContext,
                     dockerfile: undefined,
                     folder: folder
-                },
-                {
-                    appProject: csProjUris[0]?.absoluteFilePath || '',
                 }
             );
         } else {

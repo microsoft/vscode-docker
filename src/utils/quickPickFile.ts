@@ -178,3 +178,17 @@ export async function quickPickProjectFileItem(context: IActionContext, fileUri:
     }
     return fileItem;
 }
+
+export async function quickPickCsProjFileItem(context: IActionContext, fileUri: vscode.Uri, rootFolder: vscode.WorkspaceFolder, noProjectFileMessage: string): Promise<Item> {
+    if (fileUri) {
+        return createFileItem(rootFolder, fileUri);
+    }
+
+    const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN]);
+    const fileItem: Item = await quickPickFileItem(context, items, vscode.l10n.t('Choose a .csproj file.'));
+
+    if (!fileItem) {
+        throw new Error(noProjectFileMessage);
+    }
+    return fileItem;
+}

@@ -1,6 +1,10 @@
-import { commands } from "vscode";
+import * as path from "path";
+import { Uri, commands, workspace } from "vscode";
+import { ext } from "../../extensionVariables";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
 import { AllNetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
+import { getDefaultContainerName } from "../../tasks/TaskHelper";
+import { inferProjPath } from "../../tasks/netSdk/netSdkTaskUtils";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerDebugScaffoldContext } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
@@ -20,15 +24,18 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         };
 
         await netContainerBuild(netCoreBuildContext);
-
         if (netCoreBuildContext?.containerBuildOptions === AllNetContainerBuildOptions[1]) {
+            await ext.context.workspaceState.update('netSdkProjPath', undefined); // reset the project path
+            const appProjectAbsolutePath = await inferProjPath(context.actionContext, context.folder);
+
             configurations.push({
                 name: 'Docker .NET Container SDK Launch',
                 type: 'docker',
                 request: 'launch',
                 preLaunchTask: NetSdkTaskFullSymbol,
+                containerName: getDefaultContainerName(this.getProjectFolderNameFromProjectPath(appProjectAbsolutePath.absoluteFilePath), "dev"),
                 netCore: {
-                    appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
+                    appProject: unresolveWorkspaceFolder(appProjectAbsolutePath.absoluteFilePath, workspace.workspaceFolders[0]),
                 },
             });
         } else {
@@ -46,6 +53,11 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
      */
     public isDotNetSdkBuild(preLaunchTask: string): boolean {
         return preLaunchTask === NetSdkTaskFullSymbol;
+    }
+
+    public getProjectFolderNameFromProjectPath(projectPath: string): string {
+        const projFileUri = Uri.file(path.dirname(projectPath));
+        return path.basename(projFileUri.fsPath);
     }
 }
 
