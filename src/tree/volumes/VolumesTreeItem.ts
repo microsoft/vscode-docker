@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { ListVolumeItem } from "@microsoft/vscode-container-client";
 import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
-import { ListVolumeItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { TreePrefix } from "../TreePrefix";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { TreePrefix } from "../TreePrefix";
 import { VolumeGroupTreeItem } from "./VolumeGroupTreeItem";
-import { volumeProperties, VolumeProperty } from "./VolumeProperties";
+import { VolumeProperty, volumeProperties } from "./VolumeProperties";
 import { VolumeTreeItem } from "./VolumeTreeItem";
 
 export class VolumesTreeItem extends LocalRootTreeItemBase<ListVolumeItem, VolumeProperty> {

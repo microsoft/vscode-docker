@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isAutoConfigurableDockerComposeClient } from './clients/AutoConfigurableDockerComposeClient';
-import { DockerComposeClient, IContainerOrchestratorClient } from './docker';
+import { DockerComposeClient, IContainerOrchestratorClient } from '@microsoft/vscode-container-client';
 import { RuntimeManager } from './RuntimeManager';
+import { isAutoConfigurableDockerComposeClient } from './clients/AutoConfigurableDockerComposeClient';
 
 export class OrchestratorRuntimeManager extends RuntimeManager<IContainerOrchestratorClient> {
     public readonly onOrchestratorRuntimeClientRegistered = this.runtimeClientRegisteredEmitter.event;

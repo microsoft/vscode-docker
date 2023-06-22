@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { parseError } from '@microsoft/vscode-azext-utils';
+import { getNativeArchitecture, normalizeContainerOS } from '@microsoft/vscode-container-client';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
@@ -12,7 +13,6 @@ import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debuggi
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
-import { getNativeArchitecture, normalizeContainerOS } from '../../runtimes/docker';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';

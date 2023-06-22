@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListVolumeItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { ListVolumeItem } from "@microsoft/vscode-container-client";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
-import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 /**
  * This interface defines properties used by the Remote Containers extension. These properties must not be removed from this class.

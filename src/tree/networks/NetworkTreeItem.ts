@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListNetworkItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { ListNetworkItem } from "@microsoft/vscode-container-client";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { builtInNetworks } from "../../constants";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
-import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 export class NetworkTreeItem extends ToolTipTreeItem {
     public static allContextRegExp: RegExp = /Network$/;

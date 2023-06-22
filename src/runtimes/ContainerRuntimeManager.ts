@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DockerClient, IContainersClient } from './docker';
+import { DockerClient, IContainersClient } from '@microsoft/vscode-container-client';
 import { ContextManager, IContextManager } from './ContextManager';
 import { RuntimeManager } from './RuntimeManager';
 

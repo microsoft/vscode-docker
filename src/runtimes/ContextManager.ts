@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { InspectContextsItem, ListContextItem } from './docker';
+import { InspectContextsItem, ListContextItem } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 

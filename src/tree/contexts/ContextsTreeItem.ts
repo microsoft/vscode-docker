@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem, IActionContext } from '@microsoft/vscode-azext-utils';
+import { ListContextItem } from '@microsoft/vscode-container-client';
 import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
-import { ListContextItem } from '../../runtimes/docker';
-import { descriptionKey, labelKey, LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase, descriptionKey, labelKey } from "../LocalRootTreeItemBase";
+import { TreePrefix } from '../TreePrefix';
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
 import { ITreeSettingWizardInfo } from '../settings/ITreeSettingsWizardContext';
-import { TreePrefix } from '../TreePrefix';
 import { ContextGroupTreeItem } from './ContextGroupTreeItem';
-import { contextProperties, ContextProperty } from "./ContextProperties";
+import { ContextProperty, contextProperties } from "./ContextProperties";
 import { ContextTreeItem } from './ContextTreeItem';
 
 export class ContextsTreeItem extends LocalRootTreeItemBase<ListContextItem, ContextProperty> {

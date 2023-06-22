@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { ListNetworkItem } from "@microsoft/vscode-container-client";
 import { l10n, workspace } from "vscode";
 import { builtInNetworks, configPrefix } from "../../constants";
 import { ext } from "../../extensionVariables";
-import { ListNetworkItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { TreePrefix } from "../TreePrefix";
 import { CommonGroupBy, getCommonPropertyValue, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { TreePrefix } from "../TreePrefix";
 import { NetworkGroupTreeItem } from "./NetworkGroupTreeItem";
-import { networkProperties, NetworkProperty } from "./NetworkProperties";
+import { NetworkProperty, networkProperties } from "./NetworkProperties";
 import { NetworkTreeItem } from "./NetworkTreeItem";
 
 export class NetworksTreeItem extends LocalRootTreeItemBase<ListNetworkItem, NetworkProperty> {

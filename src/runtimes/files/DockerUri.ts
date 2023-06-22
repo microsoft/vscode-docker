@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContainerOS } from '../docker';
+import { ContainerOS } from '@microsoft/vscode-container-client';
 import * as corepath from 'path';
 import * as vscode from 'vscode';
 

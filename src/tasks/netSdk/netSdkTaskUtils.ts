@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "@microsoft/vscode-container-client";
 import * as os from 'os';
 import { WorkspaceFolder, l10n } from "vscode";
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '@microsoft/vscode-container-client';
 import * as cp from 'child_process';
 import * as stream from 'stream';
-import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '../runtimes/docker';
 import { CancellationToken } from 'vscode';
 
 type Progress = (content: string, err: boolean) => void;

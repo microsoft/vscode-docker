@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ImageNameInfo } from '../../runtimes/docker';
+import { ImageNameInfo } from '@microsoft/vscode-container-client';
 
 const noneTag: string = '<none>';
 
