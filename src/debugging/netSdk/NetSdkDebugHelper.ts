@@ -33,7 +33,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                 type: 'docker',
                 request: 'launch',
                 netCore: {
-                    appProject: unresolveWorkspaceFolder(appProjectAbsolutePath.absoluteFilePath, workspace.workspaceFolders[0]),
+                    appProject: unresolveWorkspaceFolder(appProjectAbsolutePath, workspace.workspaceFolders[0]), //tTODO: can probably change this
                     buildWithSdk: true,
                 },
             });
@@ -70,6 +70,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
      */
     protected async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
         const associatedTask = context.runDefinition;
+        await ext.context.workspaceState.update('netSdkProjPath', debugConfiguration.netCore.appProject);
 
         return {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),

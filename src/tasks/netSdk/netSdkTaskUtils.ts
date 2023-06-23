@@ -11,7 +11,7 @@ import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
-import { Item, quickPickCsProjFileItem } from "../../utils/quickPickFile";
+import { quickPickCsProjFileItem } from "../../utils/quickPickFile";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
 import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 import { NetCoreTaskHelper } from '../netcore/NetCoreTaskHelper';
@@ -74,14 +74,15 @@ export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): 
     return commandLine;
 }
 
-export async function inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<Item> {
-    if (ext.context.workspaceState.get<Item | undefined>('netSdkProjPath')) {
-        return ext.context.workspaceState.get<Item | undefined>('netSdkProjPath');
+export async function inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
+    const netSdkProjPath = ext.context.workspaceState.get<string | undefined>('netSdkProjPath');
+    if (netSdkProjPath) {
+        return netSdkProjPath;
     }
 
-    const projFileItem = (await quickPickCsProjFileItem(context, undefined, folder, 'No .csproj file could be found.'));
-    await ext.context.workspaceState.update('netSdkProjPath', projFileItem); // save the path for future use
-    return projFileItem;
+    const projFileItem = await quickPickCsProjFileItem(context, undefined, folder, 'No .csproj file could be found.');
+    await ext.context.workspaceState.update('netSdkProjPath', projFileItem.absoluteFilePath); // save the path for future use
+    return projFileItem.absoluteFilePath;
 }
 
 /**

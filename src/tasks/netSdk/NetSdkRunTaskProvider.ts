@@ -5,7 +5,6 @@
 
 import * as path from "path";
 import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope, Uri } from "vscode";
-import { Item } from "../../utils/quickPickFile";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
@@ -35,20 +34,19 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
 
-        // find the project path and set the project folder
-        const projPath: Item = await inferProjPath(context.actionContext, context.folder);
-        const folderUri = Uri.file(path.dirname(projPath.absoluteFilePath));
-        const folder = {
-            uri: folderUri,
-            name: path.basename(folderUri.fsPath),
-            index: 1,
-        };
-
-        if (!folder) {
-            throw new Error(`Failed to find workspace folder for ${projPath.absoluteFolderPath}`);
+        try {
+            // find the project path and set the project folder
+            const projPath = await inferProjPath(context.actionContext, context.folder);
+            const folderUri = Uri.file(path.dirname(projPath));
+            const folder = {
+                uri: folderUri,
+                name: path.basename(folderUri.fsPath),
+                index: 1,
+            };
+            context.folder = folder;
+        } catch (error) {
+            throw new Error('Failed to find project folder.');
         }
-
-        context.folder = folder;
 
         // use dotnet to build the image
         const buildCommand = await getNetSdkBuildCommand(context);
