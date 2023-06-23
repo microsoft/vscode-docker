@@ -12,7 +12,7 @@ import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
-import { quickPickCsProjFileItem } from "../../utils/quickPickFile";
+import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
 import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 import { NetCoreTaskHelper } from '../netcore/NetCoreTaskHelper';
@@ -81,7 +81,7 @@ export async function inferProjPath(context: IActionContext, folder: WorkspaceFo
         return netSdkProjPath;
     }
 
-    const projFileItem = await quickPickCsProjFileItem(context, undefined, folder, 'No .csproj file could be found.');
+    const projFileItem = await quickPickProjectFileItem(context, undefined, folder, 'No .csproj file could be found.');
     await ext.context.workspaceState.update(NetSdkProjPathMementoKey, projFileItem.absoluteFilePath); // save the path for future use
     return projFileItem.absoluteFilePath;
 }
