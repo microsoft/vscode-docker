@@ -4,50 +4,26 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from "path";
-import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope, Uri } from "vscode";
+import { CancellationToken, CustomExecution, Task, TaskDefinition, Uri, WorkspaceFolder, workspace } from "vscode";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand, inferProjPath } from './netSdkTaskUtils';
+import { NetCoreRunTaskDefinition } from "../netcore/NetCoreTaskHelper";
+import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand } from './netSdkTaskUtils';
 
 const NetSdkDebugTaskName = 'debug';
+
+export type NetSdkRunTask = NetCoreRunTaskDefinition;
+
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
     public constructor() { super(NetSdkRunTaskType, undefined); }
 
     public provideTasks(token: CancellationToken): Task[] {
-
-        // we need to initialize a task first so we can pass it into `DockerPseudoterminal`
-        const task = new Task(
-            { type: NetSdkRunTaskType },
-            TaskScope.Workspace,
-            NetSdkDebugTaskName,
-            NetSdkRunTaskType
-        );
-
-        task.execution = new CustomExecution(async (resolvedDefinition: TaskDefinition) =>
-            Promise.resolve(new DockerPseudoterminal(this, task, resolvedDefinition))
-        );
-
-        return [task];
+        return [this.createNetSdkRunTask().task];
     }
 
     protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
-
-        try {
-            // find the project path and set the project folder
-            const projPath = await inferProjPath(context.actionContext, context.folder);
-            const folderUri = Uri.file(path.dirname(projPath));
-            const folder = {
-                uri: folderUri,
-                name: path.basename(folderUri.fsPath),
-                index: 1,
-            };
-            context.folder = folder;
-        } catch (error) {
-            throw new Error('Failed to find project folder.');
-        }
-
         // use dotnet to build the image
         const buildCommand = await getNetSdkBuildCommand(context);
         await context.terminal.execAsyncInTerminal(
@@ -70,4 +46,50 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
         return Promise.resolve();
     }
+
+    public createNetSdkRunTask(options?: NetSdkRunTask): { task: Task, promise: Promise<number> } {
+        let task: Task;
+
+        const promise = new Promise<number>((resolve, reject) => {
+            task = new Task(
+                options,
+                this.getProjectFolderFromTask(options),
+                NetSdkDebugTaskName,
+                NetSdkRunTaskType,
+                new CustomExecution(async (resolveDefinition: TaskDefinition) => {
+                    const pseudoTerminal = new DockerPseudoterminal(new NetSdkRunTaskProvider(), task, resolveDefinition);
+
+                    const closeEventRegistration = pseudoTerminal.onDidClose((exitCode: number) => {
+                        closeEventRegistration.dispose();
+
+                        if (exitCode === 0) {
+                            resolve(exitCode);
+                        } else {
+                            reject(exitCode);
+                        }
+                    });
+
+                    return pseudoTerminal;
+                }),
+            );
+        });
+
+        return { task, promise };
+    }
+
+    private getProjectFolderFromTask(task: NetSdkRunTask): WorkspaceFolder {
+        if (task?.netCore?.appProject) {
+            const folderUri = Uri.file(path.dirname(task.netCore.appProject));
+            const folder = {
+                uri: folderUri,
+                name: path.basename(folderUri.fsPath),
+                index: 1,
+            };
+            return folder;
+        } else {
+            return workspace.workspaceFolders[0];
+        }
+    }
 }
+
+export const netSdkRunTaskProvider = new NetSdkRunTaskProvider();
