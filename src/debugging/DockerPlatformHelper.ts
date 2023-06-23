@@ -7,16 +7,15 @@ import { netSdkDebugHelper } from "./netSdk/NetSdkDebugHelper";
 
 export type DockerPlatform = 'netCore' | 'node' | 'python' | 'netSdk';
 
-interface DockerPlatformConfiguration {
+export interface DockerPlatformConfiguration {
     platform?: DockerPlatform;
     netCore?: unknown;
     node?: unknown;
     python?: unknown;
-    preLaunchTask?: string;
 }
 
 export function getPlatform<T extends DockerPlatformConfiguration>(configuration: T): DockerPlatform | undefined {
-    if (netSdkDebugHelper.isDotNetSdkBuild(configuration?.preLaunchTask) && configuration.netCore !== undefined) {
+    if (netSdkDebugHelper.isDotNetSdkBuild(configuration)) {
         return 'netSdk';
     } else if (configuration.platform === 'netCore' || configuration.netCore !== undefined) {
         return 'netCore';

@@ -26,6 +26,7 @@ import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
     debuggerPath?: string;
+    buildWithSdk?: boolean;
 }
 
 export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
@@ -92,7 +93,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration?.preLaunchTask)
+        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration)
             ? appOutput
             : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
@@ -187,7 +188,7 @@ export class NetCoreDebugHelper implements DebugHelper {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
 
-        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration.preLaunchTask) && projectInfo.length >= 5) { // if .NET has support for SDK Build
+        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration) && projectInfo.length >= 5) { // if .NET has support for SDK Build
             if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
                 return projectInfo[3]; // fourth is output path
             } else {
@@ -199,7 +200,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
     }
 
-    private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+    protected async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
         const associatedTask = context.runDefinition;
 
         return {

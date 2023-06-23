@@ -114,6 +114,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             await this.removeDebugContainerIfNeeded(context.actionContext, resolvedConfiguration);
         }
 
+        await helper.afterResolveDebugConfiguration(context, originalConfiguration);
         return resolvedConfiguration;
     }
 

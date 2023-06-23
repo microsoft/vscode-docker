@@ -41,6 +41,7 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 export interface DebugHelper {
     provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
+    afterResolveDebugConfiguration?(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {
