@@ -7,7 +7,7 @@ import { netSdkDebugHelper } from "./netSdk/NetSdkDebugHelper";
 
 export type DockerPlatform = 'netCore' | 'node' | 'python' | 'netSdk';
 
-export interface DockerPlatformConfiguration {
+interface DockerPlatformConfiguration {
     platform?: DockerPlatform;
     netCore?: unknown;
     node?: unknown;

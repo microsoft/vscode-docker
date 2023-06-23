@@ -6,6 +6,7 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as os from 'os';
 import { WorkspaceFolder } from "vscode";
+import { NetSdkProjPathMementoKey } from '../../debugging/netSdk/NetSdkDebugHelper';
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
@@ -75,13 +76,13 @@ export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): 
 }
 
 export async function inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
-    const netSdkProjPath = ext.context.workspaceState.get<string | undefined>('netSdkProjPath');
+    const netSdkProjPath = ext.context.workspaceState.get<string | undefined>(NetSdkProjPathMementoKey);
     if (netSdkProjPath) {
         return netSdkProjPath;
     }
 
     const projFileItem = await quickPickCsProjFileItem(context, undefined, folder, 'No .csproj file could be found.');
-    await ext.context.workspaceState.update('netSdkProjPath', projFileItem.absoluteFilePath); // save the path for future use
+    await ext.context.workspaceState.update(NetSdkProjPathMementoKey, projFileItem.absoluteFilePath); // save the path for future use
     return projFileItem.absoluteFilePath;
 }
 
