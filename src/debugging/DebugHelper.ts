@@ -9,7 +9,7 @@ import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
-import { DockerPlatform } from './DockerPlatformHelper';
+import { DockerPlatform } from './DockerDebugPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
 import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
 import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';

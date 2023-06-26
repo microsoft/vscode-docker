@@ -10,7 +10,7 @@ import { ext } from '../extensionVariables';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { resolveFilesOfPattern } from '../utils/quickPickFile';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
-import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
+import { DockerPlatform, getDebugPlatform } from './DockerDebugPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
@@ -85,7 +85,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     throw new Error(l10n.t('The property "request" must be specified in the debug config.'));
                 }
 
-                const debugPlatform = getPlatform(debugConfiguration);
+                const debugPlatform = getDebugPlatform(debugConfiguration);
                 actionContext.telemetry.properties.dockerPlatform = debugPlatform;
                 actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 

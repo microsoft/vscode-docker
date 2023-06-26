@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { l10n, Task } from 'vscode';
-import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerPlatform } from '../debugging/DockerDebugPlatformHelper';
 import { ext } from '../extensionVariables';
 import { RunContainerBindMount } from '../runtimes/docker';
 import { cloneObject } from '../utils/cloneObject';

@@ -8,7 +8,7 @@ import * as path from 'path';
 import { CancellationToken, ConfigurationTarget, ExtensionContext, QuickPickItem, Task, WorkspaceFolder, l10n, tasks, workspace } from 'vscode';
 import { DebugConfigurationBase } from '../debugging/DockerDebugConfigurationBase';
 import { DockerDebugConfiguration } from '../debugging/DockerDebugConfigurationProvider';
-import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerPlatform } from '../debugging/DockerDebugPlatformHelper';
 import { ContainerPlatform } from '../runtimes/docker';
 import { getValidImageName, getValidImageNameWithTag } from '../utils/getValidImageName';
 import { pathNormalize } from '../utils/pathNormalize';
