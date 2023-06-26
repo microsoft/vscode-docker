@@ -65,7 +65,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         await promise;
     }
 
-    private async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
+    public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
         if (NetSdkDebugHelper.projPath) {
             return NetSdkDebugHelper.projPath;
         }

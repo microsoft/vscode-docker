@@ -6,12 +6,11 @@
 import * as os from 'os';
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
+import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
 import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
-import { NetCoreTaskHelper } from '../netcore/NetCoreTaskHelper';
 
 /**
  * Native architecture of the current machine in the RID format
@@ -30,11 +29,13 @@ export type RidCpuArchitecture =
 export const NetSdkRunTaskType = 'dotnet-container-sdk';
 const NetSdkDefaultImageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
-export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext): Promise<string> {
-
+export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext, isProjectWebApp: boolean): Promise<string> {
     const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
+
     // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
-    const publishFlag = NetCoreTaskHelper.isWebApp(context.folder.uri.fsPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
+    const publishFlag = isProjectWebApp
+        ? '-p:PublishProfile=DefaultContainer'
+        : '/t:PublishContainer';
 
     const args = composeArgs(
         withArg('dotnet', 'publish'),
@@ -50,10 +51,10 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext)
     return quotedArgs.join(' ');
 }
 
-export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): Promise<string> {
+export async function getNetSdkRunCommand(context: DockerTaskExecutionContext, isProjectWebApp: boolean): Promise<string> {
     const client = await ext.runtimeManager.getClient();
 
-    const command = await client.runContainer({
+    const options: RunContainerCommandOptions = {
         detached: true,
         publishAllPorts: true,
         name: getDefaultContainerName(context.folder.name, NetSdkDefaultImageTag),
@@ -62,10 +63,14 @@ export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): 
         imageRef: getDefaultImageName(context.folder.name, NetSdkDefaultImageTag),
         labels: defaultVsCodeLabels,
         mounts: await getRemoteDebuggerMount(),
-        exposePorts: [8080, 80], // the default port is 8080 for .NET 8 and 80 for .NET 7
         entrypoint: '/bin/sh'
-    });
+    };
 
+    if (isProjectWebApp) {
+        options.exposePorts = [8080, 80]; // the default port is 8080 for .NET 8 and 80 for .NET 7
+    }
+
+    const command = await client.runContainer(options);
     const quotedArgs = Shell.getShellOrDefault().quote(command.args);
     const commandLine = [client.commandName, ...quotedArgs].join(' ');
     return commandLine;

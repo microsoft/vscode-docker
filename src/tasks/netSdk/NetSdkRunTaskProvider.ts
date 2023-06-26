@@ -5,10 +5,11 @@
 
 import * as path from "path";
 import { CancellationToken, CustomExecution, Task, TaskDefinition, Uri, WorkspaceFolder, workspace } from "vscode";
+import { netSdkDebugHelper } from "../../debugging/netSdk/NetSdkDebugHelper";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerTaskProvider } from '../DockerTaskProvider';
-import { DockerTaskExecutionContext } from '../TaskHelper';
-import { NetCoreRunTaskDefinition } from "../netcore/NetCoreTaskHelper";
+import { DockerRunTaskContext } from '../TaskHelper';
+import { NetCoreRunTaskDefinition, NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
 import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand } from './netSdkTaskUtils';
 
 const NetSdkDebugTaskName = 'debug';
@@ -23,9 +24,13 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         return [this.createNetSdkRunTask().task];
     }
 
-    protected async executeTaskInternal(context: DockerTaskExecutionContext, task: Task): Promise<void> {
+    protected async executeTaskInternal(context: DockerRunTaskContext, task: Task): Promise<void> {
+
+        const projPath = await netSdkDebugHelper.inferProjPath(context.actionContext, context.folder);
+        const isProjectWebApp = await NetCoreTaskHelper.isWebApp(projPath);
+
         // use dotnet to build the image
-        const buildCommand = await getNetSdkBuildCommand(context);
+        const buildCommand = await getNetSdkBuildCommand(context, isProjectWebApp);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
@@ -35,7 +40,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         );
 
         // use docker run to run the image
-        const runCommand = await getNetSdkRunCommand(context);
+        const runCommand = await getNetSdkRunCommand(context, isProjectWebApp);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {
