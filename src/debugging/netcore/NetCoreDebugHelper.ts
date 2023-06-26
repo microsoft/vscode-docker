@@ -189,7 +189,9 @@ export class NetCoreDebugHelper implements DebugHelper {
         }
 
         if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration) && projectInfo.length >= 5) { // if .NET has support for SDK Build
-            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') { // fifth is whether .NET supports SDK Containers
+            // fifth is whether .NET Web apps supports SDK Containers
+            // sixth is whether .NET Console apps supports SDK Containers
+            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') {
                 return projectInfo[3]; // fourth is output path
             } else {
                 await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
