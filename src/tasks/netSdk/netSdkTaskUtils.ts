@@ -43,7 +43,7 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext,
         withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
         withArg(publishFlag),
         withNamedArg('--configuration', configuration),
-        withNamedArg('-p:ContainerImageName', getValidImageName(context.folder.name), { assignValue: true }),
+        withNamedArg('-p:ContainerRepository', getValidImageName(context.folder.name), { assignValue: true }),
         withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
     )();
 
