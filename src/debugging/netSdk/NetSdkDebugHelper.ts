@@ -10,7 +10,6 @@ import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/
 import { AllNetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { getDefaultContainerName } from "../../tasks/TaskHelper";
 import { netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
-import { NetSdkRunTaskType } from "../../tasks/netSdk/netSdkTaskUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
@@ -55,7 +54,6 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     public async afterResolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void> {
         const { task, promise } = netSdkRunTaskProvider.createNetSdkRunTask(
             {
-                type: NetSdkRunTaskType,
                 netCore: {
                     appProject: await this.inferProjPath(context.actionContext, context.folder),
                 }

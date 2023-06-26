@@ -5,8 +5,8 @@
 
 import * as path from "path";
 import { CancellationToken, CustomExecution, Task, TaskDefinition, Uri, WorkspaceFolder, workspace } from "vscode";
-import { netSdkDebugHelper } from "../../debugging/netSdk/NetSdkDebugHelper";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
+import { DockerRunTask } from "../DockerRunTaskProvider";
 import { DockerTaskProvider } from '../DockerTaskProvider';
 import { DockerRunTaskContext } from '../TaskHelper';
 import { NetCoreRunTaskDefinition, NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
@@ -24,9 +24,8 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         return [this.createNetSdkRunTask().task];
     }
 
-    protected async executeTaskInternal(context: DockerRunTaskContext, task: Task): Promise<void> {
-
-        const projPath = await netSdkDebugHelper.inferProjPath(context.actionContext, context.folder);
+    protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
+        const projPath = task.definition.netCore?.appProject;
         const isProjectWebApp = await NetCoreTaskHelper.isWebApp(projPath);
 
         // use dotnet to build the image
@@ -52,13 +51,17 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         return Promise.resolve();
     }
 
-    public createNetSdkRunTask(options?: NetSdkRunTask): { task: Task, promise: Promise<number> } {
+    public createNetSdkRunTask(options?: Omit<NetSdkRunTask, "type">): { task: Task, promise: Promise<number> } {
         let task: Task;
+        const definition = {
+            ...options,
+            type: NetSdkRunTaskType,
+        };
 
         const promise = new Promise<number>((resolve, reject) => {
             task = new Task(
-                options,
-                this.getProjectFolderFromTask(options),
+                definition,
+                this.getProjectFolderFromTask(definition),
                 NetSdkDebugTaskName,
                 NetSdkRunTaskType,
                 new CustomExecution(async (resolveDefinition: TaskDefinition) => {
