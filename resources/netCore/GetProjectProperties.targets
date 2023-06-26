@@ -10,7 +10,8 @@
 $(TargetFramework)$(TargetFrameworks.Split(';')[0])
 $(OutputPath)$(AssemblyName).dll
 $(ContainerWorkingDirectory)/$(AssemblyName).dll
-$(SDKContainerSupportEnabled)"
+$(SDKContainerSupportEnabled)
+$(EnableSdkContainerSupport)"
             Overwrite="True" />
     </Target>
 </Project>

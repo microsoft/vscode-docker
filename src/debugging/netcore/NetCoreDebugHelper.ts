@@ -19,7 +19,7 @@ import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
-import { isDotNetSdkBuild } from '../netSdk/netSdkDebugUtils';
+import { netSdkDebugHelper } from '../netSdk/NetSdkDebugHelper';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
@@ -93,7 +93,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = isDotNetSdkBuild(debugConfiguration)
+        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration)
             ? appOutput
             : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
 
@@ -188,8 +188,8 @@ export class NetCoreDebugHelper implements DebugHelper {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
 
-        if (isDotNetSdkBuild(debugConfiguration) && projectInfo.length >= 5) { // if .NET has support for SDK Build
-            if (projectInfo[4] === 'true') { // fifth is whether .NET supports SDK Containers
+        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration) && projectInfo.length >= 5) { // if .NET has support for SDK Build
+            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') { // fifth is whether .NET supports SDK Containers
                 return projectInfo[3]; // fourth is output path
             } else {
                 await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state

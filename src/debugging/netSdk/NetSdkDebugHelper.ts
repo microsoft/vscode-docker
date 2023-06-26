@@ -92,6 +92,11 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         const projFileUri = Uri.file(path.dirname(debugConfiguration.netCore.appProject));
         return getDefaultContainerName(path.basename(projFileUri.fsPath), "dev");
     }
+
+    public isDotNetSdkBuild(debugConfiguration: DockerDebugConfiguration): boolean {
+        return debugConfiguration.netCore?.buildWithSdk ?? false;
+    }
+
 }
 
 export const netSdkDebugHelper = new NetSdkDebugHelper();
