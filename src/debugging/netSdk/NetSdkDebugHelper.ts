@@ -5,11 +5,13 @@
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
 import * as path from "path";
-import { Uri, WorkspaceFolder, commands, tasks } from "vscode";
+import { Uri, WorkspaceFolder, commands, l10n, tasks } from "vscode";
+import { ext } from "../../extensionVariables";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
-import { AllNetContainerBuildOptions } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
+import { AllNetContainerBuildOptions, NetContainerBuildOptionsKey } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { getDefaultContainerName } from "../../tasks/TaskHelper";
 import { netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
+import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
@@ -63,6 +65,11 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         await promise;
     }
 
+    /**
+     * @returns the project path stored in the static variable projPath if it exists,
+     *          otherwise prompts the user to select a .csproj file and stores the path
+     *          in the static variable projPath
+     */
     public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
         if (NetSdkDebugHelper.projPath) {
             return NetSdkDebugHelper.projPath;
@@ -88,15 +95,32 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         };
     }
 
-    public inferDotNetSdkContainerName(debugConfiguration: DockerDebugConfiguration): string {
+    protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+
+        if (projectInfo.length >= 5) { // if .NET has support for SDK Build
+            // fifth is whether .NET Web apps supports SDK Containers
+            // sixth is whether .NET Console apps supports SDK Containers
+            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') {
+                return projectInfo[3]; // fourth is output path
+            } else {
+                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
+                NetSdkDebugHelper.projPath = undefined; // clear the static projPath variable
+                throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
+            }
+        }
+
+        throw new Error(l10n.t('Unable to determine assembly output path.'));
+    }
+
+    protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
+        return appOutput;
+    }
+
+    private inferDotNetSdkContainerName(debugConfiguration: DockerDebugConfiguration): string {
         const projFileUri = Uri.file(path.dirname(debugConfiguration.netCore.appProject));
         return getDefaultContainerName(path.basename(projFileUri.fsPath), "dev");
     }
-
-    public isDotNetSdkBuild(debugConfiguration: DockerDebugConfiguration): boolean {
-        return debugConfiguration.netCore?.buildWithSdk ?? false;
-    }
-
 }
 
 export const netSdkDebugHelper = new NetSdkDebugHelper();

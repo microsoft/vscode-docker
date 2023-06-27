@@ -9,7 +9,6 @@ import * as path from 'path';
 import { DebugConfiguration, MessageItem, ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { CommandLineArgs, ContainerOS, VoidCommandResponse, composeArgs, withArg, withQuotedArg } from '../../runtimes/docker';
-import { NetContainerBuildOptionsKey } from '../../scaffolding/wizard/net/NetSdkChooseBuildStep';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
@@ -19,7 +18,6 @@ import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
 import { DebugHelper, DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName, resolveDockerServerReadyAction } from '../DebugHelper';
 import { DockerAttachConfiguration, DockerDebugConfiguration } from '../DockerDebugConfigurationProvider';
-import { netSdkDebugHelper } from '../netSdk/NetSdkDebugHelper';
 import { exportCertificateIfNecessary, getHostSecretsFolders, trustCertificateIfNecessary } from './AspNetSslHelper';
 import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './VsDbgHelper';
 
@@ -93,9 +91,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration)
-            ? appOutput
-            : NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
+        const containerAppOutput = this.inferAppContainerOutput(appOutput, platformOS);
 
         const dockerServerReadyAction = resolveDockerServerReadyAction(
             debugConfiguration,
@@ -181,25 +177,22 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    private async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+    protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
         const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
 
         if (projectInfo.length < 3) {
             throw new Error(l10n.t('Unable to determine assembly output path.'));
         }
 
-        if (netSdkDebugHelper.isDotNetSdkBuild(debugConfiguration) && projectInfo.length >= 5) { // if .NET has support for SDK Build
-            // fifth is whether .NET Web apps supports SDK Containers
-            // sixth is whether .NET Console apps supports SDK Containers
-            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') {
-                return projectInfo[3]; // fourth is output path
-            } else {
-                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
-                throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
-            }
-        }
-
         return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
+    }
+
+    protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
+        const result = platformOS === 'Windows' ?
+            path.win32.join('C:\\app', appOutput) :
+            path.posix.join('/app', appOutput);
+
+        return pathNormalize(result, platformOS);
     }
 
     protected async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
@@ -272,14 +265,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/root/.nuget/fallbackpackages'
             ];
         return additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
-    }
-
-    private static getContainerAppOutput(debugConfiguration: DockerDebugConfiguration, appOutput: string, platformOS: PlatformOS): string {
-        const result = platformOS === 'Windows' ?
-            path.win32.join('C:\\app', appOutput) :
-            path.posix.join('/app', appOutput);
-
-        return pathNormalize(result, platformOS);
     }
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {
