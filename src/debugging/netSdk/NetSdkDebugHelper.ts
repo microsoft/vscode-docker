@@ -96,7 +96,13 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     }
 
     protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+        let projectInfo: string[];
+        try {
+            projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+        } catch (error) {
+            await NetSdkDebugHelper.clearWorkspaceState();
+            throw error;
+        }
 
         if (projectInfo.length >= 5) { // if .NET has support for SDK Build
             // fifth is whether .NET Web apps supports SDK Containers
@@ -104,13 +110,25 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
             if (projectInfo[4] === 'true' || projectInfo[5] === 'true') {
                 return projectInfo[3]; // fourth is output path
             } else {
-                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
-                NetSdkDebugHelper.projPath = undefined; // clear the static projPath variable
-                throw new Error(l10n.t('Your current version of .NET SDK does not support SDK Container build. Please update to a later version of .NET SDK to use this feature.'));
+                await NetSdkDebugHelper.clearWorkspaceState();
+                throw new Error(
+                    l10n.t(
+                        `Your current project configuration or version of .NET SDK doesn't support SDK Container build. Please consider one of the following options:
+
+                        1. Choose a different project that is compatible with your current configuration.
+                        2. Update to a later version of .NET SDK to enable this feature.`
+                    )
+                );
             }
         }
 
         throw new Error(l10n.t('Unable to determine assembly output path.'));
+    }
+
+    public static async clearWorkspaceState(): Promise<void> {
+        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
+        NetSdkDebugHelper.projPath = undefined; // clear the static projPath variable
+        return Promise.resolve();
     }
 
     protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {

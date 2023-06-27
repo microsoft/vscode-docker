@@ -5,6 +5,7 @@
 
 import * as path from "path";
 import { CancellationToken, CustomExecution, Task, TaskDefinition, Uri, WorkspaceFolder, workspace } from "vscode";
+import { NetSdkDebugHelper } from "../../debugging/netSdk/NetSdkDebugHelper";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerRunTask } from "../DockerRunTaskProvider";
 import { DockerTaskProvider } from '../DockerTaskProvider';
@@ -67,12 +68,13 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
                 new CustomExecution(async (resolveDefinition: TaskDefinition) => {
                     const pseudoTerminal = new DockerPseudoterminal(new NetSdkRunTaskProvider(), task, resolveDefinition);
 
-                    const closeEventRegistration = pseudoTerminal.onDidClose((exitCode: number) => {
+                    const closeEventRegistration = pseudoTerminal.onDidClose(async (exitCode: number) => {
                         closeEventRegistration.dispose();
 
                         if (exitCode === 0) {
                             resolve(exitCode);
                         } else {
+                            await NetSdkDebugHelper.clearWorkspaceState();
                             reject(exitCode);
                         }
                     });
