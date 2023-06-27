@@ -63,7 +63,7 @@ export async function getNetSdkRunCommand(isProjectWebApp: boolean, projectFolde
         imageRef: getDefaultImageName(projectFolderName, NetSdkDefaultImageTag),
         labels: defaultVsCodeLabels,
         mounts: await getRemoteDebuggerMount(),
-        entrypoint: '/bin/sh'
+        entrypoint: await getDockerOSType() === 'windows' ? 'cmd.exe' : '/bin/sh'
     };
 
     if (isProjectWebApp) {
@@ -80,7 +80,7 @@ export async function getNetSdkRunCommand(isProjectWebApp: boolean, projectFolde
  * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
+export async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
     const dockerOsType = await getDockerOSType();
     return dockerOsType === 'windows' ? 'win' : 'linux';
 }
@@ -89,7 +89,7 @@ async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
  * This method normalizes the native architecture to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeArchitectureToRidArchitecture(): Promise<RidCpuArchitecture> {
+export async function normalizeArchitectureToRidArchitecture(): Promise<RidCpuArchitecture> {
     const architecture = os.arch();
     switch (architecture) {
         case 'x32':

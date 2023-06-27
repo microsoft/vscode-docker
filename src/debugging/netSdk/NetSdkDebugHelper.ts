@@ -11,6 +11,7 @@ import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/
 import { AllNetContainerBuildOptions, NetContainerBuildOptionsKey } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { getDefaultContainerName } from "../../tasks/TaskHelper";
 import { netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
+import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
@@ -79,9 +80,13 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     }
 
     protected override async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+        const ridOS = await normalizeOsToRidOs();
+        const ridArchitecture = await normalizeArchitectureToRidArchitecture();
+
+        const additionalProperties = `/p:ContainerRuntimeIdentifier="${ridOS}-${ridArchitecture}"`;
         let projectInfo: string[];
         try {
-            projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+            projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject, additionalProperties);
         } catch (error) {
             await NetSdkDebugHelper.clearWorkspaceState();
             throw error;
@@ -89,15 +94,17 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
         if (projectInfo.length >= 5) { // if .NET has support for SDK Build
             // fifth is whether .NET Web apps supports SDK Containers
-            // sixth is whether .NET Console apps supports SDK Containers
-            if (projectInfo[4] === 'true' || projectInfo[5] === 'true') {
-                return projectInfo[3]; // fourth is output path
+            if (projectInfo[4] === 'true') {
+                return ridOS === 'win' // fourth is output path
+                    ? path.win32.normalize(projectInfo[3])
+                    : path.posix.normalize(projectInfo[3]);
             } else {
                 await NetSdkDebugHelper.clearWorkspaceState();
                 throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
             }
         }
 
+        await NetSdkDebugHelper.clearWorkspaceState();
         throw new Error(l10n.t('Unable to determine assembly output path.'));
     }
 
