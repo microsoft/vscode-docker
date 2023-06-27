@@ -72,37 +72,13 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         }
     }
 
-    /**
-     * @returns the project path stored in the static variable projPath if it exists,
-     *          otherwise prompts the user to select a .csproj file and stores the path
-     *          in the static variable projPath
-     */
-    public async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
-        if (NetSdkDebugHelper.projPath) {
-            return NetSdkDebugHelper.projPath;
-        }
-
-        const projFileItem = await quickPickProjectFileItem(context, undefined, folder, 'No .csproj file could be found.');
-        NetSdkDebugHelper.projPath = projFileItem.absoluteFilePath; // save the path for future use
-        return projFileItem.absoluteFilePath;
+    public static async clearWorkspaceState(): Promise<void> {
+        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
+        NetSdkDebugHelper.projPath = undefined; // clear the static projPath variable
+        return Promise.resolve();
     }
 
-    /**
-     * Overwite the base implementation to infer the container name from the project path (appProject)
-     * instead of the folder name
-     */
-    protected async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
-        NetSdkDebugHelper.projPath = debugConfiguration.netCore.appProject;
-
-        const associatedTask = context.runDefinition;
-        return {
-            configureSsl: !!(associatedTask?.netCore?.configureSsl),
-            containerName: this.inferDotNetSdkContainerName(debugConfiguration),
-            platformOS: associatedTask?.dockerRun?.os || 'Linux',
-        };
-    }
-
-    protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+    protected override async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
         let projectInfo: string[];
         try {
             projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
@@ -125,19 +101,39 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         throw new Error(l10n.t('Unable to determine assembly output path.'));
     }
 
-    public static async clearWorkspaceState(): Promise<void> {
-        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, ''); // clear the workspace state
-        NetSdkDebugHelper.projPath = undefined; // clear the static projPath variable
-        return Promise.resolve();
+    protected override async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+        NetSdkDebugHelper.projPath = debugConfiguration.netCore.appProject;
+
+        const associatedTask = context.runDefinition;
+        return {
+            configureSsl: !!(associatedTask?.netCore?.configureSsl),
+            containerName: this.inferDotNetSdkContainerName(debugConfiguration),
+            platformOS: associatedTask?.dockerRun?.os || 'Linux',
+        };
     }
 
-    protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
+    protected override inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
         return appOutput;
     }
 
     private inferDotNetSdkContainerName(debugConfiguration: DockerDebugConfiguration): string {
         const projFileUri = Uri.file(path.dirname(debugConfiguration.netCore.appProject));
         return getDefaultContainerName(path.basename(projFileUri.fsPath), "dev");
+    }
+
+    /**
+     * @returns the project path stored in the static variable projPath if it exists,
+     *          otherwise prompts the user to select a .csproj file and stores the path
+     *          in the static variable projPath
+     */
+    private async inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
+        if (NetSdkDebugHelper.projPath) {
+            return NetSdkDebugHelper.projPath;
+        }
+
+        const projFileItem = await quickPickProjectFileItem(context, undefined, folder, 'No .csproj file could be found.');
+        NetSdkDebugHelper.projPath = projFileItem.absoluteFilePath; // save the path for future use
+        return projFileItem.absoluteFilePath;
     }
 }
 
