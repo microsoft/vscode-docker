@@ -111,14 +111,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                 return projectInfo[3]; // fourth is output path
             } else {
                 await NetSdkDebugHelper.clearWorkspaceState();
-                throw new Error(
-                    l10n.t(
-                        `Your current project configuration or version of .NET SDK doesn't support SDK Container build. Please consider one of the following options:
-
-                        1. Choose a different project that is compatible with your current configuration.
-                        2. Update to a later version of .NET SDK to enable this feature.`
-                    )
-                );
+                throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
             }
         }
 
