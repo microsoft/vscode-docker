@@ -21,7 +21,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
     public constructor() { super(NetSdkRunTaskType, undefined); }
 
     public provideTasks(token: CancellationToken): Task[] {
-        return [this.createNetSdkRunTask().task];
+        return []; // this task is not discoverable this way
     }
 
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
