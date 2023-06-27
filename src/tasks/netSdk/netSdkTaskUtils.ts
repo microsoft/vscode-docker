@@ -10,7 +10,7 @@ import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, 
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
+import { getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 
 /**
  * Native architecture of the current machine in the RID format
@@ -29,7 +29,7 @@ export type RidCpuArchitecture =
 export const NetSdkRunTaskType = 'dotnet-container-sdk';
 const NetSdkDefaultImageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
-export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext, isProjectWebApp: boolean): Promise<string> {
+export async function getNetSdkBuildCommand(isProjectWebApp: boolean, projectFolderName: string): Promise<string> {
     const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
 
     // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
@@ -43,7 +43,7 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext,
         withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
         withArg(publishFlag),
         withNamedArg('--configuration', configuration),
-        withNamedArg('-p:ContainerRepository', getValidImageName(context.folder.name), { assignValue: true }),
+        withNamedArg('-p:ContainerRepository', getValidImageName(projectFolderName), { assignValue: true }),
         withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
     )();
 
@@ -51,16 +51,16 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext,
     return quotedArgs.join(' ');
 }
 
-export async function getNetSdkRunCommand(context: DockerTaskExecutionContext, isProjectWebApp: boolean): Promise<string> {
+export async function getNetSdkRunCommand(isProjectWebApp: boolean, projectFolderName: string): Promise<string> {
     const client = await ext.runtimeManager.getClient();
 
     const options: RunContainerCommandOptions = {
         detached: true,
         publishAllPorts: true,
-        name: getDefaultContainerName(context.folder.name, NetSdkDefaultImageTag),
+        name: getDefaultContainerName(projectFolderName, NetSdkDefaultImageTag),
         environmentVariables: {},
         removeOnExit: true,
-        imageRef: getDefaultImageName(context.folder.name, NetSdkDefaultImageTag),
+        imageRef: getDefaultImageName(projectFolderName, NetSdkDefaultImageTag),
         labels: defaultVsCodeLabels,
         mounts: await getRemoteDebuggerMount(),
         entrypoint: '/bin/sh'

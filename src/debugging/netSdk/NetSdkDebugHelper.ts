@@ -61,8 +61,15 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                 }
             }
         );
+
         await tasks.executeTask(task);
-        await promise;
+
+        try {
+            await promise;
+        } catch (error) {
+            await NetSdkDebugHelper.clearWorkspaceState();
+            throw error;
+        }
     }
 
     /**

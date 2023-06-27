@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as path from "path";
-import { CancellationToken, CustomExecution, Task, TaskDefinition, Uri, WorkspaceFolder, workspace } from "vscode";
-import { NetSdkDebugHelper } from "../../debugging/netSdk/NetSdkDebugHelper";
+import { CancellationToken, CustomExecution, Task, TaskDefinition, TaskScope } from "vscode";
 import { DockerPseudoterminal } from "../DockerPseudoterminal";
 import { DockerRunTask } from "../DockerRunTaskProvider";
 import { DockerTaskProvider } from '../DockerTaskProvider';
@@ -26,26 +25,30 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
     }
 
     protected async executeTaskInternal(context: DockerRunTaskContext, task: DockerRunTask): Promise<void> {
-        const projPath = task.definition.netCore?.appProject;
-        const isProjectWebApp = await NetCoreTaskHelper.isWebApp(projPath);
+        const projectPath = task.definition.netCore?.appProject;
+        const isProjectWebApp = await NetCoreTaskHelper.isWebApp(projectPath);
+        const projectFolderPath = path.dirname(projectPath);
+        const projectFolderName = path.basename(projectFolderPath);
 
         // use dotnet to build the image
-        const buildCommand = await getNetSdkBuildCommand(context, isProjectWebApp);
+        const buildCommand = await getNetSdkBuildCommand(isProjectWebApp, projectFolderName);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
                 folder: context.folder,
                 token: context.cancellationToken,
+                cwd: projectFolderPath,
             }
         );
 
         // use docker run to run the image
-        const runCommand = await getNetSdkRunCommand(context, isProjectWebApp);
+        const runCommand = await getNetSdkRunCommand(isProjectWebApp, projectFolderName);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {
                 folder: context.folder,
                 token: context.cancellationToken,
+                cwd: projectFolderPath,
             }
         );
 
@@ -62,19 +65,18 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         const promise = new Promise<number>((resolve, reject) => {
             task = new Task(
                 definition,
-                this.getProjectFolderFromTask(definition),
+                TaskScope.Workspace,
                 NetSdkDebugTaskName,
                 NetSdkRunTaskType,
                 new CustomExecution(async (resolveDefinition: TaskDefinition) => {
                     const pseudoTerminal = new DockerPseudoterminal(new NetSdkRunTaskProvider(), task, resolveDefinition);
 
-                    const closeEventRegistration = pseudoTerminal.onDidClose(async (exitCode: number) => {
+                    const closeEventRegistration = pseudoTerminal.onDidClose((exitCode: number) => {
                         closeEventRegistration.dispose();
 
                         if (exitCode === 0) {
                             resolve(exitCode);
                         } else {
-                            await NetSdkDebugHelper.clearWorkspaceState();
                             reject(exitCode);
                         }
                     });
@@ -85,20 +87,6 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         });
 
         return { task, promise };
-    }
-
-    private getProjectFolderFromTask(task: NetSdkRunTask): WorkspaceFolder {
-        if (task?.netCore?.appProject) {
-            const folderUri = Uri.file(path.dirname(task.netCore.appProject));
-            const folder = {
-                uri: folderUri,
-                name: path.basename(folderUri.fsPath),
-                index: 1,
-            };
-            return folder;
-        } else {
-            return workspace.workspaceFolders[0];
-        }
     }
 }
 
