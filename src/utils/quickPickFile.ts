@@ -6,7 +6,7 @@
 import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as path from "path";
 import * as vscode from 'vscode';
-import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, VBPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
+import { COMPOSE_FILE_GLOB_PATTERN, CSPROJ_GLOB_PATTERN, DOCKERFILE_GLOB_PATTERN, FILE_SEARCH_MAX_RESULT, FSPROJ_GLOB_PATTERN, YAML_GLOB_PATTERN } from "../constants";
 
 export interface Item extends vscode.QuickPickItem {
     relativeFilePath: string;
@@ -170,7 +170,7 @@ export async function quickPickProjectFileItem(context: IActionContext, fileUri:
         return createFileItem(rootFolder, fileUri);
     }
 
-    const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN, VBPROJ_GLOB_PATTERN]);
+    const items: Item[] = await resolveFilesOfPattern(rootFolder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
     const fileItem: Item = await quickPickFileItem(context, items, vscode.l10n.t('Choose a project file.'));
 
     if (!fileItem) {

@@ -5,7 +5,7 @@
 
 import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, ProviderResult, workspace, WorkspaceFolder } from 'vscode';
-import { CSPROJ_GLOB_PATTERN, DockerOrchestration, FSPROJ_GLOB_PATTERN, VBPROJ_GLOB_PATTERN } from '../constants';
+import { CSPROJ_GLOB_PATTERN, DockerOrchestration, FSPROJ_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { resolveFilesOfPattern } from '../utils/quickPickFile';
@@ -183,7 +183,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         //       type of files inside the folder here to determine the language.
 
         // check if it's a .NET Core project
-        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN, VBPROJ_GLOB_PATTERN]);
+        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
         if (csProjUris) {
             return await netSdkDebugHelper.provideDebugConfigurations(
                 {
