@@ -13,6 +13,7 @@ import { getDefaultContainerName } from "../../tasks/TaskHelper";
 import { netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
 import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
+import { isWindows } from "../../utils/osUtils";
 import { pathNormalize } from "../../utils/pathNormalize";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
@@ -114,7 +115,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         return {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),
             containerName: this.inferDotNetSdkContainerName(debugConfiguration),
-            platformOS: associatedTask?.dockerRun?.os || 'Linux',
+            platformOS: isWindows() ? 'Windows' : 'Linux',
         };
     }
 
