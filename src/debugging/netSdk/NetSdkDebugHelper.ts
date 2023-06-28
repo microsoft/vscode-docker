@@ -13,8 +13,7 @@ import { getDefaultContainerName } from "../../tasks/TaskHelper";
 import { netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
 import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
-import { isWindows } from "../../utils/osUtils";
-import { pathNormalize } from "../../utils/pathNormalize";
+import { getDockerOSType } from "../../utils/osUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
@@ -97,7 +96,9 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         if (projectInfo.length >= 5) { // if .NET has support for SDK Build
             // fifth is whether .NET Web apps supports SDK Containers
             if (projectInfo[4] === 'true') {
-                return pathNormalize(projectInfo[3]);
+                return ridOS === 'win' // fourth is output path
+                    ? path.win32.normalize(projectInfo[3])
+                    : path.posix.normalize(projectInfo[3]);
             } else {
                 await NetSdkDebugHelper.clearWorkspaceState();
                 throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
@@ -115,7 +116,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         return {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),
             containerName: this.inferDotNetSdkContainerName(debugConfiguration),
-            platformOS: isWindows() ? 'Windows' : 'Linux',
+            platformOS: await getDockerOSType() === "windows" ? 'Windows' : 'Linux',
         };
     }
 
