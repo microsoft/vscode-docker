@@ -139,7 +139,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
             return NetSdkDebugHelper.projPath;
         }
 
-        const projFileItem = await quickPickProjectFileItem(context, undefined, folder, 'No .csproj file could be found.');
+        const projFileItem = await quickPickProjectFileItem(context, undefined, folder, 'No project file could be found.');
         NetSdkDebugHelper.projPath = projFileItem.absoluteFilePath; // save the path for future use
         return projFileItem.absoluteFilePath;
     }
