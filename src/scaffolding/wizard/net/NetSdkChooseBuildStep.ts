@@ -7,6 +7,7 @@ import { IAzureQuickPickItem } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { TelemetryPromptStep } from '../TelemetryPromptStep';
+import { cSharpExtensionId, getMinimumCSharpExtensionExports } from '../netCore/netCoreStepUtils';
 import { NetChooseBuildTypeContext } from './NetContainerBuild';
 
 /** Key to .NET Container Build Options workplace momento storage */
@@ -22,6 +23,7 @@ export type NetContainerBuildOptions = NetContainerBuildOptionsTuple[number];
 
 export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTypeContext> {
     public async prompt(wizardContext: NetChooseBuildTypeContext): Promise<void> {
+        await this.ensureCSharpExtension(wizardContext);
 
         // get workspace momento storage
         const containerBuildOptions = await ext.context.workspaceState.get<NetContainerBuildOptions>(NetContainerBuildOptionsKey);
@@ -54,5 +56,21 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
 
     protected setTelemetry(wizardContext: NetChooseBuildTypeContext): void {
         wizardContext.telemetry.properties.netSdkBuildStep = wizardContext.containerBuildOptions;
+    }
+
+    private async ensureCSharpExtension(wizardContext: NetChooseBuildTypeContext): Promise<void> {
+        try {
+            await getMinimumCSharpExtensionExports();
+        } catch (err) {
+            // Suppress report issue and rethrow
+            wizardContext.errorHandling.suppressReportIssue = true;
+            wizardContext.errorHandling.buttons = [
+                {
+                    title: vscode.l10n.t('Open Extension'),
+                    callback: async () => vscode.commands.executeCommand('extension.open', cSharpExtensionId),
+                }
+            ];
+            throw err;
+        }
     }
 }

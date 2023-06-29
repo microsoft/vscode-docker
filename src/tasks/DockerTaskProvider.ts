@@ -5,12 +5,13 @@
 
 import { callWithTelemetryAndErrorHandling, IActionContext, parseError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, CustomExecution, l10n, ProviderResult, Task, TaskDefinition, TaskProvider } from 'vscode';
-import { DockerPlatform, getPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerPlatform } from '../debugging/DockerDebugPlatformHelper';
 import { ext } from '../extensionVariables';
 import { ExecError } from '../utils/execAsync';
 import { DockerBuildTask } from './DockerBuildTaskProvider';
 import { DockerPseudoterminal } from './DockerPseudoterminal';
 import { DockerRunTask } from './DockerRunTaskProvider';
+import { getTaskPlatform } from './DockerTaskPlatformHelper';
 import { DockerTaskExecutionContext, DockerTaskProviderName, TaskHelper } from './TaskHelper';
 
 export abstract class DockerTaskProvider implements TaskProvider {
@@ -46,7 +47,7 @@ export abstract class DockerTaskProvider implements TaskProvider {
                 }
 
                 context.actionContext = actionContext;
-                context.platform = getPlatform(task.definition);
+                context.platform = getTaskPlatform(task.definition);
 
                 context.actionContext.telemetry.properties.dockerPlatform = context.platform;
                 await this.executeTaskInternal(context, task);

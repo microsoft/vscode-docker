@@ -5,12 +5,12 @@
 
 import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, ProviderResult, workspace, WorkspaceFolder } from 'vscode';
-import { CSPROJ_GLOB_PATTERN, DockerOrchestration } from '../constants';
+import { CSPROJ_GLOB_PATTERN, DockerOrchestration, FSPROJ_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
 import { resolveFilesOfPattern } from '../utils/quickPickFile';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
-import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
+import { DockerPlatform, getDebugPlatform } from './DockerDebugPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
 import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
@@ -85,7 +85,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     throw new Error(l10n.t('The property "request" must be specified in the debug config.'));
                 }
 
-                const debugPlatform = getPlatform(debugConfiguration);
+                const debugPlatform = getDebugPlatform(debugConfiguration);
                 actionContext.telemetry.properties.dockerPlatform = debugPlatform;
                 actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 
@@ -114,6 +114,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             await this.removeDebugContainerIfNeeded(context.actionContext, resolvedConfiguration);
         }
 
+        await helper.afterResolveDebugConfiguration?.(context, originalConfiguration);
         return resolvedConfiguration;
     }
 
@@ -182,16 +183,13 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
         //       type of files inside the folder here to determine the language.
 
         // check if it's a .NET Core project
-        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN]);
+        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
         if (csProjUris) {
             return await netSdkDebugHelper.provideDebugConfigurations(
                 {
                     actionContext,
                     dockerfile: undefined,
                     folder: folder
-                },
-                {
-                    appProject: csProjUris[0]?.absoluteFilePath || '',
                 }
             );
         } else {

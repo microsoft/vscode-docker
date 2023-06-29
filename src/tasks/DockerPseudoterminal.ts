@@ -112,7 +112,7 @@ export class DockerPseudoterminal implements Pseudoterminal {
         return await execAsync(
             command,
             {
-                cwd: this.resolvedDefinition.options?.cwd || options.folder.uri.fsPath,
+                cwd: this.resolvedDefinition.options?.cwd || options.cwd || options.folder.uri.fsPath,
                 env: withDockerEnvSettings({ ...process.env, ...this.resolvedDefinition.options?.env }),
                 cancellationToken: options.token,
             },
@@ -135,4 +135,5 @@ type ExecuteCommandResponseInTerminalOptions = ExecAsyncInTerminalOptions & {
 type ExecAsyncInTerminalOptions = {
     folder: WorkspaceFolder;
     token?: CancellationToken;
+    cwd?: string;
 };

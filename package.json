@@ -1511,7 +1511,21 @@
                 ]
             },
             {
-                "type": "dotnet-container-sdk"
+                "type": "dotnet-container-sdk",
+                "properties": {
+                    "netCore": {
+                        "description": "%vscode-docker.debug.netCore.description%",
+                        "properties": {
+                            "appProject": {
+                                "type": "string",
+                                "description": "%vscode-docker.debug.netCore.appProject%"
+                            }
+                        },
+                        "required": [
+                            "appProject"
+                        ]
+                    }
+                }
             }
         ],
         "languages": [

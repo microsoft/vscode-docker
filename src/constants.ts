@@ -24,6 +24,7 @@ export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][l
 export const YAML_GLOB_PATTERN = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 export const CSPROJ_GLOB_PATTERN = '**/*.{[cC][sS][pP][rR][oO][jJ]}';
 export const FSPROJ_GLOB_PATTERN = '**/*.{[fF][sS][pP][rR][oO][jJ]}';
+export const VBPROJ_GLOB_PATTERN = '**/*.{[vV][bB][pP][rR][oO][jJ]}';
 
 // File search max ammout
 export const FILE_SEARCH_MAX_RESULT = 1000;

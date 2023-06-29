@@ -3,19 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from '@microsoft/vscode-azext-utils';
 import * as os from 'os';
-import { WorkspaceFolder, l10n } from "vscode";
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { RunContainerBindMount, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
+import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
 import { getValidImageName } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
-import { quickPickProjectFileItem } from "../../utils/quickPickFile";
-import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { DockerTaskExecutionContext, getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
-import { NetCoreTaskHelper } from "../netcore/NetCoreTaskHelper";
+import { getDefaultContainerName, getDefaultImageName } from "../TaskHelper";
 
 /**
  * Native architecture of the current machine in the RID format
@@ -33,17 +28,14 @@ export type RidCpuArchitecture =
 
 export const NetSdkRunTaskType = 'dotnet-container-sdk';
 const NetSdkDefaultImageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
-const ErrMsgNoWorkplaceFolder = l10n.t(`Unable to determine task scope to execute task ${NetSdkRunTaskType}. Please open a workspace folder.`);
 
-export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext): Promise<string> {
-
+export async function getNetSdkBuildCommand(isProjectWebApp: boolean, projectFolderName: string): Promise<string> {
     const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
-    const projPath = await inferProjPath(context.actionContext, context.folder);
 
     // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
-    const publishFlag = NetCoreTaskHelper.isWebApp(projPath) ? '-p:PublishProfile=DefaultContainer' : '/t:PublishContainer';
-
-    const folderName = await quickPickWorkspaceFolder(context.actionContext, ErrMsgNoWorkplaceFolder);
+    const publishFlag = isProjectWebApp
+        ? '-p:PublishProfile=DefaultContainer'
+        : '/t:PublishContainer';
 
     const args = composeArgs(
         withArg('dotnet', 'publish'),
@@ -51,7 +43,7 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext)
         withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
         withArg(publishFlag),
         withNamedArg('--configuration', configuration),
-        withNamedArg('-p:ContainerImageName', getValidImageName(folderName.name), { assignValue: true }),
+        withNamedArg('-p:ContainerRepository', getValidImageName(projectFolderName), { assignValue: true }),
         withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
     )();
 
@@ -59,39 +51,36 @@ export async function getNetSdkBuildCommand(context: DockerTaskExecutionContext)
     return quotedArgs.join(' ');
 }
 
-export async function getNetSdkRunCommand(context: DockerTaskExecutionContext): Promise<string> {
+export async function getNetSdkRunCommand(isProjectWebApp: boolean, projectFolderName: string): Promise<string> {
     const client = await ext.runtimeManager.getClient();
-    const folderName = await quickPickWorkspaceFolder(context.actionContext, ErrMsgNoWorkplaceFolder);
 
-    const command = await client.runContainer({
+    const options: RunContainerCommandOptions = {
         detached: true,
         publishAllPorts: true,
-        name: getDefaultContainerName(folderName.name, NetSdkDefaultImageTag),
+        name: getDefaultContainerName(projectFolderName, NetSdkDefaultImageTag),
         environmentVariables: {},
         removeOnExit: true,
-        imageRef: getDefaultImageName(folderName.name, NetSdkDefaultImageTag),
+        imageRef: getDefaultImageName(projectFolderName, NetSdkDefaultImageTag),
         labels: defaultVsCodeLabels,
         mounts: await getRemoteDebuggerMount(),
-        exposePorts: [8080], // hard coded for now since the default port is 8080
-        entrypoint: '/bin/sh'
-    });
+        entrypoint: await getDockerOSType() === 'windows' ? 'cmd.exe' : '/bin/sh'
+    };
 
+    if (isProjectWebApp) {
+        options.exposePorts = [8080, 80]; // the default port is 8080 for .NET 8 and 80 for .NET 7
+    }
+
+    const command = await client.runContainer(options);
     const quotedArgs = Shell.getShellOrDefault().quote(command.args);
     const commandLine = [client.commandName, ...quotedArgs].join(' ');
     return commandLine;
-}
-
-async function inferProjPath(context: IActionContext, folder: WorkspaceFolder): Promise<string> {
-    const noProjectFileErrMessage = l10n.t('No .csproj file could be found.');
-    const item = await quickPickProjectFileItem(context, undefined, folder, noProjectFileErrMessage);
-    return item.absoluteFilePath;
 }
 
 /**
  * This method normalizes the Docker OS type to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
+export async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
     const dockerOsType = await getDockerOSType();
     return dockerOsType === 'windows' ? 'win' : 'linux';
 }
@@ -100,7 +89,7 @@ async function normalizeOsToRidOs(): Promise<'linux' | 'win'> {
  * This method normalizes the native architecture to match the .NET Core SDK conventions.
  * {@link https://learn.microsoft.com/en-us/dotnet/core/rid-catalog}
  */
-async function normalizeArchitectureToRidArchitecture(): Promise<RidCpuArchitecture> {
+export async function normalizeArchitectureToRidArchitecture(): Promise<RidCpuArchitecture> {
     const architecture = os.arch();
     switch (architecture) {
         case 'x32':
