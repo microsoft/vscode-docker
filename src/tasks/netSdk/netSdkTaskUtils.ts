@@ -43,7 +43,7 @@ export async function getNetSdkBuildCommand(isProjectWebApp: boolean, projectFol
         withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
         withArg(publishFlag),
         withNamedArg('--configuration', configuration),
-        withNamedArg('-p:ContainerRepository', getValidImageName(projectFolderName), { assignValue: true }),
+        withNamedArg('-p:ContainerImageName', getValidImageName(projectFolderName), { assignValue: true }),
         withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
     )();
 
