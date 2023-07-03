@@ -19,6 +19,6 @@ export function getValidImageNameWithTag(nameHint: string, tag: string): string 
     return getImageNameWithTag(getValidImageName(nameHint), tag);
 }
 
-export function getImageNameWithTag(nameHint: string, tag: string): string {
-    return `${nameHint}:${tag}`;
+export function getImageNameWithTag(name: string, tag: string): string {
+    return `${name}:${tag}`;
 }
