@@ -1,6 +1,7 @@
 <Project>
     <PropertyGroup>
         <GetProjectPropertiesDependsOn Condition=" '$(SDKContainerSupportEnabled)' == 'true' ">$(GetProjectPropertiesDependsOn);ComputeContainerConfig;</GetProjectPropertiesDependsOn>
+        <InferImageName>$(AssemblyName)</InferImageName>
     </PropertyGroup>
 
     <Target Name="GetProjectProperties" DependsOnTargets="$(GetProjectPropertiesDependsOn)">
@@ -10,7 +11,8 @@
 $(TargetFramework)$(TargetFrameworks.Split(';')[0])
 $(OutputPath)$(AssemblyName).dll
 $(ContainerWorkingDirectory)/$(AssemblyName).dll
-$(SDKContainerSupportEnabled)"
+$(SDKContainerSupportEnabled)
+$(InferImageName)"
             Overwrite="True" />
     </Target>
 </Project>

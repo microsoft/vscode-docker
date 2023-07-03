@@ -5,8 +5,8 @@
 
 import * as cp from 'child_process';
 import * as stream from 'stream';
-import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '../runtimes/docker';
 import { CancellationToken } from 'vscode';
+import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '../runtimes/docker';
 
 type Progress = (content: string, err: boolean) => void;
 
@@ -57,7 +57,11 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
         stdErrPipe: stderrIntermediate ?? stderrFinal,
     };
 
-    await spawnStreamAsync(command, [], spawnOptions);
+    try {
+        await spawnStreamAsync(command, [], spawnOptions);
+    } catch (err) {
+        // best effort
+    }
 
     return {
         stdout: await stdoutFinal.getString(),

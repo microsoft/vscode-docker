@@ -14,7 +14,7 @@ import { NetSdkRunTaskType, getNetSdkBuildCommand, getNetSdkRunCommand } from '.
 
 const NetSdkDebugTaskName = 'debug';
 
-export type NetSdkRunTask = NetCoreRunTaskDefinition;
+export type NetSdkRunTaskDefinition = NetCoreRunTaskDefinition;
 
 export class NetSdkRunTaskProvider extends DockerTaskProvider {
 
@@ -28,10 +28,9 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         const projectPath = task.definition.netCore?.appProject;
         const isProjectWebApp = await NetCoreTaskHelper.isWebApp(projectPath);
         const projectFolderPath = path.dirname(projectPath);
-        const projectFolderName = path.basename(projectFolderPath);
 
         // use dotnet to build the image
-        const buildCommand = await getNetSdkBuildCommand(isProjectWebApp, projectFolderName);
+        const buildCommand = await getNetSdkBuildCommand(isProjectWebApp, task.definition.dockerRun.containerName);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
@@ -42,7 +41,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         );
 
         // use docker run to run the image
-        const runCommand = await getNetSdkRunCommand(isProjectWebApp, projectFolderName);
+        const runCommand = await getNetSdkRunCommand(isProjectWebApp, task.definition.dockerRun.containerName);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {
@@ -55,7 +54,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         return Promise.resolve();
     }
 
-    public createNetSdkRunTask(options?: Omit<NetSdkRunTask, "type">): { task: Task, promise: Promise<number> } {
+    public createNetSdkRunTask(options?: Omit<NetSdkRunTaskDefinition, "type">): { task: Task, promise: Promise<number> } {
         let task: Task;
         const definition = {
             ...options,
