@@ -111,7 +111,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     }
 
     private async getProjectInfo(debugConfiguration: DockerDebugConfiguration): Promise<string[]> {
-        if (this.projectInfo !== undefined && this.projectInfo.length > 0) {
+        if (this.projectInfo !== undefined && this.projectInfo.length >= 6) {
             return this.projectInfo;
         }
 

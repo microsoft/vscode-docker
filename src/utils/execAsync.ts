@@ -57,11 +57,7 @@ export async function execAsync(command: string, options?: cp.ExecOptions & { st
         stdErrPipe: stderrIntermediate ?? stderrFinal,
     };
 
-    try {
-        await spawnStreamAsync(command, [], spawnOptions);
-    } catch (err) {
-        // best effort
-    }
+    await spawnStreamAsync(command, [], spawnOptions);
 
     return {
         stdout: await stdoutFinal.getString(),

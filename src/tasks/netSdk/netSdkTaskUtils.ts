@@ -7,9 +7,10 @@ import * as os from 'os';
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
 import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
-import { getContainerNameWithTag, getImageNameWithTag } from '../../utils/getValidImageName';
+import { getImageNameWithTag } from '../../utils/getValidImageName';
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
+import { getContainerNameWithTag } from '../TaskHelper';
 
 /**
  * Native architecture of the current machine in the RID format
