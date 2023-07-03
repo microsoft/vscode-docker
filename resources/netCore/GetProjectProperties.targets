@@ -1,10 +1,13 @@
 <Project>
     <PropertyGroup>
         <GetProjectPropertiesDependsOn Condition=" '$(SDKContainerSupportEnabled)' == 'true' ">$(GetProjectPropertiesDependsOn);ComputeContainerConfig;</GetProjectPropertiesDependsOn>
-        <InferImageName>$(AssemblyName)</InferImageName>
     </PropertyGroup>
 
     <Target Name="GetProjectProperties" DependsOnTargets="$(GetProjectPropertiesDependsOn)">
+        <PropertyGroup>
+            <InferImageName>$(ContainerRepository)</InferImageName>
+            <InferImageName Condition=" '$(InferImageName)' == '' ">$(ContainerImageName)</InferImageName>
+        </PropertyGroup>
         <WriteLinesToFile
             File="$(InfoOutputPath)"
             Lines="$(AssemblyName).dll

@@ -8,9 +8,9 @@ import { commands, l10n, tasks } from "vscode";
 import { ext } from "../../extensionVariables";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
 import { AllNetContainerBuildOptions, NetContainerBuildOptionsKey } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
+import { getContainerNameWithTag } from "../../tasks/TaskHelper";
 import { NetSdkRunTaskDefinition, netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
 import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
-import { getContainerNameWithTag } from "../../utils/getValidImageName";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
 import { getDockerOSType } from "../../utils/osUtils";
 import { PlatformOS } from "../../utils/platform";
@@ -61,7 +61,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                 appProject: await this.inferProjPath(undefined, debugConfiguration.netCore),
             },
             dockerRun: {
-                containerName: projectInfo[5].toLowerCase() || 'dotnet'
+                containerName: projectInfo[5]
             }
         };
 
@@ -101,7 +101,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         const projectInfo = await this.getProjectInfo(debugConfiguration);
         return {
             configureSsl: !!(associatedTask?.netCore?.configureSsl),
-            containerName: getContainerNameWithTag(projectInfo[5].toLowerCase(), "dev"),
+            containerName: getContainerNameWithTag(projectInfo[5], "dev"),
             platformOS: await getDockerOSType() === "windows" ? 'Windows' : 'Linux',
         };
     }
@@ -122,12 +122,17 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         let projectInfo: string[];
         try {
             projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject, additionalProperties);
-            this.projectInfo = projectInfo;
         } catch (error) {
             await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
             throw error;
         }
 
+        if (projectInfo.length < 6 || !projectInfo[5]) {
+            await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
+            throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
+        }
+
+        this.projectInfo = projectInfo;
         return projectInfo;
     }
 
