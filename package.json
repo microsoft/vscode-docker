@@ -1526,11 +1526,11 @@
                         ]
                     },
                     "dockerRun": {
-                        "description": "%vscode-docker.tasks.dotnet-container-sdk.dotnetContainerSdk.description%",
+                        "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.description%",
                         "properties": {
                             "containerName": {
                                 "type": "string",
-                                "description": "%vscode-docker.tasks.dotnet-container-sdk.dotnetContainerSdk.containerName%"
+                                "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.containerName%"
                             }
                         },
                         "required": [
