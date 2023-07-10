@@ -1,6 +1,6 @@
 ## 1.26.0 - 10 July 2023
 ### Added
-* Added support for debugging .NET projects with .NET SDK container build. [#3808](https://github.com/microsoft/vscode-docker/issues/3808), [#3986](https://github.com/microsoft/vscode-docker/pull/3986)
+* Added support for debugging .NET projects with .NET SDK container build. [#3960](https://github.com/microsoft/vscode-docker/pull/3960), [#3986](https://github.com/microsoft/vscode-docker/pull/3986)
 * Introduced optional status bar item displaying the current Docker context. [#3883](https://github.com/microsoft/vscode-docker/pull/3883)
 * Enabled customization of entry point for docker run tasks. [#3914](https://github.com/microsoft/vscode-docker/pull/3914)
 
