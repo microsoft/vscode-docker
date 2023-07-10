@@ -24,7 +24,6 @@ import { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions } from "../netcore/N
 export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
     private projectInfo: string[] | undefined;
-    private appProject: string | undefined;
 
     public override async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         const configurations: DockerDebugConfiguration[] = [];
@@ -136,13 +135,8 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
      *          in the static variable projPath
      */
     private async inferProjPath(actionContext: IActionContext, folder: WorkspaceFolder): Promise<string> {
-        if (this.appProject) {
-            return this.appProject;
-        }
-
         const projFileItem = await quickPickProjectFileItem(actionContext, undefined, folder, 'No project file could be found.');
-        this.appProject = projFileItem.absoluteFilePath; // save the path for future use
-        return this.appProject;
+        return projFileItem.absoluteFilePath;
     }
 }
 
