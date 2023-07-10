@@ -5,7 +5,7 @@
 
 import { RunContainerBindMount } from '@microsoft/vscode-container-client';
 import { l10n, Task } from 'vscode';
-import { DockerPlatform } from '../debugging/DockerPlatformHelper';
+import { DockerPlatform } from '../debugging/DockerDebugPlatformHelper';
 import { ext } from '../extensionVariables';
 import { cloneObject } from '../utils/cloneObject';
 import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
