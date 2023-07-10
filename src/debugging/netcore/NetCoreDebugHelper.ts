@@ -35,7 +35,16 @@ export interface NetCoreDebugScaffoldingOptions {
     appProject?: string;
 }
 
+export interface NetCoreProjectProperties {
+    assemblyName: string;
+    targetFramework: string;
+    appOutput: string;
+}
+
 export class NetCoreDebugHelper implements DebugHelper {
+
+    protected projectProperties: NetCoreProjectProperties | undefined;
+
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
@@ -178,13 +187,8 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
-
-        if (projectInfo.length < 3) {
-            throw new Error(l10n.t('Unable to determine assembly output path.'));
-        }
-
-        return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
+        const projectProperties = await this.getProjectProperties(debugConfiguration);
+        return projectProperties.appOutput;
     }
 
     protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
@@ -203,6 +207,28 @@ export class NetCoreDebugHelper implements DebugHelper {
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask?.dockerRun?.os || 'Linux',
         };
+    }
+
+    protected async getProjectProperties(debugConfiguration: DockerDebugConfiguration): Promise<NetCoreProjectProperties> {
+        if (this.projectProperties) {
+            return this.projectProperties;
+        }
+
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+
+        if (projectInfo.length < 3) {
+            throw new Error(l10n.t('Unable to determine assembly output path.'));
+        }
+
+        // First line is assembly name, second is target framework, third+ are output path(s)
+        const projectProperties: NetCoreProjectProperties = {
+            assemblyName: projectInfo[0],
+            targetFramework: projectInfo[1],
+            appOutput: projectInfo[2]
+        };
+
+        this.projectProperties = projectProperties;
+        return projectProperties;
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
