@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "es2020",
         "target": "es6",
         "outDir": "out",
         "lib": [
@@ -10,7 +10,7 @@
         "rootDir": "src",
         "strict": true, /* enable all strict type-checking options */
         "alwaysStrict": true,
-        "esModuleInterop": true,
+        //"esModuleInterop": true,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
