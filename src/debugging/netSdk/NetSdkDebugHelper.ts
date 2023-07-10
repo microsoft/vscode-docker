@@ -16,7 +16,7 @@ import { getDockerOSType } from "../../utils/osUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
-import { DockerDebugContext, DockerDebugScaffoldContext } from "../DebugHelper";
+import { DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
 import { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions } from "../netcore/NetCoreDebugHelper";
 
@@ -24,8 +24,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
 
     private projectInfo: string[] | undefined;
 
-    public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
-
+    public override async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         const configurations: DockerDebugConfiguration[] = [];
 
         const netCoreBuildContext: NetChooseBuildTypeContext = {
@@ -54,6 +53,15 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         return configurations;
     }
 
+    public override async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
+        try {
+            return await super.resolveDebugConfiguration(context, debugConfiguration);
+        } catch (error) {
+            await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
+            throw error;
+        }
+    }
+
     public async afterResolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void> {
         const projectInfo = await this.getProjectInfo(debugConfiguration);
         const runDefinition: Omit<NetSdkRunTaskDefinition, "type"> = {
@@ -66,15 +74,8 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         };
 
         const { task, promise } = netSdkRunTaskProvider.createNetSdkRunTask(runDefinition);
-
         await tasks.executeTask(task);
-
-        try {
-            await promise;
-        } catch (error) {
-            await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
-            throw error;
-        }
+        await promise;
     }
 
     protected override async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
@@ -87,12 +88,10 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
                     ? path.win32.normalize(projectInfo[3])
                     : path.posix.normalize(projectInfo[3]);
             } else {
-                await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
                 throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
             }
         }
 
-        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
         throw new Error(l10n.t('Unable to determine assembly output path.'));
     }
 
@@ -111,7 +110,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     }
 
     private async getProjectInfo(debugConfiguration: DockerDebugConfiguration): Promise<string[]> {
-        if (this.projectInfo !== undefined && this.projectInfo.length >= 6) {
+        if (this.projectInfo && this.projectInfo.length >= 6) {
             return this.projectInfo;
         }
 
@@ -119,16 +118,9 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         const ridArchitecture = await normalizeArchitectureToRidArchitecture();
         const additionalProperties = `/p:ContainerRuntimeIdentifier="${ridOS}-${ridArchitecture}"`;
 
-        let projectInfo: string[];
-        try {
-            projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject, additionalProperties);
-        } catch (error) {
-            await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
-            throw error;
-        }
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject, additionalProperties);
 
         if (projectInfo.length < 6 || !projectInfo[5]) {
-            await ext.context.workspaceState.update(NetContainerBuildOptionsKey, '');
             throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
         }
 
