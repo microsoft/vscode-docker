@@ -123,6 +123,8 @@
     "vscode-docker.tasks.docker-compose.dockerCompose.envFile.description": "File of environment variables read in and applied to the Docker containers.",
     "vscode-docker.tasks.docker-compose.dockerCompose.files.description": "The docker-compose files to include, in order.",
     "vscode-docker.tasks.docker-compose.dockerCompose.projectName.description": "Alternate project name to use when naming and labeling Docker objects. If using an alternate project name when composing up, the same project name must be specified when composing down.",
+    "vscode-docker.tasks.dotnet-container-sdk.dotnetContainerSdk.description": "Options for running the Docker container used for debugging. Learn more at https://aka.ms/vscode-docker-run-task",
+    "vscode-docker.tasks.dotnet-container-sdk.dotnetContainerSdk.containerName": "Name of the container used for debugging.",
     "vscode-docker.config.docker.promptForRegistryWhenPushingImages": "Prompt for registry selection if the image is not explicitly tagged.",
     "vscode-docker.config.template.build.template": "The command template.",
     "vscode-docker.config.template.build.label": "The label displayed to the user.",
