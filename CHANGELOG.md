@@ -1,3 +1,7 @@
+## 1.25.2 - 23 June 2023
+### Fixed
+* Fixed a potential security issue involving Markdown tooltips for containers. [#3983](https://github.com/microsoft/vscode-docker/pull/3983)
+
 ## 1.25.1 - 16 May 2023
 ### Fixed
 * The extension was not activating when a Dockerfile was opened. [#3928](https://github.com/microsoft/vscode-docker/pull/3928)
