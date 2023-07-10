@@ -1,13 +1,13 @@
 ## 1.26.0 - 10 July 2023
 ### Added
-* Added support for debugging .NET projects with .NET SDK container build. [#3960](https://github.com/microsoft/vscode-docker/pull/3960), [#3986](https://github.com/microsoft/vscode-docker/pull/3986)
-* Introduced optional status bar item displaying the current Docker context. [#3883](https://github.com/microsoft/vscode-docker/pull/3883)
-* Enabled customization of entry point for docker run tasks. [#3914](https://github.com/microsoft/vscode-docker/pull/3914)
+* Added support for debugging .NET projects with .NET SDK container build. [#3808](https://github.com/microsoft/vscode-docker/issues/3808)
+* Introduced optional status bar item displaying the current Docker context. [#3690](https://github.com/microsoft/vscode-docker/issues/3690)
+* Enabled customization of entry point for docker run tasks. [#3831](https://github.com/microsoft/vscode-docker/issues/3831)
 
 ### Fixed
-* Updated Dockerfile language server to ignore empty continuation lines in COPY instructions and resolve an infinite loop caused by quotes in comments for the semantic highlighter. [#3955](https://github.com/microsoft/vscode-docker/pull/3955)
-* Resolved the failure to build Windows containers in the Build image command. [#3931](https://github.com/microsoft/vscode-docker/pull/3931)
-* Fixed the issue where .NET Debugging with Docker Compose failed to hit breakpoints. [#3924](https://github.com/microsoft/vscode-docker/pull/3924)
+* Updated Dockerfile language server to ignore empty continuation lines in COPY instructions and resolve an infinite loop caused by quotes in comments for the semantic highlighter. [#3576](https://github.com/microsoft/vscode-docker/issues/3576), [#3836](https://github.com/microsoft/vscode-docker/issues/3836)
+* Resolved the failure to build Windows containers in the Build image command. [#3915](https://github.com/microsoft/vscode-docker/issues/3915)
+* Fixed the issue where .NET Debugging with Docker Compose failed to hit breakpoints. [#3912](https://github.com/microsoft/vscode-docker/issues/3912)
 
 ## 1.25.2 - 23 June 2023
 ### Fixed
