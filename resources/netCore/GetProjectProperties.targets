@@ -4,13 +4,18 @@
     </PropertyGroup>
 
     <Target Name="GetProjectProperties" DependsOnTargets="$(GetProjectPropertiesDependsOn)">
+        <PropertyGroup>
+            <InferImageName>$(ContainerRepository)</InferImageName>
+            <InferImageName Condition=" '$(InferImageName)' == '' ">$(ContainerImageName)</InferImageName>
+        </PropertyGroup>
         <WriteLinesToFile
             File="$(InfoOutputPath)"
             Lines="$(AssemblyName).dll
 $(TargetFramework)$(TargetFrameworks.Split(';')[0])
 $(OutputPath)$(AssemblyName).dll
 $(ContainerWorkingDirectory)/$(AssemblyName).dll
-$(SDKContainerSupportEnabled)"
+$(SDKContainerSupportEnabled)
+$(InferImageName)"
             Overwrite="True" />
     </Target>
 </Project>

@@ -1524,6 +1524,18 @@
                         "required": [
                             "appProject"
                         ]
+                    },
+                    "dockerRun": {
+                        "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.description%",
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.containerName%"
+                            }
+                        },
+                        "required": [
+                            "containerName"
+                        ]
                     }
                 }
             }
