@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "@microsoft/vscode-azext-utils";
 import * as path from "path";
 import { WorkspaceFolder, commands, l10n, tasks } from "vscode";
 import { ext } from "../../extensionVariables";
@@ -11,16 +10,16 @@ import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/
 import { AllNetContainerBuildOptions, NetContainerBuildOptionsKey } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
 import { NetSdkRunTaskDefinition, netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
 import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
+import { NetCoreTaskHelper } from "../../tasks/netcore/NetCoreTaskHelper";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
 import { getDockerOSType } from "../../utils/osUtils";
 import { PlatformOS } from "../../utils/platform";
-import { quickPickProjectFileItem } from "../../utils/quickPickFile";
 import { resolveVariables, unresolveWorkspaceFolder } from "../../utils/resolveVariables";
 import { DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
 import { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions, NetCoreProjectProperties } from "../netcore/NetCoreDebugHelper";
 
-export interface NetSdkProjectProperties extends NetCoreProjectProperties {
+interface NetSdkProjectProperties extends NetCoreProjectProperties {
     containerWorkingDirectory: string;
     isSdkContainerSupportEnabled: boolean;
     imageName: string;
@@ -37,16 +36,17 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
             workspaceFolder: context.folder,
         };
 
-        await netContainerBuild(netCoreBuildContext);
+        await netContainerBuild(netCoreBuildContext); // prompt user whether to use .NET container SDK build
         if (netCoreBuildContext?.containerBuildOptions === AllNetContainerBuildOptions[1]) {
-            const appProjectAbsolutePath = options?.appProject || await this.inferProjPath(context.actionContext, context.folder);
+            options = options || {};
+            options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
 
             configurations.push({
                 name: 'Docker .NET Container SDK Launch',
                 type: 'docker',
                 request: 'launch',
                 netCore: {
-                    appProject: unresolveWorkspaceFolder(appProjectAbsolutePath, context.folder),
+                    appProject: unresolveWorkspaceFolder(options.appProject, context.folder),
                     buildWithSdk: true,
                 },
             });
@@ -69,7 +69,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     public async afterResolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void> {
         const runDefinition: Omit<NetSdkRunTaskDefinition, "type"> = {
             netCore: {
-                appProject: debugConfiguration?.netCore?.appProject || await this.inferProjPath(context.actionContext, context.folder),
+                appProject: debugConfiguration.netCore.appProject,
             },
             dockerRun: {
                 image: context.runDefinition.dockerRun.image,
@@ -138,16 +138,6 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         } else {
             throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
         }
-    }
-
-    /**
-     * @returns the project path stored in NetCoreDebugScaffoldingOptions,
-     *          otherwise prompts the user to select a .csproj file and stores the path
-     *          in the static variable projPath
-     */
-    private async inferProjPath(actionContext: IActionContext, folder: WorkspaceFolder): Promise<string> {
-        const projFileItem = await quickPickProjectFileItem(actionContext, undefined, folder, 'No project file could be found.');
-        return projFileItem.absoluteFilePath;
     }
 }
 
