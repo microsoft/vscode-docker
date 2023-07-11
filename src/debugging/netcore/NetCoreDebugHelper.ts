@@ -42,7 +42,6 @@ export interface NetCoreProjectProperties {
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
-
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
