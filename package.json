@@ -3037,7 +3037,7 @@
         "gradle-to-js": "^2.0.1",
         "handlebars": "^4.7.7",
         "node-fetch": "^2.6.9",
-        "semver": "^7.5.0",
+        "semver": "^7.5.2",
         "tar": "^6.1.13",
         "tree-kill": "^1.2.2",
         "vscode-languageclient": "^8.1.0",
