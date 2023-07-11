@@ -43,8 +43,6 @@ export interface NetCoreProjectProperties {
 
 export class NetCoreDebugHelper implements DebugHelper {
 
-    protected projectProperties: NetCoreProjectProperties | undefined;
-
     public async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         options = options || {};
         options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
@@ -210,10 +208,6 @@ export class NetCoreDebugHelper implements DebugHelper {
     }
 
     protected async getProjectProperties(debugConfiguration: DockerDebugConfiguration): Promise<NetCoreProjectProperties> {
-        if (this.projectProperties) {
-            return this.projectProperties;
-        }
-
         const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
 
         if (projectInfo.length < 3) {
@@ -227,7 +221,6 @@ export class NetCoreDebugHelper implements DebugHelper {
             appOutput: projectInfo[2]
         };
 
-        this.projectProperties = projectProperties;
         return projectProperties;
     }
 

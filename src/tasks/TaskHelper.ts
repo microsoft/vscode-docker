@@ -210,11 +210,7 @@ export function getDefaultImageName(nameHint: string, tag?: 'dev' | 'latest'): s
 
 export function getDefaultContainerName(nameHint: string, tag?: 'dev' | 'latest'): string {
     tag = tag || 'dev';
-    return getContainerNameWithTag(getValidImageName(nameHint), tag);
-}
-
-export function getContainerNameWithTag(name: string, tag: string): string {
-    return `${name}-${tag}`;
+    return `${getValidImageName(nameHint)}-${tag}`;
 }
 
 export async function recursiveFindTaskByType(allTasks: TaskDefinitionBase[], type: string, node: DebugConfigurationBase | TaskDefinitionBase): Promise<TaskDefinitionBase | undefined> {

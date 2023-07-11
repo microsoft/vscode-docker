@@ -9,27 +9,24 @@ import { WorkspaceFolder, commands, l10n, tasks } from "vscode";
 import { ext } from "../../extensionVariables";
 import { NetChooseBuildTypeContext, netContainerBuild } from "../../scaffolding/wizard/net/NetContainerBuild";
 import { AllNetContainerBuildOptions, NetContainerBuildOptionsKey } from "../../scaffolding/wizard/net/NetSdkChooseBuildStep";
-import { getContainerNameWithTag } from "../../tasks/TaskHelper";
 import { NetSdkRunTaskDefinition, netSdkRunTaskProvider } from "../../tasks/netSdk/NetSdkRunTaskProvider";
 import { normalizeArchitectureToRidArchitecture, normalizeOsToRidOs } from "../../tasks/netSdk/netSdkTaskUtils";
 import { getNetCoreProjectInfo } from "../../utils/netCoreUtils";
 import { getDockerOSType } from "../../utils/osUtils";
 import { PlatformOS } from "../../utils/platform";
 import { quickPickProjectFileItem } from "../../utils/quickPickFile";
-import { unresolveWorkspaceFolder } from "../../utils/resolveVariables";
-import { DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration } from "../DebugHelper";
+import { resolveVariables, unresolveWorkspaceFolder } from "../../utils/resolveVariables";
+import { DockerDebugContext, DockerDebugScaffoldContext, ResolvedDebugConfiguration, inferContainerName } from "../DebugHelper";
 import { DockerDebugConfiguration } from "../DockerDebugConfigurationProvider";
 import { NetCoreDebugHelper, NetCoreDebugScaffoldingOptions, NetCoreProjectProperties } from "../netcore/NetCoreDebugHelper";
 
 export interface NetSdkProjectProperties extends NetCoreProjectProperties {
     containerWorkingDirectory: string;
     isSdkContainerSupportEnabled: boolean;
-    containerName: string;
+    imageName: string;
 }
 
 export class NetSdkDebugHelper extends NetCoreDebugHelper {
-
-    protected projectProperties: NetSdkProjectProperties | undefined;
 
     public override async provideDebugConfigurations(context: DockerDebugScaffoldContext, options?: NetCoreDebugScaffoldingOptions): Promise<DockerDebugConfiguration[]> {
         const configurations: DockerDebugConfiguration[] = [];
@@ -70,13 +67,12 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
     }
 
     public async afterResolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void> {
-        const projectInfo = await this.getProjectProperties(debugConfiguration);
         const runDefinition: Omit<NetSdkRunTaskDefinition, "type"> = {
             netCore: {
                 appProject: debugConfiguration?.netCore?.appProject || await this.inferProjPath(context.actionContext, context.folder),
             },
             dockerRun: {
-                containerName: projectInfo.containerName
+                image: context.runDefinition.dockerRun.image,
             }
         };
 
@@ -85,25 +81,23 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         await promise;
     }
 
-    protected override async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
-        const projectInfo = await this.getProjectProperties(debugConfiguration);
-
-        // fifth is whether .NET Web apps supports SDK Containers
-        if (projectInfo.isSdkContainerSupportEnabled) {
-            return await getDockerOSType() === 'windows' // fourth is output path
-                ? path.win32.normalize(projectInfo.containerWorkingDirectory)
-                : path.posix.normalize(projectInfo.containerWorkingDirectory);
-        } else {
-            throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
-        }
-    }
-
     protected override async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
-        const associatedTask = context.runDefinition;
-        const projectInfo = await this.getProjectProperties(debugConfiguration);
+        const projectProperties = await this.getProjectProperties(debugConfiguration, context.folder);
+        debugConfiguration.netCore.appOutput = await this.normalizeAppOutput(projectProperties.containerWorkingDirectory, projectProperties.isSdkContainerSupportEnabled);
+        context.runDefinition = {
+            ...context.runDefinition,
+            dockerRun: {
+                containerName: inferContainerName(debugConfiguration, context, projectProperties.imageName, "dev"),
+                image: projectProperties.imageName,
+            },
+            netCore: {
+                enableDebugging: true,
+            }
+        };
+
         return {
-            configureSsl: !!(associatedTask?.netCore?.configureSsl),
-            containerName: getContainerNameWithTag(projectInfo.containerName, "dev"),
+            configureSsl: false,
+            containerName: context.runDefinition.dockerRun.containerName,
             platformOS: await getDockerOSType() === "windows" ? 'Windows' : 'Linux',
         };
     }
@@ -112,16 +106,13 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         return appOutput;
     }
 
-    protected override async getProjectProperties(debugConfiguration: DockerDebugConfiguration): Promise<NetSdkProjectProperties> {
-        if (this.projectProperties) {
-            return this.projectProperties;
-        }
-
+    protected override async getProjectProperties(debugConfiguration: DockerDebugConfiguration, folder?: WorkspaceFolder): Promise<NetSdkProjectProperties> {
         const ridOS = await normalizeOsToRidOs();
         const ridArchitecture = await normalizeArchitectureToRidArchitecture();
         const additionalProperties = `/p:ContainerRuntimeIdentifier="${ridOS}-${ridArchitecture}"`;
+        const resolvedAppProject = resolveVariables(debugConfiguration.netCore?.appProject, folder);
 
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject, additionalProperties);
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', resolvedAppProject, additionalProperties);
 
         if (projectInfo.length < 6 || !projectInfo[5]) {
             throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
@@ -133,11 +124,20 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
             appOutput: projectInfo[2],
             containerWorkingDirectory: projectInfo[3],
             isSdkContainerSupportEnabled: projectInfo[4] === 'true',
-            containerName: projectInfo[5],
+            imageName: projectInfo[5],
         };
 
-        this.projectProperties = projectProperties;
         return projectProperties;
+    }
+
+    private async normalizeAppOutput(unnormalizedContainerWorkingDirectory: string, isSdkContainerSupportEnabled: boolean): Promise<string> {
+        if (isSdkContainerSupportEnabled) {
+            return await getDockerOSType() === 'windows' // fourth is output path
+                ? path.win32.normalize(unnormalizedContainerWorkingDirectory)
+                : path.posix.normalize(unnormalizedContainerWorkingDirectory);
+        } else {
+            throw new Error(l10n.t("Your current project configuration or .NET SDK version doesn't support SDK Container build. Please choose a compatible project or update .NET SDK."));
+        }
     }
 
     /**

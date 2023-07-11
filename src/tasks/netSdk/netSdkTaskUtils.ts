@@ -10,7 +10,7 @@ import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, 
 import { getImageNameWithTag } from '../../utils/getValidImageName';
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
-import { getContainerNameWithTag } from '../TaskHelper';
+import { getDefaultContainerName } from '../TaskHelper';
 
 /**
  * Native architecture of the current machine in the RID format
@@ -57,7 +57,7 @@ export async function getNetSdkRunCommand(isProjectWebApp: boolean, imageName: s
     const options: RunContainerCommandOptions = {
         detached: true,
         publishAllPorts: true,
-        name: getContainerNameWithTag(imageName, NetSdkDefaultImageTag),
+        name: getDefaultContainerName(imageName, NetSdkDefaultImageTag),
         environmentVariables: {},
         removeOnExit: true,
         imageRef: getImageNameWithTag(imageName, NetSdkDefaultImageTag),

@@ -30,7 +30,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         const projectFolderPath = path.dirname(projectPath);
 
         // use dotnet to build the image
-        const buildCommand = await getNetSdkBuildCommand(isProjectWebApp, task.definition.dockerRun.containerName);
+        const buildCommand = await getNetSdkBuildCommand(isProjectWebApp, task.definition.dockerRun.image);
         await context.terminal.execAsyncInTerminal(
             buildCommand,
             {
@@ -41,7 +41,7 @@ export class NetSdkRunTaskProvider extends DockerTaskProvider {
         );
 
         // use docker run to run the image
-        const runCommand = await getNetSdkRunCommand(isProjectWebApp, task.definition.dockerRun.containerName);
+        const runCommand = await getNetSdkRunCommand(isProjectWebApp, task.definition.dockerRun.image);
         await context.terminal.execAsyncInTerminal(
             runCommand,
             {
