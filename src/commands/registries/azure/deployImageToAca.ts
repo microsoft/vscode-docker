@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { parseDockerLikeImageName } from '@microsoft/vscode-container-client/lib/clients/DockerClientBase/parseDockerLikeImageName';
+import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
