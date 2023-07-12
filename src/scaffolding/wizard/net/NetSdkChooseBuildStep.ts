@@ -19,18 +19,18 @@ export const AllNetContainerBuildOptions = [
 ] as const;
 
 type NetContainerBuildOptionsTuple = typeof AllNetContainerBuildOptions;
-export type NetContainerBuildOptions = NetContainerBuildOptionsTuple[number];
+export type NetContainerBuildOption = NetContainerBuildOptionsTuple[number];
 
 export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTypeContext> {
     public async prompt(wizardContext: NetChooseBuildTypeContext): Promise<void> {
         await this.ensureCSharpExtension(wizardContext);
 
         // get workspace momento storage
-        const containerBuildOptions = await ext.context.workspaceState.get<NetContainerBuildOptions>(NetContainerBuildOptionsKey);
+        const containerBuildOption = await ext.context.workspaceState.get<NetContainerBuildOption>(NetContainerBuildOptionsKey);
 
         // only remember if it was 'Use .NET SDK', otherwise prompt again
-        if (containerBuildOptions === AllNetContainerBuildOptions[1]) {
-            wizardContext.containerBuildOptions = containerBuildOptions;
+        if (containerBuildOption === AllNetContainerBuildOptions[1]) {
+            wizardContext.containerBuildOption = containerBuildOption;
             return;
         }
 
@@ -40,22 +40,22 @@ export class NetSdkChooseBuildStep extends TelemetryPromptStep<NetChooseBuildTyp
             placeHolder: vscode.l10n.t('How would you like to build your container image?'),
         };
 
-        const buildOptions = AllNetContainerBuildOptions as readonly NetContainerBuildOptions[];
-        const items = buildOptions.map(p => <IAzureQuickPickItem<NetContainerBuildOptions>>{ label: p, data: p });
+        const buildOptions = AllNetContainerBuildOptions as readonly NetContainerBuildOption[];
+        const items = buildOptions.map(p => <IAzureQuickPickItem<NetContainerBuildOption>>{ label: p, data: p });
 
         const response = await wizardContext.ui.showQuickPick(items, opt);
-        wizardContext.containerBuildOptions = response.data;
+        wizardContext.containerBuildOption = response.data;
 
         // update workspace momento storage
-        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, wizardContext.containerBuildOptions);
+        await ext.context.workspaceState.update(NetContainerBuildOptionsKey, wizardContext.containerBuildOption);
     }
 
     public shouldPrompt(wizardContext: NetChooseBuildTypeContext): boolean {
-        return !wizardContext.containerBuildOptions;
+        return !wizardContext.containerBuildOption;
     }
 
     protected setTelemetry(wizardContext: NetChooseBuildTypeContext): void {
-        wizardContext.telemetry.properties.netSdkBuildStep = wizardContext.containerBuildOptions;
+        wizardContext.telemetry.properties.netSdkBuildStep = wizardContext.containerBuildOption;
     }
 
     private async ensureCSharpExtension(wizardContext: NetChooseBuildTypeContext): Promise<void> {

@@ -37,7 +37,7 @@ export class NetSdkDebugHelper extends NetCoreDebugHelper {
         };
 
         await netContainerBuild(netCoreBuildContext); // prompt user whether to use .NET container SDK build
-        if (netCoreBuildContext?.containerBuildOptions === AllNetContainerBuildOptions[1]) {
+        if (netCoreBuildContext?.containerBuildOption === AllNetContainerBuildOptions[1]) {
             options = options || {};
             options.appProject = options.appProject || await NetCoreTaskHelper.inferAppProject(context); // This method internally checks the user-defined input first
 
