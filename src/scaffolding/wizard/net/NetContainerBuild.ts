@@ -6,10 +6,10 @@
 import { AzureWizard, AzureWizardPromptStep, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ScaffoldingWizardContext } from '../ScaffoldingWizardContext';
-import { NetContainerBuildOptions, NetSdkChooseBuildStep } from './NetSdkChooseBuildStep';
+import { NetContainerBuildOption, NetSdkChooseBuildStep } from './NetSdkChooseBuildStep';
 
 export interface NetChooseBuildTypeContext extends ScaffoldingWizardContext {
-    containerBuildOptions?: NetContainerBuildOptions;
+    containerBuildOption?: NetContainerBuildOption;
 }
 
 export async function netContainerBuild(wizardContext: Partial<NetChooseBuildTypeContext>, apiInput?: NetChooseBuildTypeContext): Promise<void> {
