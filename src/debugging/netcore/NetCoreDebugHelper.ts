@@ -24,6 +24,7 @@ import { VsDbgType, installDebuggersIfNecessary, vsDbgInstallBasePath } from './
 export interface NetCoreDebugOptions extends NetCoreTaskOptions {
     appOutput?: string;
     debuggerPath?: string;
+    buildWithSdk?: boolean;
 }
 
 export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
@@ -32,6 +33,12 @@ export interface NetCoreDockerDebugConfiguration extends DebugConfiguration {
 
 export interface NetCoreDebugScaffoldingOptions {
     appProject?: string;
+}
+
+export interface NetCoreProjectProperties {
+    assemblyName: string;
+    targetFramework: string;
+    appOutput: string;
 }
 
 export class NetCoreDebugHelper implements DebugHelper {
@@ -68,7 +75,7 @@ export class NetCoreDebugHelper implements DebugHelper {
         debugConfiguration.netCore.appProject = await NetCoreTaskHelper.inferAppProject(context, debugConfiguration.netCore); // This method internally checks the user-defined input first
 
         const { configureSsl, containerName, platformOS } = await this.loadExternalInfo(context, debugConfiguration);
-        const appOutput = await this.inferAppOutput(debugConfiguration.netCore);
+        const appOutput = debugConfiguration.netCore?.appOutput || await this.inferAppOutput(debugConfiguration);
         if (context.cancellationToken && context.cancellationToken.isCancellationRequested) {
             // inferAppOutput is slow, give a chance to cancel
             return undefined;
@@ -90,7 +97,7 @@ export class NetCoreDebugHelper implements DebugHelper {
 
         const additionalProbingPathsArgs = NetCoreDebugHelper.getAdditionalProbingPathsArgs(platformOS);
 
-        const containerAppOutput = NetCoreDebugHelper.getContainerAppOutput(debugConfiguration, appOutput, platformOS);
+        const containerAppOutput = this.inferAppContainerOutput(appOutput, platformOS);
 
         const dockerServerReadyAction = resolveDockerServerReadyAction(
             debugConfiguration,
@@ -176,16 +183,20 @@ export class NetCoreDebugHelper implements DebugHelper {
         };
     }
 
-    private async inferAppOutput(helperOptions: NetCoreDebugOptions): Promise<string> {
-        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', helperOptions.appProject);
-        if (projectInfo.length < 3) {
-            throw new Error(l10n.t('Unable to determine assembly output path.'));
-        }
-
-        return projectInfo[2]; // First line is assembly name, second is target framework, third+ are output path(s)
+    protected async inferAppOutput(debugConfiguration: DockerDebugConfiguration): Promise<string> {
+        const projectProperties = await this.getProjectProperties(debugConfiguration);
+        return projectProperties.appOutput;
     }
 
-    private async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
+    protected inferAppContainerOutput(appOutput: string, platformOS: PlatformOS): string {
+        const result = platformOS === 'Windows' ?
+            path.win32.join('C:\\app', appOutput) :
+            path.posix.join('/app', appOutput);
+
+        return pathNormalize(result, platformOS);
+    }
+
+    protected async loadExternalInfo(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<{ configureSsl: boolean, containerName: string, platformOS: PlatformOS }> {
         const associatedTask = context.runDefinition;
 
         return {
@@ -193,6 +204,23 @@ export class NetCoreDebugHelper implements DebugHelper {
             containerName: inferContainerName(debugConfiguration, context, context.folder.name),
             platformOS: associatedTask?.dockerRun?.os || 'Linux',
         };
+    }
+
+    protected async getProjectProperties(debugConfiguration: DockerDebugConfiguration): Promise<NetCoreProjectProperties> {
+        const projectInfo = await getNetCoreProjectInfo('GetProjectProperties', debugConfiguration.netCore?.appProject);
+
+        if (projectInfo.length < 3) {
+            throw new Error(l10n.t('Unable to determine assembly output path.'));
+        }
+
+        // First line is assembly name, second is target framework, third+ are output path(s)
+        const projectProperties: NetCoreProjectProperties = {
+            assemblyName: projectInfo[0],
+            targetFramework: projectInfo[1],
+            appOutput: projectInfo[2]
+        };
+
+        return projectProperties;
     }
 
     private async acquireDebuggers(platformOS: PlatformOS): Promise<void> {
@@ -255,14 +283,6 @@ export class NetCoreDebugHelper implements DebugHelper {
                 '/root/.nuget/fallbackpackages'
             ];
         return additionalProbingPaths.map(probingPath => `--additionalProbingPath ${probingPath}`).join(' ');
-    }
-
-    private static getContainerAppOutput(debugConfiguration: DockerDebugConfiguration, appOutput: string, platformOS: PlatformOS): string {
-        const result = platformOS === 'Windows' ?
-            path.win32.join('C:\\app', appOutput) :
-            path.posix.join('/app', appOutput);
-
-        return pathNormalize(result, platformOS);
     }
 
     private async copyDebuggerToContainer(context: IActionContext, containerName: string, containerDebuggerDirectory: string, containerOS: ContainerOS): Promise<void> {

@@ -9,9 +9,10 @@ import { DockerRunTaskDefinition } from '../tasks/DockerRunTaskProvider';
 import { DockerTaskScaffoldContext, getDefaultContainerName } from '../tasks/TaskHelper';
 import { DockerServerReadyAction } from './DockerDebugConfigurationBase';
 import { DockerDebugConfiguration, DockerDebugConfigurationProvider } from './DockerDebugConfigurationProvider';
-import { DockerPlatform } from './DockerPlatformHelper';
+import { DockerPlatform } from './DockerDebugPlatformHelper';
 import { registerServerReadyAction } from './DockerServerReadyAction';
 import { netCoreDebugHelper } from './netcore/NetCoreDebugHelper';
+import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { nodeDebugHelper } from './node/NodeDebugHelper';
 import { pythonDebugHelper } from './python/PythonDebugHelper';
 
@@ -40,6 +41,7 @@ export interface ResolvedDebugConfiguration extends DebugConfiguration {
 export interface DebugHelper {
     provideDebugConfigurations(context: DockerDebugScaffoldContext): Promise<DockerDebugConfiguration[]>;
     resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined>;
+    afterResolveDebugConfiguration?(context: DockerDebugContext, debugConfiguration: DockerDebugConfiguration): Promise<void>;
 }
 
 export function registerDebugProvider(ctx: ExtensionContext): void {
@@ -51,6 +53,7 @@ export function registerDebugProvider(ctx: ExtensionContext): void {
                     netCore: netCoreDebugHelper,
                     node: nodeDebugHelper,
                     python: pythonDebugHelper,
+                    netSdk: netSdkDebugHelper
                 }
             )
         )

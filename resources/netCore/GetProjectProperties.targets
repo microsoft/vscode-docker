@@ -1,11 +1,21 @@
 <Project>
-    <!-- All the relevant info is in root-level PropertyGroups, so there are no dependent targets to make this work -->
-    <Target Name="GetProjectProperties">
+    <PropertyGroup>
+        <GetProjectPropertiesDependsOn Condition=" '$(SDKContainerSupportEnabled)' == 'true' ">$(GetProjectPropertiesDependsOn);ComputeContainerConfig;</GetProjectPropertiesDependsOn>
+    </PropertyGroup>
+
+    <Target Name="GetProjectProperties" DependsOnTargets="$(GetProjectPropertiesDependsOn)">
+        <PropertyGroup>
+            <InferImageName>$(ContainerRepository)</InferImageName>
+            <InferImageName Condition=" '$(InferImageName)' == '' ">$(ContainerImageName)</InferImageName>
+        </PropertyGroup>
         <WriteLinesToFile
             File="$(InfoOutputPath)"
             Lines="$(AssemblyName).dll
 $(TargetFramework)$(TargetFrameworks.Split(';')[0])
-$(OutputPath)$(AssemblyName).dll"
+$(OutputPath)$(AssemblyName).dll
+$(ContainerWorkingDirectory)/$(AssemblyName).dll
+$(SDKContainerSupportEnabled)
+$(InferImageName)"
             Overwrite="True" />
     </Target>
 </Project>

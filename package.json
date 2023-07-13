@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.25.5-alpha",
+    "version": "1.26.0",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -42,6 +42,10 @@
     "contributes": {
         "menus": {
             "commandPalette": [
+                {
+                    "command": "vscode-docker.openDockerDownloadPage",
+                    "when": "never"
+                },
                 {
                     "command": "vscode-docker.containers.downloadFile",
                     "when": "never"
@@ -636,6 +640,13 @@
             {
                 "type": "docker",
                 "label": "Docker: Debug in Container",
+                "languages": [
+                    "csharp",
+                    "razor",
+                    "aspnetcorerazor",
+                    "vb",
+                    "fsharp"
+                ],
                 "configurationAttributes": {
                     "launch": {
                         "properties": {
@@ -1500,6 +1511,35 @@
                 "required": [
                     "dockerCompose"
                 ]
+            },
+            {
+                "type": "dotnet-container-sdk",
+                "properties": {
+                    "netCore": {
+                        "description": "%vscode-docker.debug.netCore.description%",
+                        "properties": {
+                            "appProject": {
+                                "type": "string",
+                                "description": "%vscode-docker.debug.netCore.appProject%"
+                            }
+                        },
+                        "required": [
+                            "appProject"
+                        ]
+                    },
+                    "dockerRun": {
+                        "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.description%",
+                        "properties": {
+                            "containerName": {
+                                "type": "string",
+                                "description": "%vscode-docker.tasks.dotnet-container-sdk.dockerRun.containerName%"
+                            }
+                        },
+                        "required": [
+                            "containerName"
+                        ]
+                    }
+                }
             }
         ],
         "languages": [
@@ -2290,8 +2330,8 @@
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
-                "command": "vscode-docker.installDocker",
-                "title": "%vscode-docker.commands.installDocker%",
+                "command": "vscode-docker.openDockerDownloadPage",
+                "title": "%vscode-docker.commands.openDockerDownloadPage%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
@@ -2993,7 +3033,7 @@
         "gradle-to-js": "^2.0.1",
         "handlebars": "^4.7.7",
         "node-fetch": "^2.6.9",
-        "semver": "^7.5.0",
+        "semver": "^7.5.2",
         "tar": "^6.1.13",
         "tree-kill": "^1.2.2",
         "vscode-languageclient": "^8.1.0",

@@ -3,14 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
-import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, MessageItem, ProviderResult, window, workspace, WorkspaceFolder } from 'vscode';
-import { DockerOrchestration } from '../constants';
+import { callWithTelemetryAndErrorHandling, IActionContext, registerEvent, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { CancellationToken, commands, debug, DebugConfiguration, DebugConfigurationProvider, DebugSession, l10n, ProviderResult, workspace, WorkspaceFolder } from 'vscode';
+import { CSPROJ_GLOB_PATTERN, DockerOrchestration, FSPROJ_GLOB_PATTERN } from '../constants';
 import { ext } from '../extensionVariables';
 import { getAssociatedDockerRunTask } from '../tasks/TaskHelper';
+import { resolveFilesOfPattern } from '../utils/quickPickFile';
 import { DebugHelper, DockerDebugContext, ResolvedDebugConfiguration } from './DebugHelper';
-import { DockerPlatform, getPlatform } from './DockerPlatformHelper';
+import { DockerPlatform, getDebugPlatform } from './DockerDebugPlatformHelper';
 import { NetCoreDockerDebugConfiguration } from './netcore/NetCoreDebugHelper';
+import { netSdkDebugHelper } from './netSdk/NetSdkDebugHelper';
 import { NodeDockerDebugConfiguration } from './node/NodeDebugHelper';
 
 export interface DockerDebugConfiguration extends NetCoreDockerDebugConfiguration, NodeDockerDebugConfiguration {
@@ -42,21 +44,14 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
     }
 
     public provideDebugConfigurations(folder: WorkspaceFolder | undefined, token?: CancellationToken): ProviderResult<DebugConfiguration[]> {
-        const add: MessageItem = { title: l10n.t('Add Docker Files') };
 
-        // Prompt them to add Docker files since they probably haven't
-        /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-        window.showErrorMessage(
-            l10n.t('To debug in a Docker container on supported platforms, use the command "Docker: Add Docker Files to Workspace", or click "Add Docker Files".'),
-            ...[add])
-            .then((result) => {
-                if (result === add) {
-                    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-                    commands.executeCommand('vscode-docker.configure');
-                }
-            });
+        return callWithTelemetryAndErrorHandling(
+            'provideDebugConfigurations',
+            async (actionContext: IActionContext) => {
+                return this.handleEmptyDebugConfig(folder, actionContext);
+            }
+        );
 
-        return [];
     }
 
     public resolveDebugConfiguration(folder: WorkspaceFolder | undefined, debugConfiguration: DockerDebugConfiguration, token?: CancellationToken): ProviderResult<DebugConfiguration | undefined> {
@@ -75,17 +70,22 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                     }
                 }
 
-                if (debugConfiguration.type === undefined) {
-                    // If type is undefined, they may be doing F5 without creating any real launch.json, which won't work
-                    // VSCode subsequently will call provideDebugConfigurations which will show an error message
-                    return null;
+                if (Object.keys(debugConfiguration).length === 0) {
+
+                    const newlyCreatedDebugConfig = await this.handleEmptyDebugConfig(folder, actionContext);
+                    // if there is no debugConfiguration, we should return undefined to exit the debug session
+                    if (newlyCreatedDebugConfig.length === 0 || !newlyCreatedDebugConfig[0]) {
+                        return undefined;
+                    }
+
+                    debugConfiguration = newlyCreatedDebugConfig[0];
                 }
 
                 if (!debugConfiguration.request) {
                     throw new Error(l10n.t('The property "request" must be specified in the debug config.'));
                 }
 
-                const debugPlatform = getPlatform(debugConfiguration);
+                const debugPlatform = getDebugPlatform(debugConfiguration);
                 actionContext.telemetry.properties.dockerPlatform = debugPlatform;
                 actionContext.telemetry.properties.orchestration = 'single' as DockerOrchestration; // TODO: docker-compose, when support is added
 
@@ -114,6 +114,7 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
             await this.removeDebugContainerIfNeeded(context.actionContext, resolvedConfiguration);
         }
 
+        await helper.afterResolveDebugConfiguration?.(context, originalConfiguration);
         return resolvedConfiguration;
     }
 
@@ -169,5 +170,33 @@ export class DockerDebugConfigurationProvider implements DebugConfigurationProvi
                 // Best effort
             }
         }
+    }
+
+    /**
+     * If the user has an empty debug launch.json, then we will:
+     *  1. check if it's a .NET Core project, if so, we will provide .NET Core debug configurations
+     *  2. otherwise, we will scaffold docker files
+     */
+    private async handleEmptyDebugConfig(folder: WorkspaceFolder, actionContext: IActionContext): Promise<DockerDebugConfiguration[]> {
+
+        // NOTE: We can not determine the language from `DockerDebugContext`, so we need to check the
+        //       type of files inside the folder here to determine the language.
+
+        // check if it's a .NET Core project
+        const csProjUris = await resolveFilesOfPattern(folder, [CSPROJ_GLOB_PATTERN, FSPROJ_GLOB_PATTERN]);
+        if (csProjUris) {
+            return await netSdkDebugHelper.provideDebugConfigurations(
+                {
+                    actionContext,
+                    dockerfile: undefined,
+                    folder: folder
+                }
+            );
+        } else {
+            // for now, we scaffold docker files
+            await commands.executeCommand('vscode-docker.configure');
+            throw new UserCancelledError();
+        }
+        // TODO: (potentially) in the future, we can add more support for ambient tasks for other types of projects
     }
 }
