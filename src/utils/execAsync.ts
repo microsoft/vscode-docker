@@ -7,6 +7,7 @@ import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '
 import * as cp from 'child_process';
 import * as stream from 'stream';
 import { CancellationToken } from 'vscode';
+import { AccumulatorStream, Shell, spawnStreamAsync, StreamSpawnOptions } from '../runtimes/docker';
 
 type Progress = (content: string, err: boolean) => void;
 
