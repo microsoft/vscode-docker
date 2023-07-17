@@ -510,6 +510,7 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withArg('image', 'prune'),
             withArg('--force'),
             withFlagArg('--all', options.all),
+            withDockerJsonFormatArg
         )();
     }
 
@@ -518,8 +519,28 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         output: string,
         strict: boolean,
     ): Promise<PruneImagesItem> {
-        // TODO: Parse output for prune info
-        return Promise.resolve({});
+        const deletedImageLineRegex = /^deleted: (.+)$/m;
+        const totalReclaimedSpaceRegex = /^Total reclaimed space: (\d+)B$/m;
+
+        const deletedImages: string[] = [];
+        let spaceReclaimed: number | undefined;
+
+        const matches = output.match(deletedImageLineRegex);
+        if (matches) {
+            for (const match of matches) {
+                deletedImages.push(match);
+            }
+        }
+
+        const spaceMatch = output.match(totalReclaimedSpaceRegex);
+        if (spaceMatch) {
+            spaceReclaimed = parseInt(spaceMatch[1]);
+        }
+
+        return Promise.resolve({
+            imageRefsDeleted: deletedImages.length > 0 ? deletedImages : undefined,
+            spaceReclaimed,
+        });
     }
 
     async pruneImages(options: PruneImagesCommandOptions): Promise<PromiseCommandResponse<PruneImagesItem>> {
@@ -1446,8 +1467,14 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         output: string,
         strict: boolean,
     ): Promise<PruneNetworksItem> {
-        // TODO: Parse output for prune info
-        return {};
+        let networks = [];
+        const deletedNetworkStartString = "Deleted Networks:";
+        if (output.includes(deletedNetworkStartString)) {
+            networks = asIds(output.replace(deletedNetworkStartString, ""));
+        }
+        return {
+            networksDeleted: networks,
+        };
     }
 
     async pruneNetworks(options: PruneNetworksCommandOptions): Promise<PromiseCommandResponse<PruneNetworksItem>> {
