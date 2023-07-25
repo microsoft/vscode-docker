@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ImageNameInfo } from '@microsoft/vscode-container-client';
 import { URL } from 'url';
 import { ociClientId } from '../../../constants';
-import { ImageNameInfo } from '../../../runtimes/docker';
 import { HttpErrorResponse, IOAuthContext, RequestLike, RequestOptionsLike, bearerAuthHeader, getWwwAuthenticateContext, httpRequest } from '../../../utils/httpRequest';
 import { NormalizedImageNameInfo } from '../NormalizedImageNameInfo';
 

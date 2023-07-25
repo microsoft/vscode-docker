@@ -4,16 +4,16 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
-import { l10n, ThemeIcon } from "vscode";
+import { ListContainersItem } from "@microsoft/vscode-container-client";
+import { ThemeIcon, l10n } from "vscode";
 import { ext } from "../../extensionVariables";
-import { ListContainersItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
 import { OpenUrlTreeItem } from "../OpenUrlTreeItem";
+import { TreePrefix } from "../TreePrefix";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { TreePrefix } from "../TreePrefix";
 import { ContainerGroupTreeItem } from "./ContainerGroupTreeItem";
-import { containerProperties, ContainerProperty, getContainerPropertyValue, NonComposeGroupName, NonLabelGroupName } from "./ContainerProperties";
+import { ContainerProperty, NonComposeGroupName, NonLabelGroupName, containerProperties, getContainerPropertyValue } from "./ContainerProperties";
 import { ContainerTreeItem } from "./ContainerTreeItem";
 
 export type DockerContainerInfo = ListContainersItem & {

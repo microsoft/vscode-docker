@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { ListImagesItem } from '@microsoft/vscode-container-client';
+import * as vscode from 'vscode';
 import { ociClientId } from '../../../constants';
 import { ext } from '../../../extensionVariables';
 import { RequestOptionsLike, httpRequest } from '../../../utils/httpRequest';
 import { DatedDockerImage } from '../ImagesTreeItem';
 import { ImageRegistry, registries } from './registries';
-import { ListImagesItem } from '../../../runtimes/docker';
 
 export class OutdatedImageChecker {
     private shouldLoad: boolean;

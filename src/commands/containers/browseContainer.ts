@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { PortBinding } from '../../runtimes/docker';
 import { IActionContext, IAzureQuickPickItem, TelemetryProperties } from '@microsoft/vscode-azext-utils';
+import { PortBinding } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from "../../extensionVariables";
 import { ContainerTreeItem } from "../../tree/containers/ContainerTreeItem";

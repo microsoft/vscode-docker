@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as fse from 'fs-extra';
 import * as path from 'path';
 import { l10n, Task } from 'vscode';
 import { ext } from '../extensionVariables';
-import { VoidCommandResponse } from '../runtimes/docker';
 import { cloneObject } from '../utils/cloneObject';
 import { resolveVariables } from '../utils/resolveVariables';
 import { DockerComposeOptions, DockerComposeTaskDefinitionBase } from './DockerComposeTaskDefinitionBase';

@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ClientIdentity } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
-import { ClientIdentity } from './docker';
 
 export abstract class RuntimeManager<TClient extends ClientIdentity> extends vscode.Disposable {
     private readonly _runtimeClients = new Map<string, TClient>();

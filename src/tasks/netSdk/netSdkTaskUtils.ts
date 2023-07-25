@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "@microsoft/vscode-container-client";
 import * as os from 'os';
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
-import { getImageNameWithTag } from '../../utils/getValidImageName';
+import { getImageNameWithTag } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
 import { getDefaultContainerName } from '../TaskHelper';
