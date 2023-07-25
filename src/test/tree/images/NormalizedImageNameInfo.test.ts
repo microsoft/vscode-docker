@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import assert = require('assert');
-import { ImageNameInfo } from '../../../runtimes/docker';
+import { ImageNameInfo } from '@microsoft/vscode-container-client';
 import { NormalizedImageNameInfo } from '../../../tree/images/NormalizedImageNameInfo';
 
 // The expected values for each of these test cases are in the methods below

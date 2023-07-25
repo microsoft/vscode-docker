@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListContextItem } from "../../runtimes/docker";
+import { ListContextItem } from "@microsoft/vscode-container-client";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { ContextProperty } from "./ContextProperties";
 

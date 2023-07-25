@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListContainersItem } from "@microsoft/vscode-container-client";
 import { l10n, ThemeColor, ThemeIcon, workspace } from "vscode";
-import { ListContainersItem } from "../../runtimes/docker";
 import { commonProperties, CommonProperty, getCommonPropertyValue } from "../settings/CommonProperties";
 import { ITreePropertyInfo } from "../settings/ITreeSettingInfo";
 
-export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status'| 'Label';
+export type ContainerProperty = Exclude<CommonProperty, 'Size'> | 'Image' | 'Compose Project Name' | 'ContainerId' | 'ContainerName' | 'Networks' | 'Ports' | 'State' | 'Status' | 'Label';
 
 export const containerProperties: ITreePropertyInfo<ContainerProperty>[] = [
     ...commonProperties,

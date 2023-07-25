@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { ContainerOS, ListFilesItem } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
-import { ContainerOS, ListFilesItem } from '../../../runtimes/docker';
 import { DockerUri } from '../../../runtimes/files/DockerUri';
 import { FileTreeItem } from "./FileTreeItem";
 

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerOS } from '@microsoft/vscode-container-client';
 import * as os from 'os';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { ContainerOS } from '../runtimes/docker';
 
 export async function getDockerOSType(): Promise<ContainerOS> {
     if (!isWindows()) {

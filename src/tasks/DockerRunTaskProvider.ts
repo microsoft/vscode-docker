@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RunContainerBindMount } from '@microsoft/vscode-container-client';
 import { l10n, Task } from 'vscode';
 import { DockerPlatform } from '../debugging/DockerDebugPlatformHelper';
 import { ext } from '../extensionVariables';
-import { RunContainerBindMount } from '../runtimes/docker';
 import { cloneObject } from '../utils/cloneObject';
 import { DockerContainerVolume, DockerRunOptions } from './DockerRunTaskDefinitionBase';
 import { DockerTaskProvider } from './DockerTaskProvider';
