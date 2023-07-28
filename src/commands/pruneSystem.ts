@@ -30,10 +30,9 @@ export async function pruneSystem(context: IActionContext): Promise<void> {
             );
 
             let message: string;
-            if (containersResult?.containersDeleted?.length && Number.isInteger(containersResult?.spaceReclaimed) &&
-                imagesResult?.imageRefsDeleted?.length && Number.isInteger(imagesResult?.spaceReclaimed) &&
-                networksResult?.networksDeleted?.length &&
-                volumesResult?.volumesDeleted?.length && Number.isInteger(volumesResult?.spaceReclaimed)) {
+            if (Number.isInteger(containersResult?.spaceReclaimed) &&
+                Number.isInteger(imagesResult?.spaceReclaimed) &&
+                Number.isInteger(volumesResult?.spaceReclaimed)) {
                 message = vscode.l10n.t(
                     'Removed {0} container(s), {1} image(s), {2} network(s), {3} volume(s) and reclaimed {4} MB of space.',
                     containersResult.containersDeleted.length,

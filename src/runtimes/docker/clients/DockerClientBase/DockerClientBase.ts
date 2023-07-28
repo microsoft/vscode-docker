@@ -510,7 +510,6 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             withArg('image', 'prune'),
             withArg('--force'),
             withFlagArg('--all', options.all),
-            withDockerJsonFormatArg
         )();
     }
 
@@ -519,27 +518,35 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         output: string,
         strict: boolean,
     ): Promise<PruneImagesItem> {
-        const deletedImageLineRegex = /^deleted: (.+)$/m;
-        const totalReclaimedSpaceRegex = /^Total reclaimed space: (\d+)B$/m;
+        const totalReclaimedSpaceRegex = /Total reclaimed space:\s*(.*)/;
+        const deletedImageLineRegex = /deleted: sha256:\s*([a-fA-F0-9]{64})/;
 
         const deletedImages: string[] = [];
-        let spaceReclaimed: number | undefined;
+        let spaceReclaimed: number = 0;
 
-        const matches = output.match(deletedImageLineRegex);
-        if (matches) {
-            for (const match of matches) {
-                deletedImages.push(match);
+        const lines = asIds(output);
+
+        if (lines.length === 0) {
+            return Promise.resolve({
+                imageRefsDeleted: [],
+                spaceReclaimed: 0,
+            });
+        }
+
+        for (const line of lines.slice(0, -1)) {
+            const deletedImageMatch = line.match(deletedImageLineRegex);
+            if (deletedImageMatch && deletedImageMatch.length === 2) {
+                deletedImages.push(deletedImageMatch[1]);
             }
         }
 
-        const spaceMatch = output.match(totalReclaimedSpaceRegex);
-        if (spaceMatch) {
-            spaceReclaimed = parseInt(spaceMatch[1]);
-        }
+        const lastLine = lines[lines.length - 1];
+        const reclaimedSpaceMatch = lastLine.match(totalReclaimedSpaceRegex);
+        spaceReclaimed = tryParseSize(reclaimedSpaceMatch[1]) || 0;
 
         return Promise.resolve({
-            imageRefsDeleted: deletedImages.length > 0 ? deletedImages : undefined,
-            spaceReclaimed,
+            imageRefsDeleted: deletedImages,
+            spaceReclaimed: spaceReclaimed ?? 0,
         });
     }
 
@@ -968,8 +975,38 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         output: string,
         strict: boolean,
     ): Promise<PruneContainersItem> {
-        // TODO: Parse output for prune info
-        return {};
+        const totalReclaimedSpaceRegex = /Total reclaimed space:\s*(.*)/;
+        const containerIdRegex = /^[0-9a-f]{64}$/i;
+
+        const deletedContainerIds: string[] = [];
+        let spaceReclaimed: number = 0;
+
+        const lines = asIds(output);
+
+        if (lines.length === 0) {
+            return {
+                containersDeleted: [],
+                spaceReclaimed: 0,
+            };
+        }
+
+        for (const line of lines.slice(0, -1)) {
+            if (containerIdRegex.test(line)) {
+                const [containerId] = line.match(containerIdRegex) || [];
+                if (containerId) {
+                    deletedContainerIds.push(containerId);
+                }
+            }
+        }
+
+        const lastLine = lines[lines.length - 1];
+        const reclaimedSpaceMatch = lastLine.match(totalReclaimedSpaceRegex);
+        spaceReclaimed = tryParseSize(reclaimedSpaceMatch[1]) || 0;
+
+        return {
+            containersDeleted: deletedContainerIds,
+            spaceReclaimed: spaceReclaimed,
+        };
     }
 
     async pruneContainers(options: PruneContainersCommandOptions): Promise<PromiseCommandResponse<PruneContainersItem>> {
@@ -1271,8 +1308,38 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
         output: string,
         strict: boolean,
     ): Promise<PruneVolumesItem> {
-        // TODO: Parse output for prune info
-        return {};
+        const deletedVolumesLineRegex = /^deleted:\s*(.+)$/;
+        const totalReclaimedSpaceRegex = /Total reclaimed space:\s*(.*)/;
+
+        const deletedVolumes: string[] = [];
+        let spaceReclaimed: number = 0;
+
+        const lines = asIds(output);
+
+        if (lines.length === 0) {
+            return Promise.resolve({
+                imageRefsDeleted: [],
+                spaceReclaimed: 0,
+            });
+        }
+
+        for (const line of lines.slice(0, -1)) {
+            const deletedVolumesMatch = line.match(deletedVolumesLineRegex);
+            if (deletedVolumesMatch && deletedVolumesMatch.length === 2) {
+                deletedVolumes.push(deletedVolumesMatch[1]);
+            }
+        }
+
+        const lastLine = lines[lines.length - 1];
+        const reclaimedSpaceMatch = lastLine.match(totalReclaimedSpaceRegex);
+        if (reclaimedSpaceMatch && reclaimedSpaceMatch.length === 2) {
+            spaceReclaimed = tryParseSize(reclaimedSpaceMatch[1]);
+        }
+
+        return Promise.resolve({
+            volumesDeleted: deletedVolumes,
+            spaceReclaimed: spaceReclaimed || 0,
+        });
     }
 
     async pruneVolumes(options: PruneVolumesCommandOptions): Promise<PromiseCommandResponse<PruneVolumesItem>> {
@@ -1280,7 +1347,6 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
             command: this.commandName,
             args: this.getPruneVolumesCommandArgs(options),
             parse: (output, strict) => this.parsePruneVolumesCommandOutput(options, output, strict),
-
         };
     }
 
@@ -1469,9 +1535,11 @@ export abstract class DockerClientBase extends ConfigurableClient implements ICo
     ): Promise<PruneNetworksItem> {
         let networks = [];
         const deletedNetworkStartString = "Deleted Networks:";
+
         if (output.includes(deletedNetworkStartString)) {
             networks = asIds(output.replace(deletedNetworkStartString, ""));
         }
+
         return {
             networksDeleted: networks,
         };
