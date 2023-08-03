@@ -3,18 +3,20 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
 import { AzExtTreeDataProvider, AzExtTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { DockerHubRegistryDataProvider, GenericRegistryV2DataProvider, GitHubRegistryDataProvider } from "@microsoft/vscode-docker-registries";
+import * as vscode from 'vscode';
 import { registerCommand } from '../commands/registerCommands';
 import { ext } from '../extensionVariables';
+import { OpenUrlTreeItem } from './OpenUrlTreeItem';
+import { RefreshManager } from './RefreshManager';
 import { ContainersTreeItem } from './containers/ContainersTreeItem';
 import { ContextsTreeItem } from './contexts/ContextsTreeItem';
 import { HelpsTreeItem } from './help/HelpsTreeItem';
 import { ImagesTreeItem } from "./images/ImagesTreeItem";
 import { NetworksTreeItem } from "./networks/NetworksTreeItem";
-import { OpenUrlTreeItem } from './OpenUrlTreeItem';
-import { RefreshManager } from './RefreshManager';
-import { RegistriesTreeItem } from "./registries/RegistriesTreeItem";
+import { AzureRegistryDataProvider } from "./registries/Azure/AzureRegistryDataProvider";
+import { UnifiedRegistryTreeDataProvider } from "./registries/UnifiedRegistryTreeDataProvider";
 import { VolumesTreeItem } from "./volumes/VolumesTreeItem";
 
 export function registerTrees(): void {
@@ -42,13 +44,17 @@ export function registerTrees(): void {
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
     registerCommand(imagesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.imagesTree.loadMore(node, context));
 
-    ext.registriesRoot = new RegistriesTreeItem();
-    const registriesLoadMore = 'vscode-docker.registries.loadMore';
-    ext.registriesTree = new AzExtTreeDataProvider(ext.registriesRoot, registriesLoadMore);
-    ext.registriesTreeView = vscode.window.createTreeView('dockerRegistries', { treeDataProvider: ext.registriesTree, showCollapseAll: true, canSelectMany: false });
-    ext.context.subscriptions.push(ext.registriesTreeView);
+    const urtdp = new UnifiedRegistryTreeDataProvider(ext.context.globalState);
+    const genericRegistryV2DataProvider = new GenericRegistryV2DataProvider(ext.context);
+    urtdp.registerProvider(new GitHubRegistryDataProvider(ext.context));
+    urtdp.registerProvider(new DockerHubRegistryDataProvider(ext.context));
+    urtdp.registerProvider(new AzureRegistryDataProvider(ext.context));
+    urtdp.registerProvider(genericRegistryV2DataProvider);
+    ext.registriesRoot = urtdp;
+    ext.registriesTreeView = vscode.window.createTreeView('dockerRegistries', { treeDataProvider: urtdp });
+    ext.registriesTree = urtdp;
+    // TODO: add gitlab registry provider when the new extension is ready
     /* eslint-disable-next-line @typescript-eslint/promise-function-async */
-    registerCommand(registriesLoadMore, (context: IActionContext, node: AzExtTreeItem) => ext.registriesTree.loadMore(node, context));
 
     ext.volumesRoot = new VolumesTreeItem(undefined);
     const volumesLoadMore = 'vscode-docker.volumes.loadMore';

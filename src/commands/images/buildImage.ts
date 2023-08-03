@@ -14,7 +14,6 @@ import { delay } from "../../utils/promiseUtils";
 import { quickPickDockerFileItem } from "../../utils/quickPickFile";
 import { quickPickWorkspaceFolder } from "../../utils/quickPickWorkspaceFolder";
 import { selectBuildCommand } from "../selectCommandTemplate";
-import { addImageTaggingTelemetry, getTagFromUserInput } from "./tagImage";
 
 const tagRegex: RegExp = /\$\{tag\}/i;
 
@@ -60,12 +59,13 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             // Temporary work-around for vscode bug where valueSelection can be messed up if a quick pick is followed by a showInputBox
             await delay(500);
 
-            addImageTaggingTelemetry(context, suggestedImageName, '.before');
-            const imageName: string = await getTagFromUserInput(context, suggestedImageName);
-            addImageTaggingTelemetry(context, imageName, '.after');
+            // addImageTaggingTelemetry(context, suggestedImageName, '.before');
+            // const imageName: string = await getTagFromUserInput(context, suggestedImageName);
+            // addImageTaggingTelemetry(context, imageName, '.after');
 
-            await ext.context.workspaceState.update(dockerFileKey, imageName);
-            terminalCommand.command = terminalCommand.command.replace(tagRegex, imageName);
+            // await ext.context.workspaceState.update(dockerFileKey, imageName);
+            // terminalCommand.command = terminalCommand.command.replace(tagRegex, imageName);
+            // TODO: review this later
         }
 
         const client = await ext.runtimeManager.getClient();

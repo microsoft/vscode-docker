@@ -3,13 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-utils';
+import { IActionContext, NoResourceFoundError, contextValueExperience } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -21,7 +20,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         });
     }
 
-    let connectedRegistry: RegistryTreeItemBase | undefined;
+    let connectedRegistry: UnifiedRegistryItem<unknown> | undefined;
 
     if (!node.fullTag.includes('/')) {
         // The registry to push to is indeterminate--could be Docker Hub, or could need tagging.
@@ -30,7 +29,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
         if (prompt) {
             try {
-                connectedRegistry = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+                connectedRegistry = await contextValueExperience(context, ext.registriesRoot, { include: 'commonregistry' });
             } catch (error) {
                 if (error instanceof NoResourceFoundError) {
                     // Do nothing, move on without a selected registry
@@ -41,7 +40,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             }
         } else {
             // Try to find a connected Docker Hub registry (primarily for login credentials)
-            connectedRegistry = await tryGetDockerHubRegistry(context);
+            connectedRegistry = await contextValueExperience(context, ext.registriesRoot, { include: 'dockerHubRegistry' });
         }
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
@@ -53,16 +52,16 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             title: vscode.l10n.t('Fetching login credentials...'),
         };
 
-        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));
+        // connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath)); TODO: review this later
     }
 
     // Give the user a chance to modify the tag however they want
     const finalTag = await tagImage(context, node, connectedRegistry);
 
-    if (connectedRegistry && finalTag.startsWith(connectedRegistry.baseImagePath)) {
-        // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
-        await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
-    }
+    // if (connectedRegistry && finalTag.startsWith(connectedRegistry.baseImagePath)) {
+    //     // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
+    //     await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
+    // } TODO: review this later
 
     addImageTaggingTelemetry(context, finalTag, '');
 
@@ -76,14 +75,4 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     await taskCRF.getCommandRunner()(
         client.pushImage({ imageRef: finalTag })
     );
-}
-
-async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<RegistryTreeItemBase | undefined> {
-    const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
-    return allRegistries.find(r => r.baseImagePath === baseImagePath);
-}
-
-async function tryGetDockerHubRegistry(context: IActionContext): Promise<RegistryTreeItemBase | undefined> {
-    const allRegistries = await ext.registriesRoot.getAllConnectedRegistries(context);
-    return allRegistries.find(r => r.contextValue.match(registryExpectedContextValues.dockerHub.registry));
 }

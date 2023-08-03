@@ -7,9 +7,9 @@ import { IActionContext, TelemetryProperties } from '@microsoft/vscode-azext-uti
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 
-export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
+export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<unknown>): Promise<string> {
     if (!node) {
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
@@ -19,7 +19,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, ''); // TODO: review this later
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.runWithDefaults(client =>

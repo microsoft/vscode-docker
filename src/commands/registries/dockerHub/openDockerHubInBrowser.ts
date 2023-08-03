@@ -3,32 +3,28 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { IActionContext, contextValueExperience } from "@microsoft/vscode-azext-utils";
 import * as vscode from "vscode";
-import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
-import { DockerHubNamespaceTreeItem } from "../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem";
-import { DockerHubRepositoryTreeItem } from "../../../tree/registries/dockerHub/DockerHubRepositoryTreeItem";
-import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
-import { RemoteTagTreeItem } from "../../../tree/registries/RemoteTagTreeItem";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 
-export async function openDockerHubInBrowser(context: IActionContext, node?: DockerHubNamespaceTreeItem | DockerHubRepositoryTreeItem | RemoteTagTreeItem): Promise<void> {
+export async function openDockerHubInBrowser(context: IActionContext, node?: UnifiedRegistryItem<unknown>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<DockerHubNamespaceTreeItem>(registryExpectedContextValues.dockerHub.registry, {
-            ...context,
-            noItemFoundErrorMessage: vscode.l10n.t('No Docker Hub registries available to browse')
-        });
+        node = await contextValueExperience(context, ext.registriesRoot, { include: 'dockerhubregistry' });
     }
 
-    let url = dockerHubUrl;
-    if (node instanceof DockerHubNamespaceTreeItem) {
-        url += `u/${node.namespace}`;
-    } else if (node instanceof DockerHubRepositoryTreeItem) {
-        url += `r/${node.parent.namespace}/${node.repoName}`;
-    } else {
-        const repoTI = <DockerHubRepositoryTreeItem>node.parent;
-        url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`;
-    }
+    // let url = dockerHubUrl;
+    // if (node instanceof DockerHubNamespaceTreeItem) {
+    //     url += `u/${node.namespace}`;
+    // } else if (node instanceof DockerHubRepositoryTreeItem) {
+    //     url += `r/${node.parent.namespace}/${node.repoName}`;
+    // } else {
+    //     const repoTI = <DockerHubRepositoryTreeItem>node.parent;
+    //     url += `r/${repoTI.parent.namespace}/${repoTI.repoName}/tags`;
+    // }
+
+    const url = '';
+    // TODO: review this later
 
     await vscode.env.openExternal(vscode.Uri.parse(url));
 }

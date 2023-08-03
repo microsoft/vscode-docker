@@ -13,7 +13,7 @@ import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
-import { RegistriesTreeItem } from './tree/registries/RegistriesTreeItem';
+import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from './tree/registries/UnifiedRegistryTreeDataProvider';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
 
@@ -45,9 +45,9 @@ export namespace ext {
 
     export const prefix: string = 'docker';
 
-    export let registriesTree: AzExtTreeDataProvider;
-    export let registriesTreeView: TreeView<AzExtTreeItem>;
-    export let registriesRoot: RegistriesTreeItem;
+    export let registriesTree: UnifiedRegistryTreeDataProvider;
+    export let registriesTreeView: TreeView<UnifiedRegistryItem<unknown>>;
+    export let registriesRoot: UnifiedRegistryTreeDataProvider;
 
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;
