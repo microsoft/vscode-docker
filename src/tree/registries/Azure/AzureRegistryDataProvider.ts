@@ -92,7 +92,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             return {
                 parent: subscriptionItem,
                 type: 'commonregistry',
-                registryUri: vscode.Uri.parse(`https://${registry.loginServer}`),
+                baseUrl: vscode.Uri.parse(`https://${registry.loginServer}`),
                 label: registry.name!,
                 iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureRegistry.svg'),
                 subscription: subscriptionItem.subscription,
