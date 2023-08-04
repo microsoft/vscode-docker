@@ -22,3 +22,26 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
 
     return `${(node.parent.parent.wrappedItem as CommonRegistry).label}/${imageName}`;
 }
+
+// export async function getImageDigestFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): Promise<string> {
+//     if (!isTag(node.wrappedItem) || !isRepository(node.parent.wrappedItem)) {
+//         throw new Error('Unable to get image name');
+//     }
+//     const digestOptions = {
+//         headers: {
+//             // According to https://docs.docker.com/registry/spec/api/
+//             // When deleting a manifest from a registry version 2.3 or later, the following header must be used when HEAD or GET-ing the manifest to obtain the correct digest to delete
+//             accept: 'application/vnd.docker.distribution.manifest.v2+json'
+//         }
+//     };
+//     const url = `v2/${(node.parent.wrappedItem as CommonRepository).label}/manifests/${node.wrappedItem.label}`;
+//     const response = await httpRequest<{ results: [{ name: string; }] }>(requestUrl.toString(), {
+//         method: 'GET',
+//         headers: {
+//             Authorization: `Bearer ${(await this.authenticationProvider.getSession([], {})).accessToken}`,
+//         }
+//     });
+//     const response = await htt;
+//     const digest = response.headers.get('docker-content-digest') as string;
+//     return digest;
+// }

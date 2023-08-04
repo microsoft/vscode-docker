@@ -16,7 +16,7 @@ export async function pullRepository(context: IActionContext, node?: UnifiedRegi
         node = await contextValueExperience(context, ext.registriesTree, { include: 'commonrepository' });
     }
 
-    await pullImages(context, node.parent, node.wrappedItem.label, true); // TODO: test this
+    await pullImages(context, node.parent, node.wrappedItem.label, true);
 }
 
 export async function pullImageFromRepository(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {

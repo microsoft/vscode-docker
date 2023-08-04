@@ -3,19 +3,17 @@
 //  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
 //  *--------------------------------------------------------------------------------------------*/
 
-// import { IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
+// import { IActionContext, contextValueExperience, nonNullProp } from "@microsoft/vscode-azext-utils";
+// import { CommonTag } from "@microsoft/vscode-docker-registries";
 // import * as vscode from "vscode";
 // import { ext } from "../../extensionVariables";
-// import { AzureTaskRunTreeItem } from "../../tree/registries/azure/AzureTaskRunTreeItem";
-// import { DockerV2TagTreeItem } from "../../tree/registries/dockerV2/DockerV2TagTreeItem";
-// import { registryExpectedContextValues } from "../../tree/registries/registryContextValues";
+// import { UnifiedRegistryItem } from "../../tree/registries/UnifiedRegistryTreeDataProvider";
 
-// export async function copyRemoteImageDigest(context: IActionContext, node?: DockerV2TagTreeItem | AzureTaskRunTreeItem): Promise<void> {
+// export async function copyRemoteImageDigest(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
 //     if (!node) {
-//         node = await ext.registriesTree.showTreeItemPicker<DockerV2TagTreeItem>(registryExpectedContextValues.dockerV2.tag, {
-//             ...context,
-//             noItemFoundErrorMessage: vscode.l10n.t('No remote images are available to copy the digest')
-//         });
+//         if (!node) {
+//             node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag'] });
+//         }
 //     }
 
 //     let digest: string;
