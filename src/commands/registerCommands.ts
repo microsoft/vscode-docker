@@ -31,19 +31,17 @@ import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
 import { useDockerContext } from "./context/useDockerContext";
 import { help } from "./help";
-import { buildImage } from "./images/buildImage";
+// import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
-import { pushImage } from "./images/pushImage";
 import { removeImage } from "./images/removeImage";
 import { removeImageGroup } from "./images/removeImageGroup";
 import { runAzureCliImage } from "./images/runAzureCliImage";
 import { runImage, runImageInteractive } from "./images/runImage";
 import { hideDanglingImages, setInitialDanglingContextValue, showDanglingImages } from "./images/showDanglingImages";
-import { tagImage } from "./images/tagImage";
 import { configureNetworksExplorer } from "./networks/configureNetworksExplorer";
 import { createNetwork } from "./networks/createNetwork";
 import { inspectNetwork } from "./networks/inspectNetwork";
@@ -54,7 +52,6 @@ import { registerWorkspaceCommand } from "./registerWorkspaceCommand";
 import { createAzureRegistry } from "./registries/azure/createAzureRegistry";
 // import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 // import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
-import { deployImageToAca } from "./registries/azure/deployImageToAca";
 // import { deployImageToAzure } from "./registries/azure/deployImageToAzure";
 import { openInAzurePortal } from "./registries/azure/openInAzurePortal";
 // import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
@@ -67,7 +64,6 @@ import { connectRegistry } from "./registries/connectRegistry";
 // import { copyRemoteFullTag } from './registries/copyRemoteFullTag';
 // import { copyRemoteImageDigest } from "./registries/copyRemoteImageDigest";
 // import { deleteRemoteImage } from "./registries/deleteRemoteImage";
-import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 // import { logInToDockerCli } from "./registries/logInToDockerCli";
 // import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 // import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
@@ -146,7 +142,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.restart', composeGroupRestart);
     registerWorkspaceCommand('vscode-docker.containers.composeGroup.down', composeGroupDown);
 
-    registerWorkspaceCommand('vscode-docker.images.build', buildImage);
+    // registerWorkspaceCommand('vscode-docker.images.build', buildImage);
     registerCommand('vscode-docker.images.configureExplorer', configureImagesExplorer);
     registerCommand('vscode-docker.images.inspect', inspectImage);
     registerCommand('vscode-docker.images.prune', pruneImages);
@@ -154,13 +150,13 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.images.hideDangling', hideDanglingImages);
     setInitialDanglingContextValue();
     registerWorkspaceCommand('vscode-docker.images.pull', pullImage);
-    registerWorkspaceCommand('vscode-docker.images.push', pushImage);
+    // registerWorkspaceCommand('vscode-docker.images.push', pushImage);
     registerCommand('vscode-docker.images.remove', removeImage);
     registerCommand('vscode-docker.images.group.remove', removeImageGroup);
     registerWorkspaceCommand('vscode-docker.images.run', runImage);
     registerWorkspaceCommand('vscode-docker.images.runAzureCli', runAzureCliImage);
     registerWorkspaceCommand('vscode-docker.images.runInteractive', runImageInteractive);
-    registerCommand('vscode-docker.images.tag', tagImage);
+    // registerCommand('vscode-docker.images.tag', tagImage);
     registerCommand('vscode-docker.images.copyFullTag', copyFullTag);
 
     registerCommand('vscode-docker.networks.configureExplorer', configureNetworksExplorer);
@@ -174,7 +170,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.copyRemoteFullTag', copyRemoteFullTag);
     // registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     // registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
-    registerCommand('vscode-docker.registries.deployImageToAca', deployImageToAca);
+    // registerCommand('vscode-docker.registries.deployImageToAca', deployImageToAca);
     registerCommand('vscode-docker.registries.disconnectRegistry', (context, item) => ext.registriesRoot.disconnectRegistryProvider(item));
     registerCommand('vscode-docker.registries.help', registryHelp);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
@@ -183,7 +179,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
     // registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
 
-    registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
+    // registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
 
     // registerWorkspaceCommand('vscode-docker.registries.azure.buildImage', buildImageInAzure);
     registerCommand('vscode-docker.registries.azure.createRegistry', createAzureRegistry);
