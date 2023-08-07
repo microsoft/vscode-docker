@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ContainerRegistryManagementClient } from "@azure/arm-containerregistry";
+import { AzureSubscription } from "@microsoft/vscode-azext-azureauth";
 import { CommonRegistry, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
 import { Uri } from "vscode";
 import { UnifiedRegistryItem } from "./UnifiedRegistryTreeDataProvider";
@@ -31,4 +33,9 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
         default:
             return `${registryLabel}/${imageName}`;
     }
+}
+
+// TODO: move this to a common place
+export async function createAzureClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
+    return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
 }
