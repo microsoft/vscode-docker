@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { AzureSubscription } from "@microsoft/vscode-azext-azureauth";
 import { getResourceGroupFromId } from "@microsoft/vscode-azext-azureutils";
 import { IActionContext, IAzureQuickPickItem, contextValueExperience, nonNullProp } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
@@ -16,6 +15,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { createAzureClient } from "../../../../tree/registries/getInformationFromRegistryItem";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
@@ -220,8 +220,4 @@ function getTempSourceArchivePath(): string {
     ext.outputChannel.info(vscode.l10n.t('Setting up temp file with \'{0}\'', archive));
     const tarFilePath: string = path.join(os.tmpdir(), archive);
     return tarFilePath;
-}
-
-async function createAzureClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
-    return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
 }

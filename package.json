@@ -496,7 +496,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.deleteRepository",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Repository;",
+                    "when": "view == dockerRegistries && viewItem =~ /azureContainerRepository/i",
                     "group": "regs_repo_2_destructive@1"
                 },
                 {
