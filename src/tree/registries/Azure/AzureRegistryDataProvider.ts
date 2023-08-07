@@ -10,11 +10,12 @@ import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-reg
 import * as vscode from 'vscode';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
-interface AzureRegistryItem extends V2RegistryItem {
+export interface AzureRegistryItem extends V2RegistryItem {
     readonly subscription: AzureSubscription;
+    readonly id: string;
 }
 
-interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
+export interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
     readonly subscription: AzureSubscription;
     readonly type: 'azuresubscription';
 }
@@ -93,9 +94,13 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                 parent: subscriptionItem,
                 type: 'commonregistry',
                 baseUrl: vscode.Uri.parse(`https://${registry.loginServer}`),
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 label: registry.name!,
                 iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureRegistry.svg'),
                 subscription: subscriptionItem.subscription,
+                additionalContextValues: ['azureContainerRegistry'],
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                id: registry.id!
             };
         });
     }
@@ -121,6 +126,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             this.authenticationProviders.set(registryString, provider);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.authenticationProviders.get(registryString)!;
     }
 }
