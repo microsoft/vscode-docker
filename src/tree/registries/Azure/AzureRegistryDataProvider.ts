@@ -145,15 +145,19 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public async deleteRepository(item: AzureRepository): Promise<void> {
-
         const authenticationProvider = this.getAuthenticationProvider(item.parent as unknown as AzureRegistryItem);
+
         const reponse = await registryV2Request({
             method: 'DELETE',
             registryUri: item.baseUrl,
             path: ['v2', '_acr', `${item.label}`, 'repository'],
-            scopes: ['registry:catalog:*'],
+            scopes: [`repository:${item.label}:delete`],
             authenticationProvider: authenticationProvider,
         });
+
+        if (!reponse.succeeded) {
+            throw new Error(`Failed to delete repository: ${reponse.statusText}`);
+        }
     }
 
     public async deleteRegistry(item: AzureRegistry): Promise<void> {
