@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeDataProvider, AzExtTreeItem, IExperimentationServiceAdapter } from '@microsoft/vscode-azext-utils';
+import { GenericRegistryV2DataProvider } from '@microsoft/vscode-docker-registries';
 import { ExtensionContext, StatusBarItem, TreeView } from 'vscode';
 import { ContainerRuntimeManager } from './runtimes/ContainerRuntimeManager';
 import { OrchestratorRuntimeManager } from './runtimes/OrchestratorRuntimeManager';
@@ -48,6 +49,7 @@ export namespace ext {
     export let registriesTree: UnifiedRegistryTreeDataProvider;
     export let registriesTreeView: TreeView<UnifiedRegistryItem<unknown>>;
     export let registriesRoot: UnifiedRegistryTreeDataProvider;
+    export let genericRegistryV2DataProvider: GenericRegistryV2DataProvider;
 
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;

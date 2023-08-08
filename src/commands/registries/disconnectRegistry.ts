@@ -3,10 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from "@microsoft/vscode-azext-utils";
+import { IActionContext, contextValueExperience } from "@microsoft/vscode-azext-utils";
+import { ext } from "../../extensionVariables";
 import { UnifiedRegistryItem } from "../../tree/registries/UnifiedRegistryTreeDataProvider";
 
-
 export async function disconnectRegistry(context: IActionContext, node?: UnifiedRegistryItem<unknown>): Promise<void> {
-    await node.provider.onDisconnect?.();
+    if (!node) {
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'commonregistryroot', exclude: 'genericRegistryV2Root' });
+    }
+
+    await ext.registriesTree.disconnectRegistryProvider(node);
 }

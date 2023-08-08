@@ -6,7 +6,6 @@
 import { ContainerRegistryManagementClient } from "@azure/arm-containerregistry";
 import { AzureSubscription } from "@microsoft/vscode-azext-azureauth";
 import { CommonRegistry, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
-import { Uri } from "vscode";
 import { UnifiedRegistryItem } from "./UnifiedRegistryTreeDataProvider";
 
 export function getImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): string {
@@ -14,7 +13,9 @@ export function getImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag
         throw new Error('Unable to get image name');
     }
 
-    return `${(node.parent.wrappedItem as CommonRepository).label}:${node.wrappedItem.label}`;
+    const repository = node.parent.wrappedItem as CommonRepository;
+
+    return `${repository.label}:${node.wrappedItem.label}`;
 }
 
 export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): string {
@@ -23,15 +24,16 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
         throw new Error('Unable to get full image name');
     }
 
-    const registryLabel = (node.parent.parent.wrappedItem as CommonRegistry).label;
+    const registry = node.parent.parent.wrappedItem as CommonRegistry;
+
     switch (node.wrappedItem.additionalContextValues?.[0] ?? '') {
         case 'registryV2Tag': {
-            const authority = Uri.parse(registryLabel).authority; // this should parse since we have validation logic
+            const authority = registry.baseUrl.authority;
             return `${authority.toLowerCase()}/${imageName}`;
         }
         case 'dockerHubTag':
         default:
-            return `${registryLabel}/${imageName}`;
+            return `${registry.label}/${imageName}`;
     }
 }
 
