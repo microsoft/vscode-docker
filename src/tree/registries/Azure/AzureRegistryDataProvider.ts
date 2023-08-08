@@ -8,6 +8,8 @@ import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/v
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
+import { getResourceGroupFromId } from '../../../utils/azureUtils';
+import { createAzureClient } from '../getInformationFromRegistryItem';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
 export type AzureRepository = V2Repository;
@@ -26,7 +28,7 @@ function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscripti
     return !!item && typeof item === 'object' && (item as AzureSubscriptionRegistryItem).type === 'azuresubscription';
 }
 
-type AzureRegistry = V2Registry & AzureRegistryItem;
+export type AzureRegistry = V2Registry & AzureRegistryItem;
 
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
     public readonly id = 'vscode-docker.azureContainerRegistry';
@@ -161,7 +163,9 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public async deleteRegistry(item: AzureRegistry): Promise<void> {
-        throw new Error('Method not implemented.');
+        const client = await createAzureClient(item.subscription);
+        const resourceGroup = getResourceGroupFromId(item.id);
+        await client.registries.beginDeleteAndWait(resourceGroup, item.label);
     }
 
     protected override getAuthenticationProvider(item: AzureRegistryItem): ACROAuthProvider {
