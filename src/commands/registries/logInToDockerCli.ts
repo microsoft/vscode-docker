@@ -33,7 +33,7 @@ export async function logInToDockerCli(context: IActionContext, node?: UnifiedRe
                     client => client.login({
                         username: username,
                         passwordStdIn: true,
-                        registry: '' // TODO: change this
+                        registry: node.wrappedItem.baseUrl?.toString() ?? ''
                     }),
                     {
                         stdInPipe: stream.Readable.from(secret),

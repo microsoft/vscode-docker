@@ -53,8 +53,7 @@ export function registerTrees(): void {
     ext.registriesRoot = urtdp;
     ext.registriesTreeView = vscode.window.createTreeView('dockerRegistries', { treeDataProvider: urtdp });
     ext.registriesTree = urtdp;
-    // TODO: add gitlab registry provider when the new extension is ready
-    /* eslint-disable-next-line @typescript-eslint/promise-function-async */
+    ext.genericRegistryV2DataProvider = genericRegistryV2DataProvider;
 
     ext.volumesRoot = new VolumesTreeItem(undefined);
     const volumesLoadMore = 'vscode-docker.volumes.loadMore';

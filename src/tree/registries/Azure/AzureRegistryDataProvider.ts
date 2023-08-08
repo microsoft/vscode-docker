@@ -114,10 +114,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     protected override getAuthenticationProvider(item: AzureRegistryItem): ACROAuthProvider {
-        const registryString = item.registryUri.toString();
+        const registryString = item.baseUrl.toString();
 
         if (!this.authenticationProviders.has(registryString)) {
-            const provider = new ACROAuthProvider(item.registryUri, item.subscription);
+            const provider = new ACROAuthProvider(item.baseUrl, item.subscription);
             this.authenticationProviders.set(registryString, provider);
         }
 

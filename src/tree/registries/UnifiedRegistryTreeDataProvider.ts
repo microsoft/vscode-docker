@@ -7,7 +7,6 @@ export interface UnifiedRegistryItem<T> {
     parent: UnifiedRegistryItem<T> | undefined;
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 const ConnectedRegistryProvidersKey = 'ConnectedRegistryProviders';
 
 export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<UnifiedRegistryItem<unknown>> {
@@ -81,7 +80,7 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
         };
     }
 
-    public refresh(): void {
+    public async refresh(): Promise<void> {
         this.onDidChangeTreeDataEmitter.fire(undefined);
     }
 

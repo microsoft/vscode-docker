@@ -301,7 +301,7 @@ export class RefreshManager extends vscode.Disposable {
                         callback = () => ext.networksRoot.refresh(context);
                         break;
                     case 'registries':
-                        ext.registriesRoot.refresh(); //TODO: change this
+                        callback = () => ext.registriesRoot.refresh();
                         break;
                     case 'volumes':
                         callback = () => ext.volumesRoot.refresh(context);
