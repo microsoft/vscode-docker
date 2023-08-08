@@ -486,7 +486,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.deleteRegistry",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Registry;",
+                    "when": "view == dockerRegistries && viewItem =~ /azureContainerRegistry/i",
                     "group": "regs_reg_2_destructive@1"
                 },
                 {
