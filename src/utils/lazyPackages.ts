@@ -34,13 +34,3 @@ export async function getAzExtAppService(): Promise<typeof import('@microsoft/vs
     appSvc.registerAppServiceExtensionVariables(ext);
     return appSvc;
 }
-
-// These are internal but we want to load them lazily
-
-export async function getAzActTreeItem(): Promise<typeof import('../tree/registries/azure/AzureAccountTreeItem')> {
-    return await import('../tree/registries/azure/AzureAccountTreeItem');
-}
-
-export async function getAzSubTreeItem(): Promise<typeof import('../tree/registries/azure/SubscriptionTreeItem')> {
-    return await import('../tree/registries/azure/SubscriptionTreeItem');
-}

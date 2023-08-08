@@ -491,7 +491,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.pullRepository",
-                    "when": "view == dockerRegistries && viewItem =~ /Repository;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commonrepository/",
                     "group": "regs_repo_1_general@1"
                 },
                 {
@@ -501,17 +501,17 @@
                 },
                 {
                     "command": "vscode-docker.registries.pullImage",
-                    "when": "view == dockerRegistries && viewItem =~ /Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.copyRemoteFullTag",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /(dockerHubTag|registryV2Tag)/i",
                     "group": "regs_tag_1_general@2"
                 },
                 {
                     "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /registryV2Tag/",
                     "group": "regs_tag_1_general@3"
                 },
                 {
@@ -551,7 +551,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /RegistryProvider;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /genericregistryrootv2/i)",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
@@ -3031,9 +3031,11 @@
         "@azure/storage-blob": "^12.14.0",
         "@microsoft/compose-language-service": "^0.2.0",
         "@microsoft/vscode-azext-azureappservice": "^1.0.2",
+        "@microsoft/vscode-azext-azureauth": "^1.1.2",
         "@microsoft/vscode-azext-azureutils": "^1.1.5",
         "@microsoft/vscode-azext-utils": "^1.2.2",
         "@microsoft/vscode-container-client": "^0.1.0",
+        "@microsoft/vscode-docker-registries": "file:../vscode-docker-extensibility/packages/vscode-docker-registries/microsoft-vscode-docker-registries-0.0.1-alpha.tgz",
         "dayjs": "^1.11.7",
         "dockerfile-language-server-nodejs": "^0.10.2",
         "fs-extra": "^11.1.1",

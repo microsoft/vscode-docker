@@ -3,17 +3,14 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, InvalidTreeItem } from "@microsoft/vscode-azext-utils";
+import { IActionContext, contextValueExperience } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../extensionVariables";
-import { ICachedRegistryProvider } from "../../tree/registries/ICachedRegistryProvider";
-import { IRegistryProviderTreeItem } from "../../tree/registries/IRegistryProviderTreeItem";
+import { UnifiedRegistryItem } from "../../tree/registries/UnifiedRegistryTreeDataProvider";
 
-export async function disconnectRegistry(context: IActionContext, node?: InvalidTreeItem | IRegistryProviderTreeItem): Promise<void> {
-    let cachedProvider: ICachedRegistryProvider | undefined;
-    if (node instanceof InvalidTreeItem) {
-        cachedProvider = <ICachedRegistryProvider>node.data;
-    } else if (node) {
-        cachedProvider = node.cachedProvider;
+export async function disconnectRegistry(context: IActionContext, node?: UnifiedRegistryItem<unknown>): Promise<void> {
+    if (!node) {
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'commonregistryroot', exclude: 'genericRegistryV2Root' });
     }
-    await ext.registriesRoot.disconnectRegistry(context, cachedProvider);
+
+    await ext.registriesTree.disconnectRegistryProvider(node);
 }

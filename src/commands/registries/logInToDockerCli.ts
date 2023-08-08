@@ -3,33 +3,24 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, parseError } from '@microsoft/vscode-azext-utils';
+import { IActionContext, contextValueExperience, parseError } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry } from '@microsoft/vscode-docker-registries/lib/clients/Common/models'; // TODO: update this
 import * as stream from 'stream';
 import * as vscode from 'vscode';
-import { NULL_GUID } from '../../constants';
 import { ext } from '../../extensionVariables';
-import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 
-export async function logInToDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
+export async function logInToDockerCli(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistry>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+        node = await contextValueExperience(context, ext.registriesRoot, { include: 'commonroot' });
     }
 
-    const creds = await node.getDockerCliCredentials();
-    const auth: { username?: string, password?: string, token?: string } = creds.auth || {};
-    let username: string | undefined;
-    let password: string | undefined;
-    if (auth.token) {
-        username = NULL_GUID;
-        password = auth.token;
-    } else if (auth.password) {
-        username = auth.username;
-        password = auth.password;
-    }
+    const creds = await node.provider?.getLoginInformation?.(node.wrappedItem);
+    const username = creds?.username;
+    const secret = creds?.secret;
 
-    if (!username || !password) {
-        ext.outputChannel.warn(vscode.l10n.t('Skipping login for "{0}" because it does not require authentication.', creds.registryPath));
+    if (!username || !secret) {
+        ext.outputChannel.warn(vscode.l10n.t('Skipping login for "{0}" because it does not require authentication.', node.provider.label));
     } else {
         const progressOptions: vscode.ProgressOptions = {
             location: vscode.ProgressLocation.Notification,
@@ -42,10 +33,10 @@ export async function logInToDockerCli(context: IActionContext, node?: RegistryT
                     client => client.login({
                         username: username,
                         passwordStdIn: true,
-                        registry: creds.registryPath,
+                        registry: node.wrappedItem.baseUrl?.toString() ?? ''
                     }),
                     {
-                        stdInPipe: stream.Readable.from(password),
+                        stdInPipe: stream.Readable.from(secret),
                     }
                 );
                 ext.outputChannel.info('Login succeeded.');
