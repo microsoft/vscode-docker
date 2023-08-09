@@ -5,25 +5,34 @@
 
 import type { Registry as AcrRegistry } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
-import { RegistryV2DataProvider, V2Registry, V2RegistryItem } from '@microsoft/vscode-docker-registries';
+import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
+import { getResourceGroupFromId } from '../../../utils/azureUtils';
+import { createAzureClient } from '../registryTreeUtils';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
-interface AzureRegistryItem extends V2RegistryItem {
+export interface AzureRegistryItem extends V2RegistryItem {
     readonly subscription: AzureSubscription;
+    readonly id: string;
 }
 
-interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
+export interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
     readonly subscription: AzureSubscription;
     readonly type: 'azuresubscription';
 }
 
-function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscriptionRegistryItem {
+export type AzureRegistry = V2Registry & AzureRegistryItem;
+
+export type AzureRepository = V2Repository;
+
+export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscriptionRegistryItem {
     return !!item && typeof item === 'object' && (item as AzureSubscriptionRegistryItem).type === 'azuresubscription';
 }
 
-type AzureRegistry = V2Registry & AzureRegistryItem;
+export function isAzureRegistryItem(item: unknown): item is AzureRegistry {
+    return !!item && typeof item === 'object' && (item as AzureRegistryItem).additionalContextValues?.includes('azureContainerRegistry');
+}
 
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
     public readonly id = 'vscode-docker.azureContainerRegistry';
@@ -77,7 +86,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         this.subscriptionProvider.dispose();
     }
 
-    public async getRegistries(subscriptionItem: CommonRegistryItem): Promise<AzureRegistry[]> {
+    public override async getRegistries(subscriptionItem: CommonRegistryItem): Promise<AzureRegistry[]> {
         subscriptionItem = subscriptionItem as AzureSubscriptionRegistryItem;
         // TODO: replace this with `createAzureClient`
         const acrClient = new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.subscription.credential, subscriptionItem.subscription.subscriptionId);
@@ -93,11 +102,39 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                 parent: subscriptionItem,
                 type: 'commonregistry',
                 baseUrl: vscode.Uri.parse(`https://${registry.loginServer}`),
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 label: registry.name!,
                 iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureRegistry.svg'),
                 subscription: subscriptionItem.subscription,
+                additionalContextValues: ['azureContainerRegistry'],
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                id: registry.id!
             };
         });
+    }
+
+    public override async getRepositories(registry: AzureRegistry): Promise<AzureRepository[]> {
+        const catalogResponse = await registryV2Request<{ repositories: string[] }>({
+            authenticationProvider: this.getAuthenticationProvider(registry),
+            method: 'GET',
+            registryUri: registry.baseUrl,
+            path: ['v2', '_catalog'],
+            scopes: ['registry:catalog:*'],
+        });
+
+        const results: AzureRepository[] = [];
+
+        for (const repository of catalogResponse.body?.repositories || []) {
+            results.push({
+                parent: registry,
+                baseUrl: registry.baseUrl,
+                label: repository,
+                type: 'commonrepository',
+                additionalContextValues: ['azureContainerRepository']
+            });
+        }
+
+        return results;
     }
 
     public override getTreeItem(element: CommonRegistryItem): Promise<vscode.TreeItem> {
@@ -113,6 +150,28 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         }
     }
 
+    public async deleteRepository(item: AzureRepository): Promise<void> {
+        const authenticationProvider = this.getAuthenticationProvider(item.parent as unknown as AzureRegistryItem);
+
+        const reponse = await registryV2Request({
+            method: 'DELETE',
+            registryUri: item.baseUrl,
+            path: ['v2', '_acr', `${item.label}`, 'repository'],
+            scopes: [`repository:${item.label}:delete`],
+            authenticationProvider: authenticationProvider,
+        });
+
+        if (!reponse.succeeded) {
+            throw new Error(`Failed to delete repository: ${reponse.statusText}`);
+        }
+    }
+
+    public async deleteRegistry(item: AzureRegistry): Promise<void> {
+        const client = await createAzureClient(item.subscription);
+        const resourceGroup = getResourceGroupFromId(item.id);
+        await client.registries.beginDeleteAndWait(resourceGroup, item.label);
+    }
+
     protected override getAuthenticationProvider(item: AzureRegistryItem): ACROAuthProvider {
         const registryString = item.baseUrl.toString();
 
@@ -121,6 +180,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             this.authenticationProviders.set(registryString, provider);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.authenticationProviders.get(registryString)!;
     }
 }

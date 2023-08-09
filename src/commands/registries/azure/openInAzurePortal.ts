@@ -3,24 +3,28 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { IActionContext, UserCancelledError, contextValueExperience } from '@microsoft/vscode-azext-utils';
+import * as vscode from 'vscode';
+import { ext } from '../../../extensionVariables';
+import { AzureRegistry, AzureSubscriptionRegistryItem, isAzureRegistryItem, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 
-export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<unknown>): Promise<void> {
-    // if (!node) {
-    //     node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
-    // }
+export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem>): Promise<void> {
+    if (!node) {
+        node = await contextValueExperience(context, ext.registriesTree, { include: ['azuresubscription', 'azureContainerRegistry'] });
+    }
 
-    // const azSubTreeItem = await getAzSubTreeItem();
-    // const azExtAzureUtils = await getAzExtAzureUtils();
+    const azureRegistryItem = node.wrappedItem;
+    const baseUrl = `${azureRegistryItem.subscription.environment.portalUrl}/#@${azureRegistryItem.subscription.tenantId}/resource`;
+    let url: string;
 
-    // if (node instanceof azSubTreeItem.SubscriptionTreeItem) {
-    //     await azExtAzureUtils.openInPortal(node.subscription, node.subscription.subscriptionId);
-    // } else if (node instanceof AzureRegistryTreeItem) {
-    //     await azExtAzureUtils.openInPortal(node.parent.subscription, node.registryId);
-    // } else {
-    //     await azExtAzureUtils.openInPortal(node.parent.parent.subscription, `${node.parent.registryId}/repository`);
-    // }
+    if (isAzureSubscriptionRegistryItem(azureRegistryItem)) {
+        url = `${baseUrl}/subscriptions/${azureRegistryItem.subscription.subscriptionId}`;
+    } else if (isAzureRegistryItem(azureRegistryItem)) {
+        url = `${baseUrl}/${azureRegistryItem.id}`;
+    } else {
+        throw new UserCancelledError();
+    }
 
-    // TODO: review this later
+    await vscode.env.openExternal(vscode.Uri.parse(url));
 }
