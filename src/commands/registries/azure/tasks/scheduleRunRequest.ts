@@ -15,7 +15,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { createAzureClient } from "../../../../tree/registries/registryTreeUtils";
+import { createAzureContainerRegistryClient } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
@@ -67,7 +67,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
         }
 
-        const azureRegistryClient = await createAzureClient(registry.subscription);
+        const azureRegistryClient = await createAzureContainerRegistryClient(registry.subscription);
         const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registry.subscription.subscriptionId, resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.info(vscode.l10n.t('Uploaded source code from {0}', tarFilePath));
 
@@ -160,7 +160,7 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
 async function streamLogs(context: IActionContext, node: UnifiedRegistryItem<AzureRegistryItem>, run: AcrRun): Promise<void> {
-    const azureRegistryClient = await createAzureClient(node.wrappedItem.subscription);
+    const azureRegistryClient = await createAzureContainerRegistryClient(node.wrappedItem.subscription);
     const resourceGroup = getResourceGroupFromId(node.wrappedItem.id);
     const result = await azureRegistryClient.runs.getLogSasUrl(resourceGroup, node.wrappedItem.label, run.runId);
 

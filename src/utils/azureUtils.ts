@@ -3,6 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
+import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
 import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { Request } from 'node-fetch';
 import { URLSearchParams } from 'url';
@@ -69,4 +71,9 @@ export async function acquireAcrRefreshToken(registryHost: string, subContext: I
 
     return (await response.json()).refresh_token;
 }
+
+export async function createAzureContainerRegistryClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
+    return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
+}
+
 /* eslint-enable @typescript-eslint/naming-convention */
