@@ -26,7 +26,7 @@ export async function deleteAzureRegistry(context: IActionContext, node?: Unifie
         await azureRegistryDataProvider.deleteRegistry(node.wrappedItem);
     });
 
-    ext.registriesTree.refresh();
+    void ext.registriesTree.refresh();
 
     const message = l10n.t('Successfully deleted registry "{0}".', registryName);
     // don't wait

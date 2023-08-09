@@ -481,7 +481,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.createRegistry",
-                    "when": "view == dockerRegistries && viewItem == azureextensionui.azureSubscription",
+                    "when": "view == dockerRegistries && viewItem =~ /azuresubscription/i",
                     "group": "regs_1_general@1"
                 },
                 {
