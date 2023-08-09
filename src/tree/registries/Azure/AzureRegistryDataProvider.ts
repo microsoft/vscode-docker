@@ -12,8 +12,6 @@ import { getResourceGroupFromId } from '../../../utils/azureUtils';
 import { createAzureClient } from '../registryTreeUtils';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
-export type AzureRepository = V2Repository;
-
 export interface AzureRegistryItem extends V2RegistryItem {
     readonly subscription: AzureSubscription;
     readonly id: string;
@@ -24,11 +22,17 @@ export interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
     readonly type: 'azuresubscription';
 }
 
-function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscriptionRegistryItem {
+export type AzureRegistry = V2Registry & AzureRegistryItem;
+
+export type AzureRepository = V2Repository;
+
+export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscriptionRegistryItem {
     return !!item && typeof item === 'object' && (item as AzureSubscriptionRegistryItem).type === 'azuresubscription';
 }
 
-export type AzureRegistry = V2Registry & AzureRegistryItem;
+export function isAzureRegistryItem(item: unknown): item is AzureRegistry {
+    return !!item && typeof item === 'object' && (item as AzureRegistryItem).additionalContextValues?.includes('azureContainerRegistry');
+}
 
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
     public readonly id = 'vscode-docker.azureContainerRegistry';
