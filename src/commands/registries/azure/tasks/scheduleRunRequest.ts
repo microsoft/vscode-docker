@@ -15,7 +15,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { createAzureClient } from "../../../../tree/registries/getInformationFromRegistryItem";
+import { createAzureClient } from "../../../../tree/registries/registryTreeUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';

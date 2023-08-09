@@ -8,7 +8,7 @@ import { CommonRegistry, CommonRepository, CommonTag } from '@microsoft/vscode-d
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getImageNameFromRegistryItem } from '../../tree/registries/getInformationFromRegistryItem';
+import { getImageNameFromRegistryItem } from '../../tree/registries/registryTreeUtils';
 import { logInToDockerCli } from './logInToDockerCli';
 
 export async function pullRepository(context: IActionContext, node?: UnifiedRegistryItem<CommonRepository>): Promise<void> {

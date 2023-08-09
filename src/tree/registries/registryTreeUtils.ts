@@ -37,7 +37,6 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
     }
 }
 
-// TODO: move this to a common place
 export async function createAzureClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
     return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
 }

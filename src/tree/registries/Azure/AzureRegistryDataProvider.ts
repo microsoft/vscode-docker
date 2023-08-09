@@ -9,7 +9,7 @@ import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, regis
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
 import { getResourceGroupFromId } from '../../../utils/azureUtils';
-import { createAzureClient } from '../getInformationFromRegistryItem';
+import { createAzureClient } from '../registryTreeUtils';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
 export type AzureRepository = V2Repository;
