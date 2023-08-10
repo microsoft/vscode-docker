@@ -71,6 +71,7 @@ import { connectRegistry } from "./registries/connectRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
+import { untagAzureImage } from "./registries/azure/untagAzureImage";
 import { viewAzureProperties } from "./registries/azure/viewAzureProperties";
 import { copyRemoteFullTag } from "./registries/copyRemoteFullTag";
 import { copyRemoteImageDigest } from "./registries/copyRemoteImageDigest";
@@ -194,7 +195,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.azure.runTask', runAzureTask);
     // registerWorkspaceCommand('vscode-docker.registries.azure.runFileAsTask', runFileAsAzureTask);
     registerCommand('vscode-docker.registries.azure.selectSubscriptions', () => commands.executeCommand("azure-account.selectSubscriptions"));
-    // registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
+    registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
     registerCommand('vscode-docker.registries.azure.viewProperties', viewAzureProperties);
     // registerCommand('vscode-docker.registries.azure.viewTaskLogs', viewAzureTaskLogs);
 

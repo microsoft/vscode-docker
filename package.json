@@ -526,7 +526,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Tag;",
+                    "when": "view == dockerRegistries && viewItem =~ /azureContainerTag/i",
                     "group": "regs_tag_2_destructive@1"
                 },
                 {

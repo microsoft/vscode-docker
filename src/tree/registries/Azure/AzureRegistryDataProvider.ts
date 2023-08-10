@@ -5,7 +5,7 @@
 
 import type { Registry as AcrRegistry } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
-import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, registryV2Request } from '@microsoft/vscode-docker-registries';
+import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from '../../../utils/azureUtils';
@@ -26,6 +26,8 @@ export type AzureRegistry = V2Registry & AzureRegistryItem & {
 };
 
 export type AzureRepository = V2Repository;
+
+export type AzureTag = V2Tag;
 
 export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSubscriptionRegistryItem {
     return !!item && typeof item === 'object' && (item as AzureSubscriptionRegistryItem).type === 'azuresubscription';
@@ -65,7 +67,8 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                     label: sub.name,
                     type: 'azuresubscription',
                     subscription: sub,
-                    additionalContextValues: ['azuresubscription']
+                    additionalContextValues: ['azuresubscription'],
+                    iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureSubscription.svg'),
                 } as AzureSubscriptionRegistryItem;
             });
         } else if (isAzureSubscriptionRegistryItem(element)) {
@@ -125,6 +128,16 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         return repositoriesWithAdditionalContext;
     }
 
+    public override async getTags(repository: AzureRepository): Promise<AzureTag[]> {
+        const tags = await super.getTags(repository);
+        const tagsWithAdditionalContext = tags.map(tag => ({
+            ...tag,
+            additionalContextValues: ['azureContainerTag']
+        }));
+
+        return tagsWithAdditionalContext;
+    }
+
     public override getTreeItem(element: CommonRegistryItem): Promise<vscode.TreeItem> {
         if (isAzureSubscriptionRegistryItem(element)) {
             return Promise.resolve({
@@ -158,6 +171,22 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         const client = await createAzureContainerRegistryClient(item.subscription);
         const resourceGroup = getResourceGroupFromId(item.id);
         await client.registries.beginDeleteAndWait(resourceGroup, item.label);
+    }
+
+    public async deleteTag(item: AzureTag): Promise<void> {
+        const authenticationProvider = this.getAuthenticationProvider(item.parent.parent as unknown as AzureRegistryItem);
+
+        const reponse = await registryV2Request({
+            method: 'DELETE',
+            registryUri: item.baseUrl,
+            path: ['v2', '_acr', `${item.parent.label}`, 'tags', `${item.label}`],
+            scopes: [`repository:${item.parent.label}:delete`],
+            authenticationProvider: authenticationProvider,
+        });
+
+        if (!reponse.succeeded) {
+            throw new Error(`Failed to delete repository: ${reponse.statusText}`);
+        }
     }
 
     protected override getAuthenticationProvider(item: AzureRegistryItem): ACROAuthProvider {
