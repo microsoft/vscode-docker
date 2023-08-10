@@ -68,7 +68,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         }
 
         const azureRegistryClient = await createAzureContainerRegistryClient(registry.subscription);
-        const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registry.subscription.subscriptionId, resourceGroup, rootUri, tarFilePath);
+        const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registry.label, resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.info(vscode.l10n.t('Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;

@@ -149,7 +149,7 @@
             ],
             "editor/context": [
                 {
-                    "when": "isWorkspaceTrusted && editorLangId == dockerfile && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && editorLangId == dockerfile",
                     "command": "vscode-docker.registries.azure.buildImage",
                     "group": "docker"
                 },
@@ -186,7 +186,7 @@
             ],
             "explorer/context": [
                 {
-                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
                     "command": "vscode-docker.registries.azure.buildImage",
                     "group": "docker"
                 },
