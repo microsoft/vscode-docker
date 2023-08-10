@@ -21,7 +21,9 @@ export interface AzureSubscriptionRegistryItem extends CommonRegistryItem {
     readonly type: 'azuresubscription';
 }
 
-export type AzureRegistry = V2Registry & AzureRegistryItem;
+export type AzureRegistry = V2Registry & AzureRegistryItem & {
+    readonly registryProperties: AcrRegistry;
+};
 
 export type AzureRepository = V2Repository;
 
@@ -107,7 +109,8 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                 subscription: subscriptionItem.subscription,
                 additionalContextValues: ['azureContainerRegistry'],
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-                id: registry.id!
+                id: registry.id!,
+                registryProperties: registry
             };
         });
     }
