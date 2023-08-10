@@ -77,6 +77,7 @@ import { copyRemoteFullTag } from "./registries/copyRemoteFullTag";
 import { copyRemoteImageDigest } from "./registries/copyRemoteImageDigest";
 import { disconnectRegistry } from "./registries/disconnectRegistry";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
+import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
 import { registryHelp } from "./registries/registryHelp";
 import { openDockerDownloadPage } from "./showDockerLearnMoreNotification";
@@ -180,7 +181,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerCommand('vscode-docker.registries.help', registryHelp);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
-    // registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
+    registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImageFromRepository);
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
     // registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
