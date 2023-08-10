@@ -8,8 +8,7 @@ import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/v
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
-import { getResourceGroupFromId } from '../../../utils/azureUtils';
-import { createAzureClient } from '../registryTreeUtils';
+import { createAzureContainerRegistryClient, getResourceGroupFromId } from '../../../utils/azureUtils';
 import { ACROAuthProvider } from './ACROAuthProvider';
 
 export interface AzureRegistryItem extends V2RegistryItem {
@@ -114,27 +113,13 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public override async getRepositories(registry: AzureRegistry): Promise<AzureRepository[]> {
-        const catalogResponse = await registryV2Request<{ repositories: string[] }>({
-            authenticationProvider: this.getAuthenticationProvider(registry),
-            method: 'GET',
-            registryUri: registry.baseUrl,
-            path: ['v2', '_catalog'],
-            scopes: ['registry:catalog:*'],
-        });
+        const repositories = await super.getRepositories(registry);
+        const repositoriesWithAdditionalContext = repositories.map(repository => ({
+            ...repository,
+            additionalContextValues: ['azureContainerRepository']
+        }));
 
-        const results: AzureRepository[] = [];
-
-        for (const repository of catalogResponse.body?.repositories || []) {
-            results.push({
-                parent: registry,
-                baseUrl: registry.baseUrl,
-                label: repository,
-                type: 'commonrepository',
-                additionalContextValues: ['azureContainerRepository']
-            });
-        }
-
-        return results;
+        return repositoriesWithAdditionalContext;
     }
 
     public override getTreeItem(element: CommonRegistryItem): Promise<vscode.TreeItem> {
@@ -167,7 +152,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public async deleteRegistry(item: AzureRegistry): Promise<void> {
-        const client = await createAzureClient(item.subscription);
+        const client = await createAzureContainerRegistryClient(item.subscription);
         const resourceGroup = getResourceGroupFromId(item.id);
         await client.registries.beginDeleteAndWait(resourceGroup, item.label);
     }

@@ -24,7 +24,7 @@ export async function deleteAzureRepository(context: IActionContext, node?: Unif
         await azureDataProvider.deleteRepository(node.wrappedItem);
     });
 
-    ext.registriesTree.refresh();
+    void ext.registriesTree.refresh();
 
     const deleteSucceeded = l10n.t('Successfully deleted repository "{0}".', node.wrappedItem.label);
     // don't wait
