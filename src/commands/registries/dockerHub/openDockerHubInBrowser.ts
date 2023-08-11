@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, contextValueExperience } from "@microsoft/vscode-azext-utils";
-import { CommonRegistryItem } from "@microsoft/vscode-docker-registries";
+import { CommonRegistryItem, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
 import * as vscode from "vscode";
 import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
@@ -18,18 +18,14 @@ export async function openDockerHubInBrowser(context: IActionContext, node?: Uni
     let url = dockerHubUrl;
     const dockerHubItem = node.wrappedItem;
 
-    switch (dockerHubItem.additionalContextValues?.[0] || '') {
-        case 'dockerHubRegistry':
-            url = `${url}u/${dockerHubItem.label}`;
-            break;
-        case 'dockerHubRepository':
-            url = `${url}r/${dockerHubItem.parent.label}/${dockerHubItem.label}`;
-            break;
-        case 'dockerHubTag':
-            url = `${url}r/${dockerHubItem.parent.parent.label}/${dockerHubItem.parent.label}/tags`;
-            break;
-        default:
-            throw new Error(`Unexpected node type ${dockerHubItem.additionalContextValues || ''}`);
+    if (isRegistry(dockerHubItem)) {
+        url = `${url}u/${dockerHubItem.label}`;
+    } else if (isRepository(dockerHubItem)) {
+        url = `${url}r/${dockerHubItem.parent.label}/${dockerHubItem.label}`;
+    } else if (isTag(dockerHubItem)) {
+        url = `${url}r/${dockerHubItem.parent.parent.label}/${dockerHubItem.parent.label}/tags`;
+    } else {
+        throw new Error(`Unexpected node type ${dockerHubItem.additionalContextValues || ''}`);
     }
 
     await vscode.env.openExternal(vscode.Uri.parse(url));
