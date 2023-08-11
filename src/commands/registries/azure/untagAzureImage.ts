@@ -1,36 +1,32 @@
-// /*---------------------------------------------------------------------------------------------
-//  *  Copyright (c) Microsoft Corporation. All rights reserved.
-//  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
-//  *--------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-// import { IActionContext } from "@microsoft/vscode-azext-utils";
-// import { l10n, ProgressLocation, window } from "vscode";
-// import { ext } from "../../../extensionVariables";
-// import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
-// import { RemoteTagTreeItem } from "../../../tree/registries/RemoteTagTreeItem";
-// import { registryRequest } from "../../../utils/registryRequestUtils";
+import { contextValueExperience, IActionContext } from "@microsoft/vscode-azext-utils";
+import { l10n, ProgressLocation, window } from "vscode";
+import { ext } from "../../../extensionVariables";
+import { AzureRegistryDataProvider, AzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { getFullImageNameFromRegistryItem } from "../../../tree/registries/registryTreeUtils";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 
-// export async function untagAzureImage(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
-//     if (!node) {
-//         node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.azure.tag, {
-//             ...context,
-//             suppressCreatePick: true,
-//             noItemFoundErrorMessage: l10n.t('No images are available to untag')
-//         });
-//     }
+export async function untagAzureImage(context: IActionContext, node?: UnifiedRegistryItem<AzureTag>): Promise<void> {
+    if (!node) {
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerTag' });
+    }
 
-//     const confirmUntag: string = l10n.t('Are you sure you want to untag image "{0}"? This does not delete the manifest referenced by the tag.', node.repoNameAndTag);
-//     // no need to check result - cancel will throw a UserCancelledError
-//     await context.ui.showWarningMessage(confirmUntag, { modal: true }, { title: "Untag" });
+    const fullTag = getFullImageNameFromRegistryItem(node);
+    const confirmUntag: string = l10n.t('Are you sure you want to untag image "{0}"? This does not delete the manifest referenced by the tag.', fullTag);
+    // no need to check result - cancel will throw a UserCancelledError
+    await context.ui.showWarningMessage(confirmUntag, { modal: true }, { title: "Untag" });
 
-//     const untagging = l10n.t('Untagging image "{0}"...', node.repoNameAndTag);
-//     const repoTI = node.parent;
-//     await window.withProgress({ location: ProgressLocation.Notification, title: untagging }, async () => {
-//         await registryRequest(repoTI, 'DELETE', `v2/_acr/${repoTI.repoName}/tags/${node.tag}`);
-//         await repoTI.refresh(context);
-//     });
+    const untagging = l10n.t('Untagging image "{0}"...', fullTag);
+    await window.withProgress({ location: ProgressLocation.Notification, title: untagging }, async () => {
+        const provider = node.provider as unknown as AzureRegistryDataProvider;
+        await provider.deleteTag(node.wrappedItem);
+    });
 
-//     // don't wait
-//     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-//     window.showInformationMessage(l10n.t('Successfully untagged image "{0}".', node.repoNameAndTag));
-// }
+    // don't wait
+    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
+    window.showInformationMessage(l10n.t('Successfully untagged image "{0}".', fullTag));
+}

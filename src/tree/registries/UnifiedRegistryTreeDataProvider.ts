@@ -117,15 +117,17 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
             await this.storageMemento.update(ConnectedRegistryProvidersKey, Array.from(connectedProviderIdsSet));
         }
 
-        this.refresh();
+        void this.refresh();
     }
 
     public async disconnectRegistryProvider(item: UnifiedRegistryItem<unknown>): Promise<void> {
         await item.provider?.onDisconnect?.();
+
         const newConnectedProviderIds = this.storageMemento
             .get<string[]>(ConnectedRegistryProvidersKey, [])
             .filter(cpi => cpi !== item.provider.id);
         await this.storageMemento.update(ConnectedRegistryProvidersKey, newConnectedProviderIds);
-        this.refresh();
+
+        void this.refresh();
     }
 }
