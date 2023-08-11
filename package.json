@@ -566,7 +566,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.dockerHub.openInBrowser",
-                    "when": "view == dockerRegistries && viewItem =~ /dockerHub;DockerHubV2;(Tag|Repository|Registry);/",
+                    "when": "view == dockerRegistries && viewItem =~ /(dockerHubRegistry|dockerHubRepository|dockerHubTag)/i",
                     "group": "regs_zzz_common@1"
                 },
                 {

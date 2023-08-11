@@ -76,6 +76,7 @@ import { viewAzureProperties } from "./registries/azure/viewAzureProperties";
 import { copyRemoteFullTag } from "./registries/copyRemoteFullTag";
 import { copyRemoteImageDigest } from "./registries/copyRemoteImageDigest";
 import { disconnectRegistry } from "./registries/disconnectRegistry";
+import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
@@ -186,7 +187,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
     // registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
 
-    // registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
+    registerCommand('vscode-docker.registries.dockerHub.openInBrowser', openDockerHubInBrowser);
 
     registerWorkspaceCommand('vscode-docker.registries.azure.buildImage', buildImageInAzure);
     registerCommand('vscode-docker.registries.azure.createRegistry', createAzureRegistry);
