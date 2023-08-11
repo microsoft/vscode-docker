@@ -12,7 +12,7 @@ import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDa
 
 export async function logInToDockerCli(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistry>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesRoot, { include: 'commonroot' });
+        node = await contextValueExperience(context, ext.registriesRoot, { include: 'commonregistry' });
     }
 
     const creds = await node.provider?.getLoginInformation?.(node.wrappedItem);

@@ -149,7 +149,7 @@
             ],
             "editor/context": [
                 {
-                    "when": "isWorkspaceTrusted && editorLangId == dockerfile && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && editorLangId == dockerfile",
                     "command": "vscode-docker.registries.azure.buildImage",
                     "group": "docker"
                 },
@@ -186,7 +186,7 @@
             ],
             "explorer/context": [
                 {
-                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
                     "command": "vscode-docker.registries.azure.buildImage",
                     "group": "docker"
                 },
@@ -526,7 +526,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Tag;",
+                    "when": "view == dockerRegistries && viewItem =~ /azureContainerTag/i",
                     "group": "regs_tag_2_destructive@1"
                 },
                 {
@@ -571,7 +571,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.viewProperties",
-                    "when": "view == dockerRegistries && viewItem =~ /azure(TaskRun|;DockerV2;Registry;)/",
+                    "when": "view == dockerRegistries && viewItem =~ /azureContainerRegistry/i",
                     "group": "regs_zzz_common@2"
                 },
                 {
