@@ -21,7 +21,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry)); // TODO: add logic to pass registry
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry));
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.runWithDefaults(client =>

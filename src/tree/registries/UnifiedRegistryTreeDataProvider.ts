@@ -1,5 +1,6 @@
-import { RegistryDataProvider } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
+import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
 
 export interface UnifiedRegistryItem<T> {
     provider: RegistryDataProvider<T>;
@@ -129,5 +130,33 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
         await this.storageMemento.update(ConnectedRegistryProvidersKey, newConnectedProviderIds);
 
         void this.refresh();
+    }
+
+    public async getAllConnectedRegistries(): Promise<UnifiedRegistryItem<CommonRegistry>[]> {
+        const registryRoots = await this.getChildren();
+
+        const results: UnifiedRegistryItem<CommonRegistry>[] = [];
+
+        for (const registryRoot of registryRoots) {
+            try {
+                const maybeRegistries = await this.getChildren(registryRoot);
+                for (const maybeRegistry of maybeRegistries) {
+                    if (isRegistry(maybeRegistry.wrappedItem)) {
+                        results.push(maybeRegistry as UnifiedRegistryItem<CommonRegistry>);
+                    } else if (isAzureSubscriptionRegistryItem(maybeRegistry.wrappedItem)) {
+                        const registries = await this.getChildren(maybeRegistry);
+                        for (const registry of registries) {
+                            if (isRegistry(registry.wrappedItem)) {
+                                results.push(registry as UnifiedRegistryItem<CommonRegistry>);
+                            }
+                        }
+                    }
+                }
+            } catch {
+                // Ignore
+            }
+        }
+
+        return results;
     }
 }
