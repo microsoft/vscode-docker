@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, TelemetryProperties } from '@microsoft/vscode-azext-utils';
-import { CommonRegistry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
@@ -21,7 +21,8 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry));
+    const baseImagePath = isRegistry(registry) ? getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry) : undefined;
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.runWithDefaults(client =>
