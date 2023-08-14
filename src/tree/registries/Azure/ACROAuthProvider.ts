@@ -4,9 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
-import { httpRequest } from '@microsoft/vscode-docker-registries';
+import { LoginInformation, httpRequest } from '@microsoft/vscode-docker-registries';
 import { AuthenticationProvider } from "@microsoft/vscode-docker-registries/";
 import * as vscode from 'vscode';
+import { NULL_GUID } from '../../../constants';
 
 // export interface ACROAuthOptions extends BasicOAuthOptions {
 //     readonly subscription: AzureSubscription;
@@ -18,16 +19,7 @@ export class ACROAuthProvider implements AuthenticationProvider {
     public constructor(private readonly registryUri: vscode.Uri, private readonly subscription: AzureSubscription) { }
 
     public async getSession(scopes: string[], options?: vscode.AuthenticationGetSessionOptions): Promise<vscode.AuthenticationSession & { type: string }> {
-        const accessToken = await this.getAccessToken(this.subscription);
-        const registryString = this.registryUri.toString();
-
-        let refreshToken: string;
-        if (!options?.forceNewSession && this.refreshTokenCache.has(registryString)) {
-            refreshToken = this.refreshTokenCache.get(registryString)!;
-        } else {
-            refreshToken = await this.getRefreshTokenFromAccessToken(accessToken, this.registryUri, this.subscription);
-            this.refreshTokenCache.set(registryString, refreshToken);
-        }
+        const refreshToken = await this.getRefreshToken(options);
 
         const oauthToken = await this.getOAuthTokenFromRefreshToken(refreshToken, this.registryUri, scopes.join(' '), this.subscription);
         const { sub, jti } = this.parseToken(oauthToken);
@@ -41,6 +33,15 @@ export class ACROAuthProvider implements AuthenticationProvider {
                 id: sub,
             },
             scopes: scopes,
+        };
+    }
+
+    public async getLoginInformation(options?: vscode.AuthenticationGetSessionOptions): Promise<LoginInformation> {
+        const refreshToken = await this.getRefreshToken(options);
+        return {
+            username: NULL_GUID,
+            secret: refreshToken,
+            server: this.registryUri.toString(),
         };
     }
 
@@ -105,6 +106,23 @@ export class ACROAuthProvider implements AuthenticationProvider {
         // Registry scopes, i.e. those passed to `getSession()`, are not valid for acquiring this
         // access token--instead, those only need to be passed to `getOAuthTokenFromRefreshToken()`
         const token = await subscription.credential.getToken([]);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return token!.token;
+    }
+
+    private async getRefreshToken(options?: vscode.AuthenticationGetSessionOptions): Promise<string> {
+        const accessToken = await this.getAccessToken(this.subscription);
+        const registryString = this.registryUri.toString();
+
+        let refreshToken: string;
+        if (!options?.forceNewSession && this.refreshTokenCache.has(registryString)) {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            refreshToken = this.refreshTokenCache.get(registryString)!;
+        } else {
+            refreshToken = await this.getRefreshTokenFromAccessToken(accessToken, this.registryUri, this.subscription);
+            this.refreshTokenCache.set(registryString, refreshToken);
+        }
+
+        return refreshToken;
     }
 }
