@@ -4,10 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, TelemetryProperties } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getBaseImagePathFromRegistryItem } from '../../tree/registries/registryTreeUtils';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<unknown>): Promise<string> {
     if (!node) {
@@ -19,7 +21,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, ''); // TODO: review this later
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry)); // TODO: add logic to pass registry
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.runWithDefaults(client =>
