@@ -153,9 +153,14 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Azure');
                 findAzureRegistryOnly = true;
             }
+            else if (authority === 'ghcr.io') {
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'GitHub');
+            }
             else {
-                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label !== 'Docker Hub'
-                    && (r.wrappedItem as CommonRegistryRoot).label !== 'Azure');
+                registryRoots = registryRoots.filter(
+                    r => (r.wrappedItem as CommonRegistryRoot).label !== 'Docker Hub'
+                        && (r.wrappedItem as CommonRegistryRoot).label !== 'Azure'
+                        && (r.wrappedItem as CommonRegistryRoot).label !== 'GitHub');
             }
         }
 
