@@ -1,4 +1,4 @@
-import { CommonRegistry, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
 
@@ -132,19 +132,46 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
         void this.refresh();
     }
 
-    public async getAllConnectedRegistries(): Promise<UnifiedRegistryItem<CommonRegistry>[]> {
-        const registryRoots = await this.getChildren();
+    /**
+     *
+     * @param imageBaseName The base name of the image to find registries for. e.g. 'docker.io'
+     * @returns A list of registries that are connected to the extension. If imageBaseName is provided, only registries that
+     *          can be used to push to that image will be returned.
+     */
+    public async getConnectedRegistries(imageBaseName?: vscode.Uri): Promise<UnifiedRegistryItem<CommonRegistry>[]> {
+        let registryRoots = await this.getChildren();
+        let findAzureRegistryOnly = false;
+
+        // filter out registry roots that don't match the image base name
+        if (imageBaseName) {
+            const authority = imageBaseName.authority;
+
+            if (authority === 'docker.io') {
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Docker Hub');
+            }
+            else if (authority.endsWith('azurecr.io')) {
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Azure');
+                findAzureRegistryOnly = true;
+            }
+            else {
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label !== 'Docker Hub'
+                    && (r.wrappedItem as CommonRegistryRoot).label !== 'Azure');
+            }
+        }
 
         const results: UnifiedRegistryItem<CommonRegistry>[] = [];
 
         for (const registryRoot of registryRoots) {
             try {
                 const maybeRegistries = await this.getChildren(registryRoot);
+
                 for (const maybeRegistry of maybeRegistries) {
-                    if (isRegistry(maybeRegistry.wrappedItem)) {
+                    // short circuit if we're only looking for Azure registries
+                    if (!findAzureRegistryOnly && isRegistry(maybeRegistry.wrappedItem)) {
                         results.push(maybeRegistry as UnifiedRegistryItem<CommonRegistry>);
-                    } else if (isAzureSubscriptionRegistryItem(maybeRegistry.wrappedItem)) {
+                    } else if (findAzureRegistryOnly || isAzureSubscriptionRegistryItem(maybeRegistry.wrappedItem)) {
                         const registries = await this.getChildren(maybeRegistry);
+
                         for (const registry of registries) {
                             if (isRegistry(registry.wrappedItem)) {
                                 results.push(registry as UnifiedRegistryItem<CommonRegistry>);
@@ -153,7 +180,7 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                     }
                 }
             } catch {
-                // Ignore
+                // best effort
             }
         }
 

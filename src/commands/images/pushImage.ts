@@ -80,7 +80,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
-    const allRegistries = await ext.registriesTree.getAllConnectedRegistries();
+    const allRegistries = await ext.registriesTree.getConnectedRegistries(vscode.Uri.parse(baseImagePath));
 
     let matchedRegistry = allRegistries.find((registry) => getBaseImagePathFromRegistryItem(registry.wrappedItem) === baseImagePath);
 
