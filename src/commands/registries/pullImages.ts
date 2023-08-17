@@ -8,7 +8,7 @@ import { CommonRegistry, CommonRepository, CommonTag } from '@microsoft/vscode-d
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getImageNameFromRegistryItem } from '../../tree/registries/registryTreeUtils';
+import { getImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
 import { logInToDockerCli } from './logInToDockerCli';
 
 export async function pullRepository(context: IActionContext, node?: UnifiedRegistryItem<CommonRepository>): Promise<void> {
@@ -24,7 +24,7 @@ export async function pullImageFromRepository(context: IActionContext, node?: Un
         node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
     }
 
-    await pullImages(context, node.parent.parent, getImageNameFromRegistryItem(node), false);
+    await pullImages(context, node.parent.parent, getImageNameFromRegistryTagItem(node.wrappedItem), false);
 }
 
 async function pullImages(context: IActionContext, node: UnifiedRegistryItem<unknown>, imageRequest: string, allTags: boolean): Promise<void> {

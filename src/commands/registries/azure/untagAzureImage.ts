@@ -7,7 +7,7 @@ import { contextValueExperience, IActionContext } from "@microsoft/vscode-azext-
 import { l10n, ProgressLocation, window } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistryDataProvider, AzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { getFullImageNameFromRegistryItem } from "../../../tree/registries/registryTreeUtils";
+import { getFullImageNameFromRegistryTagItem } from "../../../tree/registries/registryTreeUtils";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 
 export async function untagAzureImage(context: IActionContext, node?: UnifiedRegistryItem<AzureTag>): Promise<void> {
@@ -15,7 +15,7 @@ export async function untagAzureImage(context: IActionContext, node?: UnifiedReg
         node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerTag' });
     }
 
-    const fullTag = getFullImageNameFromRegistryItem(node);
+    const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);
     const confirmUntag: string = l10n.t('Are you sure you want to untag image "{0}"? This does not delete the manifest referenced by the tag.', fullTag);
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage(confirmUntag, { modal: true }, { title: "Untag" });
