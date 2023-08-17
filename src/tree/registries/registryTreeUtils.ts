@@ -25,6 +25,7 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
     const registry = node.parent.parent.wrappedItem as CommonRegistry;
 
     switch (node.wrappedItem.additionalContextValues?.[0] ?? '') {
+        case 'azureContainerTag':
         case 'registryV2Tag': {
             const authority = registry.baseUrl.authority;
             return `${authority.toLowerCase()}/${imageName}`;

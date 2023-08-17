@@ -521,7 +521,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAca",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2|GitLabV4);Tag;/ && isAzureAccountInstalled",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@6"
                 },
                 {

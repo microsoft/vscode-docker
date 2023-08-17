@@ -70,6 +70,7 @@ import { connectRegistry } from "./registries/connectRegistry";
 // import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { deleteAzureRegistry } from "./registries/azure/deleteAzureRegistry";
 import { deleteAzureRepository } from "./registries/azure/deleteAzureRepository";
+import { deployImageToAca } from "./registries/azure/deployImageToAca";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
 import { untagAzureImage } from "./registries/azure/untagAzureImage";
 import { viewAzureProperties } from "./registries/azure/viewAzureProperties";
@@ -178,7 +179,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.copyRemoteFullTag', copyRemoteFullTag);
     // registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     // registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
-    // registerCommand('vscode-docker.registries.deployImageToAca', deployImageToAca);
+    registerCommand('vscode-docker.registries.deployImageToAca', deployImageToAca);
     registerCommand('vscode-docker.registries.disconnectRegistry', disconnectRegistry);
     registerCommand('vscode-docker.registries.help', registryHelp);
     registerWorkspaceCommand('vscode-docker.registries.logInToDockerCli', logInToDockerCli);
