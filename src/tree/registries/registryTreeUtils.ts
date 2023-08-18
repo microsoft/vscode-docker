@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CommonRegistry, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
+import { getResourceGroupFromId } from "../../utils/azureUtils";
+import { AzureRegistryItem } from "./Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "./UnifiedRegistryTreeDataProvider";
 
 export function getImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): string {
@@ -34,4 +36,12 @@ export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<Commo
         default:
             return `${registry.label}/${imageName}`;
     }
+}
+
+export function getResourceGroupFromAzureRegistryItem(node: UnifiedRegistryItem<AzureRegistryItem>): string {
+    if (!isRegistry(node.wrappedItem)) {
+        throw new Error('Unable to get resource group');
+    }
+
+    return getResourceGroupFromId(node.wrappedItem.id);
 }

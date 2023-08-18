@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { Registry as AcrRegistry } from '@azure/arm-containerregistry';
+import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
@@ -35,6 +35,10 @@ export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSub
 
 export function isAzureRegistryItem(item: unknown): item is AzureRegistry {
     return !!item && typeof item === 'object' && (item as AzureRegistryItem).additionalContextValues?.includes('azureContainerRegistry');
+}
+
+export function isAzureRepositoryItem(item: unknown): item is AzureRepository {
+    return !!item && typeof item === 'object' && (item as AzureRepository).additionalContextValues?.includes('azureContainerRepository');
 }
 
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
@@ -187,6 +191,15 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         if (!reponse.succeeded) {
             throw new Error(`Failed to delete tag: ${reponse.statusText}`);
 
+        }
+    }
+
+    public async tryGetAdminCredentials(azureRegistry: AzureRegistry): Promise<RegistryListCredentialsResult | undefined> {
+        if (azureRegistry.registryProperties.adminUserEnabled) {
+            const client = await createAzureContainerRegistryClient(azureRegistry.subscription);
+            return await client.registries.listCredentials(getResourceGroupFromId(azureRegistry.id), azureRegistry.label);
+        } else {
+            return undefined;
         }
     }
 
