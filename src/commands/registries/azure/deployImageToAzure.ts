@@ -36,9 +36,11 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
     };
 
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
-    // Create a temporary azure account tree item since Azure might not be connected
+
     const subscription = await contextValueExperience(context, ext.registriesTree, { include: 'azuresubscription' }) as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
-    wizardContext.subscriptionId = subscription.wrappedItem.subscription.subscriptionId;
+    Object.assign(wizardContext, subscription.wrappedItem.subscription);
+
+    wizardContext.credentials = subscription.wrappedItem.subscription.credential;
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());

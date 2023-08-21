@@ -5,11 +5,7 @@
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
 import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
-import { ISubscriptionContext } from '@microsoft/vscode-azext-utils';
-import { Request } from 'node-fetch';
-import { URLSearchParams } from 'url';
 import { l10n } from 'vscode';
-import { httpRequest, RequestOptionsLike } from './httpRequest';
 
 const refreshTokens: { [key: string]: string } = {};
 
@@ -26,51 +22,51 @@ export function getResourceGroupFromId(id: string): string {
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
-export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
-    const options: RequestOptionsLike = {
-        form: {
-            grant_type: 'refresh_token',
-            service: registryHost,
-            scope: scope,
-            refresh_token: undefined
-        },
-        method: 'POST',
-    };
+// export async function acquireAcrAccessToken(registryHost: string, subContext: ISubscriptionContext, scope: string): Promise<string> {
+//     const options: RequestOptionsLike = {
+//         form: {
+//             grant_type: 'refresh_token',
+//             service: registryHost,
+//             scope: scope,
+//             refresh_token: undefined
+//         },
+//         method: 'POST',
+//     };
 
-    try {
-        if (refreshTokens[registryHost]) {
-            options.form.refresh_token = refreshTokens[registryHost];
-            const responseFromCachedToken = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
-            return (await responseFromCachedToken.json()).access_token;
-        }
-    } catch { /* No-op, fall back to a new refresh token */ }
+//     try {
+//         if (refreshTokens[registryHost]) {
+//             options.form.refresh_token = refreshTokens[registryHost];
+//             const responseFromCachedToken = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+//             return (await responseFromCachedToken.json()).access_token;
+//         }
+//     } catch { /* No-op, fall back to a new refresh token */ }
 
-    options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
-    const response = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
-    return (await response.json()).access_token;
-}
+//     options.form.refresh_token = refreshTokens[registryHost] = await acquireAcrRefreshToken(registryHost, subContext);
+//     const response = await httpRequest<{ access_token: string }>(`https://${registryHost}/oauth2/token`, options);
+//     return (await response.json()).access_token;
+// }
 
-export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
-    const options: RequestOptionsLike = {
-        method: 'POST',
-        form: {
-            grant_type: 'access_token',
-            service: registryHost,
-            tenant: subContext.tenantId,
-        },
-    };
+// export async function acquireAcrRefreshToken(registryHost: string, subContext: ISubscriptionContext): Promise<string> {
+//     const options: RequestOptionsLike = {
+//         method: 'POST',
+//         form: {
+//             grant_type: 'access_token',
+//             service: registryHost,
+//             tenant: subContext.tenantId,
+//         },
+//     };
 
-    const response = await httpRequest<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
-        // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
-        await subContext.credentials.signRequest(request);
-        const token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
+//     const response = await httpRequest<{ refresh_token: string }>(`https://${registryHost}/oauth2/exchange`, options, async (request) => {
+//         // Obnoxiously, the oauth2/exchange endpoint wants the token in the form data's access_token field, so we need to pick it off the signed auth header and move it there
+//         await subContext.credentials.signRequest(request);
+//         const token = (request.headers.get('authorization') as string).replace(/Bearer\s+/i, '');
 
-        const formData = new URLSearchParams({ ...options.form, access_token: token });
-        return new Request(request.url, { method: 'POST', body: formData });
-    });
+//         const formData = new URLSearchParams({ ...options.form, access_token: token });
+//         return new Request(request.url, { method: 'POST', body: formData });
+//     });
 
-    return (await response.json()).refresh_token;
-}
+//     return (await response.json()).refresh_token;
+// }
 
 export async function createAzureContainerRegistryClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
     return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
