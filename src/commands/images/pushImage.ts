@@ -1,78 +1,92 @@
-// /*---------------------------------------------------------------------------------------------
-//  *  Copyright (c) Microsoft Corporation. All rights reserved.
-//  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
-//  *--------------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-// import { IActionContext, NoResourceFoundError, contextValueExperience } from '@microsoft/vscode-azext-utils';
-// import * as vscode from 'vscode';
-// import { ext } from '../../extensionVariables';
-// import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
-// import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-// import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-// import { addImageTaggingTelemetry, tagImage } from './tagImage';
+import { IActionContext, NoResourceFoundError, contextValueExperience } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry } from '@microsoft/vscode-docker-registries';
+import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
+import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
+import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getBaseImagePathFromRegistryItem } from '../../tree/registries/registryTreeUtils';
+import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
-// export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
-//     if (!node) {
-//         await ext.imagesTree.refresh(context);
-//         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
-//             ...context,
-//             noItemFoundErrorMessage: vscode.l10n.t('No images are available to push'),
-//         });
-//     }
+export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
+    if (!node) {
+        await ext.imagesTree.refresh(context);
+        node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
+            ...context,
+            noItemFoundErrorMessage: vscode.l10n.t('No images are available to push'),
+        });
+    }
 
-//     let connectedRegistry: UnifiedRegistryItem<unknown> | undefined;
+    let connectedRegistry: UnifiedRegistryItem<CommonRegistry> | undefined;
 
-//     if (!node.fullTag.includes('/')) {
-//         // The registry to push to is indeterminate--could be Docker Hub, or could need tagging.
-//         const prompt: boolean = vscode.workspace.getConfiguration('docker').get('promptForRegistryWhenPushingImages', true);
+    if (!node.fullTag.includes('/')) {
+        // The registry to push to is indeterminate--could be Docker Hub, or could need tagging.
+        const prompt: boolean = vscode.workspace.getConfiguration('docker').get('promptForRegistryWhenPushingImages', true);
 
-//         // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
-//         if (prompt) {
-//             try {
-//                 connectedRegistry = await contextValueExperience(context, ext.registriesRoot, { include: 'commonregistry' });
-//             } catch (error) {
-//                 if (error instanceof NoResourceFoundError) {
-//                     // Do nothing, move on without a selected registry
-//                 } else {
-//                     // Rethrow
-//                     throw error;
-//                 }
-//             }
-//         } else {
-//             // Try to find a connected Docker Hub registry (primarily for login credentials)
-//             connectedRegistry = await contextValueExperience(context, ext.registriesRoot, { include: 'dockerHubRegistry' });
-//         }
-//     } else {
-//         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
-//         // Registry path is everything up to the last slash.
-//         const baseImagePath = node.fullTag.substring(0, node.fullTag.lastIndexOf('/'));
+        // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
+        if (prompt) {
+            try {
+                connectedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });
+            } catch (error) {
+                if (error instanceof NoResourceFoundError) {
+                    // Do nothing, move on without a selected registry
+                } else {
+                    // Rethrow
+                    throw error;
+                }
+            }
+        } else {
+            // Try to find a connected Docker Hub registry (primarily for login credentials)
+            connectedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['dockerHubRegistry'] });
+        }
+    } else {
+        // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
+        // Registry path is everything up to the last slash.
+        const baseImagePath = node.fullTag.substring(0, node.fullTag.lastIndexOf('/'));
 
-//         const progressOptions: vscode.ProgressOptions = {
-//             location: vscode.ProgressLocation.Notification,
-//             title: vscode.l10n.t('Fetching login credentials...'),
-//         };
+        const progressOptions: vscode.ProgressOptions = {
+            location: vscode.ProgressLocation.Notification,
+            title: vscode.l10n.t('Fetching login credentials...'),
+        };
 
-//         // connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath)); TODO: review this later
-//     }
+        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));
+    }
 
-//     // Give the user a chance to modify the tag however they want
-//     const finalTag = await tagImage(context, node, connectedRegistry);
+    // Give the user a chance to modify the tag however they want
+    const finalTag = await tagImage(context, node, connectedRegistry);
 
-//     // if (connectedRegistry && finalTag.startsWith(connectedRegistry.baseImagePath)) {
-//     //     // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
-//     //     await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
-//     // } TODO: review this later
+    if (connectedRegistry && finalTag.startsWith(getBaseImagePathFromRegistryItem(connectedRegistry.wrappedItem))) {
+        // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
+        await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
+    }
 
-//     addImageTaggingTelemetry(context, finalTag, '');
+    addImageTaggingTelemetry(context, finalTag, '');
 
-//     const client = await ext.runtimeManager.getClient();
-//     const taskCRF = new TaskCommandRunnerFactory(
-//         {
-//             taskName: finalTag
-//         }
-//     );
+    const client = await ext.runtimeManager.getClient();
+    const taskCRF = new TaskCommandRunnerFactory(
+        {
+            taskName: finalTag
+        }
+    );
 
-//     await taskCRF.getCommandRunner()(
-//         client.pushImage({ imageRef: finalTag })
-//     );
-// }
+    await taskCRF.getCommandRunner()(
+        client.pushImage({ imageRef: finalTag })
+    );
+}
+
+async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
+    const allRegistries = await ext.registriesTree.getConnectedRegistries(vscode.Uri.parse(baseImagePath));
+
+    let matchedRegistry = allRegistries.find((registry) => getBaseImagePathFromRegistryItem(registry.wrappedItem) === baseImagePath);
+
+    if (!matchedRegistry) {
+        matchedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });
+    }
+
+    return matchedRegistry;
+}

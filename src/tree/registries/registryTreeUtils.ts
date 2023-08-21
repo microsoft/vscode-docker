@@ -4,44 +4,36 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { CommonRegistry, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
-import { getResourceGroupFromId } from "../../utils/azureUtils";
-import { AzureRegistryItem } from "./Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem } from "./UnifiedRegistryTreeDataProvider";
+import { l10n } from "vscode";
 
-export function getImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): string {
-    if (!isTag(node.wrappedItem) || !isRepository(node.parent.wrappedItem)) {
-        throw new Error('Unable to get image name');
+export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
+    if (!isTag(tag) || !isRepository(tag.parent)) {
+        throw new Error(l10n.t('Unable to get image name'));
     }
 
-    const repository = node.parent.wrappedItem as CommonRepository;
+    const repository = tag.parent as CommonRepository;
 
-    return `${repository.label}:${node.wrappedItem.label}`;
+    return `${repository.label}:${tag.label}`;
 }
 
-export function getFullImageNameFromRegistryItem(node: UnifiedRegistryItem<CommonTag>): string {
-    const imageName = getImageNameFromRegistryItem(node);
-    if (!isRegistry(node.parent.parent?.wrappedItem)) {
-        throw new Error('Unable to get full image name');
+export function getBaseImagePathFromRegistryItem(registry: CommonRegistry): string {
+    if (!isRegistry(registry)) {
+        throw new Error(l10n.t('Unable to get base image path'));
     }
 
-    const registry = node.parent.parent.wrappedItem as CommonRegistry;
-
-    switch (node.wrappedItem.additionalContextValues?.[0] ?? '') {
-        case 'azureContainerTag':
-        case 'registryV2Tag': {
-            const authority = registry.baseUrl.authority;
-            return `${authority.toLowerCase()}/${imageName}`;
+    switch (registry.additionalContextValues?.[0] ?? '') {
+        case 'azureContainerRegistry':
+        case 'genericRegistryV2': {
+            return registry.baseUrl.authority.toLowerCase();
         }
-        case 'dockerHubTag':
+        case 'dockerHubRegistry':
         default:
-            return `${registry.label}/${imageName}`;
+            return `${registry.label}`;
     }
 }
 
-export function getResourceGroupFromAzureRegistryItem(node: UnifiedRegistryItem<AzureRegistryItem>): string {
-    if (!isRegistry(node.wrappedItem)) {
-        throw new Error('Unable to get resource group');
-    }
-
-    return getResourceGroupFromId(node.wrappedItem.id);
+export function getFullImageNameFromRegistryTagItem(tag: CommonTag): string {
+    const imageName = getImageNameFromRegistryTagItem(tag);
+    const baseImagePath = getBaseImagePathFromRegistryItem(tag.parent.parent);
+    return `${baseImagePath}/${imageName}`;
 }
