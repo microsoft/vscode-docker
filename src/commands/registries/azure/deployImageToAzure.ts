@@ -5,10 +5,11 @@
 
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, contextValueExperience, nonNullProp, subscriptionExperience } from "@microsoft/vscode-azext-utils";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, contextValueExperience, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { CommonTag } from '@microsoft/vscode-docker-registries';
 import { Uri, env, l10n, window } from "vscode";
 import { ext } from "../../../extensionVariables";
+import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
@@ -33,13 +34,11 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
         newSiteOS: vscAzureAppService.WebsiteOS.linux,
         newSiteKind: vscAzureAppService.AppKind.app
     };
+
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
     // Create a temporary azure account tree item since Azure might not be connected
-    const azureAccountTreeItem = new subscriptionExperience(context, undefined); // TODO: actually implement this
-    const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
-    if (subscriptionStep) {
-        promptSteps.push(subscriptionStep);
-    }
+    const subscription = await contextValueExperience(context, ext.registriesTree, { include: 'azuresubscription' }) as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
+    wizardContext.subscriptionId = subscription.wrappedItem.subscription.subscriptionId;
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());
