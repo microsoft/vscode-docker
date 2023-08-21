@@ -11,7 +11,7 @@ import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry, isAzureRegistryItem } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { getFullImageNameFromRegistryItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
+import { getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
@@ -38,7 +38,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         const registryTreeItem: UnifiedRegistryItem<AzureRegistry> = this.tagTreeItem.parent.parent as unknown as UnifiedRegistryItem<AzureRegistry>;
 
         // 1. Get the registry resource. We will need the ID.
-        const registry = await crmClient.registries.get(getResourceGroupFromAzureRegistryItem(registryTreeItem), registryTreeItem.wrappedItem.label);
+        const registry = await crmClient.registries.get(getResourceGroupFromAzureRegistryItem(registryTreeItem.wrappedItem), registryTreeItem.wrappedItem.label);
 
         if (!(registry?.id)) {
             throw new Error(
@@ -80,7 +80,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
             );
         }
 
-        const fullTag = getFullImageNameFromRegistryItem(this.tagTreeItem);
+        const fullTag = getFullImageNameFromRegistryTagItem(this.tagTreeItem.wrappedItem);
         config.linuxFxVersion = `DOCKER|${fullTag}`;
         await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }

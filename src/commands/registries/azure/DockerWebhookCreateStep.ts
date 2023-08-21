@@ -91,6 +91,6 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             actions: ["push"],
             status: 'enabled'
         };
-        return await crmClient.webhooks.beginCreateAndWait(getResourceGroupFromAzureRegistryItem(registryTreeItem), registryTreeItem.wrappedItem.label, webhookName, webhookCreateParameters);
+        return await crmClient.webhooks.beginCreateAndWait(getResourceGroupFromAzureRegistryItem(registryTreeItem.wrappedItem), registryTreeItem.wrappedItem.label, webhookName, webhookCreateParameters);
     }
 }

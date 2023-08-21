@@ -10,7 +10,7 @@ import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { isAzureRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
-import { getFullImageNameFromRegistryItem } from '../../../tree/registries/registryTreeUtils';
+import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { installExtension } from '../../../utils/installExtension';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
@@ -39,7 +39,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
     }
 
     const commandOptions: Partial<DeployImageToAcaOptionsContract> = {
-        image: getFullImageNameFromRegistryItem(node),
+        image: getFullImageNameFromRegistryTagItem(node.wrappedItem),
     };
 
     addImageTaggingTelemetry(context, commandOptions.image, '');
