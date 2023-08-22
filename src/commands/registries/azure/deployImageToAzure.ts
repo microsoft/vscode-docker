@@ -12,6 +12,7 @@ import { ext } from "../../../extensionVariables";
 import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
@@ -37,10 +38,9 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
 
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
-    const subscription = await contextValueExperience(context, ext.registriesTree, { include: 'azuresubscription' }) as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
-    Object.assign(wizardContext, subscription.wrappedItem.subscription);
-
-    wizardContext.credentials = subscription.wrappedItem.subscription.credential;
+    const subscriptionItem = await registryExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' }) as AzureSubscriptionRegistryItem;
+    Object.assign(wizardContext, subscriptionItem.subscription);
+    wizardContext.credentials = subscriptionItem.subscription.credential;
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());

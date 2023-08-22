@@ -14,6 +14,7 @@ import { ContainersTreeItem } from './tree/containers/ContainersTreeItem';
 import { ContextsTreeItem } from './tree/contexts/ContextsTreeItem';
 import { ImagesTreeItem } from './tree/images/ImagesTreeItem';
 import { NetworksTreeItem } from './tree/networks/NetworksTreeItem';
+import { AzureRegistryDataProvider } from './tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from './tree/registries/UnifiedRegistryTreeDataProvider';
 import { VolumesTreeItem } from './tree/volumes/VolumesTreeItem';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
@@ -50,6 +51,7 @@ export namespace ext {
     export let registriesTreeView: TreeView<UnifiedRegistryItem<unknown>>;
     export let registriesRoot: UnifiedRegistryTreeDataProvider;
     export let genericRegistryV2DataProvider: GenericRegistryV2DataProvider;
+    export let azureRegistryDataProvider: AzureRegistryDataProvider;
 
     export let volumesTree: AzExtTreeDataProvider;
     export let volumesTreeView: TreeView<AzExtTreeItem>;
