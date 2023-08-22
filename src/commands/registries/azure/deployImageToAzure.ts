@@ -5,7 +5,7 @@
 
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, contextValueExperience, nonNullProp } from "@microsoft/vscode-azext-utils";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, contextValueExperience, createSubscriptionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { CommonTag } from '@microsoft/vscode-docker-registries';
 import { Uri, env, l10n, window } from "vscode";
 import { ext } from "../../../extensionVariables";
@@ -30,17 +30,16 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
     const azExtAzureUtils = await getAzExtAzureUtils();
     const vscAzureAppService = await getAzExtAppService();
 
-    const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
-        ...context,
-        newSiteOS: vscAzureAppService.WebsiteOS.linux,
-        newSiteKind: vscAzureAppService.AppKind.app
-    };
-
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
     const subscriptionItem = await registryExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' }) as AzureSubscriptionRegistryItem;
-    Object.assign(wizardContext, subscriptionItem.subscription);
-    wizardContext.credentials = subscriptionItem.subscription.credential;
+    const subscriptionContext = createSubscriptionContext(subscriptionItem.subscription);
+    const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
+        ...context,
+        ...subscriptionContext,
+        newSiteOS: vscAzureAppService.WebsiteOS.linux,
+        newSiteKind: vscAzureAppService.AppKind.app
+    };
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());
