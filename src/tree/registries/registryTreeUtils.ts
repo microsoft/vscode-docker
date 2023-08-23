@@ -45,5 +45,5 @@ export function getResourceGroupFromAzureRegistryItem(node: AzureRegistryItem): 
         throw new Error('Unable to get resource group');
     }
 
-    return getResourceGroupFromId(node.wrappedItem.id);
+    return getResourceGroupFromId(node.id);
 }
