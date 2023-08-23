@@ -46,7 +46,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         if (context.customLocation) {
             // deploying to Azure Arc
             siteEnvelope.kind = 'app,linux,kubernetes,container';
-            await this.addCustomLocationProperties(siteEnvelope, context.customLocation);
+            this.addCustomLocationProperties(siteEnvelope, context.customLocation);
         } else {
             siteEnvelope.identity = {
                 type: 'SystemAssigned'
@@ -79,7 +79,6 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         // ACR -> Arc App Service. Use regular auth. Same as any V2 registry but different way of getting auth.
         else if (isAzureRegistryItem(registryTI.wrappedItem) && context.customLocation) {
             const cred = await (registryTI.provider as unknown as AzureRegistryDataProvider).tryGetAdminCredentials(registryTI.wrappedItem);
-
             if (!cred?.username || !cred?.passwords?.[0]?.value) {
                 throw new Error(l10n.t('Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));
             }
@@ -97,6 +96,9 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         }
         // Generic registry -> App Service *OR* Arc App Service
         else if (isGenericV2Registry(registryTI.wrappedItem)) {
+            const loginInformation = await registryTI.provider.getLoginInformation(registryTI.wrappedItem);
+            username = loginInformation.username;
+            password = loginInformation.secret;
             registryUrl = (registryTI.wrappedItem as CommonRegistry).baseUrl.toString();
         }
         // TODO: add case for GitHub Container Registry
