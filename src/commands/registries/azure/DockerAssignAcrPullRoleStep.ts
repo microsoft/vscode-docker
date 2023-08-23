@@ -9,7 +9,7 @@ import { CommonTag } from "@microsoft/vscode-docker-registries";
 import { randomUUID } from "crypto";
 import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistry, isAzureRegistryItem } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { AzureRegistry, isAzureTagItem } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
@@ -86,6 +86,6 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!(context.site) && isAzureRegistryItem(this.tagTreeItem.wrappedItem) && !context.customLocation;
+        return !!(context.site) && isAzureTagItem(this.tagTreeItem.wrappedItem) && !context.customLocation;
     }
 }

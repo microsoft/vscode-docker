@@ -7,7 +7,7 @@ import type { Site } from '@azure/arm-appservice'; // These are only dev-time im
 import type { Webhook, WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { CommonTag, isDockerHubRepositoryItem } from '@microsoft/vscode-docker-registries';
+import { CommonRepository, CommonTag, isDockerHubRepositoryItem } from '@microsoft/vscode-docker-registries';
 import * as vscode from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry, isAzureRepositoryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
@@ -34,17 +34,19 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const siteClient = await parsedSite.createClient(context);
         const appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
 
-        if (isAzureRepositoryItem(this.tagItem.parent)) {
+        if (isAzureRepositoryItem(this.tagItem.parent.wrappedItem)) {
             const creatingNewWebhook: string = vscode.l10n.t('Creating webhook for web app "{0}"...', context.newSiteName);
             ext.outputChannel.info(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(context, context.site, appUri);
             ext.outputChannel.info(vscode.l10n.t('Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
-        } else if (isDockerHubRepositoryItem(this.tagItem.parent)) {
+        } else if (isDockerHubRepositoryItem(this.tagItem.parent.wrappedItem)) {
+            const registryName = this.tagItem.parent.parent.wrappedItem.label;
+            const repoName = (this.tagItem.parent as unknown as CommonRepository).wrappedItem.label;
             // point to dockerhub to create a webhook
             // http://cloud.docker.com/repository/docker/<registryName>/<repoName>/webHooks
             const dockerhubPrompt: string = vscode.l10n.t('Copy & Open');
-            const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${this.tagItem.parent.parent.wrappedItem.label}/${this.tagItem.parent.wrappedItem.label}/webHooks`;
+            const dockerhubUri: string = `https://cloud.docker.com/repository/docker/${registryName}/${repoName}/webHooks`;
 
             // NOTE: The response to the information message is not awaited but handled independently of the wizard steps.
             //       VS Code will hide such messages in the notifications pane after a period of time; awaiting them risks
@@ -64,7 +66,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!context.site && (isAzureRepositoryItem(this.tagItem.parent) || isDockerHubRepositoryItem(this.tagItem.parent));
+        return !!context.site && (isAzureRepositoryItem(this.tagItem.parent.wrappedItem) || isDockerHubRepositoryItem(this.tagItem.parent.wrappedItem));
     }
 
     private async createWebhookForApp(context: IAppServiceWizardContext, site: Site, appUri: string): Promise<Webhook | undefined> {

@@ -41,6 +41,10 @@ export function isAzureRepositoryItem(item: unknown): item is AzureRepository {
     return !!item && typeof item === 'object' && (item as AzureRepository).additionalContextValues?.includes('azureContainerRepository');
 }
 
+export function isAzureTagItem(item: unknown): item is AzureTag {
+    return !!item && typeof item === 'object' && (item as AzureTag).additionalContextValues?.includes('azureContainerTag');
+}
+
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
     public readonly id = 'vscode-docker.azureContainerRegistry';
     public readonly label = vscode.l10n.t('Azure');

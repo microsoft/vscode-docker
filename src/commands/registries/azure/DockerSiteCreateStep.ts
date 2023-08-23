@@ -92,7 +92,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         else if (isDockerHubRegistryItem(registryTI.wrappedItem)) {
             const loginInformation = await registryTI.provider.getLoginInformation(registryTI.wrappedItem);
             username = loginInformation.username;
-            password = await loginInformation.secret;
+            password = loginInformation.secret;
             registryUrl = 'https://index.docker.io';
         }
         // Generic registry -> App Service *OR* Arc App Service
