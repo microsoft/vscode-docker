@@ -194,7 +194,6 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
         if (!reponse.succeeded) {
             throw new Error(`Failed to delete tag: ${reponse.statusText}`);
-
         }
     }
 

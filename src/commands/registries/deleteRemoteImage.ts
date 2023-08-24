@@ -13,7 +13,7 @@ import { registryExperience } from '../../utils/registryExperience';
 
 export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.genericRegistryV2DataProvider, { include: ['commontag'] });
+        node = await registryExperience(context, [ext.genericRegistryV2DataProvider, ext.azureRegistryDataProvider], { include: ['genericRegistryV2Tag', 'azureContainerTag'] }, false);
     }
 
     const tagName = getImageNameFromRegistryTagItem(node.wrappedItem);
@@ -39,6 +39,8 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
             }
         }
     });
+
+    // TODO: investigate if we can do this for GitHub
 
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
     // don't wait

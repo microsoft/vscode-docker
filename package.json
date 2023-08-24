@@ -531,7 +531,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.deleteImage",
-                    "when": "view == dockerRegistries && viewItem =~ /genericRegistryV2Tag/i",
+                    "when": "view == dockerRegistries && viewItem =~ /(genericRegistryV2Tag|azureContainerTag)/i",
                     "group": "regs_tag_2_destructive@2"
                 },
                 {
