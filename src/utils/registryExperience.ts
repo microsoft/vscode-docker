@@ -4,25 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardPromptStep, ContextValueFilter, IActionContext, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
-import { CommonRegistryDataProvider } from '@microsoft/vscode-docker-registries';
-import { ext } from '../extensionVariables';
-import { UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
+import * as vscode from 'vscode';
 
-export async function registryExperience<TPick>(context: IActionContext, tdp: CommonRegistryDataProvider | CommonRegistryDataProvider[], contextValueFilter: ContextValueFilter, skipIfOne: boolean = true): Promise<TPick> {
-    let unifiedProvider: UnifiedRegistryTreeDataProvider | undefined;
-    if (Array.isArray(tdp)) {
-        unifiedProvider = new UnifiedRegistryTreeDataProvider(ext.context.globalState);
-        for (const provider of tdp) {
-            unifiedProvider.registerProvider(provider);
-        }
-    }
-
+export async function registryExperience<TPick>(context: IActionContext, tdp: vscode.TreeDataProvider<unknown>, contextValueFilter: ContextValueFilter, skipIfOne: boolean = true): Promise<TPick> {
     const promptSteps: AzureWizardPromptStep<QuickPickWizardContext>[] = [
         new RecursiveQuickPickStep(
-            unifiedProvider || (tdp as CommonRegistryDataProvider),
+            tdp,
             {
                 contextValueFilter: contextValueFilter,
-                skipIfOne: skipIfOne
+                skipIfOne: true
             }
         )
     ];
