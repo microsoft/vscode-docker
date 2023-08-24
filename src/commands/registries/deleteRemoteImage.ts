@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DialogResponses, IActionContext } from '@microsoft/vscode-azext-utils';
+import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
 import { CommonTag, GenericRegistryV2DataProvider } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -24,12 +24,25 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
     const deleting = l10n.t('Deleting image "{0}"...', tagName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
         const provider = node.provider as unknown as GenericRegistryV2DataProvider;
-        await provider.deleteTag(node.wrappedItem);
+
+        try {
+            await provider.deleteTag(node.wrappedItem);
+        } catch (error) {
+            const errorType: string = parseError(error).errorType.toLowerCase();
+            if (errorType === '405' || errorType === 'unsupported') {
+                // Don't wait
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                context.ui.showWarningMessage('Deleting remote images is not supported on this registry. It may need to be enabled.', { learnMoreLink: 'https://aka.ms/AA7jsql' });
+                throw new UserCancelledError();
+            } else {
+                throw error;
+            }
+        }
     });
 
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
-    const message = l10n.t('Successfully deleted image "{0}".', tagName);
     // don't wait
+    void ext.registriesTree.refresh();
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(message);
+    window.showInformationMessage(l10n.t('Successfully deleted image "{0}".', tagName));
 }
