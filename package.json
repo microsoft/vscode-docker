@@ -560,6 +560,11 @@
                     "group": "regs_yyy_destructive@1"
                 },
                 {
+                    "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
+                    "when": "view == dockerRegistries && viewItem =~ /genericRegistryV2Root/i",
+                    "group": "regs_yyy_destructive@1"
+                },
+                {
                     "command": "vscode-docker.registries.azure.openInPortal",
                     "when": "view == dockerRegistries && viewItem =~ /(azuresubscription|azureContainerRegistry)/i",
                     "group": "regs_zzz_common@1"
@@ -2669,6 +2674,11 @@
               "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
               "title": "%vscode-docker.commands.registries.genericV2.removeTrackedRegistry%",
               "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+                "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
+                "title": "%vscode-docker.commands.registries.genericV2.addTrackedRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.dockerHub.openInBrowser",
