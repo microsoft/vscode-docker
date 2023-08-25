@@ -59,8 +59,8 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
     // Give the user a chance to modify the tag however they want
     const finalTag = await tagImage(context, node, connectedRegistry);
-
-    if (connectedRegistry && finalTag.startsWith(getBaseImagePathFromRegistryItem(connectedRegistry.wrappedItem))) {
+    const baseImagePath = getBaseImagePathFromRegistryItem(connectedRegistry.wrappedItem);
+    if (connectedRegistry && finalTag.startsWith(baseImagePath)) {
         // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
         await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
     }

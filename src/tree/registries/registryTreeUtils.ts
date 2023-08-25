@@ -25,8 +25,11 @@ export function getBaseImagePathFromRegistryItem(registry: CommonRegistry): stri
 
     switch (registry.additionalContextValues?.[0] ?? '') {
         case 'azureContainerRegistry':
-        case 'genericRegistryV2': {
+        case 'genericRegistryV2Registry': {
             return registry.baseUrl.authority.toLowerCase();
+        }
+        case 'githubRegistry': {
+            return `${registry.baseUrl.authority.toLowerCase()}/${registry.label}`;
         }
         case 'dockerHubRegistry':
         default:

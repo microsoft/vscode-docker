@@ -181,7 +181,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         await client.registries.beginDeleteAndWait(resourceGroup, item.label);
     }
 
-    public async deleteTag(item: AzureTag): Promise<void> {
+    public override async deleteTag(item: AzureTag): Promise<void> {
         const authenticationProvider = this.getAuthenticationProvider(item.parent.parent as unknown as AzureRegistryItem);
 
         const reponse = await registryV2Request({
@@ -194,7 +194,6 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
         if (!reponse.succeeded) {
             throw new Error(`Failed to delete tag: ${reponse.statusText}`);
-
         }
     }
 

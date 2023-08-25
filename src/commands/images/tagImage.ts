@@ -11,7 +11,7 @@ import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getBaseImagePathFromRegistryItem } from '../../tree/registries/registryTreeUtils';
 
-export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<unknown>): Promise<string> {
+export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<CommonRegistry>): Promise<string> {
     if (!node) {
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
@@ -21,7 +21,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const baseImagePath = isRegistry(registry) ? getBaseImagePathFromRegistryItem(registry.wrappedItem as CommonRegistry) : undefined;
+    const baseImagePath = isRegistry(registry.wrappedItem) ? getBaseImagePathFromRegistryItem(registry.wrappedItem) : undefined;
     const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
