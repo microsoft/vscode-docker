@@ -23,10 +23,11 @@ export async function untagAzureImage(context: IActionContext, node?: UnifiedReg
     const untagging = l10n.t('Untagging image "{0}"...', fullTag);
     await window.withProgress({ location: ProgressLocation.Notification, title: untagging }, async () => {
         const provider = node.provider as unknown as AzureRegistryDataProvider;
-        await provider.deleteTag(node.wrappedItem);
+        await provider.untagImage(node.wrappedItem);
     });
 
     // don't wait
+    void ext.registriesTree.refresh();
     /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
     window.showInformationMessage(l10n.t('Successfully untagged image "{0}".', fullTag));
 }
