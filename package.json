@@ -506,7 +506,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.copyRemoteFullTag",
-                    "when": "view == dockerRegistries && viewItem =~ /(dockerHubTag|genericRegistryV2Tag|azureContainerTag|githubRegistryTag)/i",
+                    "when": "view == dockerRegistries && viewItem =~ /(dockerHubTag|registryV2Tag)/i",
                     "group": "regs_tag_1_general@2"
                 },
                 {
