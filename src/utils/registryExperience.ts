@@ -12,7 +12,7 @@ export async function registryExperience<TPick>(context: IActionContext, tdp: vs
             tdp,
             {
                 contextValueFilter: contextValueFilter,
-                skipIfOne: true
+                skipIfOne: skipIfOne
             }
         )
     ];
