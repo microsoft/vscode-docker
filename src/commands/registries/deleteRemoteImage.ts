@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
-import { CommonTag, GenericRegistryV2DataProvider } from '@microsoft/vscode-docker-registries';
+import { CommonRegistryDataProvider, CommonTag } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -23,7 +23,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
 
     const deleting = l10n.t('Deleting image "{0}"...', tagName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
-        const provider = node.provider as unknown as GenericRegistryV2DataProvider;
+        const provider = node.provider as unknown as CommonRegistryDataProvider;
 
         try {
             await provider.deleteTag(node.wrappedItem);
@@ -39,8 +39,6 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
             }
         }
     });
-
-    // TODO: investigate if we can do this for GitHub
 
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
     // don't wait
