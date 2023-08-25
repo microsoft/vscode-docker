@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
-import { CommonTag, RegistryV2DataProvider } from '@microsoft/vscode-docker-registries';
+import { RegistryV2DataProvider, V2Tag } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
 import { registryExperience } from '../../utils/registryExperience';
 
-export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
+export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<V2Tag>): Promise<void> {
     if (!node) {
         node = await registryExperience(context, ext.registriesTree, { include: ['genericRegistryV2Tag', 'azureContainerTag'] }, false);
     }
