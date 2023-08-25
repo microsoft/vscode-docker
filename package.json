@@ -551,12 +551,12 @@
                 },
                 {
                     "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /genericregistryrootv2/i)",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /genericRegistryV2Root/i)",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
-                    "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem == invalidRegistryProvider",
+                    "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
+                    "when": "view == dockerRegistries && viewItem =~ /genericRegistryV2Registry/i",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
@@ -2664,6 +2664,11 @@
                 "command": "vscode-docker.registries.disconnectRegistry",
                 "title": "%vscode-docker.commands.registries.disconnectRegistry%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+              "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
+              "title": "%vscode-docker.commands.registries.genericV2.removeTrackedRegistry%",
+              "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.dockerHub.openInBrowser",
