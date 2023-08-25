@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
-import { CommonRegistryDataProvider, CommonTag } from '@microsoft/vscode-docker-registries';
+import { CommonTag, RegistryV2DataProvider } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -13,7 +13,7 @@ import { registryExperience } from '../../utils/registryExperience';
 
 export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { include: ['genericRegistryV2Tag', 'azureContainerTag', 'githubRegistryTag'] }, false);
+        node = await registryExperience(context, ext.registriesTree, { include: ['genericRegistryV2Tag', 'azureContainerTag'] }, false);
     }
 
     const tagName = getImageNameFromRegistryTagItem(node.wrappedItem);
@@ -23,7 +23,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
 
     const deleting = l10n.t('Deleting image "{0}"...', tagName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
-        const provider = node.provider as unknown as CommonRegistryDataProvider;
+        const provider = node.provider as unknown as RegistryV2DataProvider;
 
         try {
             await provider.deleteTag(node.wrappedItem);
