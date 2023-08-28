@@ -277,7 +277,7 @@
     "vscode-docker.commands.registries.deployImageToAca": "Deploy Image to Azure Container Apps...",
     "vscode-docker.commands.registries.disconnectRegistry": "Disconnect",
     "vscode-docker.commands.registries.genericV2.removeTrackedRegistry": "Remove Tracked Registry",
-    "vscode-docker.commands.registries.genericV2.addTrackedRegistry": "Add Registry...",
+    "vscode-docker.commands.registries.genericV2.addTrackedRegistry": "Connect to Generic Docker Registry...",
     "vscode-docker.commands.registries.dockerHub.openInBrowser": "Open in Browser",
     "vscode-docker.commands.registries.help": "Registries Help",
     "vscode-docker.commands.registries.logInToDockerCli": "Log In to Docker CLI",
