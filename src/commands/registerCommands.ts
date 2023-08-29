@@ -58,7 +58,6 @@ import { deployImageToAca } from "./registries/azure/deployImageToAca";
 import { deployImageToAzure } from "./registries/azure/deployImageToAzure";
 import { openInAzurePortal } from "./registries/azure/openInAzurePortal";
 import { buildImageInAzure } from "./registries/azure/tasks/buildImageInAzure";
-import { runAzureTask } from "./registries/azure/tasks/runAzureTask";
 import { untagAzureImage } from "./registries/azure/untagAzureImage";
 import { viewAzureProperties } from "./registries/azure/viewAzureProperties";
 import { connectRegistry } from "./registries/connectRegistry";
@@ -190,12 +189,9 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.azure.deleteRegistry', deleteAzureRegistry);
     registerCommand('vscode-docker.registries.azure.deleteRepository', deleteAzureRepository);
     registerCommand('vscode-docker.registries.azure.openInPortal', openInAzurePortal);
-    registerCommand('vscode-docker.registries.azure.runTask', runAzureTask);
-    // registerWorkspaceCommand('vscode-docker.registries.azure.runFileAsTask', runFileAsAzureTask);
     registerCommand('vscode-docker.registries.azure.selectSubscriptions', () => commands.executeCommand("azure-account.selectSubscriptions"));
     registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
     registerCommand('vscode-docker.registries.azure.viewProperties', viewAzureProperties);
-    // registerCommand('vscode-docker.registries.azure.viewTaskLogs', viewAzureTaskLogs);
 
     registerCommand('vscode-docker.volumes.configureExplorer', configureVolumesExplorer);
     registerCommand('vscode-docker.volumes.inspect', inspectVolume);

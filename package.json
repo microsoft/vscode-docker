@@ -123,10 +123,6 @@
                     "when": "isWorkspaceTrusted"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
-                    "when": "isWorkspaceTrusted"
-                },
-                {
                     "command": "vscode-docker.help.openWalkthrough",
                     "when": "never"
                 },
@@ -151,11 +147,6 @@
                 {
                     "when": "isWorkspaceTrusted && editorLangId == dockerfile",
                     "command": "vscode-docker.registries.azure.buildImage",
-                    "group": "docker"
-                },
-                {
-                    "when": "isWorkspaceTrusted && editorLangId == yaml && isAzureAccountInstalled",
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
@@ -188,11 +179,6 @@
                 {
                     "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
                     "command": "vscode-docker.registries.azure.buildImage",
-                    "group": "docker"
-                },
-                {
-                    "when": "isWorkspaceTrusted && resourceLangId == yaml && isAzureAccountInstalled",
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
@@ -465,11 +451,6 @@
                     "group": "inline"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.viewTaskLogs",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "inline"
-                },
-                {
                     "command": "vscode-docker.networks.inspect",
                     "when": "view == dockerNetworks && viewItem =~ /network$/i",
                     "group": "networks_1_general@1"
@@ -533,21 +514,6 @@
                     "command": "vscode-docker.registries.deleteImage",
                     "when": "view == dockerRegistries && viewItem =~ /(genericRegistryV2Tag|azureContainerTag)/i",
                     "group": "regs_tag_2_destructive@2"
-                },
-                {
-                    "command": "vscode-docker.registries.azure.runTask",
-                    "when": "view == dockerRegistries && viewItem == azureTask",
-                    "group": "regs_task_1_general@1"
-                },
-                {
-                    "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "regs_taskRun_1_general@1"
-                },
-                {
-                    "command": "vscode-docker.registries.azure.viewTaskLogs",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "regs_taskRun_1_general@2"
                 },
                 {
                     "command": "vscode-docker.registries.disconnectRegistry",
@@ -2604,16 +2570,6 @@
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
-                "command": "vscode-docker.registries.azure.runFileAsTask",
-                "title": "%vscode-docker.commands.registries.azure.runFileAsTask%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
-                "command": "vscode-docker.registries.azure.runTask",
-                "title": "%vscode-docker.commands.registries.azure.runTask%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
                 "command": "vscode-docker.registries.azure.selectSubscriptions",
                 "title": "%vscode-docker.commands.registries.azure.selectSubscriptions%",
                 "icon": "$(filter)"
@@ -2627,12 +2583,6 @@
                 "command": "vscode-docker.registries.azure.viewProperties",
                 "title": "%vscode-docker.commands.registries.azure.viewProperties%",
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
-                "command": "vscode-docker.registries.azure.viewTaskLogs",
-                "title": "%vscode-docker.commands.registries.azure.viewLogs%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%",
-                "icon": "$(output)"
             },
             {
                 "command": "vscode-docker.registries.connectRegistry",
