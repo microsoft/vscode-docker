@@ -581,7 +581,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem == registryConnectError",
+                    "when": "view == dockerRegistries && viewItem =~ /registryConnectError/i",
                     "group": "regs_zzz_common@8"
                 },
                 {
@@ -2671,9 +2671,9 @@
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
-              "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
-              "title": "%vscode-docker.commands.registries.genericV2.removeTrackedRegistry%",
-              "category": "%vscode-docker.commands.category.dockerRegistries%"
+                "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
+                "title": "%vscode-docker.commands.registries.genericV2.removeTrackedRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
                 "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
