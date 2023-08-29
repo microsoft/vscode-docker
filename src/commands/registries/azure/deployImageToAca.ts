@@ -5,7 +5,7 @@
 
 import { contextValueExperience, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
-import { CommonRegistry, CommonTag, isDockerHubRegistryItem, LoginInformation } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, CommonTag, isDockerHubRegistry, LoginInformation } from '@microsoft/vscode-docker-registries';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
@@ -55,7 +55,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
             throw new Error(vscode.l10n.t('No credentials found for registry "{0}".', registry.wrappedItem.label));
         }
 
-        if (isDockerHubRegistryItem(registry.wrappedItem)) {
+        if (isDockerHubRegistry(registry.wrappedItem)) {
             // Ensure Docker Hub images are prefixed with 'docker.io/...'
             if (!/^docker\.io\//i.test(commandOptions.image)) {
                 commandOptions.image = 'docker.io/' + commandOptions.image;

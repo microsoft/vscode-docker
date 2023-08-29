@@ -7,7 +7,7 @@ import type { NameValuePair, Site, SiteConfig, WebSiteManagementClient } from '@
 import type { CustomLocation } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
-import { CommonRegistry, CommonTag, isDockerHubRegistryItem, isGenericV2Registry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, CommonTag, isDockerHubRegistry, isGenericV2Registry } from '@microsoft/vscode-docker-registries';
 import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistryDataProvider, isAzureRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
@@ -88,7 +88,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             registryUrl = registryTI.wrappedItem.baseUrl.toString();
         }
         // Docker Hub -> App Service *OR* Arc App Service
-        else if (isDockerHubRegistryItem(registryTI.wrappedItem)) {
+        else if (isDockerHubRegistry(registryTI.wrappedItem)) {
             const loginInformation = await registryTI.provider.getLoginInformation(registryTI.wrappedItem);
             username = loginInformation.username;
             password = loginInformation.secret;

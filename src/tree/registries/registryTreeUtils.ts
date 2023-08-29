@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommonRegistry, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
+import { CommonRegistry, CommonRepository, CommonTag, isGenericV2Registry, isGitHubRegistry, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
 import { l10n } from "vscode";
 import { getResourceGroupFromId } from "../../utils/azureUtils";
-import { AzureRegistryItem } from "./Azure/AzureRegistryDataProvider";
+import { AzureRegistryItem, isAzureRegistryItem } from "./Azure/AzureRegistryDataProvider";
 
 export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
     if (!isTag(tag) || !isRepository(tag.parent)) {
@@ -14,26 +14,16 @@ export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
     }
 
     const repository = tag.parent as CommonRepository;
-
-    return `${repository.label}:${tag.label}`;
+    return `${repository.label.toLowerCase()}:${tag.label.toLowerCase()}`;
 }
 
 export function getBaseImagePathFromRegistryItem(registry: CommonRegistry): string {
     if (!isRegistry(registry)) {
         throw new Error(l10n.t('Unable to get base image path'));
-    }
-
-    switch (registry.additionalContextValues?.[0] ?? '') {
-        case 'azureContainerRegistry':
-        case 'genericRegistryV2Registry': {
-            return registry.baseUrl.authority.toLowerCase();
-        }
-        case 'githubRegistry': {
-            return `${registry.baseUrl.authority.toLowerCase()}/${registry.label}`;
-        }
-        case 'dockerHubRegistry':
-        default:
-            return `${registry.label}`;
+    } else if (isAzureRegistryItem(registry) || isGenericV2Registry(registry) || isGitHubRegistry(registry)) {
+        return registry.baseUrl.authority.toLowerCase();
+    } else {
+        return registry.label.toLowerCase();
     }
 }
 
@@ -49,7 +39,7 @@ export function getFullRepositoryNameFromRepositoryItem(repository: CommonReposi
     }
 
     const baseImagePath = getBaseImagePathFromRegistryItem(repository.parent);
-    return `${baseImagePath}/${repository.label}`;
+    return `${baseImagePath}/${repository.label.toLowerCase()}`;
 }
 
 export function getResourceGroupFromAzureRegistryItem(node: AzureRegistryItem): string {

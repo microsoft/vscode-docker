@@ -7,7 +7,7 @@ import type { Site } from '@azure/arm-appservice'; // These are only dev-time im
 import type { Webhook, WebhookCreateParameters } from '@azure/arm-containerregistry'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { CommonRepository, CommonTag, isDockerHubRepositoryItem } from '@microsoft/vscode-docker-registries';
+import { CommonRepository, CommonTag, isDockerHubRepository } from '@microsoft/vscode-docker-registries';
 import * as vscode from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry, isAzureRepositoryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
@@ -40,7 +40,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
             progress.report({ message: creatingNewWebhook });
             const webhook = await this.createWebhookForApp(context, context.site, appUri);
             ext.outputChannel.info(vscode.l10n.t('Created webhook "{0}" with scope "{1}", id: "{2}" and location: "{3}"', webhook.name, webhook.scope, webhook.id, webhook.location));
-        } else if (isDockerHubRepositoryItem(this.tagItem.parent.wrappedItem)) {
+        } else if (isDockerHubRepository(this.tagItem.parent.wrappedItem)) {
             const registryName = this.tagItem.parent.parent.wrappedItem.label;
             const repoName = (this.tagItem.parent as unknown as CommonRepository).wrappedItem.label;
             // point to dockerhub to create a webhook
@@ -66,7 +66,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!context.site && (isAzureRepositoryItem(this.tagItem.parent.wrappedItem) || isDockerHubRepositoryItem(this.tagItem.parent.wrappedItem));
+        return !!context.site && (isAzureRepositoryItem(this.tagItem.parent.wrappedItem) || isDockerHubRepository(this.tagItem.parent.wrappedItem));
     }
 
     private async createWebhookForApp(context: IAppServiceWizardContext, site: Site, appUri: string): Promise<Webhook | undefined> {
