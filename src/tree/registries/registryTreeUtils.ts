@@ -43,6 +43,15 @@ export function getFullImageNameFromRegistryTagItem(tag: CommonTag): string {
     return `${baseImagePath}/${imageName}`;
 }
 
+export function getFullRepositoryNameFromRepositoryItem(repository: CommonRepository): string {
+    if (!isRepository(repository)) {
+        throw new Error(l10n.t('Unable to get full repository name'));
+    }
+
+    const baseImagePath = getBaseImagePathFromRegistryItem(repository.parent);
+    return `${baseImagePath}/${repository.label}`;
+}
+
 export function getResourceGroupFromAzureRegistryItem(node: AzureRegistryItem): string {
     if (!isRegistry(node)) {
         throw new Error('Unable to get resource group');
