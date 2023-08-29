@@ -511,7 +511,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem =~ /(dockerHubTag|genericRegistryV2Tag|azureContainerTag|githubRegistryTag)/",
+                    "when": "view == dockerRegistries && viewItem =~ /registryV2Tag/i",
                     "group": "regs_tag_1_general@3"
                 },
                 {
