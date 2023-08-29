@@ -72,6 +72,7 @@ import { removeTrackedGenericV2Registry } from "./registries/genericV2/removeTra
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
+import { reconnectRegistry } from "./registries/reconnectRegistry";
 import { registryHelp } from "./registries/registryHelp";
 import { openDockerDownloadPage } from "./showDockerLearnMoreNotification";
 import { configureVolumesExplorer } from "./volumes/configureVolumesExplorer";
@@ -177,7 +178,7 @@ export function registerCommands(): void {
     registerWorkspaceCommand('vscode-docker.registries.logOutOfDockerCli', logOutOfDockerCli);
     registerWorkspaceCommand('vscode-docker.registries.pullImage', pullImageFromRepository);
     registerWorkspaceCommand('vscode-docker.registries.pullRepository', pullRepository);
-    // registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
+    registerCommand('vscode-docker.registries.reconnectRegistry', reconnectRegistry);
 
     registerCommand('vscode-docker.registries.genericV2.removeTrackedRegistry', removeTrackedGenericV2Registry);
     registerCommand('vscode-docker.registries.genericV2.addTrackedRegistry', addTrackedGenericV2Registry);
