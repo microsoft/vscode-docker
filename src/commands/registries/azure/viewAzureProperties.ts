@@ -9,7 +9,6 @@ import { AzureRegistry } from "../../../tree/registries/Azure/AzureRegistryDataP
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 
 export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
-    // TODO: add logic for azure task and azure tree task
     if (!node) {
         node = await contextValueExperience(context, ext.registriesRoot, { 'include': 'azureContainerRegistry' });
     }

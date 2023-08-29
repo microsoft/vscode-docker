@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, contextValueExperience, parseError } from '@microsoft/vscode-azext-utils';
-import { CommonRegistry } from '@microsoft/vscode-docker-registries/lib/clients/Common/models'; // TODO: update this
+import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as stream from 'stream';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
