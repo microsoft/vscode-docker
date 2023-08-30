@@ -18,6 +18,7 @@ export async function logInToDockerCli(context: IActionContext, node?: UnifiedRe
     const creds = await node.provider?.getLoginInformation?.(node.wrappedItem);
     const username = creds?.username;
     const secret = creds?.secret;
+    const server = creds?.server;
 
     if (!username || !secret) {
         ext.outputChannel.warn(vscode.l10n.t('Skipping login for "{0}" because it does not require authentication.', node.provider.label));
@@ -33,7 +34,7 @@ export async function logInToDockerCli(context: IActionContext, node?: UnifiedRe
                     client => client.login({
                         username: username,
                         passwordStdIn: true,
-                        registry: node.wrappedItem.baseUrl?.toString() ?? ''
+                        registry: server
                     }),
                     {
                         stdInPipe: stream.Readable.from(secret),

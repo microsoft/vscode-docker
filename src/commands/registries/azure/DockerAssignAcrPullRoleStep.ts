@@ -42,7 +42,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(registry?.id)) {
             throw new Error(
-                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.wrappedItem.baseUrl)
+                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.wrappedItem.baseUrl.toString())
             );
         }
 

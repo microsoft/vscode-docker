@@ -10,7 +10,7 @@ import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getBaseImagePathFromRegistryItem } from '../../tree/registries/registryTreeUtils';
+import { getBaseUrlFromItem } from '../../tree/registries/registryTreeUtils';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -59,7 +59,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
     // Give the user a chance to modify the tag however they want
     const finalTag = await tagImage(context, node, connectedRegistry);
-    const baseImagePath = getBaseImagePathFromRegistryItem(connectedRegistry.wrappedItem);
+    const baseImagePath = getBaseUrlFromItem(connectedRegistry.wrappedItem);
     if (connectedRegistry && finalTag.startsWith(baseImagePath)) {
         // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
         await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
@@ -82,7 +82,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
     const allRegistries = await ext.registriesTree.getConnectedRegistries(vscode.Uri.parse(baseImagePath));
 
-    let matchedRegistry = allRegistries.find((registry) => getBaseImagePathFromRegistryItem(registry.wrappedItem) === baseImagePath);
+    let matchedRegistry = allRegistries.find((registry) => getBaseUrlFromItem(registry.wrappedItem) === baseImagePath);
 
     if (!matchedRegistry) {
         matchedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });

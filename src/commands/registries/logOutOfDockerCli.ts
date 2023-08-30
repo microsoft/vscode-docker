@@ -5,6 +5,7 @@
 
 import { IActionContext, contextValueExperience } from '@microsoft/vscode-azext-utils';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -12,6 +13,10 @@ import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDa
 export async function logOutOfDockerCli(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistry>): Promise<void> {
     if (!node) {
         node = await contextValueExperience(context, ext.registriesTree, { include: 'commonregistry' });
+    }
+    const serverUrl = (await node.provider.getLoginInformation?.(node.wrappedItem))?.server;
+    if (!serverUrl) {
+        throw new Error(l10n.t('Unable to get server URL'));
     }
 
     const client = await ext.runtimeManager.getClient();
@@ -22,6 +27,6 @@ export async function logOutOfDockerCli(context: IActionContext, node?: UnifiedR
     );
 
     await taskCRF.getCommandRunner()(
-        client.logout({ registry: node.wrappedItem.baseUrl?.toString() || '' }),
+        client.logout({ registry: serverUrl }),
     );
 }
