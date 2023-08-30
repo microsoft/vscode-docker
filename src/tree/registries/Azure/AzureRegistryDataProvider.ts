@@ -61,7 +61,6 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     public override async getChildren(element?: CommonRegistryItem | undefined): Promise<CommonRegistryItem[]> {
         if (isRegistryRoot(element)) {
             if (!await this.subscriptionProvider.isSignedIn()) {
-                // TODO: show a node for sign in
                 await this.subscriptionProvider.signIn();
                 this.onDidChangeTreeDataEmitter.fire(element); // TODO: this fires too fast, need a "fire soon" analogue
                 return [];
@@ -100,9 +99,8 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public override async getRegistries(subscriptionItem: CommonRegistryItem): Promise<AzureRegistry[]> {
         subscriptionItem = subscriptionItem as AzureSubscriptionRegistryItem;
-        // TODO: replace this with `createAzureClient`
-        const acrClient = new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.subscription.credential, subscriptionItem.subscription.subscriptionId);
 
+        const acrClient = await createAzureContainerRegistryClient(subscriptionItem.subscription);
         const registries: AcrRegistry[] = [];
 
         for await (const registry of acrClient.registries.list()) {
