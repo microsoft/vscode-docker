@@ -10,7 +10,7 @@ import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@micro
 import { CommonRegistry, CommonTag, isDockerHubRegistry, isGenericV2Registry } from '@microsoft/vscode-docker-registries';
 import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistryDataProvider, isAzureRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { AzureRegistryDataProvider, isAzureRegistry } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
@@ -66,7 +66,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
 
         // Scenarios:
         // ACR -> App Service, NOT Arc App Service. Use managed service identity.
-        if (isAzureRegistryItem(registryTI.wrappedItem) && !context.customLocation) {
+        if (isAzureRegistry(registryTI.wrappedItem) && !context.customLocation) {
             appSettings.push({ name: 'DOCKER_ENABLE_CI', value: 'true' });
 
             // Don't need an image, username, or password--just create an empty web app to assign permissions and then configure with an image
@@ -77,7 +77,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             };
         }
         // ACR -> Arc App Service. Use regular auth. Same as any V2 registry but different way of getting auth.
-        else if (isAzureRegistryItem(registryTI.wrappedItem) && context.customLocation) {
+        else if (isAzureRegistry(registryTI.wrappedItem) && context.customLocation) {
             const cred = await (registryTI.provider as unknown as AzureRegistryDataProvider).tryGetAdminCredentials(registryTI.wrappedItem);
             if (!cred?.username || !cred?.passwords?.[0]?.value) {
                 throw new Error(l10n.t('Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));

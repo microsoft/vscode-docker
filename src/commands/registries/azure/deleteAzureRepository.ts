@@ -11,7 +11,7 @@ import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTre
 
 export async function deleteAzureRepository(context: IActionContext, node?: UnifiedRegistryItem<AzureRepository>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerRepository' });
+        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRepository' });
     }
 
     const confirmDelete = l10n.t('Are you sure you want to delete repository "{0}" and its associated images?', node.wrappedItem.label);

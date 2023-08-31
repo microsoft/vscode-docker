@@ -10,7 +10,7 @@ import { AzureWizardExecuteStep, nonNullProp } from "@microsoft/vscode-azext-uti
 import { CommonRepository, CommonTag, isDockerHubRepository } from '@microsoft/vscode-docker-registries';
 import * as vscode from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistry, isAzureRepositoryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { AzureRegistry, isAzureRepository } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getResourceGroupFromAzureRegistryItem } from '../../../tree/registries/registryTreeUtils';
 import { cryptoUtils } from '../../../utils/cryptoUtils';
@@ -34,7 +34,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
         const siteClient = await parsedSite.createClient(context);
         const appUri: string = (await siteClient.getWebAppPublishCredential()).scmUri;
 
-        if (isAzureRepositoryItem(this.tagItem.parent.wrappedItem)) {
+        if (isAzureRepository(this.tagItem.parent.wrappedItem)) {
             const creatingNewWebhook: string = vscode.l10n.t('Creating webhook for web app "{0}"...', context.newSiteName);
             ext.outputChannel.info(creatingNewWebhook);
             progress.report({ message: creatingNewWebhook });
@@ -66,7 +66,7 @@ export class DockerWebhookCreateStep extends AzureWizardExecuteStep<IAppServiceW
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!context.site && (isAzureRepositoryItem(this.tagItem.parent.wrappedItem) || isDockerHubRepository(this.tagItem.parent.wrappedItem));
+        return !!context.site && (isAzureRepository(this.tagItem.parent.wrappedItem) || isDockerHubRepository(this.tagItem.parent.wrappedItem));
     }
 
     private async createWebhookForApp(context: IAppServiceWizardContext, site: Site, appUri: string): Promise<Webhook | undefined> {

@@ -42,7 +42,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             }
         } else {
             // Try to find a connected Docker Hub registry (primarily for login credentials)
-            connectedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['dockerHubRegistry'] });
+            connectedRegistry = await contextValueExperience(context, ext.dockerHubRegistryDataProvider, { include: ['dockerHubRegistry'] });
         }
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
@@ -80,7 +80,11 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 }
 
 async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
-    const allRegistries = await ext.registriesTree.getConnectedRegistries(vscode.Uri.parse(baseImagePath));
+    let baseImagePathUri = vscode.Uri.parse(baseImagePath);
+    if (!baseImagePathUri.scheme || baseImagePathUri.scheme === 'file') {
+        baseImagePathUri = vscode.Uri.parse(`https://${baseImagePath}`); // Add a scheme so that we can parse the hostname
+    }
+    const allRegistries = await ext.registriesTree.getConnectedRegistries(baseImagePathUri);
 
     let matchedRegistry = allRegistries.find((registry) => getBaseUrlFromItem(registry.wrappedItem) === baseImagePath);
 

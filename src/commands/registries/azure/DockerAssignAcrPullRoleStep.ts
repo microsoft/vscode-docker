@@ -9,9 +9,9 @@ import { CommonTag } from "@microsoft/vscode-docker-registries";
 import { randomUUID } from "crypto";
 import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistry, isAzureTagItem } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { AzureRegistry, isAzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
+import { getBaseUrlFromItem, getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
@@ -42,7 +42,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(registry?.id)) {
             throw new Error(
-                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.wrappedItem.baseUrl.toString())
+                l10n.t('Unable to get details from Container Registry {0}', getBaseUrlFromItem(registryTreeItem.wrappedItem))
             );
         }
 
@@ -86,6 +86,6 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!(context.site) && isAzureTagItem(this.tagTreeItem.wrappedItem) && !context.customLocation;
+        return !!(context.site) && isAzureTag(this.tagTreeItem.wrappedItem) && !context.customLocation;
     }
 }

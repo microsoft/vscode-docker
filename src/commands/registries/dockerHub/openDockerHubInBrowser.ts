@@ -12,7 +12,7 @@ import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTre
 
 export async function openDockerHubInBrowser(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistryItem>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesRoot, { include: ['dockerHubRegistry', 'dockerHubRepository', 'dockerHubTag'] });
+        node = await contextValueExperience(context, ext.registriesRoot, { include: ['dockerHubRegistry'] }); // TODO: use dockerHub tree here
     }
 
     let url = dockerHubUrl;

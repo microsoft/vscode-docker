@@ -33,15 +33,15 @@ export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSub
     return !!item && typeof item === 'object' && (item as AzureSubscriptionRegistryItem).type === 'azuresubscription';
 }
 
-export function isAzureRegistryItem(item: unknown): item is AzureRegistry {
+export function isAzureRegistry(item: unknown): item is AzureRegistry {
     return !!item && typeof item === 'object' && (item as AzureRegistryItem).additionalContextValues?.includes('azureContainerRegistry');
 }
 
-export function isAzureRepositoryItem(item: unknown): item is AzureRepository {
+export function isAzureRepository(item: unknown): item is AzureRepository {
     return !!item && typeof item === 'object' && (item as AzureRepository).additionalContextValues?.includes('azureContainerRepository');
 }
 
-export function isAzureTagItem(item: unknown): item is AzureTag {
+export function isAzureTag(item: unknown): item is AzureTag {
     return !!item && typeof item === 'object' && (item as AzureTag).additionalContextValues?.includes('azureContainerTag');
 }
 

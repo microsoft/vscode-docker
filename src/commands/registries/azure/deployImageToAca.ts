@@ -9,7 +9,7 @@ import { CommonRegistry, CommonTag, isDockerHubRegistry, LoginInformation } from
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { isAzureRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { isAzureRegistry } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { installExtension } from '../../../utils/installExtension';
@@ -35,7 +35,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
     }
 
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
+        node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag', 'dockerHubTag'], });
     }
 
     const commandOptions: Partial<DeployImageToAcaOptionsContract> = {
@@ -46,7 +46,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
 
     const registry: UnifiedRegistryItem<CommonRegistry> = node.parent.parent as unknown as UnifiedRegistryItem<CommonRegistry>;
 
-    if (isAzureRegistryItem(registry.wrappedItem)) {
+    if (isAzureRegistry(registry.wrappedItem)) {
         // No additional work to do; ACA can handle this on its own
     } else {
         const logInInfo: LoginInformation = await registry.provider.getLoginInformation(registry.wrappedItem);

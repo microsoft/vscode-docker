@@ -22,5 +22,3 @@ export function getResourceGroupFromId(id: string): string {
 export async function createAzureContainerRegistryClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
     return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
 }
-
-/* eslint-enable @typescript-eslint/naming-convention */

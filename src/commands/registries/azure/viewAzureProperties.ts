@@ -10,7 +10,7 @@ import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTre
 
 export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesRoot, { 'include': 'azureContainerRegistry' });
+        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { 'include': 'azureContainerRegistry' });
     }
 
     await openReadOnlyJson({ label: node.wrappedItem.label, fullId: node.wrappedItem.id }, node.wrappedItem.registryProperties);

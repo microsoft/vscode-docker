@@ -47,7 +47,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         throw new Error(vscode.l10n.t('Run Request Type Currently not supported.'));
     }
 
-    const node: UnifiedRegistryItem<AzureRegistryItem> = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerRegistry' });
+    const node: UnifiedRegistryItem<AzureRegistryItem> = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRegistry' });
     const registry: AzureRegistryItem = node.wrappedItem;
     const resourceGroup = getResourceGroupFromId(registry.id);
 

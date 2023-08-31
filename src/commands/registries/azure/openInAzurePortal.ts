@@ -6,7 +6,7 @@
 import { IActionContext, UserCancelledError, contextValueExperience } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
-import { AzureRegistry, AzureSubscriptionRegistryItem, isAzureRegistryItem, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { AzureRegistry, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 
 export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem>): Promise<void> {
@@ -20,7 +20,7 @@ export async function openInAzurePortal(context: IActionContext, node?: UnifiedR
 
     if (isAzureSubscriptionRegistryItem(azureRegistryItem)) {
         url = `${baseUrl}/subscriptions/${azureRegistryItem.subscription.subscriptionId}`;
-    } else if (isAzureRegistryItem(azureRegistryItem)) {
+    } else if (isAzureRegistry(azureRegistryItem)) {
         url = `${baseUrl}/${azureRegistryItem.id}`;
     } else {
         throw new UserCancelledError();

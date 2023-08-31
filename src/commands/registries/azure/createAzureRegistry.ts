@@ -17,7 +17,7 @@ import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
 export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<void> {
 
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'azuresubscription' });
+        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' });
     }
 
     const subscriptionContext = createSubscriptionContext(node.wrappedItem.subscription);

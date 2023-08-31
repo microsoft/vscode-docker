@@ -12,7 +12,7 @@ import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTre
 
 export async function untagAzureImage(context: IActionContext, node?: UnifiedRegistryItem<AzureTag>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerTag' });
+        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerTag' });
     }
 
     const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);

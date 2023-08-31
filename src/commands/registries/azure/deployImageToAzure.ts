@@ -24,12 +24,11 @@ export interface IAppServiceContainerWizardContext extends IAppServiceWizardCont
 
 export async function deployImageToAzure(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
+        node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag', 'dockerHubTag'], });
     }
 
     const azExtAzureUtils = await getAzExtAzureUtils();
     const vscAzureAppService = await getAzExtAppService();
-
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
     const subscriptionItem = await registryExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' }) as AzureSubscriptionRegistryItem;
