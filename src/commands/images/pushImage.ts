@@ -47,7 +47,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
         // Registry path is everything up to the last slash.
-        const baseImagePath = node.fullTag.substring(0, node.fullTag.lastIndexOf('/'));
+        const baseImagePath = node.parent.label.substring(0, node.parent.label.lastIndexOf('/'));
 
         const progressOptions: vscode.ProgressOptions = {
             location: vscode.ProgressLocation.Notification,
