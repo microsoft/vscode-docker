@@ -9,10 +9,6 @@ import { AuthenticationProvider } from "@microsoft/vscode-docker-registries/";
 import * as vscode from 'vscode';
 import { NULL_GUID } from '../../../constants';
 
-// export interface ACROAuthOptions extends BasicOAuthOptions {
-//     readonly subscription: AzureSubscription;
-// }
-
 export class ACROAuthProvider implements AuthenticationProvider {
     private refreshTokenCache = new Map<string, string>();
 

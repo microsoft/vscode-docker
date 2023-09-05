@@ -27,7 +27,5 @@ export async function deleteAzureRepository(context: IActionContext, node?: Unif
     void ext.registriesTree.refresh();
 
     const deleteSucceeded = l10n.t('Successfully deleted repository "{0}".', node.wrappedItem.label);
-    // don't wait
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(deleteSucceeded);
+    void window.showInformationMessage(deleteSucceeded);
 }

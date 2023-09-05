@@ -28,6 +28,5 @@ export async function untagAzureImage(context: IActionContext, node?: UnifiedReg
 
     // don't wait
     void ext.registriesTree.refresh();
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(l10n.t('Successfully untagged image "{0}".', fullTag));
+    void window.showInformationMessage(l10n.t('Successfully untagged image "{0}".', fullTag));
 }
