@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CommonRegistryItem, CommonRepository, CommonTag, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
+import { CommonRegistry, CommonRepository, CommonTag, isDockerHubRegistry, isGenericV2Registry, isGitHubRegistry, isRegistry, isRepository, isTag } from "@microsoft/vscode-docker-registries";
 import { l10n } from "vscode";
 import { getResourceGroupFromId } from "../../utils/azureUtils";
-import { AzureRegistryItem } from "./Azure/AzureRegistryDataProvider";
+import { AzureRegistryItem as AzureRegistry, isAzureRegistry } from "./Azure/AzureRegistryDataProvider";
 
-export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
+export function getImageNameFromTag(tag: CommonTag): string {
     if (!isTag(tag) || !isRepository(tag.parent)) {
         throw new Error(l10n.t('Unable to get image name'));
     }
@@ -17,33 +17,35 @@ export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
     return `${repository.label.toLowerCase()}:${tag.label.toLowerCase()}`;
 }
 
-export function getBaseUrlFromItem(item: CommonRegistryItem): string {
-    if (!isTag(item) && !isRepository(item) && !isRegistry(item)) {
-        throw new Error(l10n.t('Unable to get base URL'));
+export function getBaseImagePathFromRegistry(registry: CommonRegistry): string {
+    if (!isRegistry(registry)) {
+        throw new Error(l10n.t('Unable to get base image path'));
+    } else if (isAzureRegistry(registry) || isGenericV2Registry(registry) || isGitHubRegistry(registry)) {
+        return registry.baseUrl.authority.toLowerCase();
+    } else if (isDockerHubRegistry(registry)) {
+        registry = registry as CommonRegistry;
+        return registry.label.toLowerCase();
     }
-    const authority = item.baseUrl.authority;
-    const path = item.baseUrl.path === '/' ? '' : item.baseUrl.path;
 
-    return `${authority}${path}`;
+    throw new Error(l10n.t('The type of registry is not supported. Unable to get base image path'));
 }
 
-export function getFullImageNameFromRegistryTagItem(tag: CommonTag): string {
-    if (!isTag(tag) || !isRegistry(tag.parent.parent)) {
-        throw new Error(l10n.t('Unable to get full image name'));
-    }
-    const imageName = getImageNameFromRegistryTagItem(tag);
-    return `${getBaseUrlFromItem(tag)}/${imageName}`;
+export function getFullImageNameFromTag(tag: CommonTag): string {
+    const baseImagePath = getBaseImagePathFromRegistry(tag.parent.parent);
+    const imageName = getImageNameFromTag(tag);
+    return `${baseImagePath}/${imageName}`;
 }
 
 export function getFullRepositoryNameFromRepositoryItem(repository: CommonRepository): string {
-    if (!isRepository(repository) || !isRegistry(repository.parent)) {
+    if (!isRepository(repository)) {
         throw new Error(l10n.t('Unable to get full repository name'));
     }
 
-    return `${getBaseUrlFromItem(repository)}/${repository.label.toLowerCase()}`;
+    const baseImagePath = getBaseImagePathFromRegistry(repository.parent);
+    return `${baseImagePath}/${repository.label.toLowerCase()}`;
 }
 
-export function getResourceGroupFromAzureRegistryItem(node: AzureRegistryItem): string {
+export function getResourceGroupFromAzureRegistryItem(node: AzureRegistry): string {
     if (!isRegistry(node)) {
         throw new Error('Unable to get resource group');
     }

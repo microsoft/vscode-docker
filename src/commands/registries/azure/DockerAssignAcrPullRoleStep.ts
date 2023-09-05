@@ -11,7 +11,7 @@ import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry, isAzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { getBaseUrlFromItem, getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
+import { getBaseImagePathFromRegistry, getFullImageNameFromTag, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
@@ -42,7 +42,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
 
         if (!(registry?.id)) {
             throw new Error(
-                l10n.t('Unable to get details from Container Registry {0}', getBaseUrlFromItem(registryTreeItem.wrappedItem))
+                l10n.t('Unable to get details from Container Registry {0}', getBaseImagePathFromRegistry(registryTreeItem.wrappedItem))
             );
         }
 
@@ -80,7 +80,7 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
             );
         }
 
-        const fullTag = getFullImageNameFromRegistryTagItem(this.tagTreeItem.wrappedItem);
+        const fullTag = getFullImageNameFromTag(this.tagTreeItem.wrappedItem);
         config.linuxFxVersion = `DOCKER|${fullTag}`;
         await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }

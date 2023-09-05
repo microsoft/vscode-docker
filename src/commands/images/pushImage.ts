@@ -4,13 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, NoResourceFoundError, contextValueExperience } from '@microsoft/vscode-azext-utils';
-import { CommonRegistry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, isGitHubRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getBaseUrlFromItem } from '../../tree/registries/registryTreeUtils';
+import { getBaseImagePathFromRegistry } from '../../tree/registries/registryTreeUtils';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -46,20 +46,18 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         }
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
-        // Registry path is everything up to the last slash.
-        const baseImagePath = node.parent.label.substring(0, node.parent.label.lastIndexOf('/'));
 
         const progressOptions: vscode.ProgressOptions = {
             location: vscode.ProgressLocation.Notification,
             title: vscode.l10n.t('Fetching login credentials...'),
         };
 
-        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, baseImagePath));
+        connectedRegistry = await vscode.window.withProgress(progressOptions, async () => await tryGetConnectedRegistryForPath(context, node));
     }
 
     // Give the user a chance to modify the tag however they want
     const finalTag = await tagImage(context, node, connectedRegistry);
-    const baseImagePath = getBaseUrlFromItem(connectedRegistry.wrappedItem);
+    const baseImagePath = getBaseImagePathFromRegistry(connectedRegistry.wrappedItem);
     if (connectedRegistry && finalTag.startsWith(baseImagePath)) {
         // If a registry was found/chosen and is still the same as the final tag's registry, try logging in
         await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', connectedRegistry);
@@ -79,18 +77,22 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
     );
 }
 
-async function tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
-    let baseImagePathUri = vscode.Uri.parse(baseImagePath);
-    if (!baseImagePathUri.scheme || baseImagePathUri.scheme === 'file') {
-        baseImagePathUri = vscode.Uri.parse(`https://${baseImagePath}`); // Add a scheme so that we can parse the hostname
-    }
-    const allRegistries = await ext.registriesTree.getConnectedRegistries(baseImagePathUri);
+async function tryGetConnectedRegistryForPath(context: IActionContext, imageItem: ImageTreeItem): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
+    const allRegistries = await ext.registriesTree.getConnectedRegistries(imageItem.parent.label);
+    const baseImagePath = imageItem.fullTag.substring(0, imageItem.fullTag.lastIndexOf('/'));
 
-    let matchedRegistry = allRegistries.find((registry) => getBaseUrlFromItem(registry.wrappedItem) === baseImagePath);
-
+    let matchedRegistry = allRegistries.find((registry) => getFullRegistryPath(registry.wrappedItem) === baseImagePath);
     if (!matchedRegistry) {
         matchedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });
     }
 
     return matchedRegistry;
+}
+
+function getFullRegistryPath(registry: CommonRegistry): string {
+    let fullRegistryName = getBaseImagePathFromRegistry(registry);
+    if (isGitHubRegistry(registry)) {
+        fullRegistryName = `${fullRegistryName}/${registry.label}`;
+    }
+    return fullRegistryName;
 }

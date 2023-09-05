@@ -8,13 +8,13 @@ import { CommonTag } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getFullImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
+import { getFullImageNameFromTag } from '../../tree/registries/registryTreeUtils';
 
 export async function copyRemoteFullTag(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<string> {
     if (!node) {
         node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag', 'dockerHubTag'] });
     }
-    const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);
+    const fullTag = getFullImageNameFromTag(node.wrappedItem);
     void vscode.env.clipboard.writeText(fullTag);
     return fullTag;
 }

@@ -12,7 +12,7 @@ import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistryDataProvider, isAzureRegistry } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
+import { getFullImageNameFromTag } from '../../../tree/registries/registryTreeUtils';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
@@ -119,7 +119,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             appSettings.push({ name: "WEBSITES_PORT", value: context.webSitesPort.toString() });
         }
 
-        const linuxFxVersion = `DOCKER|${getFullImageNameFromRegistryTagItem(this.tagItem.wrappedItem)}`;
+        const linuxFxVersion = `DOCKER|${getFullImageNameFromTag(this.tagItem.wrappedItem)}`;
 
         return {
             linuxFxVersion,

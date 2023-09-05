@@ -8,7 +8,7 @@ import { RegistryV2DataProvider, V2Tag } from '@microsoft/vscode-docker-registri
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
+import { getFullImageNameFromTag } from '../../tree/registries/registryTreeUtils';
 import { registryExperience } from '../../utils/registryExperience';
 
 export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<V2Tag>): Promise<void> {
@@ -16,7 +16,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
         node = await registryExperience(context, ext.registriesTree, { include: ['genericRegistryV2Tag', 'azureContainerTag'] }, false);
     }
 
-    const tagName = getImageNameFromRegistryTagItem(node.wrappedItem);
+    const tagName = getFullImageNameFromTag(node.wrappedItem);
     const confirmDelete = l10n.t('Are you sure you want to delete image "{0}"? This will delete all images that have the same digest.', tagName);
     // no need to check result - cancel will throw a UserCancelledError
     await context.ui.showWarningMessage(confirmDelete, { modal: true }, DialogResponses.deleteResponse);
