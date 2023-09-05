@@ -91,6 +91,8 @@ async function tryGetConnectedRegistryForPath(context: IActionContext, imageItem
 
 function getFullRegistryPath(registry: CommonRegistry): string {
     let fullRegistryName = getBaseImagePathFromRegistry(registry);
+
+    // If it's a GitHub registry, we need to add the owner name to the path
     if (isGitHubRegistry(registry)) {
         fullRegistryName = `${fullRegistryName}/${registry.label}`;
     }
