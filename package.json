@@ -1533,6 +1533,9 @@
                 "id": "ignore",
                 "filenames": [
                     ".dockerignore"
+                ],
+                "filenamePatterns": [
+                    "*.dockerignore"
                 ]
             }
         ],
