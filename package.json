@@ -141,6 +141,10 @@
                 {
                     "command": "vscode-docker.containers.group.remove",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.activateRegistryProviders",
+                    "when": "never"
                 }
             ],
             "editor/context": [
@@ -2749,6 +2753,11 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.activateRegistryProviders",
+                "title": "%vscode-docker.commands.activateRegistryProviders%",
+                "category": "%vscode-docker.commands.category.docker%"
             }
         ],
         "views": {
