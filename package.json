@@ -532,7 +532,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.openInPortal",
-                    "when": "view == dockerRegistries && viewItem =~ /(azuresubscription|azureContainerRegistry)/i",
+                    "when": "view == dockerRegistries && viewItem =~ /(azuresubscription|azureContainerRegistry|azureContainerRepository)/i",
                     "group": "regs_zzz_common@1"
                 },
                 {

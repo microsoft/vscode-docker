@@ -3,28 +3,28 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, UserCancelledError, contextValueExperience } from '@microsoft/vscode-azext-utils';
-import * as vscode from 'vscode';
+import { IActionContext, contextValueExperience, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
-import { AzureRegistry, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { AzureRegistry, AzureRepository, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
 
-export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem>): Promise<void> {
+export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem | AzureRepository>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: ['azuresubscription', 'azureContainerRegistry'] });
+        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: ['azureContainerRegistry'] });
     }
 
     const azureRegistryItem = node.wrappedItem;
-    const baseUrl = `${azureRegistryItem.subscription.environment.portalUrl}/#@${azureRegistryItem.subscription.tenantId}/resource`;
-    let url: string;
-
+    const azExtAzureUtils = await getAzExtAzureUtils();
+    let subscriptionContext = undefined;
     if (isAzureSubscriptionRegistryItem(azureRegistryItem)) {
-        url = `${baseUrl}/subscriptions/${azureRegistryItem.subscription.subscriptionId}`;
+        subscriptionContext = createSubscriptionContext(azureRegistryItem.subscription);
+        await azExtAzureUtils.openInPortal(subscriptionContext, `/subscriptions/${subscriptionContext.subscriptionId}`);
     } else if (isAzureRegistry(azureRegistryItem)) {
-        url = `${baseUrl}/${azureRegistryItem.id}`;
+        subscriptionContext = createSubscriptionContext(azureRegistryItem.parent.subscription);
+        await azExtAzureUtils.openInPortal(subscriptionContext, azureRegistryItem.id);
     } else {
-        throw new UserCancelledError();
+        subscriptionContext = createSubscriptionContext(azureRegistryItem.parent.parent.subscription);
+        await azExtAzureUtils.openInPortal(subscriptionContext, `${azureRegistryItem.parent.id}/repository`);
     }
-
-    await vscode.env.openExternal(vscode.Uri.parse(url));
 }
