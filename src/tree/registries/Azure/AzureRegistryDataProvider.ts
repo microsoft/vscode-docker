@@ -5,7 +5,7 @@
 
 import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
-import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, registryV2Request } from '@microsoft/vscode-docker-registries';
+import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, getContextValue, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from '../../../utils/azureUtils';
@@ -75,7 +75,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                     type: 'azuresubscription',
                     subscription: sub,
                     additionalContextValues: ['azuresubscription'],
-                    iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureSubscription.svg'),
+                    iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'dist', 'node_modules', '@microsoft', 'vscode-azext-azureutils', 'resources', 'azureSubscription.svg'),
                 } as AzureSubscriptionRegistryItem;
             });
         } else if (isAzureSubscriptionRegistryItem(element)) {
@@ -149,8 +149,8 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             return Promise.resolve({
                 label: element.label,
                 collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
-                contextValue: 'azuresubscription',
-                iconPath: vscode.Uri.joinPath(this.extensionContext.extensionUri, 'resources', 'azureSubscription.svg'),
+                contextValue: getContextValue(element),
+                iconPath: element.iconPath,
             });
         } else {
             return super.getTreeItem(element);
