@@ -25,9 +25,10 @@ export function getBaseImagePathFromRegistry(registry: CommonRegistry): string {
     } else if (isDockerHubRegistry(registry)) {
         registry = registry as CommonRegistry;
         return registry.label.toLowerCase();
+    } else {
+        registry = registry as CommonRegistry;
+        return registry.baseUrl.authority.toLowerCase();
     }
-
-    throw new Error(l10n.t('The type of registry is not supported. Unable to get base image path'));
 }
 
 export function getFullImageNameFromTag(tag: CommonTag): string {
