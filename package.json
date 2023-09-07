@@ -2998,7 +2998,7 @@
         "@azure/arm-containerregistry": "^10.1.0",
         "@azure/storage-blob": "^12.14.0",
         "@microsoft/compose-language-service": "^0.2.0",
-        "@microsoft/vscode-azext-azureappservice": "~2.0.0",
+        "@microsoft/vscode-azext-azureappservice": "~2.0",
         "@microsoft/vscode-azext-azureauth": "^1.1.2",
         "@microsoft/vscode-azext-azureutils": "^2.0.0",
         "@microsoft/vscode-azext-utils": "^2.0.0",
