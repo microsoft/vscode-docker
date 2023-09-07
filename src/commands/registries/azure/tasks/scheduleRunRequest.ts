@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { getResourceGroupFromId } from "@microsoft/vscode-azext-azureutils";
 import { IActionContext, IAzureQuickPickItem, contextValueExperience, nonNullProp } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
@@ -15,7 +14,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
-import { createAzureContainerRegistryClient } from "../../../../utils/azureUtils";
+import { createAzureContainerRegistryClient, getResourceGroupFromId } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
