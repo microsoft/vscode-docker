@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
-import { CommonTag } from '@microsoft/vscode-docker-registries';
+import { CommonRegistryDataProvider, CommonTag } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -16,7 +16,7 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
         node = await registryExperience(context, ext.registriesTree, { include: 'commontag', exclude: ['githubRegistryTag', 'dockerHubTag'] }, false);
     }
 
-    const provider = node.provider as unknown as CommonTag;
+    const provider = node.provider as unknown as CommonRegistryDataProvider;
     if (typeof provider.deleteTag !== 'function') {
         throw new Error(l10n.t('Deleting remote images is not supported on this registry.'));
     }
