@@ -138,22 +138,20 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
      * @returns A list of registries that are connected to the extension. If imageBaseName is provided, only registries that
      *          can be used to push to that image will be returned.
      */
-    public async getConnectedRegistries(imageBaseName?: vscode.Uri): Promise<UnifiedRegistryItem<CommonRegistry>[]> {
+    public async getConnectedRegistries(imageBaseName?: string): Promise<UnifiedRegistryItem<CommonRegistry>[]> {
         let registryRoots = await this.getChildren();
         let findAzureRegistryOnly = false;
 
         // filter out registry roots that don't match the image base name
         if (imageBaseName) {
-            const authority = imageBaseName.authority;
-
-            if (authority === 'docker.io') {
+            if (imageBaseName === 'docker.io') {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Docker Hub');
             }
-            else if (authority.endsWith('azurecr.io')) {
+            else if (imageBaseName.endsWith('azurecr.io')) {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Azure');
                 findAzureRegistryOnly = true;
             }
-            else if (authority === 'ghcr.io') {
+            else if (imageBaseName === 'ghcr.io') {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'GitHub');
             }
             else {
