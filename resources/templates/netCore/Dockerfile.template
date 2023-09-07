@@ -23,7 +23,7 @@ USER appuser
 {{/if}}
 {{/if}}
 {{/unless}}
-FROM {{ netCoreSdkBaseImage }} AS build
+FROM --platform=$BUILDPLATFORM {{ netCoreSdkBaseImage }} AS build
 ARG configuration=Release
 WORKDIR /src
 COPY ["{{ workspaceRelative . artifact }}", "{{ dirname (workspaceRelative . artifact) }}/"]
