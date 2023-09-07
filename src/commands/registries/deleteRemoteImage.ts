@@ -4,16 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { DialogResponses, IActionContext, UserCancelledError, parseError } from '@microsoft/vscode-azext-utils';
-import { RegistryV2DataProvider, V2Tag } from '@microsoft/vscode-docker-registries';
+import { CommonTag } from '@microsoft/vscode-docker-registries';
 import { ProgressLocation, l10n, window } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
 import { registryExperience } from '../../utils/registryExperience';
 
-export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<V2Tag>): Promise<void> {
+export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { include: ['genericRegistryV2Tag', 'azureContainerTag'] }, false);
+        node = await registryExperience(context, ext.registriesTree, { include: 'commontag', exclude: ['githubRegistryTag', 'dockerHubTag'] }, false);
+    }
+
+    const provider = node.provider as unknown as CommonTag;
+    if (typeof provider.deleteTag !== 'function') {
+        throw new Error(l10n.t('Deleting remote images is not supported on this registry.'));
     }
 
     const tagName = getImageNameFromRegistryTagItem(node.wrappedItem);
@@ -23,8 +28,6 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
 
     const deleting = l10n.t('Deleting image "{0}"...', tagName);
     await window.withProgress({ location: ProgressLocation.Notification, title: deleting }, async () => {
-        const provider = node.provider as unknown as RegistryV2DataProvider;
-
         try {
             await provider.deleteTag(node.wrappedItem);
         } catch (error) {
