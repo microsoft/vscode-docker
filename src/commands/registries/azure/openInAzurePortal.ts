@@ -3,15 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, contextValueExperience, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
+import { IActionContext, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
 import { AzureRegistry, AzureRepository, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 
 export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem | AzureRepository>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: ['azureContainerRegistry'] });
+        node = await registryExperience(context, ext.registriesTree, { include: ['azureContainerRegistry'] });
     }
 
     const azureRegistryItem = node.wrappedItem;
