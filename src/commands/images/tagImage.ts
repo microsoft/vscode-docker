@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
-import { getBaseUrlFromItem } from '../../tree/registries/registryTreeUtils';
+import { getBaseImagePathFromRegistry } from '../../tree/registries/registryTreeUtils';
 
 export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<CommonRegistry>): Promise<string> {
     if (!node) {
@@ -21,7 +21,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const baseImagePath = isRegistry(registry.wrappedItem) ? getBaseUrlFromItem(registry.wrappedItem) : undefined;
+    const baseImagePath = isRegistry(registry.wrappedItem) ? getBaseImagePathFromRegistry(registry.wrappedItem) : undefined;
     const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
