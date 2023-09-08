@@ -71,11 +71,11 @@ export class RegistryPickFilter implements PickFilter {
     isAncestorPick(treeItem: CommonRegistryItem, element: unknown): boolean {
         // Check if the tree item is the first step and if you want to skip it
         if (!isRegistryRoot(treeItem)) {
-            return true;
+            return !!treeItem.collapsibleState;
         }
 
-        if (isRegistryRoot(treeItem) && treeItem.label === 'Azure') {
-            return true;
+        if (isRegistryRoot(treeItem) && treeItem.label === 'Azure') { // TODO: actually add this to function parameters
+            return !!treeItem.collapsibleState;
         }
 
         return false;
