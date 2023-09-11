@@ -31,7 +31,7 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
     const vscAzureAppService = await getAzExtAppService();
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
-    const subscriptionItem = await registryExperience(context, ext.registriesTree, { include: 'azuresubscription' }) as AzureSubscriptionRegistryItem;
+    const subscriptionItem = await registryExperience(context, ext.registriesTree, { include: 'azuresubscription' }, ['Azure']) as AzureSubscriptionRegistryItem;
     const subscriptionContext = createSubscriptionContext(subscriptionItem.subscription);
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,

@@ -8,14 +8,16 @@ import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-reg
 import * as vscode from 'vscode';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
 
-export async function registryExperience<TPick>(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, contextValueFilter: ContextValueFilter, skipIfOne: boolean = true): Promise<TPick> {
+export async function registryExperience<TPick>(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, contextValueFilter: ContextValueFilter, registryFilter: RegistryType[], skipIfOne: boolean = true): Promise<TPick> {
     const promptSteps: AzureWizardPromptStep<QuickPickWizardContext>[] = [
         new RecursiveQuickPickStep(
             tdp,
             {
-                contextValueFilter: { include: ['azureContainerRegistry'] },
-                skipIfOne: skipIfOne
-            }
+                contextValueFilter: contextValueFilter,
+                skipIfOne: skipIfOne,
+
+            },
+            registryFilter
         )
     ];
 
@@ -35,11 +37,16 @@ export function getLastNode<UnifiedRegistryItem>(context: QuickPickWizardContext
     return context.pickedNodes.at(-1) as UnifiedRegistryItem | undefined;
 }
 
+export type RegistryType = 'Azure' | 'Docker Hub' | 'Generic Registry V2' | 'GitHub' | 'GitLab';
+
+// This class is copied over from the azure tools repo
+// https://github.com/microsoft/vscode-azuretools/blob/main/utils/src/pickTreeItem/contextValue/ContextValueQuickPickStep.ts#L16
 export class RegistryQuickPickStep<TContext extends QuickPickWizardContext, TOptions extends ContextValueFilterQuickPickOptions> extends GenericQuickPickStep<TContext, TOptions> {
     public constructor(
         protected readonly treeDataProvider: UnifiedRegistryTreeDataProvider,
         protected readonly pickOptions: TOptions,
-        protected readonly promptOptions?: IAzureQuickPickOptions
+        protected readonly registryFilter: RegistryType[],
+        protected readonly promptOptions?: IAzureQuickPickOptions,
     ) {
         super(treeDataProvider, pickOptions, promptOptions);
         this.promptOptions = {
@@ -47,11 +54,14 @@ export class RegistryQuickPickStep<TContext extends QuickPickWizardContext, TOpt
             ...promptOptions,
         };
     }
-    protected readonly pickFilter: PickFilter = new RegistryPickFilter(this.pickOptions);
+    protected readonly pickFilter: PickFilter = new RegistryPickFilter(this.pickOptions, this.registryFilter);
 }
 
 export class RegistryPickFilter implements PickFilter {
-    constructor(protected readonly pickOptions: ContextValueFilterQuickPickOptions) { }
+    constructor(
+        protected readonly pickOptions: ContextValueFilterQuickPickOptions,
+        protected readonly registryFilter: RegistryType[],
+    ) { }
 
     isFinalPick(node: CommonRegistryItem): boolean {
         const includeOption = this.pickOptions.contextValueFilter.include;
@@ -74,7 +84,7 @@ export class RegistryPickFilter implements PickFilter {
             return !!treeItem.collapsibleState;
         }
 
-        if (isRegistryRoot(treeItem) && treeItem.label === 'Azure') { // TODO: actually add this to function parameters
+        if (isRegistryRoot(treeItem) && this.registryFilter.includes(treeItem.label as RegistryType)) {
             return !!treeItem.collapsibleState;
         }
 
@@ -112,7 +122,7 @@ export class RecursiveQuickPickStep<TContext extends QuickPickWizardContext> ext
             // Need to keep going because the last picked node is not a match
             return {
                 promptSteps: [
-                    new RecursiveQuickPickStep(this.treeDataProvider, this.pickOptions)
+                    new RecursiveQuickPickStep(this.treeDataProvider, this.pickOptions, this.registryFilter, this.promptOptions)
                 ],
             };
         }

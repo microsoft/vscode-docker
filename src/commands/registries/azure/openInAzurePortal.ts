@@ -12,7 +12,7 @@ import { registryExperience } from '../../../utils/registryExperience';
 
 export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem | AzureRepository>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { include: ['azureContainerRegistry'] });
+        node = await registryExperience(context, ext.registriesTree, { include: ['azureContainerRegistry'] }, ['Azure']);
     }
 
     const azureRegistryItem = node.wrappedItem;
