@@ -11,7 +11,7 @@ import { AzureRegistryCreateStep } from '../../../tree/registries/Azure/createWi
 import { AzureRegistryNameStep } from '../../../tree/registries/Azure/createWizard/AzureRegistryNameStep';
 import { AzureRegistrySkuStep } from '../../../tree/registries/Azure/createWizard/AzureRegistrySkuStep';
 import { IAzureRegistryWizardContext } from '../../../tree/registries/Azure/createWizard/IAzureRegistryWizardContext';
-import { UnifiedRegistryItem, isWrappedItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { UnifiedRegistryItem, isUnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
 
 export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<void> {
@@ -20,7 +20,7 @@ export async function createAzureRegistry(context: IActionContext, node?: Unifie
         node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' });
     }
 
-    const registryItem = isWrappedItem(node) ? node.wrappedItem : node;
+    const registryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
 
     const subscriptionContext = createSubscriptionContext(registryItem.subscription);
     const wizardContext: IAzureRegistryWizardContext = {

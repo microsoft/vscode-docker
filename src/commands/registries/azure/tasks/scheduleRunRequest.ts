@@ -13,7 +13,7 @@ import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem, isWrappedItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { UnifiedRegistryItem, isUnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
@@ -47,7 +47,7 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     }
 
     const node: UnifiedRegistryItem<AzureRegistryItem> = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRegistry' });
-    const registryItem: AzureRegistryItem = isWrappedItem(node) ? node.wrappedItem : node;
+    const registryItem: AzureRegistryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
     const resourceGroup = getResourceGroupFromId(registryItem.id);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });

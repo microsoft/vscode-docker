@@ -6,7 +6,7 @@
 import { IActionContext, contextValueExperience, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
 import { AzureRegistry, AzureRepository, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
-import { UnifiedRegistryItem, isWrappedItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { UnifiedRegistryItem, isUnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
 
 export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem | AzureRepository>): Promise<void> {
@@ -14,7 +14,7 @@ export async function openInAzurePortal(context: IActionContext, node?: UnifiedR
         node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: ['azureContainerRegistry'] });
     }
 
-    const azureRegistryItem = isWrappedItem(node) ? node.wrappedItem : node;
+    const azureRegistryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
     const azExtAzureUtils = await getAzExtAzureUtils();
     let subscriptionContext = undefined;
     if (isAzureSubscriptionRegistryItem(azureRegistryItem)) {
