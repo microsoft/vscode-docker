@@ -12,7 +12,8 @@ import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTre
 
 export async function untagAzureImage(context: IActionContext, node?: UnifiedRegistryItem<AzureTag>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerTag' });
+        // we can't pass in the azure tree provider because it's not a UnifiedRegistryItem and we need the provider to untag
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerTag' });
     }
 
     const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);

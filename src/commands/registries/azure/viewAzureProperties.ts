@@ -3,15 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, contextValueExperience, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
+import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { UnifiedRegistryItem, isWrappedItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { registryExperience } from "../../../utils/registryExperience";
 
 export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { 'include': 'azureContainerRegistry' });
+        node = await registryExperience(context, ext.azureRegistryDataProvider, { 'include': 'azureContainerRegistry' }, true);
     }
 
-    await openReadOnlyJson({ label: node.wrappedItem.label, fullId: node.wrappedItem.id }, node.wrappedItem.registryProperties);
+    const registryItem = isWrappedItem(node) ? node.wrappedItem : node;
+    await openReadOnlyJson({ label: registryItem.label, fullId: registryItem.id }, registryItem.registryProperties);
 }

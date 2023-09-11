@@ -13,7 +13,7 @@ import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
 import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { UnifiedRegistryItem, isWrappedItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
@@ -47,8 +47,8 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
     }
 
     const node: UnifiedRegistryItem<AzureRegistryItem> = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRegistry' });
-    const registry: AzureRegistryItem = node.wrappedItem;
-    const resourceGroup = getResourceGroupFromId(registry.id);
+    const registryItem: AzureRegistryItem = isWrappedItem(node) ? node.wrappedItem : node;
+    const resourceGroup = getResourceGroupFromId(registryItem.id);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });
     const osType: AcrOS = (await context.ui.showQuickPick(osPick, { placeHolder: vscode.l10n.t('Select image base OS') })).data;
@@ -66,8 +66,8 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
         }
 
-        const azureRegistryClient = await createAzureContainerRegistryClient(registry.subscription);
-        const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registry.label, resourceGroup, rootUri, tarFilePath);
+        const azureRegistryClient = await createAzureContainerRegistryClient(registryItem.subscription);
+        const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registryItem.label, resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.info(vscode.l10n.t('Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
@@ -92,13 +92,13 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Schedule the run and Clean up.
         ext.outputChannel.info(vscode.l10n.t('Set up run request'));
 
-        const run = await azureRegistryClient.registries.beginScheduleRunAndWait(resourceGroup, registry.label, runRequest);
+        const run = await azureRegistryClient.registries.beginScheduleRunAndWait(resourceGroup, registryItem.label, runRequest);
         ext.outputChannel.info(vscode.l10n.t('Scheduled run {0}', run.runId));
 
-        void streamLogs(context, node, run);
+        void streamLogs(context, registryItem, run);
 
         // function returns the AcrRun info
-        return async () => azureRegistryClient.runs.get(resourceGroup, registry.label, run.runId);
+        return async () => azureRegistryClient.runs.get(resourceGroup, registryItem.label, run.runId);
     } finally {
         if (await fse.pathExists(tarFilePath)) {
             await fse.unlink(tarFilePath);
@@ -158,10 +158,10 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
-async function streamLogs(context: IActionContext, node: UnifiedRegistryItem<AzureRegistryItem>, run: AcrRun): Promise<void> {
-    const azureRegistryClient = await createAzureContainerRegistryClient(node.wrappedItem.subscription);
-    const resourceGroup = getResourceGroupFromId(node.wrappedItem.id);
-    const result = await azureRegistryClient.runs.getLogSasUrl(resourceGroup, node.wrappedItem.label, run.runId);
+async function streamLogs(context: IActionContext, registryItem: AzureRegistryItem, run: AcrRun): Promise<void> {
+    const azureRegistryClient = await createAzureContainerRegistryClient(registryItem.subscription);
+    const resourceGroup = getResourceGroupFromId(registryItem.id);
+    const result = await azureRegistryClient.runs.getLogSasUrl(resourceGroup, registryItem.label, run.runId);
 
     const storageBlob = await getStorageBlob();
     const blobClient = new storageBlob.BlobClient(nonNullProp(result, 'logLink'));

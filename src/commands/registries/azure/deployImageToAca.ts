@@ -35,7 +35,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
     }
 
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag', 'dockerHubTag'], });
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
     }
 
     const commandOptions: Partial<DeployImageToAcaOptionsContract> = {

@@ -11,7 +11,8 @@ import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTre
 
 export async function deleteAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRegistry' });
+        // we can't pass in the azure tree provider because it's not a UnifiedRegistryItem and we need the provider to delete
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerRegistry' });
     }
 
     const registryName = node.wrappedItem.label;

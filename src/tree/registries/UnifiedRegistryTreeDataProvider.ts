@@ -8,6 +8,10 @@ export interface UnifiedRegistryItem<T> {
     parent: UnifiedRegistryItem<T> | undefined;
 }
 
+export function isWrappedItem(item: unknown): item is UnifiedRegistryItem<unknown> {
+    return !!item && typeof item === 'object' && 'provider' in item && 'wrappedItem' in item && 'parent' in item;
+}
+
 const ConnectedRegistryProvidersKey = 'ConnectedRegistryProviders';
 
 export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<UnifiedRegistryItem<unknown>> {

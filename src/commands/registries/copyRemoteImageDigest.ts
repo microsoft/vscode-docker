@@ -17,6 +17,5 @@ export async function copyRemoteImageDigest(context: IActionContext, node?: Unif
     const v2DataProvider = node.provider as unknown as RegistryV2DataProvider;
     const digest = await v2DataProvider.getImageDigest(node.wrappedItem);
 
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.env.clipboard.writeText(digest);
+    void vscode.env.clipboard.writeText(digest);
 }

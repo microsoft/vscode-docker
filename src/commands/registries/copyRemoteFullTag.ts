@@ -12,7 +12,7 @@ import { getFullImageNameFromRegistryTagItem } from '../../tree/registries/regis
 
 export async function copyRemoteFullTag(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<string> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: ['registryV2Tag', 'dockerHubTag'] });
+        node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
     }
     const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);
     void vscode.env.clipboard.writeText(fullTag);
