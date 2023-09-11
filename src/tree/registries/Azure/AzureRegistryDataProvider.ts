@@ -62,7 +62,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         if (isRegistryRoot(element)) {
             if (!await this.subscriptionProvider.isSignedIn()) {
                 await this.subscriptionProvider.signIn();
-                void this.fireSoon(element);
+                this.fireSoon(element);
                 return [];
             }
 
@@ -216,13 +216,11 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         return this.authenticationProviders.get(registryString)!;
     }
 
-    private async fireSoon(element?: CommonRegistryItem | undefined): Promise<void> {
-        return new Promise<void>(resolve => {
-            setTimeout(() => {
-                this.onDidChangeTreeDataEmitter.fire(element);
-                resolve();
-            }, 5);
-        });
+    private fireSoon(element?: CommonRegistryItem | undefined) {
+        const timeout = setTimeout(() => {
+            clearTimeout(timeout);
+            this.onDidChangeTreeDataEmitter.fire(element);
+        }, 5);
     }
 
 }
