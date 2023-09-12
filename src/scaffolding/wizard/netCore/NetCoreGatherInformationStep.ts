@@ -20,6 +20,7 @@ const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
 
 const cSharpConfigId = 'csharp';
 const cSharpPromptSetting = 'suppressBuildAssetsNotification';
+const NetCorePreviewVersion = 9;
 
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
     private targetFramework: string;
@@ -53,7 +54,7 @@ export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreS
             wizardContext.netCoreRuntimeBaseImage = wizardContext.platform === '.NET: ASP.NET Core' ? `${aspNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}` : `${consoleNetBaseImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
             wizardContext.netCoreSdkBaseImage = `${netSdkImage}:${netCoreVersion.major}.${netCoreVersion.minor}`;
 
-            if (netCoreVersion.major === 9) {
+            if (netCoreVersion.major >= NetCorePreviewVersion) {
                 wizardContext.netCoreRuntimeBaseImage = `${wizardContext.netCoreRuntimeBaseImage}-preview`;
                 wizardContext.netCoreSdkBaseImage = `${wizardContext.netCoreSdkBaseImage}-preview`;
             }
