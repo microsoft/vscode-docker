@@ -1,3 +1,12 @@
+## 1.26.1 - 13 September 2023
+### Added
+- Updated .NET Dockerfile scaffolding to utilize the latest .NET 8 image names. (https://github.com/microsoft/vscode-docker/issues/4015)
+- Added support for multiple .dockerignore file naming conventions specific to language modes. (https://github.com/microsoft/vscode-docker/issues/4059)
+- Integrated the container client package. (https://github.com/microsoft/vscode-docker/pull/3982)
+
+### Fixed
+- Enhanced debugging experience on arm64 machines. (https://github.com/microsoft/vscode-docker/issues/4040)
+
 ## 1.26.0 - 10 July 2023
 ### Added
 * Added support for debugging .NET projects with .NET SDK container build. [#3808](https://github.com/microsoft/vscode-docker/issues/3808)
