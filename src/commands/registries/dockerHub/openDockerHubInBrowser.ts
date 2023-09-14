@@ -13,7 +13,10 @@ import { registryExperience } from "../../../utils/registryExperience";
 
 export async function openDockerHubInBrowser(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistryItem>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.dockerHubRegistryDataProvider, { include: ['dockerHubRegistry'] }, true);
+        node = await registryExperience(context, ext.registriesTree, {
+            contextValueFilter: { include: ['dockerHubRegistry'] },
+            registryFilter: { exclude: [ext.azureRegistryDataProvider.label, ext.githubRegistryDataProvider.label, ext.genericRegistryV2DataProvider.label] }
+        });
     }
 
     let url = dockerHubUrl;

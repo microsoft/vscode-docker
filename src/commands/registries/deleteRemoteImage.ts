@@ -13,7 +13,11 @@ import { registryExperience } from '../../utils/registryExperience';
 
 export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { include: 'commontag', exclude: ['githubRegistryTag', 'dockerHubTag'] }, false);
+        node = await registryExperience(context, ext.registriesTree,
+            {
+                contextValueFilter: { include: 'commontag', exclude: ['githubRegistryTag', 'dockerHubTag'] },
+                registryFilter: { exclude: [ext.githubRegistryDataProvider.label, ext.dockerHubRegistryDataProvider.label] }
+            });
     }
 
     const provider = node.provider as unknown as CommonRegistryDataProvider;
