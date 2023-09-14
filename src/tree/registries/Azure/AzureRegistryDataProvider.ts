@@ -159,11 +159,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public async deleteRepository(item: AzureRepository): Promise<void> {
         const authenticationProvider = this.getAuthenticationProvider(item.parent as unknown as AzureRegistryItem);
-
+        const requestUrl = item.baseUrl.with({ path: `v2/_acr/${item.label}/repository` });
         const reponse = await registryV2Request({
             method: 'DELETE',
-            registryUri: item.baseUrl,
-            path: ['v2', '_acr', `${item.label}`, 'repository'],
+            requestUri: requestUrl,
             scopes: [`repository:${item.label}:delete`],
             authenticationProvider: authenticationProvider,
         });
@@ -181,11 +180,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public async untagImage(item: AzureTag): Promise<void> {
         const authenticationProvider = this.getAuthenticationProvider(item.parent.parent as unknown as AzureRegistryItem);
-
+        const requestUrl = item.baseUrl.with({ path: `v2/_acr/${item.parent.label}/tags/${item.label}` });
         const reponse = await registryV2Request({
             method: 'DELETE',
-            registryUri: item.baseUrl,
-            path: ['v2', '_acr', `${item.parent.label}`, 'tags', `${item.label}`],
+            requestUri: requestUrl,
             scopes: [`repository:${item.parent.label}:delete`],
             authenticationProvider: authenticationProvider,
         });
