@@ -136,12 +136,11 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public override async getTags(repository: AzureRepository): Promise<AzureTag[]> {
         const tags = await super.getTags(repository);
-        const tagsWithAdditionalContext = tags.map(tag => ({
-            ...tag,
-            additionalContextValues: ['azureContainerTag']
-        }));
+        tags.forEach(tag => {
+            tag.additionalContextValues = [...tag.additionalContextValues, 'azureContainerTag'];
+        });
 
-        return tagsWithAdditionalContext;
+        return tags;
     }
 
     public override getTreeItem(element: CommonRegistryItem): Promise<vscode.TreeItem> {

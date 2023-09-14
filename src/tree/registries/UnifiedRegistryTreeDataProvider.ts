@@ -9,6 +9,14 @@ export interface UnifiedRegistryItem<T> {
     parent: UnifiedRegistryItem<T> | undefined;
 }
 
+interface WrappedElement {
+    urtdp_wrapper: UnifiedRegistryItem<unknown>;
+}
+
+function canReferenceWrapper(item: unknown): item is WrappedElement {
+    return !!item && typeof item === 'object';
+}
+
 export function isUnifiedRegistryItem(item: unknown): item is UnifiedRegistryItem<unknown> {
     return !!item && typeof item === 'object' && 'provider' in item && 'wrappedItem' in item && 'parent' in item;
 }
@@ -37,13 +45,23 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 return [];
             }
 
-            return elements.map(e => {
-                return {
+            const results: UnifiedRegistryItem<unknown>[] = [];
+
+            for (const child of elements) {
+                const wrapper = {
                     provider: element.provider,
-                    wrappedItem: e,
+                    wrappedItem: child,
                     parent: element
                 };
-            });
+
+                if (canReferenceWrapper(child)) {
+                    child.urtdp_wrapper = wrapper;
+                }
+
+                results.push(wrapper);
+            }
+
+            return results;
         } else {
             const unifiedRoots: UnifiedRegistryItem<unknown>[] = [];
 
@@ -78,9 +96,17 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
 
     public registerProvider(provider: RegistryDataProvider<unknown>): vscode.Disposable {
         this.providers.set(provider.id, provider);
+        const disposable = provider.onDidChangeTreeData((child) => {
+            if (canReferenceWrapper(child) && child.urtdp_wrapper) {
+                this.onDidChangeTreeDataEmitter.fire(child.urtdp_wrapper);
+            } else {
+                // TODO this.onDidChangeTreeDataEmitter.fire(undefined);
+            }
+        });
 
         return {
             dispose: () => {
+                disposable.dispose();
                 this.providers.delete(provider.id);
             }
         };
