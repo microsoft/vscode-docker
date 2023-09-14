@@ -48,7 +48,8 @@ export function registerTrees(): void {
     const genericRegistryV2DataProvider = new GenericRegistryV2DataProvider(ext.context);
     const azureRegistryDataProvider = new AzureRegistryDataProvider(ext.context);
     const dockerHubRegistryDataProvider = new DockerHubRegistryDataProvider(ext.context);
-    urtdp.registerProvider(new GitHubRegistryDataProvider(ext.context));
+    const githubRegistryDataProvider = new GitHubRegistryDataProvider(ext.context);
+    urtdp.registerProvider(githubRegistryDataProvider);
     urtdp.registerProvider(dockerHubRegistryDataProvider);
     urtdp.registerProvider(azureRegistryDataProvider);
     urtdp.registerProvider(genericRegistryV2DataProvider);
@@ -58,6 +59,7 @@ export function registerTrees(): void {
     ext.genericRegistryV2DataProvider = genericRegistryV2DataProvider;
     ext.azureRegistryDataProvider = azureRegistryDataProvider;
     ext.dockerHubRegistryDataProvider = dockerHubRegistryDataProvider;
+    ext.githubRegistryDataProvider = githubRegistryDataProvider;
 
     ext.volumesRoot = new VolumesTreeItem(undefined);
     const volumesLoadMore = 'vscode-docker.volumes.loadMore';
