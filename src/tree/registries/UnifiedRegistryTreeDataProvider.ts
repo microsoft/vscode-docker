@@ -1,5 +1,6 @@
 import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
+import { ext } from '../../extensionVariables';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
 
 export interface UnifiedRegistryItem<T> {
@@ -149,14 +150,14 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
         // filter out registry roots that don't match the image base name
         if (imageBaseName) {
             if (imageBaseName === 'docker.io') {
-                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Docker Hub');
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.dockerHubRegistryDataProvider.label);
             }
             else if (imageBaseName.endsWith('azurecr.io')) {
-                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'Azure');
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.azureRegistryDataProvider.label);
                 findAzureRegistryOnly = true;
             }
             else if (imageBaseName === 'ghcr.io') {
-                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === 'GitHub');
+                registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.githubRegistryDataProvider.label);
             }
             else {
                 registryRoots = registryRoots.filter(
