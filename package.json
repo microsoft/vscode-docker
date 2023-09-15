@@ -542,7 +542,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.viewProperties",
-                    "when": "view == dockerRegistries && viewItem == azure;commonregistry;",
+                    "when": "view == dockerRegistries && viewItem == azure;commonregistry",
                     "group": "regs_zzz_common@2"
                 },
                 {
