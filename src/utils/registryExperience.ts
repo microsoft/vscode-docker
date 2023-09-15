@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, IWizardOptions, PickFilter, QuickPickWizardContext, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries';
 import { TreeItem, TreeItemLabel } from 'vscode';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -23,7 +23,11 @@ export interface RegistryExperienceOptions extends ContextValueFilterQuickPickOp
 export async function registryExperience(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, options: RegistryExperienceOptions): Promise<UnifiedRegistryItem<CommonRegistryItem>> {
     // get the registry provider unified item
     const registryProviderStep: AzureWizardPromptStep<QuickPickWizardContext>[] = [
-        new RegistryRecursiveQuickPickStep(
+        new RegistryQuickPickStep(
+            tdp,
+            { ...options, skipIfOne: true }
+        ),
+        new RecursiveQuickPickStep(
             tdp,
             options
         )
@@ -44,7 +48,7 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
         protected readonly treeDataProvider: UnifiedRegistryTreeDataProvider,
         protected readonly pickOptions: RegistryExperienceOptions,
     ) {
-        super(treeDataProvider, { ...pickOptions, skipIfOne: true });
+        super(treeDataProvider, pickOptions);
     }
 
     protected async getPicks(wizardContext: QuickPickWizardContext): Promise<IAzureQuickPickItem<UnifiedRegistryItem<unknown>>[]> {
@@ -78,32 +82,6 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
             description: item.description as string,
             data: element,
         };
-    }
-}
-
-export class RegistryRecursiveQuickPickStep<TContext extends QuickPickWizardContext> extends RegistryQuickPickStep {
-    hideStepCount: boolean = true;
-
-    public async getSubWizard(wizardContext: TContext): Promise<IWizardOptions<TContext> | undefined> {
-        const lastPickedItem = getLastNode(wizardContext);
-
-        if (!lastPickedItem) {
-            // Something went wrong, no node was chosen
-            throw new Error('No node was set after prompt step.');
-        }
-
-        if (this.pickFilter.isFinalPick(await this.treeDataProvider.getTreeItem(lastPickedItem), lastPickedItem)) {
-            // The last picked node matches the expected filter
-            // No need to continue prompting
-            return undefined;
-        } else {
-            // Need to keep going because the last picked node is not a match
-            return {
-                promptSteps: [
-                    new RegistryRecursiveQuickPickStep(this.treeDataProvider, { ...this.pickOptions, skipIfOne: true })
-                ],
-            };
-        }
     }
 }
 
