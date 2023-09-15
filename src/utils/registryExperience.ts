@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
-import { CommonRegistryRoot, RegistryItem } from '@microsoft/vscode-docker-registries';
-import { TreeItem, TreeItemLabel, l10n } from 'vscode';
+import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, IWizardOptions, PickFilter, QuickPickWizardContext, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries';
+import { TreeItem, TreeItemLabel } from 'vscode';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
 
 export interface RegistryFilter {
@@ -20,51 +20,26 @@ export interface RegistryExperienceOptions extends ContextValueFilterQuickPickOp
     registryFilter?: RegistryFilter;
 }
 
-export async function registryExperience(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, options: RegistryExperienceOptions): Promise<UnifiedRegistryItem<RegistryItem>> {
+export async function registryExperience(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, options: RegistryExperienceOptions): Promise<UnifiedRegistryItem<CommonRegistryItem>> {
     // get the registry provider unified item
     const registryProviderStep: AzureWizardPromptStep<QuickPickWizardContext>[] = [
-        new RegistryQuickPickStep(
+        new RegistryRecursiveQuickPickStep(
             tdp,
             options
         )
     ];
+
     const unifiedRegistryItem = await runQuickPickWizard(context, {
         hideStepCount: true,
         promptSteps: registryProviderStep,
     });
 
-    // if no registries are found, throw an error
-    if (!unifiedRegistryItem) {
-        context.errorHandling.suppressReportIssue = true;
-        throw new Error(l10n.t('No registries found'));
-    }
-
-    // actually get the registry item from the provider
-    const promptSteps: AzureWizardPromptStep<QuickPickWizardContext>[] = [
-        new RecursiveQuickPickStep(
-            (unifiedRegistryItem as UnifiedRegistryItem<RegistryItem>).provider,
-            {
-                ...options,
-                skipIfOne: true,
-            }
-        )
-    ];
-    const pickWithoutProvider = await runQuickPickWizard(context, {
-        hideStepCount: true,
-        promptSteps: promptSteps,
-    });
-
-    // add the provider back to the registry item
-    const pickWithProvider: UnifiedRegistryItem<RegistryItem> = {
-        wrappedItem: pickWithoutProvider,
-        provider: (unifiedRegistryItem as UnifiedRegistryItem<RegistryItem>).provider,
-        parent: undefined, // TODO: figure out how to get the parent
-    };
-
-    return pickWithProvider;
+    return unifiedRegistryItem as UnifiedRegistryItem<CommonRegistryItem>;
 }
 
 export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardContext, RegistryExperienceOptions> {
+    protected readonly pickFilter: PickFilter = new RegistryPickFilter(this.pickOptions);
+
     public constructor(
         protected readonly treeDataProvider: UnifiedRegistryTreeDataProvider,
         protected readonly pickOptions: RegistryExperienceOptions,
@@ -72,22 +47,24 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
         super(treeDataProvider, { ...pickOptions, skipIfOne: true });
     }
 
-    protected async getPicks(wizardContext: QuickPickWizardContext): Promise<IAzureQuickPickItem<UnifiedRegistryItem<CommonRegistryRoot>>[]> {
+    protected async getPicks(wizardContext: QuickPickWizardContext): Promise<IAzureQuickPickItem<UnifiedRegistryItem<unknown>>[]> {
+        const lastPickedItem: UnifiedRegistryItem<unknown> | undefined = getLastNode(wizardContext);
+
         // get all connected registry providers
-        let childElements = ((await this.treeDataProvider.getChildren()) || []) as UnifiedRegistryItem<CommonRegistryRoot>[];
-        if (this.pickOptions.registryFilter) {
+        let childElements = ((await this.treeDataProvider.getChildren(lastPickedItem)) || []) as UnifiedRegistryItem<unknown>[];
+        // only filter down choices when a registry filter is given and the items for registry roots
+        if (this.pickOptions.registryFilter && isRegistryRoot(childElements?.[0]?.wrappedItem)) {
             // Filter out elements based on the given arrays of labels
             childElements = childElements.filter((element) => {
-                const label = element.wrappedItem.label;
+                const label = (element.wrappedItem as CommonRegistryItem).label;
                 return !this.pickOptions.registryFilter.exclude.includes(label);
             });
         }
 
-        // logic copied from GenericQuickPickStep
         const childItems = await Promise.all(childElements.map(async childElement => await this.treeDataProvider.getTreeItem(childElement)));
-        const childPairs: [UnifiedRegistryItem<CommonRegistryRoot>, TreeItem][] = childElements.map((childElement, i: number) => [childElement, childItems[i]]);
+        const childPairs: [UnifiedRegistryItem<unknown>, TreeItem][] = childElements.map((childElement, i: number) => [childElement, childItems[i]]);
 
-        const picks: IAzureQuickPickItem<UnifiedRegistryItem<CommonRegistryRoot>>[] = [];
+        const picks: IAzureQuickPickItem<UnifiedRegistryItem<unknown>>[] = [];
         for (const pairs of childPairs) {
             picks.push(await this.getQuickPickItem(...pairs));
         }
@@ -95,8 +72,7 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
         return picks;
     }
 
-    // clogic opied from GenericQuickPickStep
-    protected async getQuickPickItem(element: UnifiedRegistryItem<CommonRegistryRoot>, item: TreeItem): Promise<IAzureQuickPickItem<UnifiedRegistryItem<CommonRegistryRoot>>> {
+    protected async getQuickPickItem(element: UnifiedRegistryItem<unknown>, item: TreeItem): Promise<IAzureQuickPickItem<UnifiedRegistryItem<unknown>>> {
         return {
             label: ((item.label as TreeItemLabel)?.label || item.label) as string,
             description: item.description as string,
@@ -104,4 +80,67 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
         };
     }
 }
+
+export class RegistryRecursiveQuickPickStep<TContext extends QuickPickWizardContext> extends RegistryQuickPickStep {
+    hideStepCount: boolean = true;
+
+    public async getSubWizard(wizardContext: TContext): Promise<IWizardOptions<TContext> | undefined> {
+        const lastPickedItem = getLastNode(wizardContext);
+
+        if (!lastPickedItem) {
+            // Something went wrong, no node was chosen
+            throw new Error('No node was set after prompt step.');
+        }
+
+        if (this.pickFilter.isFinalPick(await this.treeDataProvider.getTreeItem(lastPickedItem), lastPickedItem)) {
+            // The last picked node matches the expected filter
+            // No need to continue prompting
+            return undefined;
+        } else {
+            // Need to keep going because the last picked node is not a match
+            return {
+                promptSteps: [
+                    new RegistryRecursiveQuickPickStep(this.treeDataProvider, { ...this.pickOptions, skipIfOne: true })
+                ],
+            };
+        }
+    }
+}
+
+export class RegistryPickFilter implements PickFilter {
+    constructor(protected readonly pickOptions: ContextValueFilterQuickPickOptions) { }
+
+    isFinalPick(node: TreeItem): boolean {
+        const includeOption = this.pickOptions.contextValueFilter.include;
+        const excludeOption = this.pickOptions.contextValueFilter.exclude;
+
+        const includeArray: (string | RegExp)[] = Array.isArray(includeOption) ? includeOption : [includeOption];
+        const excludeArray: (string | RegExp)[] = excludeOption ?
+            (Array.isArray(excludeOption) ? excludeOption : [excludeOption]) :
+            [];
+
+
+        return includeArray.some(i => this.matchesFilter(i, node.contextValue)) &&
+            !excludeArray.some(e => this.matchesFilter(e, node.contextValue));
+    }
+
+    isAncestorPick(treeItem: TreeItem, element: unknown): boolean {
+        // `TreeItemCollapsibleState.None` and `undefined` are both falsy, and indicate that a `TreeItem` cannot have children--and therefore, cannot be an ancestor pick
+        return !!treeItem.collapsibleState;
+    }
+
+    private matchesFilter(matcher: string | RegExp, nodeContextValue: string): boolean {
+        if (matcher instanceof RegExp) {
+            return matcher.test(nodeContextValue);
+        }
+
+        // Context value matcher is a string, do full equality (same as old behavior)
+        return nodeContextValue === matcher;
+    }
+}
+
+export function getLastNode<TNode = UnifiedRegistryItem<unknown>>(context: QuickPickWizardContext): TNode | undefined {
+    return context.pickedNodes.at(-1) as TNode | undefined;
+}
+
 

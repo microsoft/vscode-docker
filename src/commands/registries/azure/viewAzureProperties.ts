@@ -11,7 +11,10 @@ import { registryExperience } from "../../../utils/registryExperience";
 
 export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { contextValueFilter: { include: 'azureContainerRegistry' }, registryFilter: { exclude: [ext.genericRegistryV2DataProvider.label, ext.dockerHubRegistryDataProvider.label, ext.githubRegistryDataProvider.label] } });
+        node = await registryExperience(context, ext.registriesTree, {
+            contextValueFilter: { include: /azure;.*commonregistry/ },
+            registryFilter: { exclude: [ext.genericRegistryV2DataProvider.label, ext.dockerHubRegistryDataProvider.label, ext.githubRegistryDataProvider.label] }
+        }) as UnifiedRegistryItem<AzureRegistry>;
     }
 
     const registryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;

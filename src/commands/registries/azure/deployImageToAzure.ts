@@ -34,8 +34,8 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
     const subscriptionItem = await registryExperience(context, ext.registriesTree, {
         contextValueFilter: { include: 'azuresubscription' },
         registryFilter: { exclude: [ext.genericRegistryV2DataProvider.label, ext.dockerHubRegistryDataProvider.label, ext.githubRegistryDataProvider.label] }
-    }) as AzureSubscriptionRegistryItem;
-    const subscriptionContext = createSubscriptionContext(subscriptionItem.subscription);
+    }) as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
+    const subscriptionContext = createSubscriptionContext(subscriptionItem.wrappedItem.subscription);
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
         ...subscriptionContext,
