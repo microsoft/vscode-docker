@@ -81,7 +81,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         } else if (isAzureSubscriptionRegistryItem(element)) {
             const registries = await this.getRegistries(element);
             registries.forEach(registry => {
-                registry.additionalContextValues = ['azure'];
+                registry.additionalContextValues = [...(registry.additionalContextValues || []), 'azure'];
             });
             return registries;
         } else {
@@ -90,7 +90,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             if ((element as AzureRegistryItem)?.subscription) {
                 children.forEach(e => {
                     e.subscription = (element as AzureRegistryItem).subscription;
-                    e.additionalContextValues = ['azure'];
+                    e.additionalContextValues = [...(e.additionalContextValues || []), 'azure'];
                 });
             }
 
