@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
-import { IActionContext, IAzureQuickPickItem, contextValueExperience, nonNullProp } from '@microsoft/vscode-azext-utils';
+import { IActionContext, IAzureQuickPickItem, nonNullProp } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
@@ -12,13 +12,14 @@ import * as readline from 'readline';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
-import { AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem, isUnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { AzureRegistry, AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
+import { registryExperience } from "../../../../utils/registryExperience";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 
 const idPrecision = 6;
@@ -46,8 +47,11 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         throw new Error(vscode.l10n.t('Run Request Type Currently not supported.'));
     }
 
-    const node: UnifiedRegistryItem<AzureRegistryItem> = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azureContainerRegistry' });
-    const registryItem: AzureRegistryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
+    const node: UnifiedRegistryItem<AzureRegistryItem> = await registryExperience<AzureRegistry>(context, {
+        registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+        contextValueFilter: { include: /commonregistry/i },
+    });
+    const registryItem: AzureRegistryItem = node.wrappedItem;
     const resourceGroup = getResourceGroupFromId(registryItem.id);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });

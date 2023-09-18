@@ -12,10 +12,10 @@ import { registryExperience } from "../../utils/registryExperience";
 
 export async function copyRemoteImageDigest(context: IActionContext, node?: UnifiedRegistryItem<V2Tag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, {
-            contextValueFilter: { include: /commontag/, exclude: [/dockerHubTag/] },
-            registryFilter: { exclude: [ext.dockerHubRegistryDataProvider.label] }
-        }) as UnifiedRegistryItem<V2Tag>;
+        node = await registryExperience<V2Tag>(context, {
+            registryFilter: { exclude: [ext.dockerHubRegistryDataProvider.label] },
+            contextValueFilter: { include: /commontag/i, },
+        });
     }
 
     const v2DataProvider = node.provider as unknown as RegistryV2DataProvider;

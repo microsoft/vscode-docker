@@ -8,19 +8,19 @@ import { CommonRegistryItem, isRegistry, isRepository, isTag } from "@microsoft/
 import * as vscode from "vscode";
 import { dockerHubUrl } from "../../../constants";
 import { ext } from "../../../extensionVariables";
-import { UnifiedRegistryItem, isUnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { registryExperience } from "../../../utils/registryExperience";
 
 export async function openDockerHubInBrowser(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistryItem>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, {
-            contextValueFilter: { include: ['dockerHubRegistry'] },
-            registryFilter: { exclude: [ext.azureRegistryDataProvider.label, ext.githubRegistryDataProvider.label, ext.genericRegistryV2DataProvider.label] }
+        node = await registryExperience<CommonRegistryItem>(context, {
+            registryFilter: { include: [ext.dockerHubRegistryDataProvider.label] },
+            contextValueFilter: { include: [/commonregistry/i] },
         });
     }
 
     let url = dockerHubUrl;
-    const dockerHubItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
+    const dockerHubItem = node.wrappedItem;
 
     if (isRegistry(dockerHubItem)) {
         url = `${url}u/${dockerHubItem.label}`;

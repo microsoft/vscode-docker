@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizard, IActionContext, contextValueExperience, createSubscriptionContext, nonNullProp } from '@microsoft/vscode-azext-utils';
+import { AzureWizard, IActionContext, createSubscriptionContext, nonNullProp } from '@microsoft/vscode-azext-utils';
 import { l10n, window } from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
@@ -11,16 +11,22 @@ import { AzureRegistryCreateStep } from '../../../tree/registries/Azure/createWi
 import { AzureRegistryNameStep } from '../../../tree/registries/Azure/createWizard/AzureRegistryNameStep';
 import { AzureRegistrySkuStep } from '../../../tree/registries/Azure/createWizard/AzureRegistrySkuStep';
 import { IAzureRegistryWizardContext } from '../../../tree/registries/Azure/createWizard/IAzureRegistryWizardContext';
-import { UnifiedRegistryItem, isUnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 
 export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<void> {
 
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' });
+        node = await registryExperience<AzureSubscriptionRegistryItem>(context,
+            {
+                contextValueFilter: { include: /azuresubscription/i },
+                registryFilter: { include: [ext.azureRegistryDataProvider.label] }
+            }
+        );
     }
 
-    const registryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
+    const registryItem = node.wrappedItem;
 
     const subscriptionContext = createSubscriptionContext(registryItem.subscription);
     const wizardContext: IAzureRegistryWizardContext = {

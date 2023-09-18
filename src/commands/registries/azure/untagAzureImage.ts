@@ -3,17 +3,21 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { contextValueExperience, IActionContext } from "@microsoft/vscode-azext-utils";
+import { IActionContext } from "@microsoft/vscode-azext-utils";
 import { l10n, ProgressLocation, window } from "vscode";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistryDataProvider, AzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
 import { getFullImageNameFromRegistryTagItem } from "../../../tree/registries/registryTreeUtils";
 import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { registryExperience } from "../../../utils/registryExperience";
 
 export async function untagAzureImage(context: IActionContext, node?: UnifiedRegistryItem<AzureTag>): Promise<void> {
     if (!node) {
         // we can't pass in the azure tree provider because it's not a UnifiedRegistryItem and we need the provider to untag
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'azureContainerTag' });
+        node = await registryExperience<AzureTag>(context, {
+            registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+            contextValueFilter: { include: /commontag/i },
+        });
     }
 
     const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);
