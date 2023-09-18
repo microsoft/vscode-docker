@@ -12,8 +12,8 @@ import { registryExperience } from "../../../utils/registryExperience";
 export async function removeTrackedGenericV2Registry(context: IActionContext, node?: UnifiedRegistryItem<GenericV2Registry>): Promise<void> {
     if (!node) {
         node = await registryExperience<GenericV2Registry>(context, {
+            registryFilter: { include: [ext.genericRegistryV2DataProvider.label] },
             contextValueFilter: { include: /commonregistry/i },
-            registryFilter: { include: [ext.genericRegistryV2DataProvider.label] }
         });
     }
 
