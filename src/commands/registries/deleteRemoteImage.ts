@@ -49,6 +49,5 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
     // don't wait
     void ext.registriesTree.refresh();
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(l10n.t('Successfully deleted image "{0}".', tagName));
+    void window.showInformationMessage(l10n.t('Successfully deleted image "{0}".', tagName));
 }
