@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IAzureQuickPickItem, IWizardOptions, PickFilter, QuickPickWizardContext, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
 import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries';
 import { TreeItem, TreeItemLabel } from 'vscode';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
@@ -23,13 +23,9 @@ export interface RegistryExperienceOptions extends ContextValueFilterQuickPickOp
 export async function registryExperience(context: IActionContext, tdp: UnifiedRegistryTreeDataProvider, options: RegistryExperienceOptions): Promise<UnifiedRegistryItem<CommonRegistryItem>> {
     // get the registry provider unified item
     const registryProviderStep: AzureWizardPromptStep<QuickPickWizardContext>[] = [
-        new RegistryQuickPickStep(
+        new RegistryRecursiveQuickPickStep(
             tdp,
             { ...options, skipIfOne: true }
-        ),
-        new RecursiveQuickPickStep(
-            tdp,
-            options
         )
     ];
 
@@ -114,6 +110,32 @@ export class RegistryPickFilter implements PickFilter {
 
         // Context value matcher is a string, do full equality (same as old behavior)
         return nodeContextValue === matcher;
+    }
+}
+
+export class RegistryRecursiveQuickPickStep<TContext extends QuickPickWizardContext> extends RegistryQuickPickStep {
+    hideStepCount: boolean = true;
+
+    public async getSubWizard(wizardContext: TContext): Promise<IWizardOptions<TContext> | undefined> {
+        const lastPickedItem = getLastNode(wizardContext);
+
+        if (!lastPickedItem) {
+            // Something went wrong, no node was chosen
+            throw new Error('No node was set after prompt step.');
+        }
+
+        if (this.pickFilter.isFinalPick(await this.treeDataProvider.getTreeItem(lastPickedItem), lastPickedItem)) {
+            // The last picked node matches the expected filter
+            // No need to continue prompting
+            return undefined;
+        } else {
+            // Need to keep going because the last picked node is not a match
+            return {
+                promptSteps: [
+                    new RegistryRecursiveQuickPickStep(this.treeDataProvider, { ...this.pickOptions, skipIfOne: true })
+                ],
+            };
+        }
     }
 }
 
