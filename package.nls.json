@@ -293,6 +293,7 @@
     "vscode-docker.commands.contexts.configureExplorer": "Configure Explorer...",
     "vscode-docker.commands.contexts.refresh": "Refresh",
     "vscode-docker.commands.contexts.help": "Docker Context Help",
+    "vscode-docker.commands.activateRegistryProviders": "Activate Registry Providers...",
     "vscode-docker.commands.category.docker": "Docker",
     "vscode-docker.commands.category.dockerContainers": "Docker Containers",
     "vscode-docker.commands.category.dockerImages": "Docker Images",
