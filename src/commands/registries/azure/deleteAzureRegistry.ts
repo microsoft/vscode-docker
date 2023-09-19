@@ -12,7 +12,6 @@ import { registryExperience } from '../../../utils/registryExperience';
 
 export async function deleteAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        // we can't pass in the azure tree provider because it's not a UnifiedRegistryItem and we need the provider to delete
         node = await registryExperience<AzureRegistry>(context, {
             contextValueFilter: { include: /commonregistry/i },
             registryFilter: { include: [ext.azureRegistryDataProvider.label] }
