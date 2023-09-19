@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from "@microsoft/vscode-azext-utils";
-import { GenericV2Registry, RegistryConnectError, isGenericV2Registry } from "@microsoft/vscode-docker-registries";
+import { RegistryConnectError, V2Registry, isGenericV2Registry } from "@microsoft/vscode-docker-registries";
 import { l10n } from 'vscode';
 import { ext } from "../../extensionVariables";
 import { UnifiedRegistryItem } from "../../tree/registries/UnifiedRegistryTreeDataProvider";
@@ -16,7 +16,7 @@ export async function reconnectRegistry(context: IActionContext, node?: UnifiedR
     }
 
     if (isGenericV2Registry(node.parent.wrappedItem)) {
-        await ext.genericRegistryV2DataProvider.removeTrackedRegistry(node.parent.wrappedItem as GenericV2Registry);
+        await ext.genericRegistryV2DataProvider.removeTrackedRegistry(node.parent.wrappedItem as V2Registry);
         await ext.genericRegistryV2DataProvider.addTrackedRegistry();
     } else {
         await ext.registriesTree.disconnectRegistryProvider(node.parent);

@@ -13,7 +13,10 @@ import { registryExperience } from '../../utils/registryExperience';
 
 export async function deleteRemoteImage(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.registriesTree, { include: 'commontag', exclude: ['githubRegistryTag', 'dockerHubTag'] }, false);
+        node = await registryExperience<CommonTag>(context, {
+            registryFilter: { exclude: [ext.githubRegistryDataProvider.label, ext.dockerHubRegistryDataProvider.label] },
+            contextValueFilter: { include: /commontag/i },
+        });
     }
 
     const provider = node.provider as unknown as CommonRegistryDataProvider;
@@ -46,6 +49,5 @@ export async function deleteRemoteImage(context: IActionContext, node?: UnifiedR
     // Other tags that also matched the image may have been deleted, so refresh the whole repository
     // don't wait
     void ext.registriesTree.refresh();
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    window.showInformationMessage(l10n.t('Successfully deleted image "{0}".', tagName));
+    void window.showInformationMessage(l10n.t('Successfully deleted image "{0}".', tagName));
 }

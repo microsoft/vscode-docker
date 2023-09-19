@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, NoResourceFoundError, contextValueExperience } from '@microsoft/vscode-azext-utils';
+import { IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-utils';
 import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
@@ -11,6 +11,7 @@ import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { registryExperience } from '../../utils/registryExperience';
 import { addImageTaggingTelemetry, tagImage } from './tagImage';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -31,7 +32,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         // If the prompt setting is true, we'll ask; if not we'll assume Docker Hub.
         if (prompt) {
             try {
-                connectedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });
+                connectedRegistry = await registryExperience<CommonRegistry>(context, { contextValueFilter: { include: [/commonregistry/i] } });
             } catch (error) {
                 if (error instanceof NoResourceFoundError) {
                     // Do nothing, move on without a selected registry
@@ -42,7 +43,14 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             }
         } else {
             // Try to find a connected Docker Hub registry (primarily for login credentials)
-            connectedRegistry = await contextValueExperience(context, ext.dockerHubRegistryDataProvider, { include: ['dockerHubRegistry'] });
+            connectedRegistry = await registryExperience<CommonRegistry>(
+                context,
+                {
+                    registryFilter: { include: [ext.dockerHubRegistryDataProvider.label] },
+                    contextValueFilter: { include: /commonregistry/i },
+                    skipIfOne: true
+                }
+            );
         }
     } else {
         // The registry to push to is determinate. If there's a connected registry in the tree view, we'll try to find it, to perform login ahead of time.
@@ -84,7 +92,7 @@ async function tryGetConnectedRegistryForPath(context: IActionContext, baseImage
     let matchedRegistry = allRegistries.find((registry) => registry.wrappedItem.baseUrl.authority === baseImageNameInfo.registry);
 
     if (!matchedRegistry) {
-        matchedRegistry = await contextValueExperience(context, ext.registriesTree, { include: ['commonregistry'] });
+        matchedRegistry = await registryExperience<CommonRegistry>(context, { contextValueFilter: { include: [/commonregistry/i] } });
     }
 
     return matchedRegistry;

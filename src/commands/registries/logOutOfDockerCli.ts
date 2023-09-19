@@ -3,16 +3,17 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, contextValueExperience } from '@microsoft/vscode-azext-utils';
+import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
 import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { registryExperience } from '../../utils/registryExperience';
 
 export async function logOutOfDockerCli(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistry>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'commonregistry' });
+        node = await registryExperience<CommonRegistry>(context, { contextValueFilter: { include: /commonregistry/i } });
     }
     const serverUrl = (await node.provider.getLoginInformation?.(node.wrappedItem))?.server;
     if (!serverUrl) {
