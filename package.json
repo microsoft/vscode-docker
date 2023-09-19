@@ -492,7 +492,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;dockerhub/i)",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;.*dockerhub/i)",
                     "group": "regs_tag_1_general@3"
                 },
                 {
@@ -512,22 +512,22 @@
                 },
                 {
                     "command": "vscode-docker.registries.deleteImage",
-                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;(dockerhub|github)/i)",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;.*(dockerhub|github)/i)",
                     "group": "regs_tag_2_destructive@2"
                 },
                 {
                     "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /commonregistryroot;generic/i)",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /commonregistryroot;.*generic/i)",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /commonregistry;generic/i",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistry;.*generic/i",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot;generic/i",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot;.*generic/i",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
@@ -537,7 +537,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.dockerHub.openInBrowser",
-                    "when": "view == dockerRegistries && viewItem =~ /(commonregistry|commonrepository|commontag);dockerhub/i",
+                    "when": "view == dockerRegistries && viewItem =~ /(commonregistry|commonrepository|commontag);.*dockerhub/i",
                     "group": "regs_zzz_common@1"
                 },
                 {
