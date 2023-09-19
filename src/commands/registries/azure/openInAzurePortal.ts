@@ -3,18 +3,22 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext, contextValueExperience, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
+import { IActionContext, createSubscriptionContext } from '@microsoft/vscode-azext-utils';
 import { ext } from '../../../extensionVariables';
 import { AzureRegistry, AzureRepository, AzureSubscriptionRegistryItem, isAzureRegistry, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
-import { UnifiedRegistryItem, isUnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 
 export async function openInAzurePortal(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry | AzureSubscriptionRegistryItem | AzureRepository>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.azureRegistryDataProvider, { include: ['azureContainerRegistry'] });
+        node = await registryExperience<AzureRegistry>(context, {
+            registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+            contextValueFilter: { include: [/commonregistry/i] },
+        });
     }
 
-    const azureRegistryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
+    const azureRegistryItem = node.wrappedItem;
     const azExtAzureUtils = await getAzExtAzureUtils();
     let subscriptionContext = undefined;
     if (isAzureSubscriptionRegistryItem(azureRegistryItem)) {

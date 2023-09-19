@@ -5,7 +5,7 @@
 
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, contextValueExperience, createSubscriptionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, createSubscriptionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
 import { CommonTag } from '@microsoft/vscode-docker-registries';
 import { Uri, env, l10n, window } from "vscode";
 import { ext } from "../../../extensionVariables";
@@ -24,15 +24,18 @@ export interface IAppServiceContainerWizardContext extends IAppServiceWizardCont
 
 export async function deployImageToAzure(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: ['commontag'], });
+        node = await registryExperience<CommonTag>(context, { contextValueFilter: { include: 'commontag' } });
     }
 
     const azExtAzureUtils = await getAzExtAzureUtils();
     const vscAzureAppService = await getAzExtAppService();
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
-    const subscriptionItem = await registryExperience(context, ext.azureRegistryDataProvider, { include: 'azuresubscription' }) as AzureSubscriptionRegistryItem;
-    const subscriptionContext = createSubscriptionContext(subscriptionItem.subscription);
+    const subscriptionItem = await registryExperience<AzureSubscriptionRegistryItem>(context, {
+        registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+        contextValueFilter: { include: /azuresubscription/i },
+    });
+    const subscriptionContext = createSubscriptionContext(subscriptionItem.wrappedItem.subscription);
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
         ...subscriptionContext,

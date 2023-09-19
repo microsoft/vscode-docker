@@ -6,7 +6,7 @@
 import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, getContextValue, registryV2Request } from '@microsoft/vscode-docker-registries';
-import { CommonRegistryItem, isRegistryRoot } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
+import { CommonRegistryItem, isRegistry, isRegistryRoot, isRepository, isTag } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
 import { createAzureContainerRegistryClient, getResourceGroupFromId } from '../../../utils/azureUtils';
 import { ACROAuthProvider } from './ACROAuthProvider';
@@ -34,15 +34,15 @@ export function isAzureSubscriptionRegistryItem(item: unknown): item is AzureSub
 }
 
 export function isAzureRegistry(item: unknown): item is AzureRegistry {
-    return !!item && typeof item === 'object' && (item as AzureRegistryItem).additionalContextValues?.includes('azureContainerRegistry');
+    return isRegistry(item) && item.additionalContextValues?.includes('azure');
 }
 
 export function isAzureRepository(item: unknown): item is AzureRepository {
-    return !!item && typeof item === 'object' && (item as AzureRepository).additionalContextValues?.includes('azureContainerRepository');
+    return isRepository(item) && item.additionalContextValues?.includes('azure');
 }
 
 export function isAzureTag(item: unknown): item is AzureTag {
-    return !!item && typeof item === 'object' && (item as AzureTag).additionalContextValues?.includes('azureContainerTag');
+    return isTag(item) && item.additionalContextValues?.includes('azure');
 }
 
 export class AzureRegistryDataProvider extends RegistryV2DataProvider implements vscode.Disposable {
@@ -79,13 +79,18 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                 } as AzureSubscriptionRegistryItem;
             });
         } else if (isAzureSubscriptionRegistryItem(element)) {
-            return await this.getRegistries(element);
+            const registries = await this.getRegistries(element);
+            registries.forEach(registry => {
+                registry.additionalContextValues = [...(registry.additionalContextValues || []), 'azure'];
+            });
+            return registries;
         } else {
             const children = await super.getChildren(element);
 
             if ((element as AzureRegistryItem)?.subscription) {
                 children.forEach(e => {
                     e.subscription = (element as AzureRegistryItem).subscription;
+                    e.additionalContextValues = [...(e.additionalContextValues || []), 'azure'];
                 });
             }
 
@@ -124,25 +129,6 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         });
     }
 
-    public override async getRepositories(registry: AzureRegistry): Promise<AzureRepository[]> {
-        const repositories = await super.getRepositories(registry);
-        const repositoriesWithAdditionalContext = repositories.map(repository => ({
-            ...repository,
-            additionalContextValues: ['azureContainerRepository']
-        }));
-
-        return repositoriesWithAdditionalContext;
-    }
-
-    public override async getTags(repository: AzureRepository): Promise<AzureTag[]> {
-        const tags = await super.getTags(repository);
-        tags.forEach(tag => {
-            tag.additionalContextValues = [...tag.additionalContextValues, 'azureContainerTag'];
-        });
-
-        return tags;
-    }
-
     public override getTreeItem(element: CommonRegistryItem): Promise<vscode.TreeItem> {
         if (isAzureSubscriptionRegistryItem(element)) {
             return Promise.resolve({
@@ -158,11 +144,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public async deleteRepository(item: AzureRepository): Promise<void> {
         const authenticationProvider = this.getAuthenticationProvider(item.parent as unknown as AzureRegistryItem);
-
+        const requestUrl = item.baseUrl.with({ path: `v2/_acr/${item.label}/repository` });
         const reponse = await registryV2Request({
             method: 'DELETE',
-            registryUri: item.baseUrl,
-            path: ['v2', '_acr', `${item.label}`, 'repository'],
+            requestUri: requestUrl,
             scopes: [`repository:${item.label}:delete`],
             authenticationProvider: authenticationProvider,
         });
@@ -180,11 +165,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
     public async untagImage(item: AzureTag): Promise<void> {
         const authenticationProvider = this.getAuthenticationProvider(item.parent.parent as unknown as AzureRegistryItem);
-
+        const requestUrl = item.baseUrl.with({ path: `v2/_acr/${item.parent.label}/tags/${item.label}` });
         const reponse = await registryV2Request({
             method: 'DELETE',
-            registryUri: item.baseUrl,
-            path: ['v2', '_acr', `${item.parent.label}`, 'tags', `${item.label}`],
+            requestUri: requestUrl,
             scopes: [`repository:${item.parent.label}:delete`],
             authenticationProvider: authenticationProvider,
         });

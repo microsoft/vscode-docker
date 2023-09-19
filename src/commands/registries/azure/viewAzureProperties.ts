@@ -6,14 +6,17 @@
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
 import { AzureRegistry } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
-import { UnifiedRegistryItem, isUnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
 import { registryExperience } from "../../../utils/registryExperience";
 
 export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await registryExperience(context, ext.azureRegistryDataProvider, { 'include': 'azureContainerRegistry' }, true);
+        node = await registryExperience<AzureRegistry>(context, {
+            registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+            contextValueFilter: { include: /commonregistry/i },
+        });
     }
 
-    const registryItem = isUnifiedRegistryItem(node) ? node.wrappedItem : node;
+    const registryItem = node.wrappedItem;
     await openReadOnlyJson({ label: registryItem.label, fullId: registryItem.id }, registryItem.registryProperties);
 }

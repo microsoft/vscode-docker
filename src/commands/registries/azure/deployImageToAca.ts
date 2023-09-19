@@ -3,16 +3,16 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { contextValueExperience, IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { IActionContext, nonNullProp, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import { CommonRegistry, CommonTag, isDockerHubRegistry, LoginInformation } from '@microsoft/vscode-docker-registries';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
-import { ext } from '../../../extensionVariables';
 import { isAzureRegistry } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { installExtension } from '../../../utils/installExtension';
+import { registryExperience } from '../../../utils/registryExperience';
 import { addImageTaggingTelemetry } from '../../images/tagImage';
 
 const acaExtensionId = 'ms-azuretools.vscode-azurecontainerapps';
@@ -35,7 +35,7 @@ export async function deployImageToAca(context: IActionContext, node?: UnifiedRe
     }
 
     if (!node) {
-        node = await contextValueExperience(context, ext.registriesTree, { include: 'commontag' });
+        node = await registryExperience<CommonTag>(context, { contextValueFilter: { include: /commontag/i } });
     }
 
     const commandOptions: Partial<DeployImageToAcaOptionsContract> = {
