@@ -97,7 +97,7 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
             if (canReferenceWrapper(child) && child._urtdp_wrapper) {
                 this.onDidChangeTreeDataEmitter.fire(child._urtdp_wrapper);
             } else {
-                // TODO this.onDidChangeTreeDataEmitter.fire(undefined);
+                this.onDidChangeTreeDataEmitter.fire(undefined);
             }
         });
 
