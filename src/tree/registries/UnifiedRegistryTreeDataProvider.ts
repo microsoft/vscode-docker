@@ -3,6 +3,15 @@ import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
 
+interface WrappedElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    _urtdp_wrapper: UnifiedRegistryItem<unknown>;
+}
+
+function canReferenceWrapper(item: unknown): item is WrappedElement {
+    return !!item && typeof item === 'object';
+}
+
 export interface UnifiedRegistryItem<T> {
     provider: RegistryDataProvider<T>;
     wrappedItem: T;
@@ -43,7 +52,7 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 };
 
                 if (canReferenceWrapper(child)) {
-                    child.urtdp_wrapper = wrapper;
+                    child._urtdp_wrapper = wrapper;
                 }
 
                 results.push(wrapper);
@@ -85,8 +94,8 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
     public registerProvider(provider: RegistryDataProvider<unknown>): vscode.Disposable {
         this.providers.set(provider.id, provider);
         const disposable = provider.onDidChangeTreeData((child) => {
-            if (canReferenceWrapper(child) && child.urtdp_wrapper) {
-                this.onDidChangeTreeDataEmitter.fire(child.urtdp_wrapper);
+            if (canReferenceWrapper(child) && child._urtdp_wrapper) {
+                this.onDidChangeTreeDataEmitter.fire(child._urtdp_wrapper);
             } else {
                 // TODO this.onDidChangeTreeDataEmitter.fire(undefined);
             }
