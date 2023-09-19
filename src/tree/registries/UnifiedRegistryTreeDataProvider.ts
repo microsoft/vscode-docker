@@ -3,6 +3,15 @@ import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
 
+interface WrappedElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    _urtdp_wrapper: UnifiedRegistryItem<unknown>;
+}
+
+function canReferenceWrapper(item: unknown): item is WrappedElement {
+    return !!item && typeof item === 'object';
+}
+
 export interface UnifiedRegistryItem<T> {
     provider: RegistryDataProvider<T>;
     wrappedItem: T;
@@ -33,13 +42,23 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 return [];
             }
 
-            return elements.map(e => {
-                return {
+            const results: UnifiedRegistryItem<unknown>[] = [];
+
+            for (const child of elements) {
+                const wrapper = {
                     provider: element.provider,
-                    wrappedItem: e,
+                    wrappedItem: child,
                     parent: element
                 };
-            });
+
+                if (canReferenceWrapper(child)) {
+                    child._urtdp_wrapper = wrapper;
+                }
+
+                results.push(wrapper);
+            }
+
+            return results;
         } else {
             const unifiedRoots: UnifiedRegistryItem<unknown>[] = [];
 
@@ -74,9 +93,17 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
 
     public registerProvider(provider: RegistryDataProvider<unknown>): vscode.Disposable {
         this.providers.set(provider.id, provider);
+        const disposable = provider.onDidChangeTreeData((child) => {
+            if (canReferenceWrapper(child) && child._urtdp_wrapper) {
+                this.onDidChangeTreeDataEmitter.fire(child._urtdp_wrapper);
+            } else {
+                this.onDidChangeTreeDataEmitter.fire(undefined);
+            }
+        });
 
         return {
             dispose: () => {
+                disposable.dispose();
                 this.providers.delete(provider.id);
             }
         };
