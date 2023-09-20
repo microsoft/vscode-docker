@@ -18,6 +18,12 @@ export async function removeTrackedGenericV2Registry(context: IActionContext, no
     }
 
     await ext.genericRegistryV2DataProvider.removeTrackedRegistry(node.wrappedItem);
+
+    // remove the provider if it's the last one
+    if ((await ext.genericRegistryV2DataProvider.getRegistries(node.parent.wrappedItem)).length === 0) {
+        await ext.registriesTree.disconnectRegistryProvider(node.parent);
+    }
+
     // don't wait
     void ext.registriesTree.refresh();
 }
