@@ -65,10 +65,6 @@ export async function getNetSdkRunCommand(isProjectWebApp: boolean, imageName: s
         entrypoint: await getDockerOSType() === 'windows' ? 'cmd.exe' : '/bin/sh'
     };
 
-    if (isProjectWebApp) {
-        options.exposePorts = [8080, 80]; // the default port is 8080 for .NET 8 and 80 for .NET 7
-    }
-
     const command = await client.runContainer(options);
     const quotedArgs = Shell.getShellOrDefault().quote(command.args);
     const commandLine = [client.commandName, ...quotedArgs].join(' ');
