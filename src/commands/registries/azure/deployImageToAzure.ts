@@ -5,45 +5,43 @@
 
 import type { Site } from '@azure/arm-appservice'; // These are only dev-time imports so don't need to be lazy
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
-import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
-import { env, l10n, Uri, window } from "vscode";
+import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionContext, createSubscriptionContext, nonNullProp } from "@microsoft/vscode-azext-utils";
+import { CommonTag } from '@microsoft/vscode-docker-registries';
+import { Uri, env, l10n, window } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { RegistryApi } from '../../../tree/registries/all/RegistryApi';
-import { azureRegistryProviderId } from '../../../tree/registries/azure/azureRegistryProvider';
-import { registryExpectedContextValues } from '../../../tree/registries/registryContextValues';
-import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
-import { getAzActTreeItem, getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
 import { WebSitesPortPromptStep } from './WebSitesPortPromptStep';
 
-
 export interface IAppServiceContainerWizardContext extends IAppServiceWizardContext {
     webSitesPort?: number;
 }
 
-export async function deployImageToAzure(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
+export async function deployImageToAzure(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerHub.tag, registryExpectedContextValues.dockerV2.tag], context);
+        node = await registryExperience<CommonTag>(context, { contextValueFilter: { include: 'commontag' } });
     }
 
     const azExtAzureUtils = await getAzExtAzureUtils();
     const vscAzureAppService = await getAzExtAppService();
-    const azActTreeItem = await getAzActTreeItem();
+    const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
+    const subscriptionItem = await registryExperience<AzureSubscriptionRegistryItem>(context, {
+        registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+        contextValueFilter: { include: /azuresubscription/i },
+    });
+    const subscriptionContext = createSubscriptionContext(subscriptionItem.wrappedItem.subscription);
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
+        ...subscriptionContext,
         newSiteOS: vscAzureAppService.WebsiteOS.linux,
         newSiteKind: vscAzureAppService.AppKind.app
     };
-    const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
-    // Create a temporary azure account tree item since Azure might not be connected
-    const azureAccountTreeItem = new azActTreeItem.AzureAccountTreeItem(ext.registriesRoot, { id: azureRegistryProviderId, api: RegistryApi.DockerV2 });
-    const subscriptionStep = await azureAccountTreeItem.getSubscriptionPromptStep(wizardContext);
-    if (subscriptionStep) {
-        promptSteps.push(subscriptionStep);
-    }
 
     promptSteps.push(new vscAzureAppService.SiteNameStep());
     promptSteps.push(new azExtAzureUtils.ResourceGroupListStep());

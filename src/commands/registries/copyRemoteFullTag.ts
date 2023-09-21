@@ -4,20 +4,17 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { CommonTag } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
-import { ext } from '../../extensionVariables';
-import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
-import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getFullImageNameFromRegistryTagItem } from '../../tree/registries/registryTreeUtils';
+import { registryExperience } from '../../utils/registryExperience';
 
-export async function copyRemoteFullTag(context: IActionContext, node?: RemoteTagTreeItem): Promise<string> {
+export async function copyRemoteFullTag(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<string> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>([registryExpectedContextValues.dockerV2.tag, registryExpectedContextValues.dockerHub.tag], {
-            ...context,
-            noItemFoundErrorMessage: vscode.l10n.t('No remote images are available to copy the full tag')
-        });
+        node = await registryExperience<CommonTag>(context, { contextValueFilter: { include: /commontag/i } });
     }
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    // Don't wait
-    void vscode.env.clipboard.writeText(node.fullTag);
-    return node.fullTag;
+    const fullTag = getFullImageNameFromRegistryTagItem(node.wrappedItem);
+    void vscode.env.clipboard.writeText(fullTag);
+    return fullTag;
 }

@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import type { Run } from '@azure/arm-containerregistry';
-import { scheduleRunRequest, RootStrategy } from './scheduleRunRequest';
-import { delay } from '../../../../utils/promiseUtils';
+import { IActionContext, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import * as vscode from 'vscode';
 import { getArmContainerRegistry } from '../../../../utils/lazyPackages';
+import { delay } from '../../../../utils/promiseUtils';
+import { RootStrategy, scheduleRunRequest } from './scheduleRunRequest';
 
 const WAIT_MS = 5000;
 
@@ -18,7 +18,7 @@ export async function buildImageInAzure(context: IActionContext, uri?: vscode.Ur
     }
 
     const getRun = await scheduleRunRequest(context, "DockerBuildRequest", uri, rootStrategy);
-    
+
     let run = await getRun();
     const { KnownRunStatus } = await getArmContainerRegistry();
     while (

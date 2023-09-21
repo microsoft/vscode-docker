@@ -5,9 +5,10 @@
 
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils';
 import { AzureWizardExecuteStep, nonNullProp, parseError } from '@microsoft/vscode-azext-utils';
-import { l10n, Progress } from 'vscode';
+import { Progress, l10n } from 'vscode';
 import { ext } from '../../../../extensionVariables';
-import { getArmContainerRegistry, getAzExtAzureUtils } from '../../../../utils/lazyPackages';
+import { createAzureContainerRegistryClient } from '../../../../utils/azureUtils';
+import { getAzExtAzureUtils } from '../../../../utils/lazyPackages';
 import { IAzureRegistryWizardContext } from './IAzureRegistryWizardContext';
 
 export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegistryWizardContext> {
@@ -16,9 +17,9 @@ export class AzureRegistryCreateStep extends AzureWizardExecuteStep<IAzureRegist
     public async execute(context: IAzureRegistryWizardContext, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
         const newRegistryName = nonNullProp(context, 'newRegistryName');
 
+        const client = await createAzureContainerRegistryClient(context.azureSubscription);
+
         const azExtAzureUtils = await getAzExtAzureUtils();
-        const armContainerRegistry = await getArmContainerRegistry();
-        const client = azExtAzureUtils.createAzureClient(context, armContainerRegistry.ContainerRegistryManagementClient);
         const creating: string = l10n.t('Creating registry "{0}"...', newRegistryName);
         ext.outputChannel.info(creating);
         progress.report({ message: creating });

@@ -4,32 +4,33 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry, CommonRepository, CommonTag } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
-import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
-import { RemoteRepositoryTreeItemBase } from '../../tree/registries/RemoteRepositoryTreeItemBase';
-import { RemoteTagTreeItem } from '../../tree/registries/RemoteTagTreeItem';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getFullImageNameFromRegistryTagItem, getFullRepositoryNameFromRepositoryItem } from '../../tree/registries/registryTreeUtils';
+import { registryExperience } from '../../utils/registryExperience';
 import { logInToDockerCli } from './logInToDockerCli';
 
-export async function pullRepository(context: IActionContext, node?: RemoteRepositoryTreeItemBase): Promise<void> {
+export async function pullRepository(context: IActionContext, node?: UnifiedRegistryItem<CommonRepository>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteRepositoryTreeItemBase>(registryExpectedContextValues.all.repository, context);
+        node = await registryExperience<CommonRepository>(context, { contextValueFilter: { include: /commonrepository/i } });
     }
 
-    await pullImages(context, node.parent, node.repoName, true);
+    await pullImages(context, node.parent, getFullRepositoryNameFromRepositoryItem(node.wrappedItem), true);
 }
 
-export async function pullImageFromRepository(context: IActionContext, node?: RemoteTagTreeItem): Promise<void> {
+export async function pullImageFromRepository(context: IActionContext, node?: UnifiedRegistryItem<CommonTag>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RemoteTagTreeItem>(registryExpectedContextValues.all.tag, context);
+        node = await registryExperience<CommonTag>(context, { contextValueFilter: { include: /commontag/i } });
     }
 
-    await pullImages(context, node.parent.parent, node.repoNameAndTag, false);
+    await pullImages(context, node.parent.parent, getFullImageNameFromRegistryTagItem(node.wrappedItem), false);
 }
 
-async function pullImages(context: IActionContext, node: RegistryTreeItemBase, imageRequest: string, allTags: boolean): Promise<void> {
-    await logInToDockerCli(context, node);
+async function pullImages(context: IActionContext, node: UnifiedRegistryItem<unknown>, imageRequest: string, allTags: boolean): Promise<void> {
+    const registryNode = node as UnifiedRegistryItem<CommonRegistry>;
+    await logInToDockerCli(context, registryNode);
 
     const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory({
@@ -39,7 +40,7 @@ async function pullImages(context: IActionContext, node: RegistryTreeItemBase, i
     await taskCRF.getCommandRunner()(
         client.pullImage(
             {
-                imageRef: `${node.baseImagePath}/${imageRequest}`,
+                imageRef: imageRequest,
                 allTags: allTags,
             }
         )

@@ -123,10 +123,6 @@
                     "when": "isWorkspaceTrusted"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
-                    "when": "isWorkspaceTrusted"
-                },
-                {
                     "command": "vscode-docker.help.openWalkthrough",
                     "when": "never"
                 },
@@ -145,17 +141,16 @@
                 {
                     "command": "vscode-docker.containers.group.remove",
                     "when": "never"
+                },
+                {
+                    "command": "vscode-docker.activateRegistryProviders",
+                    "when": "never"
                 }
             ],
             "editor/context": [
                 {
-                    "when": "isWorkspaceTrusted && editorLangId == dockerfile && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && editorLangId == dockerfile",
                     "command": "vscode-docker.registries.azure.buildImage",
-                    "group": "docker"
-                },
-                {
-                    "when": "isWorkspaceTrusted && editorLangId == yaml && isAzureAccountInstalled",
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
@@ -186,13 +181,8 @@
             ],
             "explorer/context": [
                 {
-                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i && isAzureAccountInstalled",
+                    "when": "isWorkspaceTrusted && resourceFilename =~ /dockerfile/i",
                     "command": "vscode-docker.registries.azure.buildImage",
-                    "group": "docker"
-                },
-                {
-                    "when": "isWorkspaceTrusted && resourceLangId == yaml && isAzureAccountInstalled",
-                    "command": "vscode-docker.registries.azure.runFileAsTask",
                     "group": "docker"
                 },
                 {
@@ -465,11 +455,6 @@
                     "group": "inline"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.viewTaskLogs",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "inline"
-                },
-                {
                     "command": "vscode-docker.networks.inspect",
                     "when": "view == dockerNetworks && viewItem =~ /network$/i",
                     "group": "networks_1_general@1"
@@ -481,102 +466,92 @@
                 },
                 {
                     "command": "vscode-docker.registries.azure.createRegistry",
-                    "when": "view == dockerRegistries && viewItem == azureextensionui.azureSubscription",
+                    "when": "view == dockerRegistries && viewItem =~ /azuresubscription/i",
                     "group": "regs_1_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.deleteRegistry",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Registry;",
+                    "when": "view == dockerRegistries && viewItem =~ /azure;.*commonregistry/i",
                     "group": "regs_reg_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.pullRepository",
-                    "when": "view == dockerRegistries && viewItem =~ /Repository;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commonrepository/",
                     "group": "regs_repo_1_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.deleteRepository",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Repository;",
+                    "when": "view == dockerRegistries && viewItem =~ /azure;.*commonrepository/i",
                     "group": "regs_repo_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.pullImage",
-                    "when": "view == dockerRegistries && viewItem =~ /Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@1"
                 },
                 {
                     "command": "vscode-docker.registries.copyRemoteFullTag",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@2"
                 },
                 {
                     "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;.*dockerhub/i)",
                     "group": "regs_tag_1_general@3"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAzure",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2);Tag;/ && isAzureAccountInstalled",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@4"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAca",
-                    "when": "view == dockerRegistries && viewItem =~ /(DockerV2|DockerHubV2|GitLabV4);Tag;/ && isAzureAccountInstalled",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i",
                     "group": "regs_tag_1_general@6"
                 },
                 {
                     "command": "vscode-docker.registries.azure.untagImage",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;Tag;",
+                    "when": "view == dockerRegistries && viewItem =~ /azure;.*commontag/i",
                     "group": "regs_tag_2_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.deleteImage",
-                    "when": "view == dockerRegistries && viewItem =~ /DockerV2;Tag;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;.*(dockerhub|github)/i)",
                     "group": "regs_tag_2_destructive@2"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.runTask",
-                    "when": "view == dockerRegistries && viewItem == azureTask",
-                    "group": "regs_task_1_general@1"
-                },
-                {
-                    "command": "vscode-docker.registries.copyImageDigest",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "regs_taskRun_1_general@1"
-                },
-                {
-                    "command": "vscode-docker.registries.azure.viewTaskLogs",
-                    "when": "view == dockerRegistries && viewItem == azureTaskRun",
-                    "group": "regs_taskRun_1_general@2"
-                },
-                {
                     "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /RegistryProvider;/",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /commonregistryroot;.*generic/i)",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
-                    "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem == invalidRegistryProvider",
+                    "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistry;.*generic/i",
+                    "group": "regs_yyy_destructive@1"
+                },
+                {
+                    "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot;.*generic/i",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.openInPortal",
-                    "when": "view == dockerRegistries && viewItem =~ /azure(Subscription|;DockerV2;Registry;)/",
+                    "when": "view == dockerRegistries && viewItem =~ /azuresubscription|azure;.*(commonregistry|commonrepository)/i",
                     "group": "regs_zzz_common@1"
                 },
                 {
                     "command": "vscode-docker.registries.dockerHub.openInBrowser",
-                    "when": "view == dockerRegistries && viewItem =~ /dockerHub;DockerHubV2;(Tag|Repository|Registry);/",
+                    "when": "view == dockerRegistries && viewItem =~ /(commonregistry|commonrepository|commontag);.*dockerhub/i",
                     "group": "regs_zzz_common@1"
                 },
                 {
                     "command": "vscode-docker.registries.azure.viewProperties",
-                    "when": "view == dockerRegistries && viewItem =~ /azure(TaskRun|;DockerV2;Registry;)/",
+                    "when": "view == dockerRegistries && viewItem =~ /azure;.*commonregistry/i",
                     "group": "regs_zzz_common@2"
                 },
                 {
                     "command": "vscode-docker.registries.reconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem == registryConnectError",
+                    "when": "view == dockerRegistries && viewItem =~ /registryConnectError/i",
                     "group": "regs_zzz_common@8"
                 },
                 {
@@ -586,12 +561,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.refresh",
-                    "when": "view == dockerRegistries && viewItem =~ /.*;.*;(Repository|Registry|RegistryProvider);/",
-                    "group": "regs_zzz_common@9"
-                },
-                {
-                    "command": "vscode-docker.registries.refresh",
-                    "when": "view == dockerRegistries && viewItem =~ /azure(Subscription|Tasks|Task|RunsWithoutTask)$/",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistry|commonregistryroot|commonrepository/",
                     "group": "regs_zzz_common@9"
                 },
                 {
@@ -2602,16 +2572,6 @@
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%"
             },
             {
-                "command": "vscode-docker.registries.azure.runFileAsTask",
-                "title": "%vscode-docker.commands.registries.azure.runFileAsTask%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
-                "command": "vscode-docker.registries.azure.runTask",
-                "title": "%vscode-docker.commands.registries.azure.runTask%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
                 "command": "vscode-docker.registries.azure.selectSubscriptions",
                 "title": "%vscode-docker.commands.registries.azure.selectSubscriptions%",
                 "icon": "$(filter)"
@@ -2625,12 +2585,6 @@
                 "command": "vscode-docker.registries.azure.viewProperties",
                 "title": "%vscode-docker.commands.registries.azure.viewProperties%",
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
-                "command": "vscode-docker.registries.azure.viewTaskLogs",
-                "title": "%vscode-docker.commands.registries.azure.viewLogs%",
-                "category": "%vscode-docker.commands.category.azureContainerRegistry%",
-                "icon": "$(output)"
             },
             {
                 "command": "vscode-docker.registries.connectRegistry",
@@ -2666,6 +2620,16 @@
             {
                 "command": "vscode-docker.registries.disconnectRegistry",
                 "title": "%vscode-docker.commands.registries.disconnectRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+                "command": "vscode-docker.registries.genericV2.removeTrackedRegistry",
+                "title": "%vscode-docker.commands.registries.genericV2.removeTrackedRegistry%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
+                "command": "vscode-docker.registries.genericV2.addTrackedRegistry",
+                "title": "%vscode-docker.commands.registries.genericV2.addTrackedRegistry%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
@@ -2787,6 +2751,11 @@
                 "title": "%vscode-docker.commands.contexts.help%",
                 "category": "%vscode-docker.commands.category.contexts%",
                 "icon": "$(question)"
+            },
+            {
+                "command": "vscode-docker.activateRegistryProviders",
+                "title": "%vscode-docker.commands.activateRegistryProviders%",
+                "category": "%vscode-docker.commands.category.docker%"
             }
         ],
         "views": {
@@ -3033,10 +3002,12 @@
         "@azure/arm-containerregistry": "^10.1.0",
         "@azure/storage-blob": "^12.14.0",
         "@microsoft/compose-language-service": "^0.2.0",
-        "@microsoft/vscode-azext-azureappservice": "^1.0.2",
-        "@microsoft/vscode-azext-azureutils": "^1.1.5",
-        "@microsoft/vscode-azext-utils": "^1.2.2",
+        "@microsoft/vscode-azext-azureappservice": "~2.0",
+        "@microsoft/vscode-azext-azureauth": "^1.1.2",
+        "@microsoft/vscode-azext-azureutils": "^2.0.0",
+        "@microsoft/vscode-azext-utils": "^2.1.1",
         "@microsoft/vscode-container-client": "^0.1.0",
+        "@microsoft/vscode-docker-registries": "^0.1.0",
         "dayjs": "^1.11.7",
         "dockerfile-language-server-nodejs": "^0.11.0",
         "fs-extra": "^11.1.1",

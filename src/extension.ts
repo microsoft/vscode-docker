@@ -25,7 +25,6 @@ import { registerListeners } from './telemetry/registerListeners';
 import { registerTrees } from './tree/registerTrees';
 import { AlternateYamlLanguageServiceClientFeature } from './utils/AlternateYamlLanguageServiceClientFeature';
 import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapper';
-import { AzureAccountExtensionListener } from './utils/AzureAccountExtensionListener';
 import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
@@ -136,13 +135,16 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     // Don't wait
     void migrateOldEnvironmentSettingsIfNeeded();
 
+    // Call command to activate registry provider extensions
+    // Don't wait
+    void vscode.commands.executeCommand('vscode-docker.activateRegistryProviders');
+
     return new DockerExtensionApi(ctx);
 }
 
 export async function deactivateInternal(ctx: vscode.ExtensionContext): Promise<void> {
     await callWithTelemetryAndErrorHandling('docker.deactivate', async (activateContext: IActionContext) => {
         activateContext.telemetry.properties.isActivationEvent = 'true';
-        AzureAccountExtensionListener.dispose();
 
         await Promise.all([
             dockerfileLanguageClient.stop(),
