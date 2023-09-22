@@ -5,7 +5,7 @@
 
 import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
 import { CommonRegistryItem } from '@microsoft/vscode-docker-registries';
-import { TreeItem } from 'vscode';
+import { TreeItem, l10n } from 'vscode';
 import { ext } from '../extensionVariables';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
 
@@ -77,7 +77,7 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
         protected readonly treeDataProvider: UnifiedRegistryTreeDataProvider,
         protected readonly pickOptions: RegistryExperienceOptions,
     ) {
-        super(treeDataProvider, pickOptions);
+        super(treeDataProvider, pickOptions, { placeHolder: l10n.t('Select registry provider') });
         this.pickFilter = new RegistryPickFilter(pickOptions);
     }
 }
