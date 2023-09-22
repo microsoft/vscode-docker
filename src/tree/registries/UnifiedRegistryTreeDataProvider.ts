@@ -127,7 +127,8 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 });
             }
 
-            const picked = await vscode.window.showQuickPick(picks, { placeHolder: vscode.l10n.t('Select a registry provider to use') });
+            const pickPrompt = picks && picks.length > 0 ? vscode.l10n.t('Select a registry provider to use') : vscode.l10n.t('No registry providers are available for connection');
+            const picked = await vscode.window.showQuickPick(picks, { placeHolder: pickPrompt });
             if (!picked) {
                 return;
             }
