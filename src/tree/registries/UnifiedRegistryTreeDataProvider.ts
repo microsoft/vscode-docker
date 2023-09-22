@@ -1,4 +1,4 @@
-import { CommonRegistry, CommonRegistryItem, CommonRegistryRoot, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isCommonRegistryItem, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
@@ -80,7 +80,12 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
             }
         }
 
-        return unifiedRegistryItems.sort((a, b) => (a.wrappedItem as CommonRegistryItem).label.localeCompare((b.wrappedItem as CommonRegistryItem).label));
+        return unifiedRegistryItems.sort((a, b) => {
+            if (isCommonRegistryItem(a.wrappedItem) && isCommonRegistryItem(b.wrappedItem)) {
+                return a.wrappedItem.label.localeCompare(b.wrappedItem.label);
+            }
+            return a.toString().localeCompare(b.toString());
+        });
     }
 
     public getParent(element: UnifiedRegistryItem<unknown>): UnifiedRegistryItem<unknown> | undefined {
