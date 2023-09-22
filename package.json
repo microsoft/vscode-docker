@@ -3007,7 +3007,7 @@
         "@microsoft/vscode-azext-azureutils": "^2.0.0",
         "@microsoft/vscode-azext-utils": "^2.1.1",
         "@microsoft/vscode-container-client": "^0.1.0",
-        "@microsoft/vscode-docker-registries": "^0.1.0",
+        "@microsoft/vscode-docker-registries": "^0.1.1",
         "dayjs": "^1.11.7",
         "dockerfile-language-server-nodejs": "^0.11.0",
         "fs-extra": "^11.1.1",

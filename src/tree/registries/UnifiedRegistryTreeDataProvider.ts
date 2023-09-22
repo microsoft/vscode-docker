@@ -1,4 +1,4 @@
-import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isRegistry } from '@microsoft/vscode-docker-registries';
+import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isCommonRegistryItem, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { isAzureSubscriptionRegistryItem } from './Azure/AzureRegistryDataProvider';
@@ -35,14 +35,14 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
     }
 
     public async getChildren(element?: UnifiedRegistryItem<unknown> | undefined): Promise<UnifiedRegistryItem<unknown>[]> {
+        const unifiedRegistryItems: UnifiedRegistryItem<unknown>[] = [];
+
         if (element) {
             const elements = await element.provider.getChildren(element.wrappedItem);
 
             if (!elements) {
                 return [];
             }
-
-            const results: UnifiedRegistryItem<unknown>[] = [];
 
             for (const child of elements) {
                 const wrapper = {
@@ -55,13 +55,9 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                     child._urtdp_wrapper = wrapper;
                 }
 
-                results.push(wrapper);
+                unifiedRegistryItems.push(wrapper);
             }
-
-            return results;
         } else {
-            const unifiedRoots: UnifiedRegistryItem<unknown>[] = [];
-
             const connectedProviderIds = this.storageMemento.get<string[]>(ConnectedRegistryProvidersKey, []);
 
             for (const provider of this.providers.values()) {
@@ -74,7 +70,7 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                     continue;
                 }
 
-                unifiedRoots.push(...roots.map(r => {
+                unifiedRegistryItems.push(...roots.map(r => {
                     return {
                         provider,
                         wrappedItem: r,
@@ -82,9 +78,14 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                     };
                 }));
             }
-
-            return unifiedRoots;
         }
+
+        return unifiedRegistryItems.sort((a, b) => {
+            if (isCommonRegistryItem(a.wrappedItem) && isCommonRegistryItem(b.wrappedItem)) {
+                return a.wrappedItem.label.localeCompare(b.wrappedItem.label);
+            }
+            return a.toString().localeCompare(b.toString());
+        });
     }
 
     public getParent(element: UnifiedRegistryItem<unknown>): UnifiedRegistryItem<unknown> | undefined {
@@ -131,7 +132,8 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                 });
             }
 
-            const picked = await vscode.window.showQuickPick(picks, { placeHolder: vscode.l10n.t('Select a registry provider to use') });
+            const pickPrompt = picks && picks.length > 0 ? vscode.l10n.t('Select a registry provider to use') : vscode.l10n.t('No registry providers are available for connection');
+            const picked = await vscode.window.showQuickPick(picks, { placeHolder: pickPrompt });
             if (!picked) {
                 return;
             }
