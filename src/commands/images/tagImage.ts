@@ -21,7 +21,7 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const baseImagePath = isRegistry(registry.wrappedItem) ? getBaseImagePathFromRegistry(registry.wrappedItem) : undefined;
+    const baseImagePath = isRegistry(registry?.wrappedItem) ? getBaseImagePathFromRegistry(registry.wrappedItem) : undefined;
     const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
