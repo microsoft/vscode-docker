@@ -31,7 +31,11 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
     }
 
     public getTreeItem(element: UnifiedRegistryItem<unknown>): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        return element.provider.getTreeItem(element.wrappedItem);
+        if (!element.provider) {
+            return element.wrappedItem as vscode.TreeItem;
+        } else {
+            return element.provider.getTreeItem(element.wrappedItem);
+        }
     }
 
     public async getChildren(element?: UnifiedRegistryItem<unknown> | undefined): Promise<UnifiedRegistryItem<unknown>[]> {
@@ -77,6 +81,22 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
                         parent: undefined
                     };
                 }));
+            }
+
+            // if there are no connected providers, show a command to connect one
+            if (unifiedRegistryItems.length === 0) {
+                unifiedRegistryItems.push({
+                    provider: undefined,
+                    wrappedItem: {
+                        label: vscode.l10n.t('Connect Registry...'),
+                        type: 'connectregistry',
+                        iconPath: new vscode.ThemeIcon('plug'),
+                        command: {
+                            command: 'vscode-docker.registries.connectRegistry'
+                        }
+                    },
+                    parent: undefined,
+                });
             }
         }
 
