@@ -3,10 +3,11 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, UserCancelledError, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
 import { CommonRegistryItem } from '@microsoft/vscode-docker-registries';
-import { TreeItem, l10n } from 'vscode';
+import { MessageItem, TreeItem, commands, l10n, window } from 'vscode';
 import { ext } from '../extensionVariables';
+import { isConnectRegistryTreeItem } from '../tree/registries/ConnectRegistryTreeItem';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
 
 export interface RegistryFilter {
@@ -27,6 +28,22 @@ export interface RegistryExperienceOptions extends Partial<ContextValueFilterQui
 }
 
 export async function registryExperience<TNode extends CommonRegistryItem>(context: IActionContext, options?: RegistryExperienceOptions): Promise<UnifiedRegistryItem<TNode>> {
+    const registryRoots = await ext.registriesTree.getChildren();
+    // if there are no registry providers, throw an error with option to connect a registry provider
+    if (registryRoots.length === 0 || (registryRoots.length === 1 && isConnectRegistryTreeItem(registryRoots[0].wrappedItem))) {
+        const add: MessageItem = { title: l10n.t('Connect Registry...') };
+        void window.showErrorMessage(
+            l10n.t('No registry providers are connected. Please connect a registry provider to continue.'),
+            ...[add])
+            .then((result) => {
+                if (result === add) {
+                    void commands.executeCommand('vscode-docker.registries.connectRegistry');
+                }
+            });
+
+        throw new UserCancelledError();
+    }
+
     // get the registry provider unified item
     const promptSteps: AzureWizardPromptStep<QuickPickWizardContext>[] = [
         new RegistryQuickPickStep(ext.registriesTree, options)
