@@ -82,7 +82,7 @@ export async function migrateRegistriesData(ctx: vscode.ExtensionContext): Promi
         }
     }
 
-    // don't wait & make the migration as done
+    // don't wait & mark the migration as done
     void ctx.globalState.update(IsRegistriesDataMigratedKey, true);
     void ext.registriesTree.refresh();
 }
