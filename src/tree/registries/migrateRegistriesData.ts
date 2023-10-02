@@ -12,6 +12,10 @@ const OldRegistriesProvidersKey = 'docker.registryProviders';
 const GenericV2StorageKey = 'GenericV2ContainerRegistry';
 const TrackedRegistriesKey = `${GenericV2StorageKey}.TrackedRegistries`;
 
+/**
+ * This function migrates the registries data from the old extension to the new one. It should be deleted after the migration is complete
+ * after a few months or so.
+ */
 export async function migrateRegistriesData(ctx: vscode.ExtensionContext): Promise<void> {
     // check to see if we've already migrated
     if (ctx.globalState.get(IsRegistriesDataMigratedKey)) {
@@ -83,10 +87,12 @@ export async function migrateRegistriesData(ctx: vscode.ExtensionContext): Promi
     void ext.registriesTree.refresh();
 }
 
-/*---------------------------------------------------------------------------------------------
- * Old code that we need to get the secrets from the old extension. This should be deleted after
- * the migration is complete.
- *--------------------------------------------------------------------------------------------*/
+// --------------------------------------------------------------------------------------------
+//
+// Old code that we need to get the secrets from the old extension. This should be deleted after
+// the migration is complete.
+//
+// -------------------------------------------------------------------------------------------
 import * as crypto from 'crypto';
 import { ext } from '../../extensionVariables';
 
