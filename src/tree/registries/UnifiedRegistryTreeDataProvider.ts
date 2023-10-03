@@ -19,7 +19,7 @@ export interface UnifiedRegistryItem<T> {
     parent: UnifiedRegistryItem<T> | undefined;
 }
 
-const ConnectedRegistryProvidersKey = 'ConnectedRegistryProviders';
+export const ConnectedRegistryProvidersKey = 'ConnectedRegistryProviders';
 
 export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<UnifiedRegistryItem<unknown>> {
     private readonly onDidChangeTreeDataEmitter = new vscode.EventEmitter<UnifiedRegistryItem<unknown> | UnifiedRegistryItem<unknown>[] | undefined>();
@@ -154,12 +154,17 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
 
         if (!connectedProviderIds.includes(provider.id)) {
             await provider?.onConnect?.();
-            const connectedProviderIdsSet: Set<string> = new Set(connectedProviderIds);
-            connectedProviderIdsSet.add(provider.id);
-            await this.storageMemento.update(ConnectedRegistryProvidersKey, Array.from(connectedProviderIdsSet));
+            await this.storeRegistryProvider(provider.id);
         }
 
         void this.refresh();
+    }
+
+    public async storeRegistryProvider(providerId: string): Promise<void> {
+        const connectedProviderIds = this.storageMemento.get<string[]>(ConnectedRegistryProvidersKey, []);
+        const connectedProviderIdsSet: Set<string> = new Set(connectedProviderIds);
+        connectedProviderIdsSet.add(providerId);
+        await this.storageMemento.update(ConnectedRegistryProvidersKey, Array.from(connectedProviderIdsSet));
     }
 
     public async disconnectRegistryProvider(item: UnifiedRegistryItem<unknown>): Promise<void> {

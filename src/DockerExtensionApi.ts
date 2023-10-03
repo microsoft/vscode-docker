@@ -21,7 +21,9 @@ export class DockerExtensionApi implements MementoExplorerExport, DockerExtensio
     }
 
     public registerRegistryDataProvider<T extends RegistryItem>(id: string, registryDataProvider: RegistryDataProvider<T>): vscode.Disposable {
-        return ext.registriesTree.registerProvider(registryDataProvider);
+        const disposable = ext.registriesTree.registerProvider(registryDataProvider);
+        void ext.registriesTree.refresh();
+        return disposable;
     }
 
     public get memento(): ExtensionMementos | undefined {
