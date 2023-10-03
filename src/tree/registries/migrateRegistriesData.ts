@@ -42,7 +42,6 @@ export async function migrateRegistriesData(ctx: vscode.ExtensionContext): Promi
                 break;
             case "azure":
                 registryProviderId = ext.azureRegistryDataProvider.id;
-                // TODO: check that and make sure we shouldn't have to do anything here
                 break;
             case "dockerHub":
                 registryProviderId = ext.dockerHubRegistryDataProvider.id;
