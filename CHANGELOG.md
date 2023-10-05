@@ -1,3 +1,17 @@
+## 1.27.0 - 5 October 2023
+### Added
+- Enhanced registries functionality: (https://github.com/microsoft/vscode-docker/issues/869)
+  - Allow third party providers to contribute to the registries view.
+  - Added GitHub Registries support.
+
+### Fixed
+- Resolved issues with opening .NET web apps in browsers built with .NET SDK containers. (https://github.com/microsoft/vscode-docker/issues/4006)
+- Updated Docker language server to address: 
+  - Invalid link to Docker Hub when image is hash-pinned. (https://github.com/microsoft/vscode-docker/issues/4056)
+  - Recognize `--start-interval` as a valid argument for `HEALTHCHECK`. (https://github.com/microsoft/vscode-docker/issues/4054)
+  - Recognize `--checksum` as a valid argument for `ADD`. (https://github.com/microsoft/vscode-docker/issues/4051)
+  - Properly handled automatic platform arguments in the global scope. (https://github.com/microsoft/vscode-docker/issues/4012)
+
 ## 1.26.1 - 13 September 2023
 ### Added
 - Updated .NET Dockerfile scaffolding to utilize the latest .NET 8 image names. (https://github.com/microsoft/vscode-docker/issues/4015)
