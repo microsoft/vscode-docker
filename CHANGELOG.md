@@ -1,11 +1,22 @@
-## 1.26.1 - 13 September 2023
+## 1.27.0 - 16 October 2023
 ### Added
-- Updated .NET Dockerfile scaffolding to utilize the latest .NET 8 image names. (https://github.com/microsoft/vscode-docker/issues/4015)
-- Added support for multiple .dockerignore file naming conventions specific to language modes. (https://github.com/microsoft/vscode-docker/issues/4059)
-- Integrated the container client package. (https://github.com/microsoft/vscode-docker/pull/3982)
+- Enhanced registries functionality: [#869](https://github.com/microsoft/vscode-docker/issues/869)
+  - Allow third party providers to contribute to the registries view.
+  - Added GitHub Registries support.
+  - GitLab support will be moved to a separate extension. We will provide a link to install once it's published.  
 
 ### Fixed
-- Enhanced debugging experience on arm64 machines. (https://github.com/microsoft/vscode-docker/issues/4040)
+- Resolved issues with opening .NET web apps in browsers built with .NET SDK containers. [#4006](https://github.com/microsoft/vscode-docker/issues/4006)
+- Fixed several Dockerfile language server issues. [#4056](https://github.com/microsoft/vscode-docker/issues/4056), [#4054](https://github.com/microsoft/vscode-docker/issues/4054), [#4051](https://github.com/microsoft/vscode-docker/issues/4051), [#4012](https://github.com/microsoft/vscode-docker/issues/4012)
+  
+## 1.26.1 - 13 September 2023
+### Added
+- Updated .NET Dockerfile scaffolding to utilize the latest .NET 8 image names. [#4015](https://github.com/microsoft/vscode-docker/issues/4015)
+- Added support for multiple .dockerignore file naming conventions specific to language modes. [#4059](https://github.com/microsoft/vscode-docker/issues/4059)
+- Integrated the container client package. [#3982](https://github.com/microsoft/vscode-docker/pull/3982)
+
+### Fixed
+- Enhanced debugging experience on arm64 machines. [#4040](https://github.com/microsoft/vscode-docker/issues/4040)
 
 ## 1.26.0 - 10 July 2023
 ### Added
