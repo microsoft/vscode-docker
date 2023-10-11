@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { PromiseCommandResponse, Shell, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import { CancellationToken, CancellationTokenSource, Event, EventEmitter, Pseudoterminal, TaskScope, TerminalDimensions, workspace, WorkspaceFolder } from 'vscode';
-import { PromiseCommandResponse, Shell, VoidCommandResponse } from '../runtimes/docker';
 import { execAsync, ExecAsyncOutput } from '../utils/execAsync';
 import { resolveVariables } from '../utils/resolveVariables';
 import { withDockerEnvSettings } from '../utils/withDockerEnvSettings';

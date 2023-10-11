@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ListNetworkItem } from "../../runtimes/docker";
+import { ListNetworkItem } from "@microsoft/vscode-container-client";
 import { ThemeIcon } from "vscode";
 import { LocalGroupTreeItemBase } from "../LocalGroupTreeItemBase";
 import { getCommonGroupIcon } from "../settings/CommonProperties";

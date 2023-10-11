@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { ContainerRegistryManagementClient, DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
+import type { DockerBuildRequest as AcrDockerBuildRequest, FileTaskRunRequest as AcrFileTaskRunRequest, OS as AcrOS, Run as AcrRun, ContainerRegistryManagementClient } from "@azure/arm-containerregistry"; // These are only dev-time imports so don't need to be lazy
 import { IActionContext, IAzureQuickPickItem, nonNullProp } from '@microsoft/vscode-azext-utils';
 import * as fse from 'fs-extra';
 import * as os from 'os';
@@ -12,12 +12,14 @@ import * as readline from 'readline';
 import * as tar from 'tar';
 import * as vscode from 'vscode';
 import { ext } from '../../../../extensionVariables';
-import { AzureRegistryTreeItem } from '../../../../tree/registries/azure/AzureRegistryTreeItem';
-import { registryExpectedContextValues } from "../../../../tree/registries/registryContextValues";
+import { AzureRegistry, AzureRegistryItem } from "../../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { UnifiedRegistryItem } from "../../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { createAzureContainerRegistryClient, getResourceGroupFromId } from "../../../../utils/azureUtils";
 import { getStorageBlob } from '../../../../utils/lazyPackages';
 import { delay } from '../../../../utils/promiseUtils';
 import { Item, quickPickDockerFileItem, quickPickYamlFileItem } from '../../../../utils/quickPickFile';
 import { quickPickWorkspaceFolder } from '../../../../utils/quickPickWorkspaceFolder';
+import { registryExperience } from "../../../../utils/registryExperience";
 import { addImageTaggingTelemetry, getTagFromUserInput } from '../../../images/tagImage';
 
 const idPrecision = 6;
@@ -45,7 +47,12 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         throw new Error(vscode.l10n.t('Run Request Type Currently not supported.'));
     }
 
-    const node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
+    const node: UnifiedRegistryItem<AzureRegistryItem> = await registryExperience<AzureRegistry>(context, {
+        registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+        contextValueFilter: { include: /commonregistry/i },
+    });
+    const registryItem: AzureRegistryItem = node.wrappedItem;
+    const resourceGroup = getResourceGroupFromId(registryItem.id);
 
     const osPick = ['Linux', 'Windows'].map(item => <IAzureQuickPickItem<AcrOS>>{ label: item, data: item });
     const osType: AcrOS = (await context.ui.showQuickPick(osPick, { placeHolder: vscode.l10n.t('Select image base OS') })).data;
@@ -63,7 +70,8 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
             rootUri = vscode.Uri.file(path.dirname(fileItem.absoluteFilePath));
         }
 
-        const uploadedSourceLocation: string = await uploadSourceCode(await node.getClient(context), node.registryName, node.resourceGroup, rootUri, tarFilePath);
+        const azureRegistryClient = await createAzureContainerRegistryClient(registryItem.subscription);
+        const uploadedSourceLocation: string = await uploadSourceCode(azureRegistryClient, registryItem.label, resourceGroup, rootUri, tarFilePath);
         ext.outputChannel.info(vscode.l10n.t('Uploaded source code from {0}', tarFilePath));
 
         let runRequest: AcrDockerBuildRequest | AcrFileTaskRunRequest;
@@ -88,14 +96,13 @@ export async function scheduleRunRequest(context: IActionContext, requestType: '
         // Schedule the run and Clean up.
         ext.outputChannel.info(vscode.l10n.t('Set up run request'));
 
-        const client = await node.getClient(context);
-        const run = await client.registries.beginScheduleRunAndWait(node.resourceGroup, node.registryName, runRequest);
+        const run = await azureRegistryClient.registries.beginScheduleRunAndWait(resourceGroup, registryItem.label, runRequest);
         ext.outputChannel.info(vscode.l10n.t('Scheduled run {0}', run.runId));
 
-        void streamLogs(context, node, run);
+        void streamLogs(context, registryItem, run);
 
         // function returns the AcrRun info
-        return async () => client.runs.get(node.resourceGroup, node.registryName, run.runId);
+        return async () => azureRegistryClient.runs.get(resourceGroup, registryItem.label, run.runId);
     } finally {
         if (await fse.pathExists(tarFilePath)) {
             await fse.unlink(tarFilePath);
@@ -155,8 +162,10 @@ async function uploadSourceCode(client: ContainerRegistryManagementClient, regis
 
 const blobCheckInterval = 1000;
 const maxBlobChecks = 30;
-async function streamLogs(context: IActionContext, node: AzureRegistryTreeItem, run: AcrRun): Promise<void> {
-    const result = await (await node.getClient(context)).runs.getLogSasUrl(node.resourceGroup, node.registryName, run.runId);
+async function streamLogs(context: IActionContext, registryItem: AzureRegistryItem, run: AcrRun): Promise<void> {
+    const azureRegistryClient = await createAzureContainerRegistryClient(registryItem.subscription);
+    const resourceGroup = getResourceGroupFromId(registryItem.id);
+    const result = await azureRegistryClient.runs.getLogSasUrl(resourceGroup, registryItem.label, run.runId);
 
     const storageBlob = await getStorageBlob();
     const blobClient = new storageBlob.BlobClient(nonNullProp(result, 'logLink'));

@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { InspectContextsItem, ListContextItem } from "../../runtimes/docker";
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { InspectContextsItem, ListContextItem } from "@microsoft/vscode-container-client";
 import { MarkdownString, ThemeIcon } from "vscode";
 import { ext } from "../../extensionVariables";
 import { getTreeId } from "../LocalRootTreeItemBase";
-import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 import { ToolTipTreeItem } from "../ToolTipTreeItem";
+import { resolveTooltipMarkdown } from "../resolveTooltipMarkdown";
 
 const DefaultContextNames = ['default', 'desktop-windows', 'desktop-linux'];
 

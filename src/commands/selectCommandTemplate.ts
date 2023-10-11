@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { PortBinding, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { PortBinding, VoidCommandResponse } from '../runtimes/docker';
 import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
 import { resolveVariables } from '../utils/resolveVariables';
 

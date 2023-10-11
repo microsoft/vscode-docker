@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, AzExtTreeItem, AzureWizard, GenericTreeItem, IActionContext, parseError } from "@microsoft/vscode-azext-utils";
+import { ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem, isCommandNotSupportedError } from "@microsoft/vscode-container-client";
 import { ConfigurationTarget, ThemeColor, ThemeIcon, WorkspaceConfiguration, l10n, workspace } from "vscode";
 import { showDockerLearnMoreNotification } from "../commands/showDockerLearnMoreNotification";
 import { configPrefix } from "../constants";
 import { ext } from "../extensionVariables";
-import { ListContainersItem, ListContextItem, ListImagesItem, ListNetworkItem, ListVolumeItem, isCommandNotSupportedError } from "../runtimes/docker";
 import { runtimeInstallStatusProvider } from "../utils/RuntimeInstallStatusProvider";
 import { DockerExtensionKind, IVSCodeRemoteInfo, RemoteKind, getVSCodeRemoteInfo } from "../utils/getVSCodeRemoteInfo";
 import { LocalGroupTreeItemBase } from "./LocalGroupTreeItemBase";

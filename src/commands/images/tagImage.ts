@@ -4,12 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, TelemetryProperties } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { ImageTreeItem } from '../../tree/images/ImageTreeItem';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getBaseImagePathFromRegistry } from '../../tree/registries/registryTreeUtils';
 
-export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: RegistryTreeItemBase): Promise<string> {
+export async function tagImage(context: IActionContext, node?: ImageTreeItem, registry?: UnifiedRegistryItem<CommonRegistry>): Promise<string> {
     if (!node) {
         await ext.imagesTree.refresh(context);
         node = await ext.imagesTree.showTreeItemPicker<ImageTreeItem>(ImageTreeItem.contextValue, {
@@ -19,7 +21,8 @@ export async function tagImage(context: IActionContext, node?: ImageTreeItem, re
     }
 
     addImageTaggingTelemetry(context, node.fullTag, '.before');
-    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, registry?.baseImagePath);
+    const baseImagePath = isRegistry(registry?.wrappedItem) ? getBaseImagePathFromRegistry(registry.wrappedItem) : undefined;
+    const newTaggedName: string = await getTagFromUserInput(context, node.fullTag, baseImagePath);
     addImageTaggingTelemetry(context, newTaggedName, '.after');
 
     await ext.runWithDefaults(client =>

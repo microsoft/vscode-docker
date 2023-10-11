@@ -7,22 +7,19 @@ import type { NameValuePair, Site, SiteConfig, WebSiteManagementClient } from '@
 import type { CustomLocation } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import type { AzExtLocation } from '@microsoft/vscode-azext-azureutils'; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep, nonNullProp, nonNullValueAndProp } from "@microsoft/vscode-azext-utils";
-import { l10n, Progress } from "vscode";
+import { CommonRegistry, CommonTag } from '@microsoft/vscode-docker-registries';
+import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
-import { DockerHubNamespaceTreeItem } from '../../../tree/registries/dockerHub/DockerHubNamespaceTreeItem';
-import { DockerV2RegistryTreeItemBase } from '../../../tree/registries/dockerV2/DockerV2RegistryTreeItemBase';
-import { GenericDockerV2RegistryTreeItem } from '../../../tree/registries/dockerV2/GenericDockerV2RegistryTreeItem';
-import { getRegistryPassword } from '../../../tree/registries/registryPasswords';
-import { RegistryTreeItemBase } from '../../../tree/registries/RegistryTreeItemBase';
-import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { AzureRegistryDataProvider, isAzureRegistry } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getFullImageNameFromRegistryTagItem } from '../../../tree/registries/registryTreeUtils';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
 import { IAppServiceContainerWizardContext } from './deployImageToAzure';
 
 export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceContainerWizardContext> {
     public priority: number = 140;
 
-    public constructor(private readonly node: RemoteTagTreeItem) {
+    public constructor(private readonly tagItem: UnifiedRegistryItem<CommonTag>) {
         super();
     }
 
@@ -49,7 +46,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
         if (context.customLocation) {
             // deploying to Azure Arc
             siteEnvelope.kind = 'app,linux,kubernetes,container';
-            await this.addCustomLocationProperties(siteEnvelope, context.customLocation);
+            this.addCustomLocationProperties(siteEnvelope, context.customLocation);
         } else {
             siteEnvelope.identity = {
                 type: 'SystemAssigned'
@@ -60,7 +57,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
     }
 
     private async getNewSiteConfig(context: IAppServiceContainerWizardContext): Promise<SiteConfig> {
-        const registryTI: RegistryTreeItemBase = this.node.parent.parent;
+        const registryTI: UnifiedRegistryItem<CommonRegistry> = this.tagItem.parent.parent as unknown as UnifiedRegistryItem<CommonRegistry>;
 
         let username: string | undefined;
         let password: string | undefined;
@@ -69,7 +66,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
 
         // Scenarios:
         // ACR -> App Service, NOT Arc App Service. Use managed service identity.
-        if (registryTI instanceof AzureRegistryTreeItem && !context.customLocation) {
+        if (isAzureRegistry(registryTI.wrappedItem) && !context.customLocation) {
             appSettings.push({ name: 'DOCKER_ENABLE_CI', value: 'true' });
 
             // Don't need an image, username, or password--just create an empty web app to assign permissions and then configure with an image
@@ -80,35 +77,28 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             };
         }
         // ACR -> Arc App Service. Use regular auth. Same as any V2 registry but different way of getting auth.
-        else if (registryTI instanceof AzureRegistryTreeItem && context.customLocation) {
-            const cred = await registryTI.tryGetAdminCredentials(context);
+        else if (isAzureRegistry(registryTI.wrappedItem) && context.customLocation) {
+            const cred = await (registryTI.provider as unknown as AzureRegistryDataProvider).tryGetAdminCredentials(registryTI.wrappedItem);
             if (!cred?.username || !cred?.passwords?.[0]?.value) {
                 throw new Error(l10n.t('Azure App service deployment on Azure Arc only supports running images from Azure Container Registries with admin enabled'));
             }
 
             username = cred.username;
             password = cred.passwords[0].value;
-            registryUrl = registryTI.baseUrl;
+            registryUrl = registryTI.wrappedItem.baseUrl.toString();
         }
-        // Docker Hub -> App Service *OR* Arc App Service
-        else if (registryTI instanceof DockerHubNamespaceTreeItem) {
-            username = registryTI.parent.username;
-            password = await registryTI.parent.getPassword();
-            registryUrl = 'https://index.docker.io';
-        }
-        // Generic registry -> App Service *OR* Arc App Service
-        else if (registryTI instanceof DockerV2RegistryTreeItemBase) {
-            if (registryTI instanceof GenericDockerV2RegistryTreeItem) {
-                username = registryTI.cachedProvider.username;
-                password = await getRegistryPassword(registryTI.cachedProvider);
-            } else {
-                throw new RangeError(l10n.t('Unrecognized node type "{0}"', registryTI.constructor.name));
+        // Other registries -> App Service *OR* Arc App Service
+        else {
+            if (!registryTI.provider.getLoginInformation) {
+                throw new Error(l10n.t('This registry does not support deploying to Azure App Service'));
             }
+            const loginInformation = await registryTI.provider.getLoginInformation(registryTI.wrappedItem);
 
-            registryUrl = registryTI.baseUrl;
-        } else {
-            throw new RangeError(l10n.t('Unrecognized node type "{0}"', registryTI.constructor.name));
+            registryUrl = (registryTI.wrappedItem as CommonRegistry).baseUrl.toString();
+            username = loginInformation.username;
+            password = loginInformation.secret;
         }
+
 
         if (username && password) {
             appSettings.push({ name: "DOCKER_REGISTRY_SERVER_USERNAME", value: username });
@@ -123,7 +113,7 @@ export class DockerSiteCreateStep extends AzureWizardExecuteStep<IAppServiceCont
             appSettings.push({ name: "WEBSITES_PORT", value: context.webSitesPort.toString() });
         }
 
-        const linuxFxVersion = `DOCKER|${this.node.fullTag}`;
+        const linuxFxVersion = `DOCKER|${getFullImageNameFromRegistryTagItem(this.tagItem.wrappedItem)}`;
 
         return {
             linuxFxVersion,

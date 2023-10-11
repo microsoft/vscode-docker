@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { ListImagesItem } from "@microsoft/vscode-container-client";
 import { ThemeIcon, workspace } from "vscode";
 import { configPrefix } from "../../constants";
-import { ListImagesItem } from "../../runtimes/docker";
 import { trimWithElipsis } from "../../utils/trimWithElipsis";
-import { CommonGroupBy, commonProperties, CommonProperty, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
+import { CommonGroupBy, CommonProperty, commonProperties, getCommonGroupIcon, getCommonPropertyValue } from '../settings/CommonProperties';
 import { ITreePropertyInfo } from '../settings/ITreeSettingInfo';
 import { NormalizedImageNameInfo } from "./NormalizedImageNameInfo";
 

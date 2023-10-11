@@ -5,17 +5,19 @@
 
 import type { IAppServiceWizardContext } from "@microsoft/vscode-azext-azureappservice"; // These are only dev-time imports so don't need to be lazy
 import { AzureWizardExecuteStep } from "@microsoft/vscode-azext-utils";
+import { CommonTag } from "@microsoft/vscode-docker-registries";
 import { randomUUID } from "crypto";
-import { l10n, Progress } from "vscode";
+import { Progress, l10n } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistryTreeItem } from '../../../tree/registries/azure/AzureRegistryTreeItem';
-import { RemoteTagTreeItem } from '../../../tree/registries/RemoteTagTreeItem';
+import { AzureRegistry, isAzureTag } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { getFullImageNameFromRegistryTagItem, getResourceGroupFromAzureRegistryItem } from "../../../tree/registries/registryTreeUtils";
 import { getArmAuth, getArmContainerRegistry, getAzExtAppService, getAzExtAzureUtils } from "../../../utils/lazyPackages";
 
 export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServiceWizardContext> {
     public priority: number = 141; // execute after DockerSiteCreateStep
 
-    public constructor(private readonly tagTreeItem: RemoteTagTreeItem) {
+    public constructor(private readonly tagTreeItem: UnifiedRegistryItem<CommonTag>) {
         super();
     }
 
@@ -33,14 +35,14 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
         const appSvcClient = await vscAzureAppService.createWebSiteClient(context);
 
         // If we're in `execute`, then `shouldExecute` passed and `this.tagTreeItem.parent.parent` is guaranteed to be an AzureRegistryTreeItem
-        const registryTreeItem: AzureRegistryTreeItem = this.tagTreeItem.parent.parent as unknown as AzureRegistryTreeItem;
+        const registryTreeItem: UnifiedRegistryItem<AzureRegistry> = this.tagTreeItem.parent.parent as unknown as UnifiedRegistryItem<AzureRegistry>;
 
         // 1. Get the registry resource. We will need the ID.
-        const registry = await crmClient.registries.get(registryTreeItem.resourceGroup, registryTreeItem.registryName);
+        const registry = await crmClient.registries.get(getResourceGroupFromAzureRegistryItem(registryTreeItem.wrappedItem), registryTreeItem.wrappedItem.label);
 
         if (!(registry?.id)) {
             throw new Error(
-                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.baseUrl)
+                l10n.t('Unable to get details from Container Registry {0}', registryTreeItem.wrappedItem.label)
             );
         }
 
@@ -78,12 +80,12 @@ export class DockerAssignAcrPullRoleStep extends AzureWizardExecuteStep<IAppServ
             );
         }
 
-        config.linuxFxVersion = `DOCKER|${this.tagTreeItem.fullTag}`;
+        const fullTag = getFullImageNameFromRegistryTagItem(this.tagTreeItem.wrappedItem);
+        config.linuxFxVersion = `DOCKER|${fullTag}`;
         await appSvcClient.webApps.updateConfiguration(context.site.resourceGroup, context.site.name, config);
     }
 
     public shouldExecute(context: IAppServiceWizardContext): boolean {
-        return !!(context.site) && !!(this.tagTreeItem?.parent?.parent) && this.tagTreeItem.parent.parent instanceof AzureRegistryTreeItem
-            && !context.customLocation;
+        return !!(context.site) && isAzureTag(this.tagTreeItem.wrappedItem) && !context.customLocation;
     }
 }

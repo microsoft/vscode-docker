@@ -4,15 +4,15 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { parseError } from '@microsoft/vscode-azext-utils';
+import { normalizeContainerOS } from '@microsoft/vscode-container-client';
 import * as fse from 'fs-extra';
 import * as os from 'os';
 import * as path from 'path';
-import { l10n, WorkspaceFolder } from 'vscode';
+import { WorkspaceFolder, l10n } from 'vscode';
 import { getContainerSecretsFolders, getHostSecretsFolders } from '../../debugging/netcore/AspNetSslHelper';
 import { NetCoreDebugOptions } from '../../debugging/netcore/NetCoreDebugHelper';
 import { vsDbgInstallBasePath } from '../../debugging/netcore/VsDbgHelper';
 import { ext } from '../../extensionVariables';
-import { getNativeArchitecture, normalizeContainerOS } from '../../runtimes/docker';
 import { PlatformOS } from '../../utils/platform';
 import { quickPickProjectFileItem } from '../../utils/quickPickFile';
 import { resolveVariables, unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -20,7 +20,7 @@ import { DockerBuildOptions, DockerBuildTaskDefinitionBase } from '../DockerBuil
 import { DockerBuildTaskDefinition } from '../DockerBuildTaskProvider';
 import { DockerContainerVolume, DockerRunOptions, DockerRunTaskDefinitionBase } from '../DockerRunTaskDefinitionBase';
 import { DockerRunTaskDefinition } from '../DockerRunTaskProvider';
-import { addVolumeWithoutConflicts, DockerBuildTaskContext, DockerRunTaskContext, DockerTaskContext, DockerTaskScaffoldContext, getDefaultContainerName, getDefaultImageName, inferImageName, TaskHelper } from '../TaskHelper';
+import { DockerBuildTaskContext, DockerRunTaskContext, DockerTaskContext, DockerTaskScaffoldContext, TaskHelper, addVolumeWithoutConflicts, getDefaultContainerName, getDefaultImageName, inferImageName } from '../TaskHelper';
 import { updateBlazorManifest } from './updateBlazorManifest';
 
 export interface NetCoreTaskOptions {
@@ -77,7 +77,7 @@ export class NetCoreTaskHelper implements TaskHelper {
                     context: '${workspaceFolder}',
                     platform: {
                         os: normalizeContainerOS(options?.platformOS),
-                        architecture: getNativeArchitecture()
+                        architecture: 'amd64'
                     },
                     pull: true
                 },

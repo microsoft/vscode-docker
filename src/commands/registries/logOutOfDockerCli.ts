@@ -4,17 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { CommonRegistry } from '@microsoft/vscode-docker-registries';
+import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
-import { registryExpectedContextValues } from '../../tree/registries/registryContextValues';
-import { RegistryTreeItemBase } from '../../tree/registries/RegistryTreeItemBase';
+import { UnifiedRegistryItem } from '../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { registryExperience } from '../../utils/registryExperience';
 
-export async function logOutOfDockerCli(context: IActionContext, node?: RegistryTreeItemBase): Promise<void> {
+export async function logOutOfDockerCli(context: IActionContext, node?: UnifiedRegistryItem<CommonRegistry>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<RegistryTreeItemBase>(registryExpectedContextValues.all.registry, context);
+        node = await registryExperience<CommonRegistry>(context, { contextValueFilter: { include: /commonregistry/i } });
     }
-
-    const creds = await node.getDockerCliCredentials();
+    const serverUrl = (await node.provider.getLoginInformation?.(node.wrappedItem))?.server;
+    if (!serverUrl) {
+        throw new Error(l10n.t('Unable to get server URL'));
+    }
 
     const client = await ext.runtimeManager.getClient();
     const taskCRF = new TaskCommandRunnerFactory(
@@ -24,6 +28,6 @@ export async function logOutOfDockerCli(context: IActionContext, node?: Registry
     );
 
     await taskCRF.getCommandRunner()(
-        client.logout({ registry: creds.registryPath })
+        client.logout({ registry: serverUrl }),
     );
 }

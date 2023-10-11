@@ -3,17 +3,61 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IActionContext } from '@microsoft/vscode-azext-utils';
+import { AzureWizard, IActionContext, createSubscriptionContext, nonNullProp } from '@microsoft/vscode-azext-utils';
+import { l10n, window } from 'vscode';
 import { ext } from '../../../extensionVariables';
-import type { SubscriptionTreeItem } from '../../../tree/registries/azure/SubscriptionTreeItem'; // These are only dev-time imports so don't need to be lazy
-import { getAzSubTreeItem } from '../../../utils/lazyPackages';
+import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
+import { AzureRegistryCreateStep } from '../../../tree/registries/Azure/createWizard/AzureRegistryCreateStep';
+import { AzureRegistryNameStep } from '../../../tree/registries/Azure/createWizard/AzureRegistryNameStep';
+import { AzureRegistrySkuStep } from '../../../tree/registries/Azure/createWizard/AzureRegistrySkuStep';
+import { IAzureRegistryWizardContext } from '../../../tree/registries/Azure/createWizard/IAzureRegistryWizardContext';
+import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
+import { registryExperience } from '../../../utils/registryExperience';
 
-export async function createAzureRegistry(context: IActionContext, node?: SubscriptionTreeItem): Promise<void> {
-    const azSubTreeItem = await getAzSubTreeItem();
+export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<void> {
 
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<SubscriptionTreeItem>(azSubTreeItem.SubscriptionTreeItem.contextValue, context);
+        node = await registryExperience<AzureSubscriptionRegistryItem>(context,
+            {
+                contextValueFilter: { include: /azuresubscription/i },
+                registryFilter: { include: [ext.azureRegistryDataProvider.label] }
+            }
+        );
     }
 
-    await node.createChild(context);
+    const registryItem = node.wrappedItem;
+
+    const subscriptionContext = createSubscriptionContext(registryItem.subscription);
+    const wizardContext: IAzureRegistryWizardContext = {
+        ...context,
+        ...subscriptionContext,
+        azureSubscription: registryItem.subscription,
+    };
+    const azExtAzureUtils = await getAzExtAzureUtils();
+
+    const promptSteps = [
+        new AzureRegistryNameStep(),
+        new AzureRegistrySkuStep(),
+        new azExtAzureUtils.ResourceGroupListStep(),
+    ];
+    azExtAzureUtils.LocationListStep.addStep(wizardContext, promptSteps);
+
+    const wizard = new AzureWizard(
+        wizardContext,
+        {
+            promptSteps,
+            executeSteps: [
+                new AzureRegistryCreateStep()
+            ],
+            title: l10n.t('Create new Azure Container Registry')
+        }
+    );
+
+    await wizard.prompt();
+    const newRegistryName: string = nonNullProp(wizardContext, 'newRegistryName');
+    await wizard.execute();
+
+    void window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
+    void ext.registriesTree.refresh();
 }

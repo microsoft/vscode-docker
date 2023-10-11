@@ -4,18 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtParentTreeItem, IActionContext } from "@microsoft/vscode-azext-utils";
+import { ListImagesCommandOptions, ListImagesItem } from "@microsoft/vscode-container-client";
 import { l10n } from 'vscode';
 import { danglingImagesMementoKey } from "../../commands/images/showDanglingImages";
 import { ext } from "../../extensionVariables";
-import { ListImagesCommandOptions, ListImagesItem } from "../../runtimes/docker";
 import { LocalChildGroupType, LocalChildType, LocalRootTreeItemBase } from "../LocalRootTreeItemBase";
+import { TreePrefix } from "../TreePrefix";
 import { CommonGroupBy, groupByNoneProperty } from "../settings/CommonProperties";
 import { ITreeArraySettingInfo, ITreeSettingInfo } from "../settings/ITreeSettingInfo";
-import { TreePrefix } from "../TreePrefix";
-import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 import { ImageGroupTreeItem } from './ImageGroupTreeItem';
-import { getImagePropertyValue, imageProperties, ImageProperty } from "./ImageProperties";
+import { ImageProperty, getImagePropertyValue, imageProperties } from "./ImageProperties";
 import { ImageTreeItem } from "./ImageTreeItem";
+import { OutdatedImageChecker } from "./imageChecker/OutdatedImageChecker";
 
 export interface DatedDockerImage extends ListImagesItem {
     outdated?: boolean;

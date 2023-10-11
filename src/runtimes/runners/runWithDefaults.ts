@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, NoShell, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as stream from 'stream';
 import * as vscode from 'vscode';
-import { AccumulatorStream, ClientIdentity, GeneratorCommandResponse, IContainersClient, isChildProcessError, Like, normalizeCommandResponseLike, NoShell, PromiseCommandResponse, ShellStreamCommandRunnerFactory, ShellStreamCommandRunnerOptions, VoidCommandResponse } from '../docker';
 import { ext } from '../../extensionVariables';
-import { RuntimeManager } from '../RuntimeManager';
 import { withDockerEnvSettings } from '../../utils/withDockerEnvSettings';
+import { RuntimeManager } from '../RuntimeManager';
 
 type ClientCallback<TClient, T> = (client: TClient) => Like<PromiseCommandResponse<T>>;
 type VoidClientCallback<TClient> = (client: TClient) => Like<VoidCommandResponse>;

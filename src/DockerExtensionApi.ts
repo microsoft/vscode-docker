@@ -3,9 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { DockerExtensionApi as DockerExtensionRegistryApi, RegistryDataProvider, RegistryItem } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
+import { ext } from './extensionVariables';
 
-export class DockerExtensionApi implements MementoExplorerExport {
+export class DockerExtensionApi implements MementoExplorerExport, DockerExtensionRegistryApi {
     readonly #extensionMementos: ExtensionMementos | undefined;
 
     public constructor(ctx: vscode.ExtensionContext) {
@@ -16,6 +18,12 @@ export class DockerExtensionApi implements MementoExplorerExport {
                 workspaceState: ctx.workspaceState,
             };
         }
+    }
+
+    public registerRegistryDataProvider<T extends RegistryItem>(id: string, registryDataProvider: RegistryDataProvider<T>): vscode.Disposable {
+        const disposable = ext.registriesTree.registerProvider(registryDataProvider);
+        void ext.registriesTree.refresh();
+        return disposable;
     }
 
     public get memento(): ExtensionMementos | undefined {

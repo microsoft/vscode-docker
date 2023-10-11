@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzExtTreeItem, callWithTelemetryAndErrorHandling, IActionContext, parseError, registerCommand } from '@microsoft/vscode-azext-utils';
+import { EventAction, EventType, isCancellationError } from '@microsoft/vscode-container-client';
 import * as os from 'os';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
-import { EventAction, EventType, isCancellationError } from '../runtimes/docker';
 import { debounce } from '../utils/debounce';
 import { AllTreePrefixes, TreePrefix } from './TreePrefix';
 
@@ -301,7 +301,7 @@ export class RefreshManager extends vscode.Disposable {
                         callback = () => ext.networksRoot.refresh(context);
                         break;
                     case 'registries':
-                        callback = () => ext.registriesRoot.refresh(context);
+                        callback = () => ext.registriesRoot.refresh();
                         break;
                     case 'volumes':
                         callback = () => ext.volumesRoot.refresh(context);

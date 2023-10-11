@@ -5,15 +5,18 @@
 
 import { IActionContext, openReadOnlyJson } from "@microsoft/vscode-azext-utils";
 import { ext } from "../../../extensionVariables";
-import { AzureRegistryTreeItem } from "../../../tree/registries/azure/AzureRegistryTreeItem";
-import { AzureTaskRunTreeItem } from "../../../tree/registries/azure/AzureTaskRunTreeItem";
-import { AzureTaskTreeItem } from "../../../tree/registries/azure/AzureTaskTreeItem";
-import { registryExpectedContextValues } from "../../../tree/registries/registryContextValues";
+import { AzureRegistry } from "../../../tree/registries/Azure/AzureRegistryDataProvider";
+import { UnifiedRegistryItem } from "../../../tree/registries/UnifiedRegistryTreeDataProvider";
+import { registryExperience } from "../../../utils/registryExperience";
 
-export async function viewAzureProperties(context: IActionContext, node?: AzureRegistryTreeItem | AzureTaskTreeItem | AzureTaskRunTreeItem): Promise<void> {
+export async function viewAzureProperties(context: IActionContext, node?: UnifiedRegistryItem<AzureRegistry>): Promise<void> {
     if (!node) {
-        node = await ext.registriesTree.showTreeItemPicker<AzureRegistryTreeItem>(registryExpectedContextValues.azure.registry, context);
+        node = await registryExperience<AzureRegistry>(context, {
+            registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+            contextValueFilter: { include: /commonregistry/i },
+        });
     }
 
-    await openReadOnlyJson(node, node.properties);
+    const registryItem = node.wrappedItem;
+    await openReadOnlyJson({ label: registryItem.label, fullId: registryItem.id }, registryItem.registryProperties);
 }

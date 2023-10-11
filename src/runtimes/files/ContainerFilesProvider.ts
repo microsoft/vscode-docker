@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
+import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '@microsoft/vscode-container-client';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { getDockerOSType } from '../../utils/osUtils';
 import { tarPackStream, tarUnpackStream } from '../../utils/tarUtils';
-import { AccumulatorStream, CommandNotSupportedError, DisposableLike, ListFilesItem } from '../docker';
 import { DockerUri } from './DockerUri';
 
 class MethodNotImplementedError extends CommandNotSupportedError {

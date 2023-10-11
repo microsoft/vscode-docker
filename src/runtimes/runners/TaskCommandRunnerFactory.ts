@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { CommandLineArgs, CommandNotSupportedError, CommandRunner, ICommandRunnerFactory, Like, normalizeCommandResponseLike, PromiseCommandResponse, StreamingCommandRunner, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as os from 'os';
 import * as vscode from 'vscode';
-import { CommandLineArgs, CommandNotSupportedError, CommandRunner, ICommandRunnerFactory, Like, normalizeCommandResponseLike, PromiseCommandResponse, StreamingCommandRunner, VoidCommandResponse } from '../docker';
 
 interface TaskCommandRunnerOptions {
     taskName: string;

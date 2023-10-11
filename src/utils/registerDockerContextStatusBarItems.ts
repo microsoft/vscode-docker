@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, registerEvent } from '@microsoft/vscode-azext-utils';
+import { ListContextItem } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from "../extensionVariables";
-import { ListContextItem } from '../runtimes/docker/contracts/ContainerClient';
 
 const dockerContextStatusBarSetting = 'contexts.showInStatusBar';
 

@@ -3,11 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "@microsoft/vscode-container-client";
 import * as os from 'os';
 import { vsDbgInstallBasePath } from "../../debugging/netcore/VsDbgHelper";
 import { ext } from "../../extensionVariables";
-import { RunContainerBindMount, RunContainerCommandOptions, Shell, composeArgs, withArg, withNamedArg } from "../../runtimes/docker";
-import { getImageNameWithTag } from '../../utils/getValidImageName';
+import { getImageNameWithTag } from "../../utils/getValidImageName";
 import { getDockerOSType } from "../../utils/osUtils";
 import { defaultVsCodeLabels } from "../TaskDefinitionBase";
 import { getDefaultContainerName } from '../TaskHelper';
@@ -64,10 +64,6 @@ export async function getNetSdkRunCommand(isProjectWebApp: boolean, imageName: s
         mounts: await getRemoteDebuggerMount(),
         entrypoint: await getDockerOSType() === 'windows' ? 'cmd.exe' : '/bin/sh'
     };
-
-    if (isProjectWebApp) {
-        options.exposePorts = [8080, 80]; // the default port is 8080 for .NET 8 and 80 for .NET 7
-    }
 
     const command = await client.runContainer(options);
     const quotedArgs = Shell.getShellOrDefault().quote(command.args);
