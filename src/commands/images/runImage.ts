@@ -35,14 +35,14 @@ async function runImageCore(context: IActionContext, node: ImageTreeItem | undef
 
     const terminalCommand = await selectRunCommand(
         context,
-        node.fullTag,
+        node.imageId,
         interactive,
         inspectResult?.[0]?.ports
     );
 
     const taskCRF = new TaskCommandRunnerFactory(
         {
-            taskName: node.fullTag,
+            taskName: node.imageId,
             alwaysRunNew: interactive,
         }
     );

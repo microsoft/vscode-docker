@@ -38,7 +38,7 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
+export async function selectRunCommand(context: IActionContext, imageId: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
@@ -47,9 +47,9 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
     return await selectCommandTemplate(
         context,
         interactive ? 'runInteractive' : 'run',
-        [fullTag],
+        [imageId],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
+        { 'imageId': imageId, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 

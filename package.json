@@ -1615,7 +1615,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${containerCommand} run --rm -d ${exposedPorts} ${tag}",
+                    "default": "${containerCommand} run --rm -d ${exposedPorts} ${imageId}",
                     "description": "%vscode-docker.config.template.run.description%"
                 },
                 "docker.commands.runInteractive": {
@@ -1647,7 +1647,7 @@
                             "type": "string"
                         }
                     ],
-                    "default": "${containerCommand} run --rm -it ${exposedPorts} ${tag}",
+                    "default": "${containerCommand} run --rm -it ${exposedPorts} ${imageId}",
                     "description": "%vscode-docker.config.template.runInteractive.description%"
                 },
                 "docker.commands.attach": {
