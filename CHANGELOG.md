@@ -2,7 +2,7 @@
 ### Added
 - Enhanced registries functionality: [#869](https://github.com/microsoft/vscode-docker/issues/869)
   - Allows third party providers to contribute to the registries view.
-  - Added GitHub Registries support.
+  - Added GitHub Container Registry support.
   - GitLab Container Registry support will be moved to a separate extension. We will provide a link to install once it's published.
 
 ### Fixed
