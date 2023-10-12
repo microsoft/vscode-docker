@@ -44,7 +44,8 @@ export async function selectRunCommand(context: IActionContext, fullTag: string,
         portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
     }
 
-    const tagOrImageId = fullTag !== '<none>' ? fullTag : imageId;
+    const tagOrImageId = fullTag === '<none>' ? imageId : fullTag;
+
 
     return await selectCommandTemplate(
         context,
