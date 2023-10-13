@@ -7,7 +7,7 @@ fastapi[all]==0.89.0
 uvicorn[standard]==0.20.0
 {{/if}}
 {{#if (eq platform 'Python: Flask')}}
-flask==2.2.2
+flask==3.0.0
 {{/if}}
 {{#unless (eq platform 'Python: General')}}
 gunicorn==20.1.0
