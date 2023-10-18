@@ -38,18 +38,21 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, imageId: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
     }
 
+    const tagOrImageId = fullTag === '<none>' ? imageId : fullTag;
+
+
     return await selectCommandTemplate(
         context,
         interactive ? 'runInteractive' : 'run',
-        [fullTag],
+        [fullTag, imageId],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
+        { 'tag': tagOrImageId, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
