@@ -500,9 +500,14 @@
                     "group": "regs_tag_1_general@3"
                 },
                 {
+                    "command": "vscode-docker.registries.inspectRemoteImageManifest",
+                    "when": "view == dockerRegistries && viewItem =~ /commontag/i && !(viewItem =~ /commontag;.*dockerhub/i)",
+                    "group": "regs_tag_1_general@4"
+                },
+                {
                     "command": "vscode-docker.registries.deployImageToAzure",
                     "when": "view == dockerRegistries && viewItem =~ /commontag/i",
-                    "group": "regs_tag_1_general@4"
+                    "group": "regs_tag_1_general@5"
                 },
                 {
                     "command": "vscode-docker.registries.deployImageToAca",
@@ -2598,6 +2603,11 @@
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
             },
             {
+                "command": "vscode-docker.registries.inspectRemoteImageManifest",
+                "title": "%vscode-docker.commands.registries.inspectRemoteImageManifest%",
+                "category": "%vscode-docker.commands.category.dockerRegistries%"
+            },
+            {
                 "command": "vscode-docker.registries.copyRemoteFullTag",
                 "title": "%vscode-docker.commands.registries.copyRemoteFullTag%",
                 "category": "%vscode-docker.commands.category.dockerRegistries%"
@@ -3007,7 +3017,7 @@
         "@microsoft/vscode-azext-azureutils": "^2.0.0",
         "@microsoft/vscode-azext-utils": "^2.1.1",
         "@microsoft/vscode-container-client": "^0.1.0",
-        "@microsoft/vscode-docker-registries": "^0.1.5",
+        "@microsoft/vscode-docker-registries": "file:../vscode-docker-extensibility/packages/vscode-docker-registries/microsoft-vscode-docker-registries-0.1.6.tgz",
         "dayjs": "^1.11.7",
         "dockerfile-language-server-nodejs": "^0.11.0",
         "fs-extra": "^11.1.1",

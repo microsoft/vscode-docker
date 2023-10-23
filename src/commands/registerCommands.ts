@@ -68,6 +68,7 @@ import { disconnectRegistry } from "./registries/disconnectRegistry";
 import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 import { addTrackedGenericV2Registry } from "./registries/genericV2/addTrackedGenericV2Registry";
 import { removeTrackedGenericV2Registry } from "./registries/genericV2/removeTrackedGenericV2Registry";
+import { inspectRemoteImageManifest } from "./registries/inspectRemoteImageManifest";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
@@ -167,6 +168,7 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.registries.connectRegistry', connectRegistry);
     registerCommand('vscode-docker.registries.copyImageDigest', copyRemoteImageDigest);
+    registerCommand('vscode-docker.registries.inspectRemoteImageManifest', inspectRemoteImageManifest);
     registerCommand('vscode-docker.registries.copyRemoteFullTag', copyRemoteFullTag);
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
