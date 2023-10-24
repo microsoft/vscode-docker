@@ -59,10 +59,6 @@
                     "when": "never"
                 },
                 {
-                    "command": "vscode-docker.registries.azure.selectSubscriptions",
-                    "when": "never"
-                },
-                {
                     "command": "vscode-docker.registries.reconnectRegistry",
                     "when": "never"
                 },
@@ -448,11 +444,6 @@
                     "command": "vscode-docker.images.group.remove",
                     "when": "view == dockerImages && viewItem =~ /imageGroup$/i",
                     "group": "images_group_1_destructive@1"
-                },
-                {
-                    "command": "vscode-docker.registries.azure.selectSubscriptions",
-                    "when": "view == dockerRegistries && viewItem == azure;DockerV2;RegistryProvider;",
-                    "group": "inline"
                 },
                 {
                     "command": "vscode-docker.networks.inspect",
@@ -2570,11 +2561,6 @@
                 "command": "vscode-docker.registries.azure.openInPortal",
                 "title": "%vscode-docker.commands.registries.azure.openInPortal%",
                 "category": "%vscode-docker.commands.category.azureContainerRegistry%"
-            },
-            {
-                "command": "vscode-docker.registries.azure.selectSubscriptions",
-                "title": "%vscode-docker.commands.registries.azure.selectSubscriptions%",
-                "icon": "$(filter)"
             },
             {
                 "command": "vscode-docker.registries.azure.untagImage",
