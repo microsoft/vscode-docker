@@ -189,7 +189,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.azure.deleteRegistry', deleteAzureRegistry);
     registerCommand('vscode-docker.registries.azure.deleteRepository', deleteAzureRepository);
     registerCommand('vscode-docker.registries.azure.openInPortal', openInAzurePortal);
-    registerCommand('vscode-docker.registries.azure.selectSubscriptions', () => commands.executeCommand("azure-account.selectSubscriptions"));
     registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
     registerCommand('vscode-docker.registries.azure.viewProperties', viewAzureProperties);
 
