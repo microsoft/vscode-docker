@@ -517,7 +517,7 @@
                 },
                 {
                     "command": "vscode-docker.registries.disconnectRegistry",
-                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i && !(viewItem =~ /commonregistryroot;.*generic/i)",
+                    "when": "view == dockerRegistries && viewItem =~ /commonregistryroot/i",
                     "group": "regs_yyy_destructive@1"
                 },
                 {
