@@ -24,6 +24,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
 
     const wizardContext = context as PushImageWizardContext;
     wizardContext.initialTag = node.fullTag;
+    wizardContext.node = node;
 
     const wizard = new AzureWizard(wizardContext, {
         promptSteps: [
