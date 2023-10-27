@@ -4,7 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { AzureWizardExecuteStep } from '@microsoft/vscode-azext-utils';
+import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
+import { NormalizedImageNameInfo } from '../../../tree/images/NormalizedImageNameInfo';
 import { PushImageWizardContext } from './PushImageWizardContext';
 
 export class RegistryLoginStep extends AzureWizardExecuteStep<PushImageWizardContext> {
@@ -20,7 +22,8 @@ export class RegistryLoginStep extends AzureWizardExecuteStep<PushImageWizardCon
             return false;
         }
 
-        const baseImagePath = wizardContext.connectedRegistry.wrappedItem.baseUrl.authority;
-        return wizardContext.finalTag.startsWith(baseImagePath);
+        const baseAuthority = wizardContext.connectedRegistry.wrappedItem.baseUrl.authority;
+        const desiredRegistry = new NormalizedImageNameInfo(parseDockerLikeImageName(wizardContext.finalTag)).normalizedRegistry;
+        return desiredRegistry === baseAuthority;
     }
 }

@@ -8,6 +8,7 @@ import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
+import { NormalizedImageNameInfo } from '../../../tree/images/NormalizedImageNameInfo';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { registryExperience } from '../../../utils/registryExperience';
 import { PushImageWizardContext } from './PushImageWizardContext';
@@ -40,9 +41,14 @@ export class GetRegistryTargetPromptStep extends AzureWizardPromptStep<PushImage
 
     private async tryGetConnectedRegistryForPath(context: IActionContext, baseImagePath: string): Promise<UnifiedRegistryItem<CommonRegistry> | undefined> {
         const baseImageNameInfo = parseDockerLikeImageName(baseImagePath);
-        const allRegistries = await ext.registriesTree.getConnectedRegistries(baseImageNameInfo.registry);
+        const normalizedImageNameInfo = new NormalizedImageNameInfo(baseImageNameInfo);
 
-        return allRegistries.find((registry) => registry.wrappedItem.baseUrl.authority === baseImageNameInfo.registry);
+        const allRegistries = await vscode.window.withProgress({
+            location: vscode.ProgressLocation.Notification,
+            title: vscode.l10n.t('Determining registry to push to...'),
+        }, () => ext.registriesTree.getConnectedRegistries(normalizedImageNameInfo.normalizedRegistry));
+
+        return allRegistries.find((registry) => registry.wrappedItem.baseUrl.authority === normalizedImageNameInfo.normalizedRegistry);
     }
 
     private get shouldPromptForRegistry(): boolean {
