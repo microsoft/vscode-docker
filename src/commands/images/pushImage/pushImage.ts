@@ -7,7 +7,6 @@ import { AzureWizard, IActionContext } from '@microsoft/vscode-azext-utils';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { ImageTreeItem } from '../../../tree/images/ImageTreeItem';
-import { CreateAcrStep } from './CreateAcrStep';
 import { CreatePickAcrPromptStep } from './CreatePickAcrPromptStep';
 import { FinalTagPromptStep } from './FinalTagPromptStep';
 import { GetRegistryTargetPromptStep } from './GetRegistryTargetPromptStep';
@@ -35,7 +34,6 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
             new FinalTagPromptStep(),
         ],
         executeSteps: [
-            new CreateAcrStep(),
             new RegistryLoginStep(),
             new ImagePushStep(),
         ],

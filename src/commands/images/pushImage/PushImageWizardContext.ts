@@ -16,6 +16,5 @@ export interface PushImageWizardContext extends IActionContext {
     initialTag: string;
     node: ImageTreeItem;
 
-    createAcr?: boolean;
     azureSubscriptionNode?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
 }

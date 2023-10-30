@@ -8,6 +8,7 @@ import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
+import { createAzureRegistry } from '../../registries/azure/createAzureRegistry';
 import { PushImageWizardContext } from './PushImageWizardContext';
 
 export class CreatePickAcrPromptStep extends AzureWizardPromptStep<PushImageWizardContext> {
@@ -19,7 +20,11 @@ export class CreatePickAcrPromptStep extends AzureWizardPromptStep<PushImageWiza
         const response = await wizardContext.ui.showQuickPick(picks, { placeHolder: vscode.l10n.t('Select a registry to push to') });
 
         if (response.data === 'create') {
-            wizardContext.createAcr = true;
+            const createdAcrName = await createAzureRegistry(wizardContext, wizardContext.azureSubscriptionNode);
+
+            const acrNodes = await ext.registriesRoot.getChildren(wizardContext.azureSubscriptionNode) as UnifiedRegistryItem<CommonRegistry>[];
+            const selectedAcrNode = acrNodes.find(acrNode => acrNode.wrappedItem.label === createdAcrName);
+            wizardContext.connectedRegistry = selectedAcrNode;
         } else {
             wizardContext.connectedRegistry = response.data as UnifiedRegistryItem<CommonRegistry>;
         }
