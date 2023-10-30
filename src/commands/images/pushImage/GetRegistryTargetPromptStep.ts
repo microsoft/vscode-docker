@@ -9,6 +9,7 @@ import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../../extensionVariables';
 import { NormalizedImageNameInfo } from '../../../tree/images/NormalizedImageNameInfo';
+import { AzureSubscriptionRegistryItem, isAzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { registryExperience } from '../../../utils/registryExperience';
 import { PushImageWizardContext } from './PushImageWizardContext';
@@ -23,8 +24,13 @@ export class GetRegistryTargetPromptStep extends AzureWizardPromptStep<PushImage
 
     public async prompt(wizardContext: PushImageWizardContext): Promise<void> {
         try {
-            // TODO: if Azure is chosen, a Create ACR pick should be shown
-            wizardContext.connectedRegistry = await registryExperience<CommonRegistry>(wizardContext, { contextValueFilter: { include: [/commonregistry/i] } });
+            const pickedNode = await registryExperience<CommonRegistry | AzureSubscriptionRegistryItem>(wizardContext, { contextValueFilter: { include: [/commonregistry/i, /azuresubscription/i] } });
+            if (isAzureSubscriptionRegistryItem(pickedNode.wrappedItem)) {
+                // Azure was chosen. The CreatePickAcrPromptStep will be activated.
+                wizardContext.azureSubscriptionNode = pickedNode as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
+            } else {
+                wizardContext.connectedRegistry = pickedNode as UnifiedRegistryItem<CommonRegistry>;
+            }
         } catch (error) {
             if (error instanceof NoResourceFoundError || error instanceof UserCancelledError) {
                 // Do nothing, move on without a selected registry

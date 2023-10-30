@@ -3,10 +3,9 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ContextValueFilterQuickPickOptions, ContextValueQuickPickStep, GenericQuickPickStep, IActionContext, IWizardOptions, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, UserCancelledError, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
-import { CommonRegistryItem, CommonRegistryRoot } from '@microsoft/vscode-docker-registries';
+import { ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, IWizardOptions, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, UserCancelledError, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { CommonRegistryItem } from '@microsoft/vscode-docker-registries';
 import { MessageItem, TreeItem, commands, l10n, window } from 'vscode';
-import { CreatePickAcrPromptStep } from '../commands/images/pushImage/CreatePickAcrPromptStep';
 import { ext } from '../extensionVariables';
 import { AzureSubscriptionRegistryItem } from '../tree/registries/Azure/AzureRegistryDataProvider';
 import { isConnectRegistryTreeItem } from '../tree/registries/ConnectRegistryTreeItem';
@@ -104,18 +103,6 @@ export class RegistryProviderQuickPickStep extends GenericQuickPickStep<QuickPic
     }
 
     public async getSubWizard(wizardContext: QuickPickWizardContext): Promise<IWizardOptions<QuickPickWizardContext>> {
-        const treeItem = await this.treeDataProvider.getTreeItem(wizardContext.pickedNodes[0] as UnifiedRegistryItem<CommonRegistryRoot>);
-
-        if (treeItem.label === ext.azureRegistryDataProvider.label) {
-            // If it's Azure, we need to put in a subscription pick step, then an ACR+Create step, and then optionally a context value step
-            return {
-                promptSteps: [
-                    new ContextValueQuickPickStep(this.treeDataProvider, this.pickOptions as ContextValueFilterQuickPickOptions),
-                    new CreatePickAcrPromptStep(),
-                ],
-            };
-        }
-
         if (this.pickOptions.contextValueFilter) {
             return {
                 promptSteps: [new RecursiveQuickPickStep(this.treeDataProvider, this.pickOptions as ContextValueFilterQuickPickOptions)],
