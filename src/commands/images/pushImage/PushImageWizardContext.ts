@@ -6,6 +6,7 @@
 import { IActionContext } from '@microsoft/vscode-azext-utils';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import { ImageTreeItem } from '../../../tree/images/ImageTreeItem';
+import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 
 export interface PushImageWizardContext extends IActionContext {
@@ -14,4 +15,7 @@ export interface PushImageWizardContext extends IActionContext {
 
     initialTag: string;
     node: ImageTreeItem;
+
+    createAcr?: boolean;
+    azureSubscriptionNode?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
 }

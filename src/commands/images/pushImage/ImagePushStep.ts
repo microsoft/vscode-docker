@@ -10,7 +10,7 @@ import { addImageTaggingTelemetry } from '../tagImage';
 import { PushImageWizardContext } from './PushImageWizardContext';
 
 export class ImagePushStep extends AzureWizardExecuteStep<PushImageWizardContext> {
-    public priority: number = 200;
+    public priority: number = 300;
 
     public async execute(wizardContext: PushImageWizardContext): Promise<void> {
         addImageTaggingTelemetry(wizardContext, wizardContext.finalTag, '');

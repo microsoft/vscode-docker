@@ -10,7 +10,7 @@ import { NormalizedImageNameInfo } from '../../../tree/images/NormalizedImageNam
 import { PushImageWizardContext } from './PushImageWizardContext';
 
 export class RegistryLoginStep extends AzureWizardExecuteStep<PushImageWizardContext> {
-    public priority: number = 100;
+    public priority: number = 200;
 
     public async execute(wizardContext: PushImageWizardContext): Promise<void> {
         await vscode.commands.executeCommand('vscode-docker.registries.logInToDockerCli', wizardContext.connectedRegistry);

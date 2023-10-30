@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, IActionContext, NoResourceFoundError } from '@microsoft/vscode-azext-utils';
+import { AzureWizardPromptStep, IActionContext, NoResourceFoundError, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import { parseDockerLikeImageName } from '@microsoft/vscode-container-client';
 import { CommonRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
@@ -26,7 +26,7 @@ export class GetRegistryTargetPromptStep extends AzureWizardPromptStep<PushImage
             // TODO: if Azure is chosen, a Create ACR pick should be shown
             wizardContext.connectedRegistry = await registryExperience<CommonRegistry>(wizardContext, { contextValueFilter: { include: [/commonregistry/i] } });
         } catch (error) {
-            if (error instanceof NoResourceFoundError) {
+            if (error instanceof NoResourceFoundError || error instanceof UserCancelledError) {
                 // Do nothing, move on without a selected registry
             } else {
                 // Rethrow

@@ -3,10 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureWizardPromptStep, ContextValueFilterQuickPickOptions, GenericQuickPickStep, IActionContext, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, UserCancelledError, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
-import { CommonRegistryItem } from '@microsoft/vscode-docker-registries';
+import { ContextValueFilterQuickPickOptions, ContextValueQuickPickStep, GenericQuickPickStep, IActionContext, IWizardOptions, PickFilter, QuickPickWizardContext, RecursiveQuickPickStep, UserCancelledError, runQuickPickWizard } from '@microsoft/vscode-azext-utils';
+import { CommonRegistryItem, CommonRegistryRoot } from '@microsoft/vscode-docker-registries';
 import { MessageItem, TreeItem, commands, l10n, window } from 'vscode';
+import { CreatePickAcrPromptStep } from '../commands/images/pushImage/CreatePickAcrPromptStep';
 import { ext } from '../extensionVariables';
+import { AzureSubscriptionRegistryItem } from '../tree/registries/Azure/AzureRegistryDataProvider';
 import { isConnectRegistryTreeItem } from '../tree/registries/ConnectRegistryTreeItem';
 import { UnifiedRegistryItem, UnifiedRegistryTreeDataProvider } from '../tree/registries/UnifiedRegistryTreeDataProvider';
 
@@ -33,7 +35,7 @@ export async function registryExperience<TNode extends CommonRegistryItem>(conte
     if (registryRoots.length === 0 || (registryRoots.length === 1 && isConnectRegistryTreeItem(registryRoots[0].wrappedItem))) {
         const add: MessageItem = { title: l10n.t('Connect Registry...') };
         void window.showErrorMessage(
-            l10n.t('No registry providers are connected. Please connect a registry provider to continue.'),
+            l10n.t('No registry providers are connected. Please connect a registry provider and try again to continue.'),
             ...[add])
             .then((result) => {
                 if (result === add) {
@@ -44,21 +46,24 @@ export async function registryExperience<TNode extends CommonRegistryItem>(conte
         throw new UserCancelledError();
     }
 
-    // get the registry provider unified item
-    const promptSteps: AzureWizardPromptStep<QuickPickWizardContext>[] = [
-        new RegistryQuickPickStep(ext.registriesTree, options)
-    ];
-
-    if (options?.contextValueFilter) {
-        promptSteps.push(new RecursiveQuickPickStep(ext.registriesTree, options as ContextValueFilterQuickPickOptions));
-    }
-
     const unifiedRegistryItem = await runQuickPickWizard<UnifiedRegistryItem<TNode>>(context, {
         hideStepCount: true,
-        promptSteps: promptSteps,
+        promptSteps: [
+            new RegistryProviderQuickPickStep(ext.registriesTree, options)
+        ],
     });
 
     return unifiedRegistryItem;
+}
+
+export async function subscriptionExperience(context: IActionContext): Promise<UnifiedRegistryItem<AzureSubscriptionRegistryItem>> {
+    return registryExperience<AzureSubscriptionRegistryItem>(context,
+        {
+            registryFilter: { include: [ext.azureRegistryDataProvider.label] },
+            contextValueFilter: { include: /azuresubscription/i },
+            skipIfOne: true
+        }
+    );
 }
 
 export class RegistryPickFilter implements PickFilter {
@@ -87,7 +92,7 @@ export class RegistryPickFilter implements PickFilter {
     }
 }
 
-export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardContext, RegistryExperienceOptions> {
+export class RegistryProviderQuickPickStep extends GenericQuickPickStep<QuickPickWizardContext, RegistryExperienceOptions> {
     public readonly pickFilter: PickFilter;
 
     public constructor(
@@ -96,5 +101,28 @@ export class RegistryQuickPickStep extends GenericQuickPickStep<QuickPickWizardC
     ) {
         super(treeDataProvider, pickOptions, { placeHolder: l10n.t('Select registry provider') });
         this.pickFilter = new RegistryPickFilter(pickOptions);
+    }
+
+    public async getSubWizard(wizardContext: QuickPickWizardContext): Promise<IWizardOptions<QuickPickWizardContext>> {
+        const treeItem = await this.treeDataProvider.getTreeItem(wizardContext.pickedNodes[0] as UnifiedRegistryItem<CommonRegistryRoot>);
+
+        if (treeItem.label === ext.azureRegistryDataProvider.label) {
+            // If it's Azure, we need to put in a subscription pick step, then an ACR+Create step, and then optionally a context value step
+            return {
+                promptSteps: [
+                    new ContextValueQuickPickStep(this.treeDataProvider, this.pickOptions as ContextValueFilterQuickPickOptions),
+                    new CreatePickAcrPromptStep(),
+                ],
+            };
+        }
+
+        if (this.pickOptions.contextValueFilter) {
+            return {
+                promptSteps: [new RecursiveQuickPickStep(this.treeDataProvider, this.pickOptions as ContextValueFilterQuickPickOptions)],
+                hideStepCount: true,
+            };
+        }
+
+        return undefined;
     }
 }
