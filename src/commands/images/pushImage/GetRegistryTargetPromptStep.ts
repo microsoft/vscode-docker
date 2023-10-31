@@ -26,7 +26,7 @@ export class GetRegistryTargetPromptStep extends AzureWizardPromptStep<PushImage
         try {
             const pickedNode = await registryExperience<CommonRegistry | AzureSubscriptionRegistryItem>(wizardContext, { contextValueFilter: { include: [/commonregistry/i, /azuresubscription/i] } });
             if (isAzureSubscriptionRegistryItem(pickedNode.wrappedItem)) {
-                // Azure was chosen. The CreatePickAcrPromptStep will be activated.
+                // An Azure subscription node was chosen. The CreatePickAcrPromptStep will be activated, instead of the generic RecursiveQuickPickStep that would normally be used.
                 wizardContext.azureSubscriptionNode = pickedNode as UnifiedRegistryItem<AzureSubscriptionRegistryItem>;
             } else {
                 wizardContext.connectedRegistry = pickedNode as UnifiedRegistryItem<CommonRegistry>;
