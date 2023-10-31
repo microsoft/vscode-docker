@@ -17,7 +17,7 @@ export class CreatePickAcrPromptStep extends AzureWizardPromptStep<PushImageWiza
         const picks: IAzureQuickPickItem<string | UnifiedRegistryItem<CommonRegistry>>[] = acrs.map(acr => <IAzureQuickPickItem<UnifiedRegistryItem<CommonRegistry>>>{ label: acr.wrappedItem.label, data: acr });
         picks.push({ label: vscode.l10n.t('$(plus) Create new Azure Container Registry...'), data: 'create' });
 
-        const response = await wizardContext.ui.showQuickPick(picks, { placeHolder: vscode.l10n.t('Select a registry to push to') });
+        const response = await wizardContext.ui.showQuickPick(picks, { placeHolder: vscode.l10n.t('Select an Azure Container Registry to push to') });
 
         if (response.data === 'create') {
             const createdAcrName = await createAzureRegistry(wizardContext, wizardContext.azureSubscriptionNode);
