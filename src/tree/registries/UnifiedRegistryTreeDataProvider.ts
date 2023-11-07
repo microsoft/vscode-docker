@@ -1,3 +1,8 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
 import { CommonRegistry, CommonRegistryRoot, RegistryDataProvider, isCommonRegistryItem, isRegistry } from '@microsoft/vscode-docker-registries';
 import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
@@ -192,15 +197,12 @@ export class UnifiedRegistryTreeDataProvider implements vscode.TreeDataProvider<
         if (imageBaseName) {
             if (imageBaseName === 'docker.io') {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.dockerHubRegistryDataProvider.label);
-            }
-            else if (imageBaseName.endsWith('azurecr.io')) {
+            } else if (imageBaseName.endsWith('azurecr.io')) {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.azureRegistryDataProvider.label);
                 findAzureRegistryOnly = true;
-            }
-            else if (imageBaseName === 'ghcr.io') {
+            } else if (imageBaseName === 'ghcr.io') {
                 registryRoots = registryRoots.filter(r => (r.wrappedItem as CommonRegistryRoot).label === ext.githubRegistryDataProvider.label);
-            }
-            else {
+            } else {
                 registryRoots = registryRoots.filter(
                     r => (r.wrappedItem as CommonRegistryRoot).label !== 'Docker Hub'
                         && (r.wrappedItem as CommonRegistryRoot).label !== 'Azure'

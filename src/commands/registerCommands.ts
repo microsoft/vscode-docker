@@ -37,7 +37,7 @@ import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
-import { pushImage } from "./images/pushImage";
+import { pushImage } from "./images/pushImage/pushImage";
 import { removeImage } from "./images/removeImage";
 import { removeImageGroup } from "./images/removeImageGroup";
 import { runAzureCliImage } from "./images/runAzureCliImage";
