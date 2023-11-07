@@ -5,6 +5,7 @@
 
 import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
 import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, getContextValue, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistry, isRegistryRoot, isRepository, isTag } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
@@ -65,6 +66,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             }
 
             const subscriptions = await this.subscriptionProvider.getSubscriptions();
+            void this.sendSubscriptionTelemetryIfNeeded();
 
             return subscriptions.map(sub => {
                 return {
@@ -195,5 +197,32 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
 
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         return this.authenticationProviders.get(registryString)!;
+    }
+
+    private hasSentSubscriptionTelemetry = false;
+    private async sendSubscriptionTelemetryIfNeeded(): Promise<void> {
+        if (this.hasSentSubscriptionTelemetry) {
+            return;
+        }
+        this.hasSentSubscriptionTelemetry = true;
+
+        // This event is relied upon by the DevDiv Analytics and Growth Team
+        await callWithTelemetryAndErrorHandling('updateSubscriptionsAndTenants', async (context: IActionContext) => {
+            context.telemetry.properties.isActivationEvent = 'true';
+
+            const subscriptions = await this.subscriptionProvider.getSubscriptions(false);
+
+            const tenantSet = new Set<string>();
+            const subscriptionSet = new Set<string>();
+            subscriptions.forEach(sub => {
+                tenantSet.add(sub.tenantId);
+                subscriptionSet.add(sub.subscriptionId);
+            });
+
+            context.telemetry.properties.numtenants = tenantSet.size.toString();
+            context.telemetry.properties.numsubscriptions = subscriptionSet.size.toString();
+            context.telemetry.properties.subscriptions = JSON.stringify(Array.from(subscriptionSet));
+
+        });
     }
 }
