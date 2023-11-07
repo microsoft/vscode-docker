@@ -1,3 +1,12 @@
+## 1.28.0 - 13 November 2023
+### Added
+- For certain registries, the remote image manifest can now be inspected. This has different information from inspecting an image locally. [#3996](https://github.com/microsoft/vscode-docker/issues/3996)
+
+### Fixed
+- An infinite loop condition in the Registries tree has been fixed. [#4145](https://github.com/microsoft/vscode-docker/pull/4145)
+- A rare condition which made generic V2 registries unusuable has been fixed. [#4140](https://github.com/microsoft/vscode-docker/issues/4140)
+- Untagged images can now be run. [#4100](https://github.com/microsoft/vscode-docker/issues/4100)
+
 ## 1.27.0 - 16 October 2023
 ### Added
 - Enhanced registries functionality: [#869](https://github.com/microsoft/vscode-docker/issues/869)
