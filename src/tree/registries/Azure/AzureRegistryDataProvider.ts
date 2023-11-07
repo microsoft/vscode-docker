@@ -66,7 +66,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             }
 
             const subscriptions = await this.subscriptionProvider.getSubscriptions();
-            void this.sendSubscriptionTelemetryIfNeeded();
+            this.sendSubscriptionTelemetryIfNeeded();
 
             return subscriptions.map(sub => {
                 return {
@@ -200,14 +200,14 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     private hasSentSubscriptionTelemetry = false;
-    private async sendSubscriptionTelemetryIfNeeded(): Promise<void> {
+    private sendSubscriptionTelemetryIfNeeded(): void {
         if (this.hasSentSubscriptionTelemetry) {
             return;
         }
         this.hasSentSubscriptionTelemetry = true;
 
         // This event is relied upon by the DevDiv Analytics and Growth Team
-        await callWithTelemetryAndErrorHandling('updateSubscriptionsAndTenants', async (context: IActionContext) => {
+        void callWithTelemetryAndErrorHandling('updateSubscriptionsAndTenants', async (context: IActionContext) => {
             context.telemetry.properties.isActivationEvent = 'true';
 
             const subscriptions = await this.subscriptionProvider.getSubscriptions(false);
@@ -222,7 +222,6 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
             context.telemetry.properties.numtenants = tenantSet.size.toString();
             context.telemetry.properties.numsubscriptions = subscriptionSet.size.toString();
             context.telemetry.properties.subscriptions = JSON.stringify(Array.from(subscriptionSet));
-
         });
     }
 }
