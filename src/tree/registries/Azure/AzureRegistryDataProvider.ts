@@ -209,6 +209,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         // This event is relied upon by the DevDiv Analytics and Growth Team
         void callWithTelemetryAndErrorHandling('updateSubscriptionsAndTenants', async (context: IActionContext) => {
             context.telemetry.properties.isActivationEvent = 'true';
+            context.errorHandling.suppressDisplay = true;
 
             const subscriptions = await this.subscriptionProvider.getSubscriptions(false);
 
