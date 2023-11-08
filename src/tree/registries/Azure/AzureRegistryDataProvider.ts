@@ -220,6 +220,8 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
                 subscriptionSet.add(sub.subscriptionId);
             });
 
+            // Number of tenants and subscriptions really belong in Measurements but for backwards compatibility
+            // they will be put into Properties instead.
             context.telemetry.properties.numtenants = tenantSet.size.toString();
             context.telemetry.properties.numsubscriptions = subscriptionSet.size.toString();
             context.telemetry.properties.subscriptions = JSON.stringify(Array.from(subscriptionSet));
