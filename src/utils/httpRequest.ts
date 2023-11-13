@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as fse from 'fs-extra';
-import { default as fetch, Request, RequestInit, Response } from 'node-fetch';
 import { URL, URLSearchParams } from 'url';
 import { l10n } from 'vscode';
 
@@ -133,7 +132,10 @@ export interface ResponseLike {
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
     const response = await fetch(downloadUrl);
     const writeStream = fse.createWriteStream(fileName);
-    response.body.pipe(writeStream);
+
+    for await (const chunk of response.body) {
+        writeStream.write(chunk);
+    }
 
     return new Promise((resolve, reject) => {
         writeStream.on('close', () => {
