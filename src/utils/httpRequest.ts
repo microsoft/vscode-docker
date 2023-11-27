@@ -137,16 +137,7 @@ export async function streamToFile(downloadUrl: string, fileName: string): Promi
         writeStream.write(chunk);
     }
 
-    return new Promise((resolve, reject) => {
-        writeStream.on('close', () => {
-            resolve();
-        });
-
-        writeStream.on('error', error => {
-            writeStream.close();
-            reject(error);
-        });
-    });
+    writeStream.close();
 }
 
 export function basicAuthHeader(username: string, password: string): string {
