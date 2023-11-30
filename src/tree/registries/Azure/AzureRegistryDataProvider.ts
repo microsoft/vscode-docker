@@ -99,6 +99,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public dispose(): void {
+        super.dispose();
         this.subscriptionProvider.dispose();
     }
 

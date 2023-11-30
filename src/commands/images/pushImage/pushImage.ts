@@ -12,6 +12,7 @@ import { FinalTagPromptStep } from './FinalTagPromptStep';
 import { GetRegistryTargetPromptStep } from './GetRegistryTargetPromptStep';
 import { ImagePushStep } from './ImagePushStep';
 import { PushImageWizardContext } from './PushImageWizardContext';
+import { RefreshRegistriesViewStep } from './RefreshRegistriesViewStep';
 import { RegistryLoginStep } from './RegistryLoginStep';
 
 export async function pushImage(context: IActionContext, node: ImageTreeItem | undefined): Promise<void> {
@@ -36,6 +37,7 @@ export async function pushImage(context: IActionContext, node: ImageTreeItem | u
         executeSteps: [
             new RegistryLoginStep(),
             new ImagePushStep(),
+            new RefreshRegistriesViewStep(),
         ],
         showLoadingPrompt: true,
     });
