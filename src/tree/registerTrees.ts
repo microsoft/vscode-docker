@@ -44,7 +44,7 @@ export function registerTrees(): void {
 
     const urtdp = new UnifiedRegistryTreeDataProvider(ext.context.globalState);
     ext.registriesRoot = urtdp;
-    ext.registriesTreeView = vscode.window.createTreeView('dockerRegistries', { treeDataProvider: urtdp });
+    ext.registriesTreeView = vscode.window.createTreeView('dockerRegistries', { treeDataProvider: urtdp, showCollapseAll: true });
     ext.registriesTree = urtdp;
     registerRegistryDataProviders(urtdp);
     void migrateRegistriesData(ext.context);
