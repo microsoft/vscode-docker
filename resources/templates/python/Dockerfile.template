@@ -1,5 +1,5 @@
 # For more information, please refer to https://aka.ms/vscode-docker-python
-FROM python:3.10-slim
+FROM python:3.12-slim
 
 {{#if (isRootPort ports)}}
 # Warning: A port below 1024 has been exposed. This requires the image to run as a root user which is not a best practice.
