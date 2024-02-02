@@ -59,8 +59,8 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
-        const pyExt = await PythonExtensionHelper.getPythonExtension();
-        if (!pyExt) {
+        const pyDebugExt = await PythonExtensionHelper.getPythonDebuggerExtension();
+        if (!pyDebugExt) {
             return undefined;
         }
 
@@ -83,7 +83,7 @@ export class PythonDebugHelper implements DebugHelper {
 
         return {
             ...{ ...debugConfiguration, python: undefined }, // Get the original debug configuration, minus the "python" property which belongs to the Docker launch config and confuses the Python extension
-            type: 'python',
+            type: 'debugpy',
             request: 'launch',
             pathMappings: debugConfiguration.python.pathMappings,
             justMyCode: debugConfiguration.python.justMyCode ?? true,

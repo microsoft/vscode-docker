@@ -3,13 +3,11 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-// This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
-
 import * as semver from 'semver';
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
 
-// Adapted from https://github.com/microsoft/vscode-python/blob/main/src/client/api.ts
-interface PythonExtensionAPI {
+// Adapted from https://github.com/microsoft/vscode-python-debugger/blob/main/src/extension/api.ts
+interface PythonDebuggerExtensionAPI {
     debug: {
         getDebuggerPackagePath(): Promise<string | undefined>;
     }
@@ -24,8 +22,8 @@ export namespace PythonExtensionHelper {
     }
 
     export async function getLauncherFolderPath(): Promise<string> {
-        const pyExt = await getPythonExtension();
-        const debuggerPath = await pyExt?.exports?.debug?.getDebuggerPackagePath();
+        const debugPyExt = await getPythonDebuggerExtension();
+        const debuggerPath = await debugPyExt?.exports?.debug?.getDebuggerPackagePath();
 
         if (debuggerPath) {
             return debuggerPath;
@@ -34,35 +32,35 @@ export namespace PythonExtensionHelper {
         throw new Error(vscode.l10n.t('Unable to find the debugger in the Python extension.'));
     }
 
-    export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
-        const pyExtensionId = 'ms-python.python';
-        const minPyExtensionVersion = new semver.SemVer('2020.11.367453362');
+    export async function getPythonDebuggerExtension(): Promise<vscode.Extension<PythonDebuggerExtensionAPI>> | undefined {
+        const debugPyExtensionId = 'ms-python.debugpy';
+        const minPyExtensionVersion = new semver.SemVer('2024.0.0');
 
-        const pyExt = vscode.extensions.getExtension(pyExtensionId);
+        const debugPyExt = vscode.extensions.getExtension(debugPyExtensionId);
         const button = vscode.l10n.t('Open Extension');
 
-        if (!pyExt) {
-            const response = await vscode.window.showErrorMessage(vscode.l10n.t('For debugging Python apps in a container to work, the Python extension must be installed.'), button);
+        if (!debugPyExt) {
+            const response = await vscode.window.showErrorMessage(vscode.l10n.t('For debugging Python apps in a container to work, the Python Debugger extension must be installed.'), button);
 
             if (response === button) {
-                await vscode.commands.executeCommand('extension.open', pyExtensionId);
+                await vscode.commands.executeCommand('extension.open', debugPyExtensionId);
             }
 
             return undefined;
         }
 
-        const version = new semver.SemVer(pyExt.packageJSON.version);
+        const version = new semver.SemVer(debugPyExt.packageJSON.version);
 
         if (semver.lt(version, minPyExtensionVersion)) {
-            await vscode.window.showErrorMessage(vscode.l10n.t('The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
+            await vscode.window.showErrorMessage(vscode.l10n.t('The installed Python Debugger extension does not meet the minimum requirements, please update to the latest version and try again.'));
             return undefined;
         }
 
-        if (!pyExt.isActive) {
-            await pyExt.activate();
+        if (!debugPyExt.isActive) {
+            await debugPyExt.activate();
         }
 
-        return pyExt;
+        return debugPyExt;
     }
 }
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */
