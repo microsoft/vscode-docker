@@ -1,3 +1,13 @@
+## 1.29.0 - 12 February 2024
+### Added
+- Node.js 18 is now used, requiring at minimum VSCode 1.82.0. [#4167](https://github.com/microsoft/vscode-docker/pull/4167)
+
+### Fixed
+- Instead of `python3`, the Python debugging features now use `python`. Python 2 is far out of support, and Python 3 is the default on most systems. [#4209](https://github.com/microsoft/vscode-docker/issues/4209)
+- Fixed some issues with the registries view. [#4182](https://github.com/microsoft/vscode-docker/issues/4182), [#4192](https://github.com/microsoft/vscode-docker/issues/4192)
+- Fixed an issue with Dotnet SDK container based debugging. [#4199](https://github.com/microsoft/vscode-docker/issues/4199)
+
+
 ## 1.28.0 - 13 November 2023
 ### Added
 - For certain registries, the remote image manifest can now be inspected. This has different information from inspecting an image locally. [#3996](https://github.com/microsoft/vscode-docker/issues/3996)
