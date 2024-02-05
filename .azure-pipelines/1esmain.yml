@@ -25,7 +25,7 @@ resources:
     - repository: azExtTemplates
       type: github
       name: microsoft/vscode-azuretools
-      ref: bmw/1es # TODO: Change to main once the branch is merged
+      ref: main
       endpoint: GitHub-AzureTools # The service connection to use when accessing this repository
 
 extends:
