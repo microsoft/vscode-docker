@@ -6,7 +6,7 @@ trigger:
 # Disable PR trigger
 pr: none
 
-# Scheduled nightly build
+# Scheduled nightly build of `main`
 schedules:
   - cron: "0 0 * * *"
     displayName: Nightly scheduled build
@@ -15,26 +15,15 @@ schedules:
       include:
         - main
 
-# `resources` specifies the location of templates to pick up, use it to get 1ES and AzExt templates
+# `resources` specifies the location of templates to pick up, use it to get AzExt templates
 resources:
   repositories:
-    - repository: 1esPipelines
-      type: git
-      name: 1ESPipelineTemplates/1ESPipelineTemplates
-      ref: refs/tags/release
     - repository: azExtTemplates
       type: github
       name: microsoft/vscode-azuretools
       ref: main
       endpoint: GitHub-AzureTools # The service connection to use when accessing this repository
 
+# Use those templates
 extends:
-  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
-  parameters:
-    pool:
-      name: VSEngSS-MicroBuild2022-1ES # Name of your hosted pool
-      image: server2022-microbuildVS2022-1es # Name of the image in your pool. If not specified, first image of the pool is used
-      os: windows # OS of the image. Allowed values: windows, linux, macOS
-    stages:
-      # Execute stages from the AzExt template
-      - template: azure-pipelines/1esjobs.yml@azExtTemplates
+  template: azure-pipelines/1esmain.yml@azExtTemplates
