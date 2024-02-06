@@ -117,8 +117,8 @@ export class PythonTaskHelper implements TaskHelper {
         // User input is honored in all of the below.
         runOptions.volumes = this.inferVolumes(runOptions, launcherFolder);
 
-        // If the user specifies command, we won't set entrypoint; otherwise if they set entrypoint we will respect it; otherwise use 'python' to start an idle container
-        runOptions.entrypoint = runOptions.command ? undefined : runOptions.entrypoint || 'python';
+        // If the user specifies command, we won't set entrypoint; otherwise if they set entrypoint we will respect it; otherwise use 'python3' to start an idle container
+        runOptions.entrypoint = runOptions.command ? undefined : runOptions.entrypoint || 'python3';
 
         return runOptions;
     }
