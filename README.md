@@ -34,7 +34,7 @@ The extension can scaffold Docker files for most popular development languages (
 
 ### Docker Explorer
 
-The Docker extension contributes a Docker Explorer view to VS Code. The Docker Explorer lets you examine and manage Docker assets: containers, images, volumes, networks, and container registries. If the Azure Account extension is installed, you can browse your Azure Container Registries as well.
+The Docker extension contributes a Docker Explorer view to VS Code. The Docker Explorer lets you examine and manage Docker assets: containers, images, volumes, networks, and container registries.
 
 The right-click menu provides access to commonly used commands for each type of asset.
 
