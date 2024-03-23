@@ -195,7 +195,9 @@ export class NetCoreTaskHelper implements TaskHelper {
 
     private async inferUserSecrets(helperOptions: NetCoreTaskOptions): Promise<boolean> {
         const contents = await fse.readFile(helperOptions.appProject);
-        return UserSecretsRegex.test(contents.toString());
+        // Remove comments so we don't match a commented tag
+        const noComments = contents.toString().replace(/<!--.*?-->/gs, "");
+        return UserSecretsRegex.test(noComments);
     }
 
     private async inferVolumes(folder: WorkspaceFolder, runOptions: DockerRunOptions, helperOptions: NetCoreTaskOptions, ssl: boolean, userSecrets: boolean): Promise<DockerContainerVolume[]> {
