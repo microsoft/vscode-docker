@@ -22,8 +22,8 @@ export namespace PythonExtensionHelper {
     }
 
     export async function getLauncherFolderPath(): Promise<string> {
-        const debugPyExt = await getPythonExtension();
-        const debuggerPath = await debugPyExt?.exports?.debug?.getDebuggerPackagePath();
+        const pyExt = await getPythonExtension();
+        const debuggerPath = await pyExt?.exports?.debug?.getDebuggerPackagePath();
 
         if (debuggerPath) {
             return debuggerPath;
