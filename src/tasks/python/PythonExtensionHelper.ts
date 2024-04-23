@@ -6,8 +6,8 @@
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 
-// Adapted from https://github.com/microsoft/vscode-python-debugger/blob/main/src/extension/api.ts
-interface PythonDebuggerExtensionAPI {
+// Adapted from https://github.com/microsoft/vscode-python/blob/main/src/client/api.ts
+interface PythonExtensionAPI {
     debug: {
         getDebuggerPackagePath(): Promise<string | undefined>;
     }
@@ -22,7 +22,7 @@ export namespace PythonExtensionHelper {
     }
 
     export async function getLauncherFolderPath(): Promise<string> {
-        const debugPyExt = await getPythonDebuggerExtension();
+        const debugPyExt = await getPythonExtension();
         const debuggerPath = await debugPyExt?.exports?.debug?.getDebuggerPackagePath();
 
         if (debuggerPath) {
@@ -32,35 +32,35 @@ export namespace PythonExtensionHelper {
         throw new Error(vscode.l10n.t('Unable to find the debugger in the Python extension.'));
     }
 
-    export async function getPythonDebuggerExtension(): Promise<vscode.Extension<PythonDebuggerExtensionAPI>> | undefined {
-        const debugPyExtensionId = 'ms-python.debugpy';
+    export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
+        const pyExtensionId = 'ms-python.python';
         const minPyExtensionVersion = new semver.SemVer('2024.5.11141010');
 
-        const debugPyExt = vscode.extensions.getExtension(debugPyExtensionId);
+        const pyExt = vscode.extensions.getExtension(pyExtensionId);
         const button = vscode.l10n.t('Open Extension');
 
-        if (!debugPyExt) {
-            const response = await vscode.window.showErrorMessage(vscode.l10n.t('For debugging Python apps in a container to work, the Python Debugger extension must be installed.'), button);
+        if (!pyExt) {
+            const response = await vscode.window.showErrorMessage(vscode.l10n.t('For debugging Python apps in a container to work, the Python extension must be installed.'), button);
 
             if (response === button) {
-                await vscode.commands.executeCommand('extension.open', debugPyExtensionId);
+                await vscode.commands.executeCommand('extension.open', pyExtensionId);
             }
 
             return undefined;
         }
 
-        const version = new semver.SemVer(debugPyExt.packageJSON.version);
+        const version = new semver.SemVer(pyExt.packageJSON.version);
 
         if (semver.lt(version, minPyExtensionVersion)) {
-            await vscode.window.showErrorMessage(vscode.l10n.t('The installed Python Debugger extension does not meet the minimum requirements, please update to the latest version and try again.'));
+            await vscode.window.showErrorMessage(vscode.l10n.t('The installed Python extension does not meet the minimum requirements, please update to the latest version and try again.'));
             return undefined;
         }
 
-        if (!debugPyExt.isActive) {
-            await debugPyExt.activate();
+        if (!pyExt.isActive) {
+            await pyExt.activate();
         }
 
-        return debugPyExt;
+        return pyExt;
     }
 }
 /* eslint-enable @typescript-eslint/no-namespace, no-inner-declarations */

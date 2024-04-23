@@ -59,8 +59,8 @@ export class PythonDebugHelper implements DebugHelper {
     }
 
     public async resolveDebugConfiguration(context: DockerDebugContext, debugConfiguration: PythonDockerDebugConfiguration): Promise<ResolvedDebugConfiguration | undefined> {
-        const pyDebugExt = await PythonExtensionHelper.getPythonDebuggerExtension();
-        if (!pyDebugExt) {
+        const pyExt = await PythonExtensionHelper.getPythonExtension();
+        if (!pyExt) {
             return undefined;
         }
 
