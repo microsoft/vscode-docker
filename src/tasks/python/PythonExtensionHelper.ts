@@ -34,7 +34,7 @@ export namespace PythonExtensionHelper {
 
     export async function getPythonDebuggerExtension(): Promise<vscode.Extension<PythonDebuggerExtensionAPI>> | undefined {
         const debugPyExtensionId = 'ms-python.debugpy';
-        const minPyExtensionVersion = new semver.SemVer('2024.0.0');
+        const minPyExtensionVersion = new semver.SemVer('2024.5.11141010');
 
         const debugPyExt = vscode.extensions.getExtension(debugPyExtensionId);
         const button = vscode.l10n.t('Open Extension');
