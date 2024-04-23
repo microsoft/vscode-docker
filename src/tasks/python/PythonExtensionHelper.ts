@@ -3,8 +3,10 @@
  *  Licensed under the MIT License. See LICENSE.md in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+// This will eventually be replaced by an API in the Python extension. See https://github.com/microsoft/vscode-python/issues/7282
+
 import * as semver from 'semver';
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
 // Adapted from https://github.com/microsoft/vscode-python/blob/main/src/client/api.ts
 interface PythonExtensionAPI {
@@ -34,7 +36,7 @@ export namespace PythonExtensionHelper {
 
     export async function getPythonExtension(): Promise<vscode.Extension<PythonExtensionAPI>> | undefined {
         const pyExtensionId = 'ms-python.python';
-        const minPyExtensionVersion = new semver.SemVer('2024.5.11141010');
+        const minPyExtensionVersion = new semver.SemVer('2020.11.367453362');
 
         const pyExt = vscode.extensions.getExtension(pyExtensionId);
         const button = vscode.l10n.t('Open Extension');
