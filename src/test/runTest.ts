@@ -5,9 +5,9 @@
 
 // Adapted from https://code.visualstudio.com/api/working-with-extensions/testing-extension
 
-import * as path from 'path';
 import { runTests } from '@vscode/test-electron';
 import { TestOptions } from '@vscode/test-electron/out/runTest';
+import * as path from 'path';
 
 async function main(): Promise<void> {
     // The folder containing the Extension Manifest package.json
@@ -24,7 +24,7 @@ async function main(): Promise<void> {
     const options: TestOptions = {
         extensionDevelopmentPath,
         extensionTestsPath,
-        launchArgs: [testWorkspacePath, '--install-extension', 'ms-vscode.azure-account'],
+        launchArgs: [testWorkspacePath],
         extensionTestsEnv: {
             DEBUGTELEMETRY: '1',
             // eslint-disable-next-line @typescript-eslint/naming-convention
