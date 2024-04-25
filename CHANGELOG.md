@@ -1,6 +1,6 @@
 ## 1.29.1 - 29 April 2024
 ### Added
-- Python apps will now be scaffolded with the `python:3-slim` tag, so that it does not need to be updated annually. [#4234](https://github.com/microsoft/vscode-docker/pull/4234)
+- Python Dockerfiles will now be scaffolded with the `python:3-slim` tag, so that they do not need to be updated annually. [#4234](https://github.com/microsoft/vscode-docker/pull/4234)
 - Python debugging will now use the `debugpy` debug configuration instead of the now-deprecated `python` debug configuration. This requires recent versions of the [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) extensions. [#4221](https://github.com/microsoft/vscode-docker/issues/4221)
 
 ## 1.29.0 - 12 February 2024
