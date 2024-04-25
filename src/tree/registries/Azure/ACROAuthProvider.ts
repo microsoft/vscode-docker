@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
+import type { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
 import { LoginInformation, httpRequest } from '@microsoft/vscode-docker-registries';
 import { AuthenticationProvider } from "@microsoft/vscode-docker-registries/";
 import * as vscode from 'vscode';

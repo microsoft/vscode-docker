@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
-import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
+import type { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
 import { l10n } from 'vscode';
 import { getArmContainerRegistry } from './lazyPackages';
 

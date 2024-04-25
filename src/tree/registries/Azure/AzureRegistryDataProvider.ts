@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
-import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
+import { VSCodeAzureSubscriptionProvider, type AzureSubscription } from '@microsoft/vscode-azext-azureauth';
 import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, getContextValue, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistry, isRegistryRoot, isRepository, isTag } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
