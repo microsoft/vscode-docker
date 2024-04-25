@@ -3,6 +3,9 @@
 - Python Dockerfiles will now be scaffolded with the `python:3-slim` tag, so that they do not need to be updated annually. [#4234](https://github.com/microsoft/vscode-docker/pull/4234)
 - Python debugging will now use the `debugpy` debug configuration instead of the now-deprecated `python` debug configuration. This requires recent versions of the [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) extensions. [#4221](https://github.com/microsoft/vscode-docker/issues/4221)
 
+### Fixed
+- Sovereign clouds such as Azure China and Azure US Government should now work with the connect to Azure Container Registry feature. [#4287](https://github.com/microsoft/vscode-docker/issues/4287)
+
 ## 1.29.0 - 12 February 2024
 ### Added
 - Node.js 18 is now used, requiring at minimum VSCode 1.82.0. [#4167](https://github.com/microsoft/vscode-docker/pull/4167)
