@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { ContainerRegistryManagementClient } from '@azure/arm-containerregistry';
-import { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
+import type { AzureSubscription } from '@microsoft/vscode-azext-azureauth';
 import { l10n } from 'vscode';
+import { getArmContainerRegistry } from './lazyPackages';
 
 function parseResourceId(id: string): RegExpMatchArray {
     const matches: RegExpMatchArray | null = id.match(/\/subscriptions\/(.*)\/resourceGroups\/(.*)\/providers\/(.*)\/(.*)/i);
@@ -20,5 +21,12 @@ export function getResourceGroupFromId(id: string): string {
 }
 
 export async function createAzureContainerRegistryClient(subscriptionItem: AzureSubscription): Promise<ContainerRegistryManagementClient> {
-    return new (await import('@azure/arm-containerregistry')).ContainerRegistryManagementClient(subscriptionItem.credential, subscriptionItem.subscriptionId);
+    const armContainerRegistry = await getArmContainerRegistry();
+    return new armContainerRegistry.ContainerRegistryManagementClient(
+        subscriptionItem.credential,
+        subscriptionItem.subscriptionId,
+        {
+            endpoint: subscriptionItem.environment.resourceManagerEndpointUrl
+        }
+    );
 }
