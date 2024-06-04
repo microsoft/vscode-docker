@@ -3008,7 +3008,7 @@
         "fs-extra": "^11.1.1",
         "gradle-to-js": "^2.0.1",
         "handlebars": "^4.7.7",
-        "semver": "^7.5.2",
+        "semver": "^7.6.2",
         "tar": "^6.2.1",
         "vscode-languageclient": "^8.1.0",
         "vscode-tas-client": "^0.1.75",
