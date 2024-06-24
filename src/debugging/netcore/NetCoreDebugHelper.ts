@@ -12,7 +12,7 @@ import { ext } from '../../extensionVariables';
 import { NetCoreTaskHelper, NetCoreTaskOptions } from '../../tasks/netcore/NetCoreTaskHelper';
 import { ContainerTreeItem } from '../../tree/containers/ContainerTreeItem';
 import { getNetCoreProjectInfo } from '../../utils/netCoreUtils';
-import { getDockerOSType, isArm64Mac } from '../../utils/osUtils';
+import { getDockerOSType, isArm64 } from '../../utils/osUtils';
 import { pathNormalize } from '../../utils/pathNormalize';
 import { PlatformOS } from '../../utils/platform';
 import { unresolveWorkspaceFolder } from '../../utils/resolveVariables';
@@ -237,18 +237,7 @@ export class NetCoreDebugHelper implements DebugHelper {
                         { runtime: 'linux-musl-x64', version: 'latest' },
                     ];
 
-                    //
-                    // NOTE: As OmniSharp doesn't yet support arm64 in general, we only install arm64 debuggers when
-                    //       on an arm64 Mac (e.g. M1), even though there may be other platforms that could theoretically
-                    //       run arm64 images. We are often asked to install the debugger before images are created or
-                    //       pulled, which means we don't know a-priori the architecture of the image, so we install all
-                    //       of them, just in case. Because we do not have a good way to distinguish between a Mac attached
-                    //       to its local (Linux-based) Docker host (where arm64/amd64 are valid) or a Mac attached to a
-                    //       remote (Linux-based) Docker host (where arm64 may *not* be valid), installing every debugger
-                    //       is really our only choice.
-                    //
-
-                    if (isArm64Mac()) {
+                    if (isArm64()) {
                         debuggers.push(
                             { runtime: 'linux-arm64', version: 'latest' },
                             { runtime: 'linux-musl-arm64', version: 'latest' });
