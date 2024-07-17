@@ -2967,7 +2967,7 @@
         "vscode.yaml"
     ],
     "devDependencies": {
-        "@azure/arm-appservice": "^13.0.3",
+        "@azure/arm-appservice": "^15.0.0",
         "@types/fs-extra": "^11.0.1",
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.1",
@@ -2997,10 +2997,10 @@
         "@azure/arm-containerregistry": "^10.1.0",
         "@azure/storage-blob": "^12.14.0",
         "@microsoft/compose-language-service": "^0.2.0",
-        "@microsoft/vscode-azext-azureappservice": "~2.0",
-        "@microsoft/vscode-azext-azureauth": "^2.3.0",
-        "@microsoft/vscode-azext-azureutils": "^2.0.0",
-        "@microsoft/vscode-azext-utils": "^2.1.1",
+        "@microsoft/vscode-azext-azureappservice": "~3.3.0",
+        "@microsoft/vscode-azext-azureauth": "^2.4.1",
+        "@microsoft/vscode-azext-azureutils": "^3.0.1",
+        "@microsoft/vscode-azext-utils": "^2.5.1",
         "@microsoft/vscode-container-client": "^0.1.1",
         "@microsoft/vscode-docker-registries": "^0.1.11",
         "dayjs": "^1.11.7",
