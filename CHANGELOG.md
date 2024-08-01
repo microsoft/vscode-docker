@@ -1,6 +1,5 @@
 ## 1.29.2 - 1 August 2024
 ### Fixed
-* Update dockerfile-language-server-nodejs by @bwateratmsft in [#4308](https://github.com/microsoft/vscode-docker/pull/4308)
 * Fetch arm64 debugger anytime on any arm64 OS by @bwateratmsft in [#4319](https://github.com/microsoft/vscode-docker/pull/4319)
 * Update the language server to 0.13.0 by @rcjsuen in [#4343](https://github.com/microsoft/vscode-docker/pull/4343)
 
