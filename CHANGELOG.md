@@ -1,3 +1,8 @@
+## 1.29.2 - 1 August 2024
+### Fixed
+* Fetch arm64 debugger anytime on any arm64 OS by @bwateratmsft in [#4319](https://github.com/microsoft/vscode-docker/pull/4319)
+* Update the language server to 0.13.0 by @rcjsuen in [#4343](https://github.com/microsoft/vscode-docker/pull/4343)
+
 ## 1.29.1 - 29 April 2024
 ### Added
 - Python Dockerfiles will now be scaffolded with the `python:3-slim` tag, so that they do not need to be updated annually. [#4234](https://github.com/microsoft/vscode-docker/pull/4234)
