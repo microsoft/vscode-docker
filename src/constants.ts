@@ -20,7 +20,7 @@ export const imageTagRegExp = new RegExp('^[a-zA-Z0-9.-_/]{1,256}:(?![.-])[a-zA-
 // GLOB Patterns
 export const FROM_DIRECTIVE_PATTERN = /^\s*FROM\s*([\w-/:]*)(\s*AS\s*[a-z][a-z0-9-_\\.]*)?$/i;
 export const COMPOSE_FILE_GLOB_PATTERN = '**/*[cC][oO][mM][pP][oO][sS][eE]*.{[yY][aA][mM][lL],[yY][mM][lL]}';
-export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE].*}';
+export const DOCKERFILE_GLOB_PATTERN = '**/{*.[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE],[dD][oO][cC][kK][eE][rR][fF][iI][lL][eE](?!\.(go|py|rs|js|ts|java|cpp|c|cs|rb|php|swift|kt|m|h|scala|pl|sh|lua|r|vb|vbs|html|css|xml|json|yml|yaml|toml|ini)\b).*}';
 export const YAML_GLOB_PATTERN = '**/*.{[yY][aA][mM][lL],[yY][mM][lL]}';
 export const CSPROJ_GLOB_PATTERN = '**/*.{[cC][sS][pP][rR][oO][jJ]}';
 export const FSPROJ_GLOB_PATTERN = '**/*.{[fF][sS][pP][rR][oO][jJ]}';
