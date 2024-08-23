@@ -24,6 +24,11 @@ resources:
       ref: main
       endpoint: GitHub-AzureTools # The service connection to use when accessing this repository
 
+variables:
+  # Required by MicroBuild template
+  - name: TeamName
+    value: "Container Tools Team"
+
 # Use those templates
 extends:
   template: azure-pipelines/1esmain.yml@azExtTemplates
