@@ -1,0 +1,36 @@
+trigger: none # Only run this pipeline when manually triggered
+
+parameters:
+  - name: publishVersion
+    displayName: Version to publish
+    type: string
+  - name: dryRun
+    displayName: Dry run
+    type: boolean
+    default: false
+
+resources:
+  pipelines:
+    - pipeline: build # identifier to use in pipeline resource variables
+      source: \Azure Tools\VSCode\Extensions\vscode-docker # name of the pipeline that produces the artifacts
+  repositories:
+    - repository: azExtTemplates
+      type: github
+      name: microsoft/vscode-azuretools
+      ref: main
+      endpoint: GitHub-AzureTools # The service connection to use when accessing this repository
+
+variables:
+  # Required by MicroBuild template
+  - name: TeamName
+    value: "Container Tools Team"
+
+# Use those templates
+extends:
+  template: azure-pipelines/release-extension.yml@azExtTemplates
+  parameters:
+    pipelineID: $(resources.pipeline.build.pipelineID)
+    runID: $(resources.pipeline.build.runID)
+    publishVersion: ${{ parameters.publishVersion }}
+    dryRun: ${{ parameters.dryRun }}
+    environmentName: VSCodeDockerExtensionPublish
