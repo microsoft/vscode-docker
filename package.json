@@ -2929,7 +2929,7 @@
         ]
     },
     "engines": {
-        "vscode": "^1.82.0"
+        "vscode": "^1.92.0"
     },
     "capabilities": {
         "virtualWorkspaces": false,
@@ -2971,14 +2971,14 @@
         "@types/fs-extra": "^11.0.1",
         "@types/glob": "^7.2.0",
         "@types/mocha": "^10.0.1",
-        "@types/node": "18.x",
+        "@types/node": "20.x",
         "@types/semver": "^7.3.13",
-        "@types/vscode": "1.82.0",
+        "@types/vscode": "1.92.0",
         "@types/xml2js": "^0.4.11",
         "@typescript-eslint/eslint-plugin": "^5.59.0",
         "@typescript-eslint/parser": "^5.59.0",
         "@vscode/test-electron": "^2.3.9",
-        "@vscode/vsce": "^2.19.0",
+        "@vscode/vsce": "^3.1.0",
         "chai": "^4.3.7",
         "copy-webpack-plugin": "^11.0.0",
         "eslint": "^8.38.0",
