@@ -130,14 +130,34 @@ export interface ResponseLike {
 }
 
 export async function streamToFile(downloadUrl: string, fileName: string): Promise<void> {
-    const response = await fetch(downloadUrl);
-    const writeStream = fse.createWriteStream(fileName);
+    try {
+        const response = await fetch(downloadUrl);
 
-    for await (const chunk of response.body) {
-        writeStream.write(chunk);
+        if (!response.ok) {
+            throw new HttpErrorResponse(response);
+        }
+
+        const writeStream = fse.createWriteStream(fileName);
+
+        for await (const chunk of response.body) {
+            writeStream.write(chunk);
+        }
+
+        writeStream.close();
+    } catch (error) {
+        // Sometimes the error has a cause field, sometimes a message, sometimes maybe neither
+        let errorText: string;
+
+        if (typeof error === 'object') {
+            errorText = (error as { cause: string }).cause ?? (error as { message: string }).message ?? error.toString();
+        } else if (typeof error === 'string') {
+            errorText = error;
+        } else {
+            errorText = error.toString();
+        }
+
+        throw new Error(`Failed to download ${downloadUrl}: ${errorText}`);
     }
-
-    writeStream.close();
 }
 
 export function basicAuthHeader(username: string, password: string): string {
