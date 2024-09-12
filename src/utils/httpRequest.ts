@@ -146,7 +146,16 @@ export async function streamToFile(downloadUrl: string, fileName: string): Promi
         writeStream.close();
     } catch (error) {
         // Sometimes the error has a cause field, sometimes a message, sometimes maybe neither
-        const errorText = (error as { cause: string }).cause ?? (error as { message: string }).message ?? error;
+        let errorText: string;
+
+        if (typeof error === 'object') {
+            errorText = (error as { cause: string }).cause ?? (error as { message: string }).message ?? error.toString();
+        } else if (typeof error === 'string') {
+            errorText = error;
+        } else {
+            errorText = error.toString();
+        }
+
         throw new Error(`Failed to download ${downloadUrl}: ${errorText}`);
     }
 }
