@@ -1,3 +1,7 @@
+## 1.29.3 - 24 September 2024
+### Changed
+* Changed to use Node.js 20, in order to add extension publisher signing. This requires Visual Studio Code 1.92.0 or higher. By @bwateratmsft in [#4382](https://github.com/microsoft/vscode-docker/pull/4382)
+
 ## 1.29.2 - 1 August 2024
 ### Fixed
 * Fetch arm64 debugger anytime on any arm64 OS by @bwateratmsft in [#4319](https://github.com/microsoft/vscode-docker/pull/4319)
