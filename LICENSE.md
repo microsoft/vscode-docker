@@ -1,6 +1,6 @@
 Visual Studio Code Extension for Docker
 
-Copyright (c) Microsoft Corporation
+Copyright (c) Microsoft Corporation cLOW
 
 All rights reserved.
 
