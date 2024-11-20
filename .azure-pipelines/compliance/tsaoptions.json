@@ -1,0 +1,18 @@
+{
+    "tsaVersion": "TsaV2",
+    "codeBase": "NewOrUpdate",
+    "codeBaseName": "vscode-docker",
+    "tsaStamp": "DevDiv",
+    "notificationAliases": [
+        "DockerToolsTeam@microsoft.com"
+    ],
+    "codebaseAdmins": [
+        "REDMOND\\devinb",
+        "REDMOND\\bwater"
+    ],
+    "instanceUrl": "https://devdiv.visualstudio.com",
+    "projectName": "DevDiv",
+    "areaPath": "DevDiv\\VS Azure Tools\\Container Tools",
+    "iterationPath": "DevDiv",
+    "allTools": true
+}
