@@ -71,6 +71,30 @@ export class NormalizedImageNameInfo {
     }
 
     /**
+     * Registry (if it is truthy), otherwise 'docker.io'
+     */
+    public get normalizedRegistryAndPath(): string {
+      if (this.normalizedRepositoryPath.length === 0) {
+        return this.normalizedRegistry;
+    }
+      return this.normalizedRegistry + "/" + this.normalizedRepositoryPath;
+    }
+
+    /**
+     * The short image name or '<none>' if the image name is falsy
+     */
+    public get normalizedImageShortName(): string {
+      return this.normalizedImageName.split("/").pop() || noneTag;
+    }
+
+    /**
+     * The repository path or empty string if the image path is empty
+     */
+    public get normalizedRepositoryPath(): string {
+      return this.normalizedImageName.split("/").slice(0, -1).join("/");
+    }
+
+    /**
      * Normalized registry + normalized image name
      */
     public get normalizedRegistryAndImageName(): string {
