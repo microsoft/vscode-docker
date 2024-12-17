@@ -12,9 +12,13 @@ import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';
 import { getComposeProfileList, getComposeProfilesOrServices, getComposeServiceList } from './getComposeSubsetList';
 
-async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSubset')[], message: string, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSubset')[], message: string, dockerComposeFileUri?: vscode.Uri | string, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[]): Promise<void> {
     if (!vscode.workspace.isTrusted) {
         throw new UserCancelledError('enforceTrust');
+    }
+
+    if (typeof dockerComposeFileUri === 'string') {
+        dockerComposeFileUri = vscode.Uri.parse(dockerComposeFileUri);
     }
 
     // If a file is chosen, get its workspace folder, otherwise, require the user to choose
@@ -59,7 +63,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
             );
 
             // Add the service list if needed
-            terminalCommand.command = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand.command);
+            terminalCommand.command = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand.command, preselectedServices);
 
             const client = await ext.orchestratorManager.getClient();
             const taskCRF = new TaskCommandRunnerFactory({
@@ -72,12 +76,14 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
     }
 }
 
+// The parameters of this function should not be changed without updating the compose language service which uses this command
 export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['up'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
-export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
-    return await compose(context, ['upSubset'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
+// The parameters of this function should not be changed without updating the compose language service which uses this command
+export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[]): Promise<void> {
+    return await compose(context, ['upSubset'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris, preselectedServices);
 }
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
@@ -90,9 +96,12 @@ export async function composeRestart(context: IActionContext, dockerComposeFileU
 
 const serviceListPlaceholder = /\${serviceList}/i;
 const profileListPlaceholder = /\${profileList}/i;
-async function addServicesOrProfilesIfNeeded(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, command: string): Promise<string> {
+async function addServicesOrProfilesIfNeeded(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, command: string, preselectedServices: string[]): Promise<string> {
     const commandWithoutPlaceholders = command.replace(serviceListPlaceholder, '').replace(profileListPlaceholder, '');
-    if (serviceListPlaceholder.test(command) && profileListPlaceholder.test(command)) {
+
+    if (preselectedServices?.length && serviceListPlaceholder.test(command)) {
+        return command.replace(serviceListPlaceholder, preselectedServices.join(' '));
+    } else if (serviceListPlaceholder.test(command) && profileListPlaceholder.test(command)) {
         // If both are present, need to ask
         const { services, profiles } = await getComposeProfilesOrServices(context, workspaceFolder, commandWithoutPlaceholders);
         return command
