@@ -77,12 +77,12 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
 }
 
 // The parameters of this function should not be changed without updating the compose language service which uses this command
-export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
+export async function composeUp(context: IActionContext, dockerComposeFileUri?: vscode.Uri | string, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['up'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris);
 }
 
 // The parameters of this function should not be changed without updating the compose language service which uses this command
-export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[], preselectedProfiles?: string[]): Promise<void> {
+export async function composeUpSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri | string, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[], preselectedProfiles?: string[]): Promise<void> {
     return await compose(context, ['upSubset'], vscode.l10n.t('Choose Docker Compose file to bring up'), dockerComposeFileUri, selectedComposeFileUris, preselectedServices, preselectedProfiles);
 }
 
