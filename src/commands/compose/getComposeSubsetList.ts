@@ -13,13 +13,21 @@ const composeCommandReplaceRegex = /(\b(up|down)\b).*$/i;
 
 type SubsetType = 'services' | 'profiles';
 
-export async function getComposeProfilesOrServices(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string): Promise<{ services: string | undefined, profiles: string | undefined }> {
+export async function getComposeProfilesOrServices(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string, preselectedServices?: string[], preselectedProfiles?: string[]): Promise<{ services: string | undefined, profiles: string | undefined }> {
     const profiles = await getServiceSubsets(workspaceFolder, composeCommand, 'profiles');
+
+    if (preselectedServices?.length && preselectedProfiles?.length) {
+        throw new Error(vscode.l10n.t('Cannot specify both services and profiles to start. Please choose one or the other.'));
+    }
 
     // If there any profiles, we need to ask the user whether they want profiles or services, since they are mutually exclusive to use
     // Otherwise, if there are no profiles, we'll automatically assume services
     let useProfiles = false;
-    if (profiles?.length) {
+    if (preselectedProfiles?.length) {
+        useProfiles = true;
+    } else if (preselectedServices?.length) {
+        useProfiles = false;
+    } else if (profiles?.length) {
         const profilesOrServices: IAzureQuickPickItem<SubsetType>[] = [
             {
                 label: vscode.l10n.t('Services'),
@@ -35,12 +43,12 @@ export async function getComposeProfilesOrServices(context: IActionContext, work
     }
 
     return {
-        profiles: useProfiles ? await getComposeProfileList(context, workspaceFolder, composeCommand, profiles) : '',
-        services: !useProfiles ? await getComposeServiceList(context, workspaceFolder, composeCommand) : '',
+        profiles: useProfiles ? await getComposeProfileList(context, workspaceFolder, composeCommand, profiles, preselectedProfiles) : '',
+        services: !useProfiles ? await getComposeServiceList(context, workspaceFolder, composeCommand, preselectedServices) : '',
     };
 }
 
-export async function getComposeProfileList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string, prefetchedProfiles?: string[]): Promise<string> {
+export async function getComposeProfileList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string, prefetchedProfiles?: string[], preselectedProfiles?: string[]): Promise<string> {
     const profiles = prefetchedProfiles ?? await getServiceSubsets(workspaceFolder, composeCommand, 'profiles');
 
     if (!profiles?.length) {
@@ -51,7 +59,7 @@ export async function getComposeProfileList(context: IActionContext, workspaceFo
     // Fetch the previously chosen profiles list. By default, all will be selected.
     const workspaceProfileListKey = `vscode-docker.composeProfiles.${workspaceFolder.name}`;
     const previousChoices = ext.context.workspaceState.get<string[]>(workspaceProfileListKey, profiles);
-    const result = await pickSubsets(context, 'profiles', profiles, previousChoices);
+    const result = preselectedProfiles?.length ? preselectedProfiles : await pickSubsets(context, 'profiles', profiles, previousChoices);
 
     // Update the cache
     await ext.context.workspaceState.update(workspaceProfileListKey, result);
@@ -59,7 +67,7 @@ export async function getComposeProfileList(context: IActionContext, workspaceFo
     return result.map(p => `--profile ${p}`).join(' ');
 }
 
-export async function getComposeServiceList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string): Promise<string> {
+export async function getComposeServiceList(context: IActionContext, workspaceFolder: vscode.WorkspaceFolder, composeCommand: string, preselectedServices?: string[]): Promise<string> {
     const services = await getServiceSubsets(workspaceFolder, composeCommand, 'services');
 
     if (!services?.length) {
@@ -70,7 +78,7 @@ export async function getComposeServiceList(context: IActionContext, workspaceFo
     // Fetch the previously chosen services list. By default, all will be selected.
     const workspaceServiceListKey = `vscode-docker.composeServices.${workspaceFolder.name}`;
     const previousChoices = ext.context.workspaceState.get<string[]>(workspaceServiceListKey, services);
-    const result = await pickSubsets(context, 'services', services, previousChoices);
+    const result = preselectedServices?.length ? preselectedServices : await pickSubsets(context, 'services', services, previousChoices);
 
     // Update the cache
     await ext.context.workspaceState.update(workspaceServiceListKey, result);
