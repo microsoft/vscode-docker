@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { escaped, PortBinding, VoidCommandResponse } from '@microsoft/vscode-container-client';
+import { PortBinding, quoted, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
@@ -187,12 +187,12 @@ export async function selectCommandTemplate(
     // For the default command, we can make assumptions that allow us to parse into command + args for better shell support
 
     const argsRegex = /(?:"[^"]*")|(?:[^"\s]*)/g;
-    const commandAndArgs = resolvedCommand.match(argsRegex).filter(arg => arg.length !== 0).map(arg => arg.replace(/"/g, ''));
+    const commandAndArgs = resolvedCommand.match(argsRegex).filter(arg => arg.length !== 0);
     if (commandAndArgs.length > 0) {
-        resolvedCommand = commandAndArgs[0];
+        resolvedCommand = commandAndArgs[0].replace(/"/g, '');
     }
 
-    const resolvedArgs = commandAndArgs.slice(1).map(escaped);
+    const resolvedArgs = commandAndArgs.slice(1).map(arg => arg.startsWith('"') ? quoted(arg.replace(/"/g, '')) : arg);
 
     return {
         command: resolvedCommand,
