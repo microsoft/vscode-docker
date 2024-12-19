@@ -97,8 +97,7 @@ export class ContainerTreeItem extends ToolTipParentTreeItem implements MultiSel
             return new vscode.ThemeIcon('warning', new vscode.ThemeColor('problemsWarningIcon.foreground'));
         } else if (this._item.status?.includes('(health: starting)')) {
             return new vscode.ThemeIcon('debug-rerun', new vscode.ThemeColor('debugIcon.startForeground'));
-        }
-        else {
+        } else {
             return getContainerStateIcon(this._item.state);
         }
     }
