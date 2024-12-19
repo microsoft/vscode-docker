@@ -49,10 +49,10 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             contextPath
         );
 
-        const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
-        const dockerFileKey = `buildTag_${absFilePath}`;
-
         const getImageName = async (): Promise<string> => {
+            const absFilePath: string = path.join(rootFolder.uri.fsPath, dockerFileItem.relativeFilePath);
+            const dockerFileKey = `buildTag_${absFilePath}`;
+
             const prevImageName: string | undefined = ext.context.workspaceState.get(dockerFileKey);
 
             // Get imageName based previous entries, else on name of subfolder containing the Dockerfile
@@ -65,6 +65,8 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             const imageName: string = await getTagFromUserInput(context, suggestedImageName);
             addImageTaggingTelemetry(context, imageName, '.after');
 
+            await ext.context.workspaceState.update(dockerFileKey, imageName);
+
             return imageName;
         };
 
@@ -73,13 +75,11 @@ export async function buildImage(context: IActionContext, dockerFileUri: vscode.
             // This is a customized command, so parse the tag from the command
             if (tagRegex.test(terminalCommand.command)) {
                 const imageName = await getImageName();
-                await ext.context.workspaceState.update(dockerFileKey, imageName);
                 terminalCommand.command = terminalCommand.command.replace(tagRegex, imageName);
             }
         } else if (terminalCommand.args.some(arg => tagRegex.test(typeof (arg) === 'string' ? arg : arg.value))) {
             // This is a default command, so look for ${tag} in the args
             const imageName = await getImageName();
-            await ext.context.workspaceState.update(dockerFileKey, imageName);
 
             terminalCommand.args = terminalCommand.args.map(arg => {
                 if (typeof (arg) === 'string') {
