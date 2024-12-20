@@ -57,5 +57,6 @@ OS: ${process.platform}
 OS Release: ${os.release()}
 Product: ${vscode.env.appName}
 Product Version: ${vscode.version}
+App Host: ${vscode.env.appHost}
 Language: ${vscode.env.language}`;
 }
