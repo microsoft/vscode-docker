@@ -600,6 +600,11 @@
                     "when": "view == dockerContainers && viewItem == containerFile",
                     "group": "inline@1"
                 }
+            ],
+            "issue/reporter": [
+                {
+                    "command": "vscode-docker.help.reportIssue"
+                }
             ]
         },
         "debuggers": [

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { TelemetryEvent } from '@microsoft/compose-language-service/lib/client/TelemetryEvent';
-import { callWithTelemetryAndErrorHandling, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerReportIssueCommand, registerUIExtensionVariables, UserCancelledError } from '@microsoft/vscode-azext-utils';
+import { callWithTelemetryAndErrorHandling, createExperimentationService, IActionContext, registerErrorHandler, registerEvent, registerUIExtensionVariables, UserCancelledError } from '@microsoft/vscode-azext-utils';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { ConfigurationParams, DidChangeConfigurationNotification, DocumentSelector, LanguageClient, LanguageClientOptions, Middleware, ServerOptions, TransportKind } from 'vscode-languageclient/node';
@@ -78,9 +78,7 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
         // (new SurveyManager()).activate();
 
         // Remove the "Report Issue" button from all error messages in favor of the command
-        // TODO: use built-in issue reporter if/when support is added to include arbitrary info in addition to repro steps (which we would leave blank to force the user to type *something*)
         registerErrorHandler(ctx => ctx.errorHandling.suppressReportIssue = true);
-        registerReportIssueCommand('vscode-docker.help.reportIssue');
 
         // Set up Dockerfile completion provider
         ctx.subscriptions.push(

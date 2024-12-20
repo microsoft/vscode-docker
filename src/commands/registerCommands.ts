@@ -30,7 +30,7 @@ import { configureDockerContextsExplorer, dockerContextsHelp } from "./context/D
 import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
 import { useDockerContext } from "./context/useDockerContext";
-import { help } from "./help";
+import { help, reportIssue } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
@@ -208,6 +208,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.openDockerDownloadPage', openDockerDownloadPage);
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));
+    registerCommand('vscode-docker.help.reportIssue', reportIssue);
 
     registerCommand('vscode-docker.activateRegistryProviders', (context: IActionContext) => {
         // Do nothing, but registry provider extensions can use this command as an activation event
