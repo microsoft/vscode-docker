@@ -4,9 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, IAzureQuickPickOptions } from '@microsoft/vscode-azext-utils';
-import * as os from 'os';
 import * as vscode from 'vscode';
-import { extensionId, extensionVersion } from '../constants';
+import { extensionId } from '../constants';
 
 interface HelpMenuItem extends vscode.QuickPickItem {
     handler(): Promise<void>,
@@ -52,12 +51,7 @@ async function editSettings(): Promise<void> {
 }
 
 async function getIssueData(): Promise<string> {
-    return `Version: ${extensionVersion.value}
-OS: ${process.platform}
-OS Release: ${os.release()}
-Product: ${vscode.env.appName}
-Product Version: ${vscode.version}
-App Host: ${vscode.env.appHost}
+    return `App Host: ${vscode.env.appHost}
 Remote Name: ${vscode.env.remoteName}
 Language: ${vscode.env.language}`;
 }
