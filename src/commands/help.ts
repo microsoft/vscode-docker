@@ -53,5 +53,7 @@ async function editSettings(): Promise<void> {
 async function getIssueData(): Promise<string> {
     return `App Host: ${vscode.env.appHost}
 Remote Name: ${vscode.env.remoteName}
-Language: ${vscode.env.language}`;
+Language: ${vscode.env.language}
+
+`; // Add a couple newlines after the data because VSCode doesn't
 }
