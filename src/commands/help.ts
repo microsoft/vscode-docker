@@ -16,7 +16,7 @@ export async function help(context: IActionContext): Promise<void> {
     const items: HelpMenuItem[] = [
         { label: vscode.l10n.t('Get started with Docker...'), handler: getStarted, telemetryID: 'getStarted' },
         { label: vscode.l10n.t('Review Docker extension issues...'), handler: reviewIssues, telemetryID: 'reviewIssues' },
-        { label: vscode.l10n.t('Report Docker extension issue...'), handler: reportIssue, telemetryID: 'reportIssue' },
+        { label: vscode.l10n.t('Report Docker extension issue...'), handler: reportIssueFromHelpMenu, telemetryID: 'reportIssue' },
         { label: vscode.l10n.t('Edit settings...'), handler: editSettings, telemetryID: 'editSettings' }
     ];
 
@@ -26,20 +26,34 @@ export async function help(context: IActionContext): Promise<void> {
     await selectedItem.handler();
 }
 
+export async function reportIssue(context: IActionContext): Promise<void> {
+    await vscode.commands.executeCommand('workbench.action.openIssueReporter', {
+        extensionId: extensionId,
+        issueBody: undefined, // Leaving repro steps undefined forces the user to type in *something*, which is hopefully helpful
+        data: await getIssueData(),
+    });
+}
+
 async function getStarted(): Promise<void> {
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.env.openExternal(vscode.Uri.parse('https://code.visualstudio.com/docs/containers/overview'));
+    void vscode.env.openExternal(vscode.Uri.parse('https://code.visualstudio.com/docs/containers/overview'));
 }
 
 async function reviewIssues(): Promise<void> {
-    /* eslint-disable-next-line @typescript-eslint/no-floating-promises */
-    vscode.env.openExternal(vscode.Uri.parse('https://github.com/microsoft/vscode-docker/issues'));
+    void vscode.env.openExternal(vscode.Uri.parse('https://github.com/microsoft/vscode-docker/issues'));
 }
 
-async function reportIssue(): Promise<void> {
-    return vscode.commands.executeCommand('vscode.openIssueReporter', `${extensionId}`);
+async function reportIssueFromHelpMenu(): Promise<void> {
+    return vscode.commands.executeCommand('vscode-docker.help.reportIssue');
 }
 
 async function editSettings(): Promise<void> {
     return vscode.commands.executeCommand('workbench.action.openSettings', `@ext:${extensionId}`);
+}
+
+async function getIssueData(): Promise<string> {
+    return `App Host: ${vscode.env.appHost}
+Remote Name: ${vscode.env.remoteName}
+Language: ${vscode.env.language}
+
+`; // Add a couple newlines after the data because VSCode doesn't
 }
