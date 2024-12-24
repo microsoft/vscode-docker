@@ -1,4 +1,4 @@
-name: Locker
+name: gLock
 on:
   schedule:
     - cron: 0 5 * * * # 10:00pm PT
