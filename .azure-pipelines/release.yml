@@ -11,7 +11,7 @@ parameters:
 
 resources:
   pipelines:
-    - pipeline: build # identifier to use in pipeline resource variables
+    - pipeline: build # This must be "build"
       source: \Azure Tools\VSCode\Extensions\vscode-docker # name of the pipeline that produces the artifacts
   repositories:
     - repository: azExtTemplates
@@ -29,8 +29,6 @@ variables:
 extends:
   template: azure-pipelines/release-extension.yml@azExtTemplates
   parameters:
-    pipelineID: $(resources.pipeline.build.pipelineID)
-    runID: $(resources.pipeline.build.runID)
     publishVersion: ${{ parameters.publishVersion }}
     dryRun: ${{ parameters.dryRun }}
     environmentName: VSCodeDockerExtensionPublish
