@@ -1,3 +1,14 @@
+## 1.29.4 - 21 January 2025
+### Added
+* Starting containers now have a different icon than healthy containers. [#856](https://github.com/microsoft/vscode-docker/issues/856)
+* Services can now be started all at once or individually, right from inline buttons in the compose files. [#4398](https://github.com/microsoft/vscode-docker/issues/4398)
+
+### Fixed
+* Compose merge and override tags are now supported. [#4456](https://github.com/microsoft/vscode-docker/issues/4456)
+* Fixed an issue listing tags in generic V2 registries. [#4309](https://github.com/microsoft/vscode-docker/issues/4309)
+* Fixed an escaping issue on compose commands with compose file paths with spaces. [#4291](https://github.com/microsoft/vscode-docker/issues/4291)
+* Fixed an issue where getting tags would fail on GitHub Container Registries. [#4419](https://github.com/microsoft/vscode-docker/issues/4419)
+
 ## 1.29.3 - 24 September 2024
 ### Changed
 * Changed to use Node.js 20, in order to add extension publisher signing. This requires Visual Studio Code 1.92.0 or higher. By @bwateratmsft in [#4382](https://github.com/microsoft/vscode-docker/pull/4382)
