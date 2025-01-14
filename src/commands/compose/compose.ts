@@ -63,7 +63,7 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
                 build
             );
 
-            if (terminalCommand.args.length === 0) {
+            if (!terminalCommand.args?.length) {
                 // Add the service list if needed
                 terminalCommand.command = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand.command, preselectedServices, preselectedProfiles);
             } else {
