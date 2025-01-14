@@ -12,7 +12,7 @@ import { quickPickWorkspaceFolder } from '../../utils/quickPickWorkspaceFolder';
 import { selectComposeCommand } from '../selectCommandTemplate';
 import { getComposeProfileList, getComposeProfilesOrServices, getComposeServiceList } from './getComposeSubsetList';
 
-async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSubset')[], message: string, dockerComposeFileUri?: vscode.Uri | string, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[], preselectedProfiles?: string[]): Promise<void> {
+async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSubset' | 'downSubset')[], message: string, dockerComposeFileUri?: vscode.Uri | string, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[], preselectedProfiles?: string[]): Promise<void> {
     if (!vscode.workspace.isTrusted) {
         throw new UserCancelledError('enforceTrust');
     }
@@ -88,6 +88,10 @@ export async function composeUpSubset(context: IActionContext, dockerComposeFile
 
 export async function composeDown(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
     return await compose(context, ['down'], vscode.l10n.t('Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris);
+}
+
+export async function composeDownSubset(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[], preselectedServices?: string[], preselectedProfiles?: string[]): Promise<void> {
+     return await compose(context, ['downSubset'], vscode.l10n.t('Choose Docker Compose file to take down'), dockerComposeFileUri, selectedComposeFileUris, preselectedServices, preselectedProfiles);
 }
 
 export async function composeRestart(context: IActionContext, dockerComposeFileUri?: vscode.Uri, selectedComposeFileUris?: vscode.Uri[]): Promise<void> {
