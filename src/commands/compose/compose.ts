@@ -66,7 +66,9 @@ async function compose(context: IActionContext, commands: ('up' | 'down' | 'upSu
             if (!terminalCommand.args?.length) {
                 // Add the service list if needed
                 terminalCommand.command = await addServicesOrProfilesIfNeeded(context, folder, terminalCommand.command, preselectedServices, preselectedProfiles);
-            } else {
+            } else if (command === 'upSubset') {
+                // If there are arguments, it means we're using a default command (based on the logic in selectCommandTemplate.ts)
+                // So, we only want to add profile/service list for the upSubset command
                 terminalCommand = await addDefaultCommandServicesOrProfilesIfNeeded(context, folder, terminalCommand, preselectedServices, preselectedProfiles);
             }
 
