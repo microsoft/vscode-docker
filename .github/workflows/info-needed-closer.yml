@@ -19,7 +19,9 @@ jobs:
       - name: Run Info Needed Closer
         uses: ./actions/needs-more-info-closer
         with:
-          token: ${{secrets.AZCODE_BOT_PAT}}
+          app_id: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_ID }}
+          app_installation_id: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_INSTALLATION_ID }}
+          app_private_key: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_PRIVATE_KEY }}
           label: info-needed
           closeDays: 14
           closeComment: "This issue has been closed automatically because it needs more information and has not had recent activity. See also our [issue reporting](https://aka.ms/azcodeissuereporting) guidelines.\n\nHappy Coding!"
