@@ -30,14 +30,14 @@ import { configureDockerContextsExplorer, dockerContextsHelp } from "./context/D
 import { inspectDockerContext } from "./context/inspectDockerContext";
 import { removeDockerContext } from "./context/removeDockerContext";
 import { useDockerContext } from "./context/useDockerContext";
-import { help } from "./help";
+import { help, reportIssue } from "./help";
 import { buildImage } from "./images/buildImage";
 import { configureImagesExplorer } from "./images/configureImagesExplorer";
 import { copyFullTag } from "./images/copyFullTag";
 import { inspectImage } from "./images/inspectImage";
 import { pruneImages } from "./images/pruneImages";
 import { pullImage } from "./images/pullImage";
-import { pushImage } from "./images/pushImage";
+import { pushImage } from "./images/pushImage/pushImage";
 import { removeImage } from "./images/removeImage";
 import { removeImageGroup } from "./images/removeImageGroup";
 import { runAzureCliImage } from "./images/runAzureCliImage";
@@ -68,6 +68,7 @@ import { disconnectRegistry } from "./registries/disconnectRegistry";
 import { openDockerHubInBrowser } from "./registries/dockerHub/openDockerHubInBrowser";
 import { addTrackedGenericV2Registry } from "./registries/genericV2/addTrackedGenericV2Registry";
 import { removeTrackedGenericV2Registry } from "./registries/genericV2/removeTrackedGenericV2Registry";
+import { inspectRemoteImageManifest } from "./registries/inspectRemoteImageManifest";
 import { logInToDockerCli } from "./registries/logInToDockerCli";
 import { logOutOfDockerCli } from "./registries/logOutOfDockerCli";
 import { pullImageFromRepository, pullRepository } from "./registries/pullImages";
@@ -167,6 +168,7 @@ export function registerCommands(): void {
 
     registerCommand('vscode-docker.registries.connectRegistry', connectRegistry);
     registerCommand('vscode-docker.registries.copyImageDigest', copyRemoteImageDigest);
+    registerCommand('vscode-docker.registries.inspectRemoteImageManifest', inspectRemoteImageManifest);
     registerCommand('vscode-docker.registries.copyRemoteFullTag', copyRemoteFullTag);
     registerCommand('vscode-docker.registries.deleteImage', deleteRemoteImage);
     registerCommand('vscode-docker.registries.deployImageToAzure', deployImageToAzure);
@@ -189,7 +191,6 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.registries.azure.deleteRegistry', deleteAzureRegistry);
     registerCommand('vscode-docker.registries.azure.deleteRepository', deleteAzureRepository);
     registerCommand('vscode-docker.registries.azure.openInPortal', openInAzurePortal);
-    registerCommand('vscode-docker.registries.azure.selectSubscriptions', () => commands.executeCommand("azure-account.selectSubscriptions"));
     registerCommand('vscode-docker.registries.azure.untagImage', untagAzureImage);
     registerCommand('vscode-docker.registries.azure.viewProperties', viewAzureProperties);
 
@@ -207,6 +208,7 @@ export function registerCommands(): void {
     registerCommand('vscode-docker.openDockerDownloadPage', openDockerDownloadPage);
     registerCommand('vscode-docker.help', help);
     registerCommand('vscode-docker.help.openWalkthrough', () => commands.executeCommand('workbench.action.openWalkthrough', 'ms-azuretools.vscode-docker#dockerStart'));
+    registerCommand('vscode-docker.help.reportIssue', reportIssue);
 
     registerCommand('vscode-docker.activateRegistryProviders', (context: IActionContext) => {
         // Do nothing, but registry provider extensions can use this command as an activation event

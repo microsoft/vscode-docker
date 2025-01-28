@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext, IAzureQuickPickItem, IAzureQuickPickOptions, UserCancelledError } from '@microsoft/vscode-azext-utils';
-import { PortBinding, VoidCommandResponse } from '@microsoft/vscode-container-client';
+import { PortBinding, quoted, VoidCommandResponse } from '@microsoft/vscode-container-client';
 import * as vscode from 'vscode';
 import { ext } from '../extensionVariables';
 import { isDockerComposeClient } from '../runtimes/OrchestratorRuntimeManager';
@@ -38,18 +38,21 @@ export async function selectBuildCommand(context: IActionContext, folder: vscode
     );
 }
 
-export async function selectRunCommand(context: IActionContext, fullTag: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
+export async function selectRunCommand(context: IActionContext, fullTag: string, imageId: string, interactive: boolean, exposedPorts?: PortBinding[]): Promise<VoidCommandResponse> {
     let portsString: string = '';
     if (exposedPorts) {
         portsString = exposedPorts.map(pb => `-p ${pb.containerPort}:${pb.containerPort}${pb.protocol ? '/' + pb.protocol : ''}`).join(' ');
     }
 
+    const tagOrImageId = fullTag === '<none>' ? imageId : fullTag;
+
+
     return await selectCommandTemplate(
         context,
         interactive ? 'runInteractive' : 'run',
-        [fullTag],
+        [fullTag, imageId],
         undefined,
-        { 'tag': fullTag, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
+        { 'tag': tagOrImageId, 'exposedPorts': portsString, 'containerCommand': await ext.runtimeManager.getCommand() }
     );
 }
 
@@ -165,14 +168,35 @@ export async function selectCommandTemplate(
         throw new Error(vscode.l10n.t('No command template was found for command \'{0}\'', command));
     }
 
-    actionContext.telemetry.properties.isDefaultCommand = defaultTemplates.some(t => t.template === selectedTemplate.template) ? 'true' : 'false';
+    const isDefault = defaultTemplates.some(t => t.template === selectedTemplate.template);
+    actionContext.telemetry.properties.isDefaultCommand = isDefault ? 'true' : 'false';
     actionContext.telemetry.properties.isCommandRegexMatched = selectedTemplate.match ? 'true' : 'false';
 
-    // This is not really ideal (putting the full command line into `command` instead of `command` + `args`), but parsing a string into a command + args like that is really hard
-    // Fortunately, `TaskCommandRunnerFactory` does not really care
+
+    let resolvedCommand = resolveVariables(selectedTemplate.template, folder, additionalVariables);
+
+    if (!isDefault) {
+        // This is not really ideal (putting the full command line into `command` instead of `command` + `args`), but parsing a string into a command + args like that is really hard
+        // Fortunately, `TaskCommandRunnerFactory` does not really care
+        return {
+            command: resolvedCommand,
+            args: undefined,
+        };
+    }
+
+    // For the default command, we can make assumptions that allow us to parse into command + args for better shell support
+
+    const argsRegex = /(?:"[^"]*")|(?:[^"\s]*)/g;
+    const commandAndArgs = resolvedCommand.match(argsRegex).filter(arg => arg.length !== 0);
+    if (commandAndArgs.length > 0) {
+        resolvedCommand = commandAndArgs[0].replace(/"/g, '');
+    }
+
+    const resolvedArgs = commandAndArgs.slice(1).map(arg => arg.startsWith('"') ? quoted(arg.replace(/"/g, '')) : arg);
+
     return {
-        command: resolveVariables(selectedTemplate.template, folder, additionalVariables),
-        args: undefined,
+        command: resolvedCommand,
+        args: resolvedArgs,
     };
 }
 

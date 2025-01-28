@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 import type { Registry as AcrRegistry, RegistryListCredentialsResult } from '@azure/arm-containerregistry';
-import { AzureSubscription, VSCodeAzureSubscriptionProvider } from '@microsoft/vscode-azext-azureauth';
+import { VSCodeAzureSubscriptionProvider, type AzureSubscription } from '@microsoft/vscode-azext-azureauth';
+import { IActionContext, callWithTelemetryAndErrorHandling } from '@microsoft/vscode-azext-utils';
 import { RegistryV2DataProvider, V2Registry, V2RegistryItem, V2Repository, V2Tag, getContextValue, registryV2Request } from '@microsoft/vscode-docker-registries';
 import { CommonRegistryItem, isRegistry, isRegistryRoot, isRepository, isTag } from '@microsoft/vscode-docker-registries/lib/clients/Common/models';
 import * as vscode from 'vscode';
@@ -62,11 +63,10 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         if (isRegistryRoot(element)) {
             if (!await this.subscriptionProvider.isSignedIn()) {
                 await this.subscriptionProvider.signIn();
-                this.fireSoon(() => this.onDidChangeTreeDataEmitter.fire(element));
-                return [];
             }
 
             const subscriptions = await this.subscriptionProvider.getSubscriptions();
+            this.sendSubscriptionTelemetryIfNeeded();
 
             return subscriptions.map(sub => {
                 return {
@@ -99,6 +99,7 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
     }
 
     public dispose(): void {
+        super.dispose();
         this.subscriptionProvider.dispose();
     }
 
@@ -199,10 +200,32 @@ export class AzureRegistryDataProvider extends RegistryV2DataProvider implements
         return this.authenticationProviders.get(registryString)!;
     }
 
-    private fireSoon(callback: () => void, delay: number = 5) {
-        const timeout = setTimeout(() => {
-            clearTimeout(timeout);
-            callback();
-        }, delay);
+    private hasSentSubscriptionTelemetry = false;
+    private sendSubscriptionTelemetryIfNeeded(): void {
+        if (this.hasSentSubscriptionTelemetry) {
+            return;
+        }
+        this.hasSentSubscriptionTelemetry = true;
+
+        // This event is relied upon by the DevDiv Analytics and Growth Team
+        void callWithTelemetryAndErrorHandling('updateSubscriptionsAndTenants', async (context: IActionContext) => {
+            context.telemetry.properties.isActivationEvent = 'true';
+            context.errorHandling.suppressDisplay = true;
+
+            const subscriptions = await this.subscriptionProvider.getSubscriptions(false);
+
+            const tenantSet = new Set<string>();
+            const subscriptionSet = new Set<string>();
+            subscriptions.forEach(sub => {
+                tenantSet.add(sub.tenantId);
+                subscriptionSet.add(sub.subscriptionId);
+            });
+
+            // Number of tenants and subscriptions really belong in Measurements but for backwards compatibility
+            // they will be put into Properties instead.
+            context.telemetry.properties.numtenants = tenantSet.size.toString();
+            context.telemetry.properties.numsubscriptions = subscriptionSet.size.toString();
+            context.telemetry.properties.subscriptions = JSON.stringify(Array.from(subscriptionSet));
+        });
     }
 }

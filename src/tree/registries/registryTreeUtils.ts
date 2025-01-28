@@ -18,7 +18,7 @@ export function getImageNameFromRegistryTagItem(tag: CommonTag): string {
     }
 
     const repository = tag.parent as CommonRepository;
-    return `${repository.label.toLowerCase()}:${tag.label.toLowerCase()}`;
+    return `${repository.label.toLowerCase()}:${tag.label}`; // Tag is case sensitive but repository must be lowercase
 }
 
 /**

@@ -13,17 +13,12 @@ import { AzureRegistrySkuStep } from '../../../tree/registries/Azure/createWizar
 import { IAzureRegistryWizardContext } from '../../../tree/registries/Azure/createWizard/IAzureRegistryWizardContext';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAzureUtils } from '../../../utils/lazyPackages';
-import { registryExperience } from '../../../utils/registryExperience';
+import { subscriptionExperience } from '../../../utils/registryExperience';
 
-export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<void> {
+export async function createAzureRegistry(context: IActionContext, node?: UnifiedRegistryItem<AzureSubscriptionRegistryItem>): Promise<string> {
 
     if (!node) {
-        node = await registryExperience<AzureSubscriptionRegistryItem>(context,
-            {
-                contextValueFilter: { include: /azuresubscription/i },
-                registryFilter: { include: [ext.azureRegistryDataProvider.label] }
-            }
-        );
+        node = await subscriptionExperience(context);
     }
 
     const registryItem = node.wrappedItem;
@@ -60,4 +55,6 @@ export async function createAzureRegistry(context: IActionContext, node?: Unifie
 
     void window.showInformationMessage(`Successfully created registry "${newRegistryName}".`);
     void ext.registriesTree.refresh();
+
+    return newRegistryName;
 }

@@ -1,3 +1,48 @@
+## 1.29.4 - 21 January 2025
+### Added
+* Starting containers now have a different icon than healthy containers. [#856](https://github.com/microsoft/vscode-docker/issues/856)
+* Services can now be started all at once or individually, right from inline buttons in the compose files. [#4398](https://github.com/microsoft/vscode-docker/issues/4398)
+
+### Fixed
+* Compose merge and override tags are now supported. [#4456](https://github.com/microsoft/vscode-docker/issues/4456)
+* Fixed an issue listing tags in generic V2 registries. [#4309](https://github.com/microsoft/vscode-docker/issues/4309)
+* Fixed an escaping issue on compose commands with compose file paths with spaces. [#4291](https://github.com/microsoft/vscode-docker/issues/4291)
+* Fixed an issue where getting tags would fail on GitHub Container Registries. [#4419](https://github.com/microsoft/vscode-docker/issues/4419)
+
+## 1.29.3 - 24 September 2024
+### Changed
+* Changed to use Node.js 20, in order to add extension publisher signing. This requires Visual Studio Code 1.92.0 or higher. By @bwateratmsft in [#4382](https://github.com/microsoft/vscode-docker/pull/4382)
+
+## 1.29.2 - 1 August 2024
+### Fixed
+* Fetch arm64 debugger anytime on any arm64 OS by @bwateratmsft in [#4319](https://github.com/microsoft/vscode-docker/pull/4319)
+* Update the language server to 0.13.0 by @rcjsuen in [#4343](https://github.com/microsoft/vscode-docker/pull/4343)
+
+## 1.29.1 - 29 April 2024
+### Added
+- Python Dockerfiles will now be scaffolded with the `python:3-slim` tag, so that they do not need to be updated annually. [#4234](https://github.com/microsoft/vscode-docker/pull/4234)
+- Python debugging will now use the `debugpy` debug configuration instead of the now-deprecated `python` debug configuration. This requires recent versions of the [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) and [Python Debugger](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) extensions. [#4221](https://github.com/microsoft/vscode-docker/issues/4221)
+
+### Fixed
+- Sovereign clouds such as Azure China and Azure US Government should now work with the connect to Azure Container Registry feature. [#4287](https://github.com/microsoft/vscode-docker/issues/4287)
+
+## 1.29.0 - 12 February 2024
+### Added
+- Node.js 18 is now used, requiring at minimum VSCode 1.82.0. [#4167](https://github.com/microsoft/vscode-docker/pull/4167)
+
+### Fixed
+- Fixed some issues with the registries view. [#4182](https://github.com/microsoft/vscode-docker/issues/4182), [#4192](https://github.com/microsoft/vscode-docker/issues/4192)
+- Fixed an issue with Dotnet SDK container based debugging. [#4199](https://github.com/microsoft/vscode-docker/issues/4199)
+
+## 1.28.0 - 13 November 2023
+### Added
+- For certain registries, the remote image manifest can now be inspected. This has different information from inspecting an image locally. [#3996](https://github.com/microsoft/vscode-docker/issues/3996)
+
+### Fixed
+- An infinite loop condition in the Registries tree has been fixed. [#4145](https://github.com/microsoft/vscode-docker/pull/4145)
+- A rare condition which made generic V2 registries unusuable has been fixed. [#4140](https://github.com/microsoft/vscode-docker/issues/4140)
+- Untagged images can now be run. [#4100](https://github.com/microsoft/vscode-docker/issues/4100)
+
 ## 1.27.0 - 16 October 2023
 ### Added
 - Enhanced registries functionality: [#869](https://github.com/microsoft/vscode-docker/issues/869)

@@ -20,7 +20,7 @@ const netSdkImage = 'mcr.microsoft.com/dotnet/sdk';
 
 const cSharpConfigId = 'csharp';
 const cSharpPromptSetting = 'suppressBuildAssetsNotification';
-const NetCorePreviewVersion = 9;
+const NetCorePreviewVersion = 10;
 
 export class NetCoreGatherInformationStep extends GatherInformationStep<NetCoreScaffoldingWizardContext> {
     private targetFramework: string;

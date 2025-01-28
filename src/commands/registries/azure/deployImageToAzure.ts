@@ -9,10 +9,9 @@ import { AzureWizard, AzureWizardExecuteStep, AzureWizardPromptStep, IActionCont
 import { CommonTag } from '@microsoft/vscode-docker-registries';
 import { Uri, env, l10n, window } from "vscode";
 import { ext } from "../../../extensionVariables";
-import { AzureSubscriptionRegistryItem } from '../../../tree/registries/Azure/AzureRegistryDataProvider';
 import { UnifiedRegistryItem } from '../../../tree/registries/UnifiedRegistryTreeDataProvider';
 import { getAzExtAppService, getAzExtAzureUtils } from '../../../utils/lazyPackages';
-import { registryExperience } from '../../../utils/registryExperience';
+import { registryExperience, subscriptionExperience } from '../../../utils/registryExperience';
 import { DockerAssignAcrPullRoleStep } from './DockerAssignAcrPullRoleStep';
 import { DockerSiteCreateStep } from './DockerSiteCreateStep';
 import { DockerWebhookCreateStep } from './DockerWebhookCreateStep';
@@ -31,10 +30,7 @@ export async function deployImageToAzure(context: IActionContext, node?: Unified
     const vscAzureAppService = await getAzExtAppService();
     const promptSteps: AzureWizardPromptStep<IAppServiceWizardContext>[] = [];
 
-    const subscriptionItem = await registryExperience<AzureSubscriptionRegistryItem>(context, {
-        registryFilter: { include: [ext.azureRegistryDataProvider.label] },
-        contextValueFilter: { include: /azuresubscription/i },
-    });
+    const subscriptionItem = await subscriptionExperience(context);
     const subscriptionContext = createSubscriptionContext(subscriptionItem.wrappedItem.subscription);
     const wizardContext: IActionContext & Partial<IAppServiceContainerWizardContext> = {
         ...context,
