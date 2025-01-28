@@ -16,6 +16,14 @@ On Linux, you should [enable rootless Docker](https://docs.docker.com/engine/sec
 
 To install the extension, open the Extensions view, search for `docker` to filter results and select Docker extension authored by Microsoft.
 
+### Cloning the Repository
+
+To clone the repository using the `gh` command, run the following command:
+
+```sh
+gh repo clone microsoft/vscode-docker
+```
+
 ## Overview of the extension features
 
 ### Editing Docker files
