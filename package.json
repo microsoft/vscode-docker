@@ -87,6 +87,10 @@
                     "when": "isWorkspaceTrusted"
                 },
                 {
+                    "command": "vscode-docker.compose.down.subset",
+                    "when": "isWorkspaceTrusted"
+                },
+                {
                     "command": "vscode-docker.compose.restart",
                     "when": "isWorkspaceTrusted"
                 },
@@ -156,6 +160,11 @@
                 },
                 {
                     "when": "isWorkspaceTrusted && editorLangId == dockercompose",
+                    "command": "vscode-docker.compose.down.subset",
+                    "group": "docker"
+                },
+                {
+                    "when": "isWorkspaceTrusted && editorLangId == dockercompose",
                     "command": "vscode-docker.compose.restart",
                     "group": "docker"
                 },
@@ -167,6 +176,11 @@
                 {
                     "when": "isWorkspaceTrusted && editorLangId == dockercompose",
                     "command": "vscode-docker.compose.up.subset",
+                    "group": "docker"
+                },
+                {
+                    "when": "isWorkspaceTrusted && editorLangId == dockercompose",
+                    "command": "vscode-docker.compose.down.subset",
                     "group": "docker"
                 },
                 {
@@ -184,6 +198,11 @@
                 {
                     "when": "isWorkspaceTrusted && resourceLangId == dockercompose",
                     "command": "vscode-docker.compose.down",
+                    "group": "docker"
+                },
+                {
+                    "when": "isWorkspaceTrusted && resourceLangId == dockercompose",
+                    "command": "vscode-docker.compose.down.subset",
                     "group": "docker"
                 },
                 {
@@ -1826,6 +1845,43 @@
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"
                 },
+                "docker.commands.composeDownSubset": {
+                    "oneOf": [
+                        {
+                            "type": "array",
+                            "items": {
+                                "properties": {
+                                    "template": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeDownSubset.template%"
+                                    },
+                                    "label": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeDownSubset.label%"
+                                    },
+                                    "match": {
+                                        "type": "string",
+                                        "description": "%vscode-docker.config.template.composeDownSubset.match%"
+                                    }
+                                },
+                                "required": [
+                                    "label",
+                                    "template"
+                                ]
+                            }
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "default": [
+                        {
+                            "label": "Compose Down",
+                            "template": "${composeCommand} ${profileList} ${configurationFile} down"
+                        }
+                    ],
+                    "description": "%vscode-docker.config.template.composeDownSubset.description%"
+                },
                 "docker.containers.groupBy": {
                     "type": "string",
                     "default": "Compose Project Name",
@@ -2288,6 +2344,11 @@
             {
                 "command": "vscode-docker.compose.down",
                 "title": "%vscode-docker.commands.compose.down%",
+                "category": "%vscode-docker.commands.category.docker%"
+            },
+            {
+                "command": "vscode-docker.compose.down.subset",
+                "title": "%vscode-docker.commands.compose.down.subset%",
                 "category": "%vscode-docker.commands.category.docker%"
             },
             {
