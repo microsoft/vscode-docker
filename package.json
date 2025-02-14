@@ -1821,7 +1821,7 @@
                     "default": [
                         {
                             "label": "Compose Down",
-                            "template": "${composeCommand} ${configurationFile} down"
+                            "template": "${composeCommand} ${profileList} ${configurationFile} down"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"

@@ -30,6 +30,8 @@ export async function getDefaultCommandComposeProfilesOrServices(context: IActio
         useProfiles = true;
     } else if (preselectedServices?.length) {
         useProfiles = false;
+    } else if (composeCommand.args.includes('down')) {
+        useProfiles = true;
     } else if (profiles?.length) {
         const profilesOrServices: IAzureQuickPickItem<SubsetType>[] = [
             {
