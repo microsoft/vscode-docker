@@ -1411,6 +1411,13 @@
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.removeVolumes%",
                                         "default": false
                                     },
+                                    "profiles": {
+                                        "type": "array",
+                                        "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.profiles%",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
                                     "customOptions": {
                                         "type": "string",
                                         "description": "%vscode-docker.tasks.docker-compose.dockerCompose.down.customOptions%"
@@ -1821,7 +1828,7 @@
                     "default": [
                         {
                             "label": "Compose Down",
-                            "template": "${composeCommand} ${profileList} ${configurationFile} down"
+                            "template": "${composeCommand} ${configurationFile} down"
                         }
                     ],
                     "description": "%vscode-docker.config.template.composeDown.description%"
