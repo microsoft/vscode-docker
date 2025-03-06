@@ -27,3 +27,4 @@ webpack.config*
 .eslintignore
 .eslintrc.json
 .nvmrc
+component-detection-pip-report.json
