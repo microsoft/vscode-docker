@@ -29,20 +29,13 @@ export type RidCpuArchitecture =
 export const NetSdkRunTaskType = 'dotnet-container-sdk';
 const NetSdkDefaultImageTag = 'dev'; // intentionally default to dev tag for phase 1 of this feature
 
-export async function getNetSdkBuildCommand(isProjectWebApp: boolean, imageName: string): Promise<string> {
-    const configuration = 'Debug'; // intentionally default to Debug configuration for phase 1 of this feature
-
-    // {@link https://github.com/dotnet/sdk-container-builds/issues/141} this could change in the future
-    const publishFlag = isProjectWebApp
-        ? '-p:PublishProfile=DefaultContainer'
-        : '/t:PublishContainer';
-
+export async function getNetSdkBuildCommand(): Promise<string> {
     const args = composeArgs(
         withArg('dotnet', 'publish'),
         withNamedArg('--os', await normalizeOsToRidOs()),
         withNamedArg('--arch', await normalizeArchitectureToRidArchitecture()),
-        withArg(publishFlag),
-        withNamedArg('--configuration', configuration),
+        withArg('/t:PublishContainer'),
+        withNamedArg('--configuration', 'Debug'),
         withNamedArg('-p:ContainerImageTag', NetSdkDefaultImageTag, { assignValue: true })
     )();
 
@@ -50,7 +43,7 @@ export async function getNetSdkBuildCommand(isProjectWebApp: boolean, imageName:
     return quotedArgs.join(' ');
 }
 
-export async function getNetSdkRunCommand(isProjectWebApp: boolean, imageName: string): Promise<string> {
+export async function getNetSdkRunCommand(imageName: string): Promise<string> {
     const client = await ext.runtimeManager.getClient();
 
     const options: RunContainerCommandOptions = {
