@@ -56,6 +56,7 @@ export class DockerComposeTaskProvider extends DockerTaskProvider {
                 files: options.files,
                 environmentFile: options.envFile,
                 projectName: options.projectName,
+                profiles: options.down.profiles,
                 removeImages: options.down.removeImages,
                 removeVolumes: options.down.removeVolumes,
                 customOptions: options.down.customOptions,
