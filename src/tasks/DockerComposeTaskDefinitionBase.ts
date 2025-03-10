@@ -23,6 +23,7 @@ export interface DockerComposeDownOptions {
         removeImages?: 'all' | 'local';
         removeVolumes?: boolean;
         customOptions?: string;
+        profiles?: string[];
     };
 }
 
