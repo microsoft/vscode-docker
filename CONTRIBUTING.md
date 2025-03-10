@@ -1,4 +1,4 @@
-# Contributing to Docker extension for VS Code
+# Contributing to Docker extension pack for VS Code
 
 Welcome, and thank you for your interest in contributing to Docker extension for VS Code!. There are several of ways you can contribute to this extension.
 
