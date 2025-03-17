@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { IActionContext } from '@microsoft/vscode-azext-utils';
-import { ContainerOS, VoidCommandResponse } from '@microsoft/vscode-container-client';
+import { composeArgs, ContainerOS, VoidCommandResponse, withArg, withQuotedArg } from '@microsoft/vscode-container-client';
 import { l10n } from 'vscode';
 import { ext } from '../../extensionVariables';
 import { TaskCommandRunnerFactory } from '../../runtimes/runners/TaskCommandRunnerFactory';
@@ -32,10 +32,15 @@ export async function attachShellContainer(context: IActionContext, node?: Conta
         // On Linux containers, check if bash is present
         // If so use it, otherwise use sh
         try {
+            const command = composeArgs(
+                withArg('sh', '-c'),
+                withQuotedArg('which bash'),
+            )();
+
             // If this succeeds, bash is present (exit code 0)
             await ext.runWithDefaults(client =>
                 // Since we're not interested in the output, just the exit code, we can pretend this is a `VoidCommandResponse`
-                client.execContainer({ container: node.containerId, interactive: true, command: ['sh', '-c', 'which bash'] }) as Promise<VoidCommandResponse>
+                client.execContainer({ container: node.containerId, interactive: true, command: command }) as Promise<VoidCommandResponse>
             );
             shellCommand = 'bash';
         } catch {
