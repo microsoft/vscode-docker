@@ -29,3 +29,4 @@ webpack.config*
 .nvmrc
 esbuild.js
 meta.json
+component-detection-pip-report.json

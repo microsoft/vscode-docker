@@ -2,6 +2,7 @@
 ### Added
 * Starting containers now have a different icon than healthy containers. [#856](https://github.com/microsoft/vscode-docker/issues/856)
 * Services can now be started all at once or individually, right from inline buttons in the compose files. [#4398](https://github.com/microsoft/vscode-docker/issues/4398)
+* Extended Group By options for better cloud providers' image organization. [#4426](https://github.com/microsoft/vscode-docker/pull/4426)
 
 ### Fixed
 * Compose merge and override tags are now supported. [#4456](https://github.com/microsoft/vscode-docker/issues/4456)
