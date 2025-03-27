@@ -1,3 +1,15 @@
+## 1.29.5 - 31 March 2025
+### Added
+* The new [Docker DX](https://marketplace.visualstudio.com/items?itemName=docker.docker) extension by Docker Inc. will be installed alongside this extension.
+* The `docker-compose` task can now accept a `profiles` parameter in `down` tasks. By @PotatoZhou. [#4458](https://github.com/microsoft/vscode-docker/issues/4458)
+
+### Fixed
+* Bash was not properly being detected when attaching a shell to a container. [#4526](https://github.com/microsoft/vscode-docker/issues/4526)
+* The Docker: Stats command was not working. [#4520](https://github.com/microsoft/vscode-docker/issues/4520)
+
+### Removed
+* Compose files will no longer be scaffolded with the deprecated `version` attribute. [#4485](https://github.com/microsoft/vscode-docker/issues/4485)
+
 ## 1.29.4 - 21 January 2025
 ### Added
 * Starting containers now have a different icon than healthy containers. [#856](https://github.com/microsoft/vscode-docker/issues/856)
