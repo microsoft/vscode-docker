@@ -2,7 +2,7 @@
     "name": "vscode-docker",
     "version": "2.0.0",
     "publisher": "ms-azuretools",
-    "displayName": "Docker",
+    "displayName": "Docker Extension Pack",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
     "license": "SEE LICENSE IN LICENSE.md",
     "icon": "resources/docker_blue.png",
@@ -10,24 +10,17 @@
         "color": "#1e1e1e",
         "theme": "dark"
     },
-    "categories": [
-        "Programming Languages",
-        "Linters",
-        "Azure"
-    ],
     "keywords": [
         "docker",
         "compose",
         "container",
-        "containers",
-        "multi-root ready"
+        "containers"
     ],
     "repository": {
         "type": "git",
         "url": "https://github.com/microsoft/vscode-docker"
     },
     "homepage": "https://github.com/Microsoft/vscode-docker/blob/main/README.md",
-    "activationEvents": [],
     "engines": {
         "vscode": "^1.92.0"
     },
