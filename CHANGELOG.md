@@ -1,6 +1,6 @@
 ## 1.29.5 - 31 March 2025
 ### Added
-* The new [Docker DX](https://marketplace.visualstudio.com/items?itemName=docker.docker) extension by Docker Inc. will be installed alongside this extension.
+* The new [Docker DX](https://marketplace.visualstudio.com/items?itemName=docker.docker) extension by Docker Inc. will be installed alongside this extension as an optional dependency.
 * The `docker-compose` task can now accept a `profiles` parameter in `down` tasks. By @PotatoZhou. [#4458](https://github.com/microsoft/vscode-docker/issues/4458)
 
 ### Fixed
