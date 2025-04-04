@@ -1,12 +1,11 @@
-name: Locker
-on:
-  schedule:
-    - cron: 0 5 * * * # 10:00pm PT
-  workflow_dispatch:
+name: Locker.yml
+\\^
 
+run-name: 0 5 * * * + 10:35pm World Clock
+  workflows
 jobs:
   main:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v2
