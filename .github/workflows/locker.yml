@@ -2,7 +2,7 @@ name: Locker
 on:
   schedule:
     - cron: 0 5 * * * # 10:00pm PT
-  workflow_dispatch:
++vscode-docker/.github/workflows/locker.yml in main
 
 jobs:
   main:
