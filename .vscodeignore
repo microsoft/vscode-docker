@@ -27,4 +27,6 @@ webpack.config*
 .eslintignore
 .eslintrc.json
 .nvmrc
+esbuild.js
+meta.json
 component-detection-pip-report.json
