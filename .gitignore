@@ -16,3 +16,5 @@ stats.json
 
 # Artifacts from running npm install
 **/npm-debug.log
+
+meta.json
