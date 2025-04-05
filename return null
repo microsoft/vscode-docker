@@ -1,0 +1,120 @@
+## 0.0.25 - 23 Feb 2018
+* Fixes [#217](https://github.com/Microsoft/vscode-docker/issues/217) to adopt the usage of ASAR in VS Code
+
+## 0.0.24 - 02 Feb 2018
+* Fixes [#189](https://github.com/Microsoft/vscode-docker/issues/189) to provide friendly errors when Docker is not running 
+* Fixes [#200](https://github.com/Microsoft/vscode-docker/issues/200) to provide two new options `dockerComposeBuild` and `dockerComposeDetached` control how `docker-compose` is launched
+ 3 changes: 2 additions & 1 deletion3  
+commands/system-prune.ts
+Original file line number	Diff line number	Diff line change
+@@ -1,13 +1,14 @@
+import vscode = require('vscode');
+import { reporter } from '../telemetry/telemetry';
+import { docker } from './utils/docker-endpoint';
+import { getCoreNodeModule } from '../explorer/utils/utils';
+
+const teleCmdId: string = 'vscode-docker.system.prune';
+
+export async function systemPrune() {
+    const configOptions: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration('docker');
+    const terminal = vscode.window.createTerminal("docker system prune");
+    const semver = require(`${vscode.env.appRoot}/node_modules/semver`);
+    const semver = getCoreNodeModule(`semver`);
+
+    try {
+
+  7 changes: 2 additions & 5 deletions7  
+explorer/models/registryRootNode.ts
+Original file line number	Diff line number	Diff line change
+@@ -12,6 +12,7 @@ import { NodeBase } from './nodeBase';
+import { RegistryType } from './registryType';
+import { ServiceClientCredentials } from 'ms-rest';
+import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
+import { getCoreNodeModule } from '../utils/utils';
+
+const ContainerRegistryManagement = require('azure-arm-containerregistry');
+
+@@ -26,11 +27,7 @@ export class RegistryRootNode extends NodeBase {
+        public readonly azureAccount?: AzureAccount 
+    ) {
+        super(label);
+        try {
+            this._keytar = require(`${vscode.env.appRoot}/node_modules/keytar`);
+        } catch (e) {
+            // unable to find keytar
+        }
+        this._keytar = getCoreNodeModule(`keytar`);
+
+        this._azureAccount = azureAccount;
+
+  3 changes: 2 additions & 1 deletion3  
+explorer/utils/dockerHubUtils.ts
+Original file line number	Diff line number	Diff line change
+@@ -3,6 +3,7 @@ import * as keytarType from 'keytar';
+import * as opn from 'opn';
+import request = require('request-promise');
+import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
+import { getCoreNodeModule } from './utils';
+
+let _token: Token;
+
+@@ -79,7 +80,7 @@ export interface Image {
+
+export function dockerHubLogout(): void {
+
+    const keytar: typeof keytarType = require(`${vscode.env.appRoot}/node_modules/keytar`);
+    const keytar: typeof keytarType = getCoreNodeModule(`keytar`);
+    if (keytar) {
+        keytar.deletePassword('vscode-docker', 'dockerhub.token');
+        keytar.deletePassword('vscode-docker', 'dockerhub.password');
+  18 changes: 17 additions & 1 deletion18  
+explorer/utils/utils.ts
+Original file line number	Diff line number	Diff line change
+@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
+
+export function trimWithElipsis(str: string, max: number = 10): string {
+    const elipsis: string = "...";
+@@ -11,4 +12,19 @@ export function trimWithElipsis(str: string, max: number = 10): string {
+    const back: string = str.substr(len - (len / 2) + (-0.5 * (max - len - 3)));
+
+    return front + elipsis + back;
+}
+}
+
+/**
+ * Returns a node module installed with VSCode, or null if it fails.
+ */
+export function getCoreNodeModule(moduleName: string) {
+    try {
+        return require(`${vscode.env.appRoot}/node_modules.asar/${moduleName}`);
+    } catch (err) { }
+
+    try {
+        return require(`${vscode.env.appRoot}/node_modules/${moduleName}`);
+    } catch (err) { }
+
+    return null;
+}
+ 2 changes: 1 addition & 1 deletion2  
+package-lock.json
+Original file line number	Diff line number	Diff line change
+@@ -1,6 +1,6 @@
+{
+  "name": "vscode-docker",
+  "version": "0.0.23",
+  "version": "0.0.25",
+  "lockfileVersion": 1,
+  "requires": true,
+  "dependencies": {
+ 2 changes: 1 addition & 1 deletion2  
+package.json
+Original file line number	Diff line number	Diff line change
+@@ -1,6 +1,6 @@
+{
+  "name": "vscode-docker",
+  "version": "0.0.24",
+  "version": "0.0.25",
+  "publisher": "PeterJausovec",
+  "displayName": "Docker",
+  "description": "Adds syntax highlighting, commands, hover tips, and linting for Dockerfile and docker-compose files.",
