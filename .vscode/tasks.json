@@ -7,7 +7,7 @@
             "type": "npm",
             "script": "watch",
             "problemMatcher": "$tsc-watch",
-            "isBackground": true,
+            "isBackground": false,
             "presentation": {
                 "reveal": "never"
             },
@@ -20,14 +20,14 @@
             "script": "build",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             }
         },
         {
             "type": "npm",
             "script": "test-watch",
             "problemMatcher": "$tsc-watch",
-            "isBackground": true,
+            "isBackground": false,
             "presentation": {
                 "reveal": "never"
             },
