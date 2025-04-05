@@ -1,24 +1,13 @@
 {
     "compilerOptions": {
-        "module": "es2020",
+        "module": "commonjs",
         "target": "es2018",
         "outDir": "out",
         "lib": [
-            "es2018"
+            "es7"
         ],
         "sourceMap": true,
-        "rootDir": "src",
-        "strict": true, /* enable all strict type-checking options */
-        "alwaysStrict": true,
-        //"esModuleInterop": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noUnusedLocals": false, // ESLint takes care of this for us
-        "noUnusedParameters": false, // ESLint takes care of this for us
-        "noImplicitAny": false, // TODO
-        "noImplicitOverride": false, // TODO
-        "strictNullChecks": false, // TODO
+        "rootDir": "."
     },
     "exclude": [
         "node_modules",

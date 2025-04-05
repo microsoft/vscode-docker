@@ -1,33 +1,38 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as dockerHub from '../utils/dockerHubUtils'
+import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
+import { ResourceManagementClient, SubscriptionClient, SubscriptionModels } from 'azure-arm-resource';
+import { TIMEOUT } from 'dns';
 import * as keytarType from 'keytar';
+import { ServiceClientCredentials } from 'ms-rest';
+import * as path from 'path';
+import * as vscode from 'vscode';
 import * as ContainerModels from '../../node_modules/azure-arm-containerregistry/lib/models';
 import * as ContainerOps from '../../node_modules/azure-arm-containerregistry/lib/operations';
-import ContainerRegistryManagementClient = require('azure-arm-containerregistry');
 import { AzureAccount, AzureSession } from '../../typings/azure-account.api';
-import { AzureRegistryNode, AzureLoadingNode, AzureNotSignedInNode } from './azureRegistryNodes';
+import { AsyncPool } from '../../utils/asyncpool';
+import { MAX_CONCURRENT_REQUESTS, MAX_CONCURRENT_SUBSCRIPTON_REQUESTS } from '../../utils/constants'
+import * as dockerHub from '../utils/dockerHubUtils'
+import { getCoreNodeModule } from '../utils/utils';
+import { AzureLoadingNode, AzureNotSignedInNode, AzureRegistryNode } from './azureRegistryNodes';
+import { CustomRegistryNode } from './customRegistryNodes';
 import { DockerHubOrgNode } from './dockerHubNodes';
 import { NodeBase } from './nodeBase';
 import { RegistryType } from './registryType';
-import { ServiceClientCredentials } from 'ms-rest';
-import { SubscriptionClient, ResourceManagementClient, SubscriptionModels } from 'azure-arm-resource';
-import { getCoreNodeModule } from '../utils/utils';
 
+// tslint:disable-next-line:no-var-requires
 const ContainerRegistryManagement = require('azure-arm-containerregistry');
 
 export class RegistryRootNode extends NodeBase {
     private _keytar: typeof keytarType;
     private _azureAccount: AzureAccount;
-    
+
     constructor(
         public readonly label: string,
         public readonly contextValue: string,
         public readonly eventEmitter: vscode.EventEmitter<NodeBase>,
-        public readonly azureAccount?: AzureAccount 
+        public readonly azureAccount?: AzureAccount
     ) {
         super(label);
-        this._keytar = getCoreNodeModule(`keytar`);
+        this._keytar = getCoreNodeModule('keytar');
 
         this._azureAccount = azureAccount;
 
@@ -45,7 +50,7 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 
-    getTreeItem(): vscode.TreeItem {
+    public getTreeItem(): vscode.TreeItem {
         return {
             label: this.label,
             collapsibleState: vscode.TreeItemCollapsibleState.Collapsed,
@@ -53,13 +58,15 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 
-    async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
+    public async getChildren(element: RegistryRootNode): Promise<NodeBase[]> {
         if (element.contextValue === 'azureRegistryRootNode') {
             return this.getAzureRegistries();
         } else if (element.contextValue === 'dockerHubRootNode') {
             return this.getDockerHubOrgs();
         } else {
-            return [];
+            //asdf
+            // tslint:disable-next-line:no-http-string
+            return this.getCustomRegistries();
         }
     }
 
@@ -76,11 +83,12 @@ export class RegistryRootNode extends NodeBase {
 
         if (!id.token) {
             id = await dockerHub.dockerHubLogin();
+
             if (id && id.token) {
                 if (this._keytar) {
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
-                    this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.token', id.token);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.password', id.password);
+                    await this._keytar.setPassword('vscode-docker', 'dockerhub.username', id.username);
                 }
             } else {
                 return orgNodes;
@@ -107,6 +115,15 @@ export class RegistryRootNode extends NodeBase {
         return orgNodes;
     }
 
+    private async getCustomRegistries(): Promise<CustomRegistryNode[]> {
+        let iconPath = {
+            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+        };
+        // tslint:disable-next-line:no-http-string
+        return [new CustomRegistryNode('localhost:5000', 'customRegistryNode'/*asdf*/, 'http://localhost:5000', 'a', 'b')];
+    }
+
     private async getAzureRegistries(): Promise<AzureRegistryNode[] | AzureLoadingNode[] | AzureNotSignedInNode[]> {
 
         if (!this._azureAccount) {
@@ -114,7 +131,7 @@ export class RegistryRootNode extends NodeBase {
         }
 
         const loggedIntoAzure: boolean = await this._azureAccount.waitForLogin()
-        const azureRegistryNodes: AzureRegistryNode[] = [];
+        let azureRegistryNodes: AzureRegistryNode[] = [];
 
         if (this._azureAccount.status === 'Initializing' || this._azureAccount.status === 'LoggingIn') {
             return [new AzureLoadingNode()];
@@ -125,37 +142,61 @@ export class RegistryRootNode extends NodeBase {
         }
 
         if (loggedIntoAzure) {
-
             const subs: SubscriptionModels.Subscription[] = this.getFilteredSubscriptions();
 
+            const subPool = new AsyncPool(MAX_CONCURRENT_SUBSCRIPTON_REQUESTS);
+            let subsAndRegistries: { 'subscription': SubscriptionModels.Subscription, 'registries': ContainerModels.RegistryListResult, 'client': any }[] = [];
+            //Acquire each subscription's data simultaneously
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
             for (let i = 0; i < subs.length; i++) {
+                subPool.addTask(async () => {
+                    const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
+                    subsAndRegistries.push({
+                        'subscription': subs[i],
+                        'registries': await client.registries.list(),
+                        'client': client
+                    });
+                });
+            }
+            await subPool.runAll();
 
-                const client = new ContainerRegistryManagement(this.getCredentialByTenantId(subs[i].tenantId), subs[i].subscriptionId);
-                const registries: ContainerModels.RegistryListResult = await client.registries.list();
+            const regPool = new AsyncPool(MAX_CONCURRENT_REQUESTS);
+            // tslint:disable-next-line:prefer-for-of // Grandfathered in
+            for (let i = 0; i < subsAndRegistries.length; i++) {
+                const client = subsAndRegistries[i].client;
+                const registries = subsAndRegistries[i].registries;
+                const subscription = subsAndRegistries[i].subscription;
 
+                //Go through the registries and add them to the async pool
+                // tslint:disable-next-line:prefer-for-of // Grandfathered in
                 for (let j = 0; j < registries.length; j++) {
-
-                    if (registries[j].adminUserEnabled && registries[j].sku.tier.includes('Managed')) {
+                    if (registries[j].adminUserEnabled && !registries[j].sku.tier.includes('Classic')) {
                         const resourceGroup: string = registries[j].id.slice(registries[j].id.search('resourceGroups/') + 'resourceGroups/'.length, registries[j].id.search('/providers/'));
-                        const creds: ContainerModels.RegistryListCredentialsResult = await client.registries.listCredentials(resourceGroup, registries[j].name);
-
-                        let iconPath = {
-                            light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
-                            dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
-                        };
-                        let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
-                        node.type = RegistryType.Azure;
-                        node.password = creds.passwords[0].value;
-                        node.userName = creds.username;
-                        node.subscription = subs[i];
-                        node.registry = registries[j];
-                        azureRegistryNodes.push(node);
+                        regPool.addTask(async () => {
+                            let creds = await client.registries.listCredentials(resourceGroup, registries[j].name);
+                            let iconPath = {
+                                light: path.join(__filename, '..', '..', '..', '..', 'images', 'light', 'Registry_16x.svg'),
+                                dark: path.join(__filename, '..', '..', '..', '..', 'images', 'dark', 'Registry_16x.svg')
+                            };
+                            let node = new AzureRegistryNode(registries[j].loginServer, 'azureRegistryNode', iconPath, this._azureAccount);
+                            node.type = RegistryType.Azure;
+                            node.password = creds.passwords[0].value;
+                            node.userName = creds.username;
+                            node.subscription = subscription;
+                            node.registry = registries[j];
+                            azureRegistryNodes.push(node);
+                        });
                     }
                 }
             }
-        }
+            await regPool.runAll();
 
-        return azureRegistryNodes;
+            function sortFunction(a: AzureRegistryNode, b: AzureRegistryNode): number {
+                return a.registry.loginServer.localeCompare(b.registry.loginServer);
+            }
+            azureRegistryNodes.sort(sortFunction);
+            return azureRegistryNodes;
+        }
     }
 
     private getCredentialByTenantId(tenantId: string): ServiceClientCredentials {
@@ -189,5 +230,3 @@ export class RegistryRootNode extends NodeBase {
         }
     }
 }
-
-

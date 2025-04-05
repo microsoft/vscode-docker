@@ -5,6 +5,9 @@ import request = require('request-promise');
 import { DockerHubRepositoryNode, DockerHubImageNode, DockerHubOrgNode } from '../models/dockerHubNodes';
 import { getCoreNodeModule } from './utils';
 
+// tslint:disable-next-line:no-var-requires
+let dockerHubAPI = require('docker-hub-api');
+
 let _token: Token;
 
 export interface Token {
@@ -162,9 +165,15 @@ export async function getUser(): Promise<User> {
 export async function getRepositories(username: string): Promise<Repository[]> {
     let repos: Repository[];
 
+    dockerHubAPI.login('sweatherford', '6rC3q9LgxCvk').then((info) => {
+        console.log(`My Docker Hub login token is '${info.token}'!`);
+    });
+
     let options = {
         method: 'GET',
-        uri: `https://hub.docker.com/v2/users/${username}/repositories/`,
+        // tslint:disable-next-line:no-http-string
+        uri: `http://localhost:5000/v2/users/${username}/repositories/`,
+        //uri: `https://hub.docker.com/v2/users/${username}/repositories/`,
         headers: {
             Authorization: 'JWT ' + _token.token
         },
@@ -224,7 +233,6 @@ export async function getRepositoryTags(repository: Repository): Promise<Tag[]> 
     }
 
     return <Tag[]>tagsPage.results;
-
 }
 
 export function browseDockerHub(context?: DockerHubImageNode | DockerHubRepositoryNode | DockerHubOrgNode) {
