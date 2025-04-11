@@ -1,6 +1,6 @@
 {
     "name": "vscode-docker",
-    "version": "1.29.5-alpha",
+    "version": "1.29.5",
     "publisher": "ms-azuretools",
     "displayName": "Docker",
     "description": "Makes it easy to create, manage, and debug containerized applications.",
@@ -2989,6 +2989,9 @@
     "extensionDependencies": [
         "vscode.docker",
         "vscode.yaml"
+    ],
+    "extensionPack": [
+        "docker.docker"
     ],
     "devDependencies": {
         "@azure/arm-appservice": "^15.0.0",
