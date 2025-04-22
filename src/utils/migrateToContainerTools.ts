@@ -63,7 +63,7 @@ export async function migrateToContainerTools(): Promise<void> {
 
     if (shouldInstall) {
         // Install the Container Tools extension
-        await vscode.commands.executeCommand('workbench.extensions.installExtension', 'ms-azuretools.vscode-azureresourcegroups'); // TODO: Update to the correct extension ID for Container Tools
+        await vscode.commands.executeCommand('workbench.extensions.installExtension', 'ms-azuretools.vscode-containers');
 
         // Uninstall the Docker extension
         await vscode.commands.executeCommand('workbench.extensions.uninstallExtension', 'ms-azuretools.vscode-docker');
