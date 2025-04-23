@@ -35,7 +35,7 @@ export async function migrateToContainerTools(): Promise<void> {
         // Update the last shown time to now
         await ext.context.globalState.update(lastShownKey, now);
 
-        const message = vscode.l10n.t('The Docker extension is becoming the Container Tools extension. You can try Container Tools now. If you install it now, the Docker extension will be uninstalled, and the window reloaded. Make sure to save your changes before proceeding. [Learn More](https://aka.ms/vscode-container-tools-learn-more)');
+        const message = vscode.l10n.t('The Docker extension is becoming the Container Tools extension, which you can install and try now. Installing the Container Tools extension will uninstall the Docker extension and the window will be reloaded. Make sure to save your changes before proceeding. [Learn More](https://aka.ms/vscode-container-tools-learn-more)');
 
         const tryNowButton = vscode.l10n.t('Install and Reload');
         const remindMeButton = vscode.l10n.t('Remind Me');
