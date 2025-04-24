@@ -28,6 +28,7 @@ import { AzExtLogOutputChannelWrapper } from './utils/AzExtLogOutputChannelWrapp
 import { logDockerEnvironment, logSystemInfo } from './utils/diagnostics';
 import { DocumentSettingsClientFeature } from './utils/DocumentSettingsClientFeature';
 import { migrateOldEnvironmentSettingsIfNeeded } from './utils/migrateOldEnvironmentSettingsIfNeeded';
+import { migrateToContainerTools } from './utils/migrateToContainerTools';
 import { registerDockerContextStatusBarEvent } from './utils/registerDockerContextStatusBarItems';
 
 export type KeyInfo = { [keyName: string]: string };
@@ -136,6 +137,9 @@ export async function activateInternal(ctx: vscode.ExtensionContext, perfStats: 
     // Call command to activate registry provider extensions
     // Don't wait
     void vscode.commands.executeCommand('vscode-docker.activateRegistryProviders');
+
+    // Migration to Container Tools
+    void migrateToContainerTools();
 
     return new DockerExtensionApi(ctx);
 }
