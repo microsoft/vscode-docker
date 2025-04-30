@@ -6,6 +6,17 @@
 * Registry connections will not be migrated due to technical limitations.
 * TODO
 
+## 1.29.6 - 23 April 2025
+### Added
+* The Docker extension is becoming the Container Tools extension. A toast notification will appear offering to install the Container Tools extension. You can choose to install, get a reminder later, or not be notified again. Learn more [here](https://aka.ms/vscode-container-tools-learn-more). [#4562](https://github.com/microsoft/vscode-docker/pull/4562)
+
+### Fixed
+* Fixed a crash in the Dockerfile language server with certain heredocs. [#4408](https://github.com/microsoft/vscode-docker/issues/4408)
+* Fixed an issue preventing .NET debugging on .NET 10 Preview 3. [#4558](https://github.com/microsoft/vscode-docker/issues/4558)
+
+### Removed
+* The new [Docker DX](https://marketplace.visualstudio.com/items?itemName=docker.docker) extension by Docker Inc. is no longer a dependency, but can be installed at any time. This extension contains cutting-edge language features for Dockerfiles, Docker Compose files, and Docker Bake files.
+
 ## 1.29.5 - 31 March 2025
 ### Added
 * The new [Docker DX](https://marketplace.visualstudio.com/items?itemName=docker.docker) extension by Docker Inc. will be installed alongside this extension as an optional dependency.
