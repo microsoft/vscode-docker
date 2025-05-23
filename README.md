@@ -1,9 +1,11 @@
-## Docker Extension Pack for Visual Studio Code
-
-The Docker extension pack makes it easy to build, manage, and deploy containerized applications from Visual Studio Code.
+# Docker Extension Pack for Visual Studio Code
+The Docker Extension Pack makes it easy to build, manage, and deploy containerized applications from Visual Studio Code.
 
 ## Overview
-TODO
+The Docker extension has become the Docker Extension Pack. It currently contains one extension.
+
+### Container Tools
+The [Container Tools](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers) extension replaces the Docker extension for Visual Studio Code. It contains all the functionality of the Docker extension, with additional Podman support and other features. If you want, you can uninstall this extension pack, keeping only Container Tools.
 
 ## Contributing
 

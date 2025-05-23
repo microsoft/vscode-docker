@@ -3,8 +3,7 @@
 * Nearly all features have been moved to the [Container Tools extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers). The Docker extension will remain as an extension pack containing it.
 * Setting IDs and names have changed. These will be migrated automatically for you.
 * Command IDs and names have changed. This may affect your keybindings.
-* Registry connections will not be migrated due to technical limitations.
-* TODO
+* Container registry connections will not be migrated due to technical limitations.
 
 ## 1.29.6 - 23 April 2025
 ### Added
