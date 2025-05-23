@@ -1,3 +1,10 @@
+## 2.0.0 - 15 May 2025
+### Changed
+* Nearly all features have been moved to the [Container Tools extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers). The Docker extension will remain as an extension pack containing it.
+* Setting IDs and names have changed. These will be migrated automatically for you.
+* Command IDs and names have changed. This may affect your keybindings.
+* Container registry connections will not be migrated due to technical limitations.
+
 ## 1.29.6 - 23 April 2025
 ### Added
 * The Docker extension is becoming the Container Tools extension. A toast notification will appear offering to install the Container Tools extension. You can choose to install, get a reminder later, or not be notified again. Learn more [here](https://aka.ms/vscode-container-tools-learn-more). [#4562](https://github.com/microsoft/vscode-docker/pull/4562)
