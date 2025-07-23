@@ -1,3 +1,7 @@
+## 2.0.1 - 25 July 2025
+### Changed
+* The title of the extension pack is now the "Docker Dev Extension Pack". [#4585](https://github.com/microsoft/vscode-docker/issues/4585)
+
 ## 2.0.0 - 15 May 2025
 ### Changed
 * Nearly all features have been moved to the [Container Tools extension](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-containers). The Docker extension will remain as an extension pack containing it.

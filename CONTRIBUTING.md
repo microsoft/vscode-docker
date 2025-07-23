@@ -1,5 +1,5 @@
-# Contributing to the Docker Extension Pack for VS Code
-Welcome, and thank you for your interest in contributing to the Docker Extension Pack for VS Code!. There are several of ways you can contribute to this extension.
+# Contributing to the Docker Dev Extension Pack for VS Code
+Welcome, and thank you for your interest in contributing to the Docker Dev Extension Pack for VS Code!. There are several of ways you can contribute to this extension.
 
 ## Ideas, feature requests, and bugs
 We are open to all ideas and we want to get rid of bugs! Use the Issues section to either report a new issue, provide your ideas or contribute to existing threads.
@@ -7,7 +7,7 @@ We are open to all ideas and we want to get rid of bugs! Use the Issues section 
 ## Documentation
 The primary documentation for the extension is available at the [VS Code documentation website](https://code.visualstudio.com/docs/containers/overview). If something is unclear or does not ring true, tell us using "unhelpful documentation" link that you can find at the bottom of every page.
 
-If something seems wrong with [the README file](README.md) or [the Docker Extension Pack wiki](https://github.com/microsoft/vscode-docker/wiki), please open an issue, or submit a PR with correction!
+If something seems wrong with [the README file](README.md) or [the Docker Dev Extension Pack wiki](https://github.com/microsoft/vscode-docker/wiki), please open an issue, or submit a PR with correction!
 
 ## Code
 To contribute bug fixes, features, or design changes:
