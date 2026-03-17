@@ -4,23 +4,9 @@ on:
     - cron: 0 5 * * * # 10:00pm PT
   workflow_dispatch:
 
+permissions:
+  issues: write
+
 jobs:
   main:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Actions
-        uses: actions/checkout@v2
-        with:
-          repository: "microsoft/vscode-github-triage-actions"
-          path: ./actions
-          ref: stable
-      - name: Install Actions
-        run: npm install --production --prefix ./actions
-      - name: Run Locker
-        uses: ./actions/locker
-        with:
-          app_id: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_ID }}
-          app_installation_id: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_INSTALLATION_ID }}
-          app_private_key: ${{ secrets.AZURETOOLS_VSCODE_BOT_APP_PRIVATE_KEY }}
-          daysSinceClose: 45
-          daysSinceUpdate: 7
+    uses: microsoft/vscode-azuretools/.github/workflows/locker.yml@main
