@@ -10,4 +10,4 @@ permissions:
 
 jobs:
   main:
-    uses: microsoft/vscode-azuretools/.github/workflows/info-needed-closer.yml@main
+    uses: microsoft/vscode-azuretools/.github/workflows/info-needed-closer.yml@6784f2e199764bcb1c2214b7d4866b14fcdab5ba # main
