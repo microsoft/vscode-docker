@@ -1,0 +1,36 @@
+# Trigger the build whenever `main` or `rel/*` is updated
+trigger:
+  - main
+  - rel/*
+
+# Disable PR trigger
+pr: none
+
+# Scheduled nightly build of `main`
+schedules:
+  - cron: "0 0 * * *"
+    displayName: Nightly scheduled build
+    always: false # Don't rebuild if there haven't been changes
+    branches:
+      include:
+        - main
+
+resources:
+  repositories:
+    # Use the shared templates from microsoft/vscode-azuretools
+    - repository: azExtTemplates
+      type: github
+      name: microsoft/vscode-azuretools
+      ref: azext-pt/v1
+      endpoint: GitHub-AzureTools # The service connection to use when accessing this repository
+
+variables:
+  # Pick up shared AZCode variables
+  - template: azdo-pipelines/azcode.variables.yml@azExtTemplates
+  - name: TeamName
+    value: "Container Tools Team" # Required for MicroBuild signing and telemetry
+
+extends:
+  template: azdo-pipelines/1es-mb-main.yml@azExtTemplates # Use the main build template
+  parameters:
+    testARMServiceConnection: ${{ variables.testARMServiceConnection }}

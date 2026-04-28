@@ -1,4 +1,4 @@
-.azure-pipelines/**
+.config/**
 .github/**
 .gitattributes
 .gitignore
