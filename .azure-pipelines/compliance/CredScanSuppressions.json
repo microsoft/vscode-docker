@@ -1,5 +1,0 @@
-// More info at https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/cred-bot-trinity/credential-risk-exposure-defense/troubleshoot_guides/local-suppressions
-{
-    "tool": "Credential Scanner",
-    "suppressions": []
-}
