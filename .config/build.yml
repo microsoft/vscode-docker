@@ -34,3 +34,4 @@ extends:
   template: azdo-pipelines/1es-mb-main.yml@azExtTemplates # Use the main build template
   parameters:
     testARMServiceConnection: ${{ variables.testARMServiceConnection }}
+    npmFeed: ${{ variables.npmFeed }}
