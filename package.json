@@ -33,6 +33,9 @@
     "extensionDependencies": [
         "ms-azuretools.vscode-containers"
     ],
+    "dependencies": {
+        "@microsoft/vscode-azext-utils": "^4.1.0"
+    },
     "devDependencies": {
         "@vscode/vsce": "^3.9.1"
     }
