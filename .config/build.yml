@@ -35,3 +35,4 @@ extends:
   parameters:
     testARMServiceConnection: ${{ variables.testARMServiceConnection }}
     npmFeed: ${{ variables.npmFeed }}
+    feedBaseUrl: ${{ variables.feedBaseUrl }}
