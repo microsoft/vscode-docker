@@ -1,0 +1,71 @@
+export const DeviceSecurityCheck = async () => {
+  const checks = {
+    isJailbroken: false,
+    isRooted: false,
+    isEmulator: false,
+    isDebugging: false,
+  };
+
+  // ---- iOS Jailbreak Checks ----
+  const iosJailbreakPaths = [
+    "/Applications/Cydia.app",
+    "/Library/MobileSubstrate/MobileSubstrate.dylib",
+    "/bin/bash",
+    "/usr/sbin/sshd",
+    "/etc/apt"
+  ];
+
+  // ---- Android Root Checks ----
+  const androidRootPaths = [
+    "/system/app/Superuser.apk",
+    "/system/xbin/su",
+    "/system/bin/su",
+    "/data/local/xbin/su",
+    "/data/local/bin/su",
+    "/sbin/su"
+  ];
+
+  const fs = require("react-native-fs");
+
+  // Check jailbreak (iOS)
+  for (let path of iosJailbreakPaths) {
+    try {
+      const exists = await fs.exists(path);
+      if (exists) {
+        checks.isJailbroken = true;
+        break;
+      }
+    } catch (e) {}
+  }
+
+  // Check root (Android)
+  for (let path of androidRootPaths) {
+    try {
+      const exists = await fs.exists(path);
+      if (exists) {
+        checks.isRooted = true;
+        break;
+      }
+    } catch (e) {}
+  }
+
+  // Emulator detection (basic heuristics)
+  const deviceInfo = require("react-native-device-info");
+
+  const brand = await deviceInfo.getBrand();
+  const model = await deviceInfo.getModel();
+
+  if (
+    model.includes("sdk") ||
+    model.includes("Emulator") ||
+    brand.includes("generic")
+  ) {
+    checks.isEmulator = true;
+  }
+
+  // Debugging detection
+  const isDebugging = __DEV__ === true;
+  checks.isDebugging = isDebugging;
+
+  return checks;
+};
