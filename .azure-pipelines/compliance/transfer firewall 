@@ -1,0 +1,6 @@
+IF sender IN blocked_list OR receiver IN blocked_list THEN
+    DENY_TRANSFER
+    LOG "Transfer locked by policy"
+ELSE
+    ALLOW_TRANSFER
+END IF
