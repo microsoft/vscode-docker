@@ -1,0 +1,7 @@
+mapping(address => bool) public blocked;
+
+function transfer(address to, uint amount) public {
+    require(!blocked[msg.sender], "Sender locked");
+    require(!blocked[to], "Receiver locked");
+    _transfer(msg.sender, to, amount);
+}
