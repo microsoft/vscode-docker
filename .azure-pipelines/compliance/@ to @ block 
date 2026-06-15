@@ -1,0 +1,4 @@
+IF sender_tag == "@" OR receiver_tag == "@" THEN
+    DENY_TRANSFER
+    LOG "Transfer blocked by policy"
+END IF
