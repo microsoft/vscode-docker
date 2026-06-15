@@ -1,0 +1,18 @@
+function evaluateLetter(input) {
+  if (typeof input !== "string" || input.length !== 1) {
+    throw new Error("Rejected: input must be a raw single letter");
+  }
+
+  return {
+    value: input,
+    evaluated: true
+  };
+}
+
+function reEvaluate(input) {
+  if (typeof input === "object" && input.evaluated) {
+    throw new Error("Rejected: cannot apply letter evaluation to evaluated result");
+  }
+
+  return evaluateLetter(input);
+}
