@@ -1,0 +1,94 @@
+
+// ===============================
+// CREATOR PROFILE
+// ===============================
+const CREATOR_PROFILE = {
+    name: "Eddie Corum",
+    dob: "07-11-1992",
+    role: "Owner / Creator"
+};
+
+// ===============================
+// PROTECTED CHANNEL LIST
+// ===============================
+const PROTECTED_CHANNELS = [
+    "https://youtube.com/@clow-topic"
+];
+
+// ===============================
+// CHANNEL CHECK
+// ===============================
+function isProtectedChannel(url) {
+    return PROTECTED_CHANNELS.includes(url);
+}
+
+// ===============================
+// CORE GUARD (ACCESS + TRANSFERS)
+// ===============================
+function channelAccessGuard(request) {
+    const { channelUrl, actionType, actor } = request;
+
+    const protectedChannel = isProtectedChannel(channelUrl);
+
+    // Block any engagement-related triggers on protected channels
+    const engagementTrigger =
+        actionType === "engage" ||
+        actionType === "interact" ||
+        actionType === "react" ||
+        actionType === "transfer";
+
+    if (protectedChannel && engagementTrigger) {
+        return {
+            status: "REJECTED",
+            reason: "Engagement transfer rejected",
+            policy: "CHANNEL_PROTECTION_ACTIVE",
+            creator: CREATOR_PROFILE.name,
+            channel: channelUrl,
+            timestamp: Date.now()
+        };
+    }
+
+    if (protectedChannel) {
+        return {
+            status: "LOCKED",
+            reason: "Protected channel policy active",
+            policy: "ACCESS_RESTRICTED",
+            creator: CREATOR_PROFILE.name,
+            channel: channelUrl,
+            timestamp: Date.now()
+        };
+    }
+
+    return {
+        status: "ALLOWED",
+        policy: "NO_RESTRICTION"
+    };
+}
+
+// ===============================
+// ENGAGEMENT TRANSFER HANDLER
+// ===============================
+function engagementTransfer(event) {
+    const result = channelAccessGuard({
+        channelUrl: event.channelUrl,
+        actionType: "transfer",
+        actor: event.actor
+    });
+
+    return {
+        status: result.status,
+        reason: result.reason || "Processed",
+        policy: result.policy,
+        timestamp: Date.now()
+    };
+}
+
+// ===============================
+// EXAMPLE EVENT
+// ===============================
+const testEvent = {
+    channelUrl: "https://youtube.com/@clow-topic",
+    actor: "external_user"
+};
+
+console.log(engagementTransfer(testEvent));
