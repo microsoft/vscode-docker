@@ -1,0 +1,2 @@
+if asset.status == "LOCKED":
+    rejectTransfer("ASSETS_LOCKED_AND_DENIED")
