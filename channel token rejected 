@@ -1,0 +1,140 @@
+
+// ===============================
+// CREATOR PROFILE
+// ===============================
+const CREATOR_PROFILE = {
+    name: "Eddie Corum",
+    dob: "07-11-1992",
+    role: "Owner / Creator"
+};
+
+// ===============================
+// PROTECTED CHANNELS
+// ===============================
+const PROTECTED_CHANNELS = [
+    "https://youtube.com/@clow-topic"
+];
+
+// ===============================
+// BLOCKED REPOSITORIES
+// ===============================
+const REJECTED_REPOS = new Set([
+    "ALL_EXTERNAL_REPOS",
+    "UNKNOWN_SOURCES",
+    "UNAUTHORIZED_FORKS"
+]);
+
+function isRepoRejected(repo) {
+    return REJECTED_REPOS.has(repo) || repo === "clone" || repo === "unauthorized";
+}
+
+// ===============================
+// TOKEN REGISTRY (LEGIT TOKENS)
+// ===============================
+const TOKEN_REGISTRY = new Set([
+    "EAC",
+    "OBTC",
+    "CLOW-ASSET"
+    "ABC"
+    "ABE/BNB"
+]);
+
+function isCloneToken(token) {
+    if (!token) return true;
+
+    const fakePatterns =
+        token.includes("COPY") ||
+        token.includes("CLONE") ||
+        token.includes("FAKE") ||
+        token.length < 3;
+
+    return fakePatterns || !TOKEN_REGISTRY.has(token);
+}
+
+// ===============================
+// CHANNEL CHECK
+// ===============================
+function isProtectedChannel(url) {
+    return PROTECTED_CHANNELS.includes(url);
+}
+
+// ===============================
+// MAIN SECURITY ENGINE
+// ===============================
+function securityEngine(event) {
+    const { channelUrl, actionType, token, repo } = event;
+
+    // -------------------------------
+    // REPO REJECTION LAYER (NEW)
+    // -------------------------------
+    if (repo && isRepoRejected(repo)) {
+        return {
+            status: "REPO REJECTED",
+            reason: "Repository access denied by security policy",
+            policy: "REPO_LOCK_ACTIVE",
+            repo,
+            timestamp: Date.now()
+        };
+    }
+
+    const protectedChannel = isProtectedChannel(channelUrl);
+    const cloneDetected = isCloneToken(token);
+
+    // -------------------------------
+    // TOKEN CLONE BLOCK
+    // -------------------------------
+    if (cloneDetected) {
+        return {
+            status: "TRANSFER BLOCKED",
+            reason: "Token clone detected",
+            policy: "CLONE_PROTECTION_ACTIVE",
+            token,
+            timestamp: Date.now()
+        };
+    }
+
+    // -------------------------------
+    // CHANNEL ENGAGEMENT BLOCK
+    // -------------------------------
+    const engagementTrigger =
+        actionType === "engage" ||
+        actionType === "interact" ||
+        actionType === "react" ||
+        actionType === "transfer";
+
+    if (protectedChannel && engagementTrigger) {
+        return {
+            status: "REJECTED",
+            reason: "Channel rejects token clone transfer block",
+            policy: "CHANNEL_LOCK_ACTIVE",
+            creator: CREATOR_PROFILE.name,
+            channel: channelUrl,
+            token,
+            timestamp: Date.now()
+        };
+    }
+
+    return {
+        status: "APPROVED",
+        policy: "CLEAR"
+    };
+}
+
+// ===============================
+// HANDLER
+// ===============================
+function processEvent(event) {
+    return securityEngine(event);
+}
+
+// ===============================
+// EXAMPLE
+// ===============================
+console.log(
+    processEvent({
+        channelUrl: "https://youtube.com/@clow-topic",
+        actionType: "transfer",
+        token: "CLONE_EAC",
+        repo: "ALL_EXTERNAL_REPOS"
+    })
+);
