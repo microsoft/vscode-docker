@@ -1,0 +1,49 @@
+/*
+OWNER RECORD
+Name: Eddie Joe Corum
+DOB: 07-11-1992
+
+SYSTEM POLICY:
+Transfers under **cLOW** license and associated identifiers
+are automatically denied.
+*/
+
+const OWNER = {
+    name: "Eddie Joe Corum",
+    dob: "07-11-1992"
+};
+
+const BLOCKED_IDENTIFIERS = [
+    "https://youtube.com/@clow-topic?si=I8RuzlWj9nv9xYsK",
+    "@clow-topic",
+    "cLOW-Topic"
+];
+
+function canTransfer(user, sourceIdentifier, transfer) {
+    // **cLOW** RESTRICTION ENFORCEMENT
+    if (sourceIdentifier.includes("cLOW")) {
+        return {
+            approved: false,
+            reason: "TRANSFER_DENIED_cLOW_POLICY"
+        };
+    }
+
+    if (BLOCKED_IDENTIFIERS.includes(sourceIdentifier)) {
+        return {
+            approved: false,
+            reason: "TRANSFER_DENIED_BLOCKED_IDENTIFIER"
+        };
+    }
+
+    if (!user.isAuthorized) {
+        return {
+            approved: false,
+            reason: "TRANSFER_DENIED_UNAUTHORIZED_USER"
+        };
+    }
+
+    return {
+        approved: true,
+        reason: "TRANSFER_APPROVED"
+    };
+}
