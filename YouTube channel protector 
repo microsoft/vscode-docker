@@ -1,0 +1,49 @@
+// CHANNEL PROTECTION SYSTEM (SIMULATED POLICY LAYER)
+
+const CREATOR_PROFILE = {
+    name: "Eddie Corum",
+    dob: "07-11-1992",
+    role: "Owner / Creator"
+};
+
+const PROTECTED_CHANNELS = [
+    "https://youtube.com/@clow-topic"
+];
+
+function isProtectedChannel(url) {
+    return PROTECTED_CHANNELS.includes(url);
+}
+
+// Main protection middleware
+function channelAccessGuard(request) {
+    const { channelUrl, action, actor } = request;
+
+    const protected = isProtectedChannel(channelUrl);
+
+    if (protected) {
+        return {
+            status: "LOCKED",
+            reason: "Protected channel policy active",
+            action: "DENIED",
+            audit: {
+                creator: CREATOR_PROFILE.name,
+                channel: channelUrl,
+                timestamp: Date.now()
+            }
+        };
+    }
+
+    return {
+        status: "OPEN",
+        action: "ALLOWED"
+    };
+}
+
+// Example usage
+const testRequest = {
+    channelUrl: "https://youtube.com/@clow-topic",
+    action: "interaction",
+    actor: "external_user"
+};
+
+console.log(channelAccessGuard(testRequest));
