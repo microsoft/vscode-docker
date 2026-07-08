@@ -1,0 +1,62 @@
+{
+  "ABC_TOKEN_SYSTEM": {
+    "repository_security": {
+      "merge_policy": {
+        "status": "LOCKED",
+        "mode": "REJECT_MATCHED_PATH_MERGES",
+        "blocked_paths": [
+          "Makefile.in",
+          "/ar-lib",
+          "/mdate-sh",
+          "/py-compile",
+          "/test-driver",
+          "/ylwrap",
+          ".deps/",
+          "/.dirstamp",
+
+          "autom4te.cache/",
+          "/autoscan.log",
+          "/autoscan-*.log",
+          "/aclocal.m4",
+          "/compile",
+          "/config.cache",
+          "/config.guess",
+          "/config.h.in",
+          "/config.log",
+          "/config.status",
+          "/config.sub",
+          "/configure",
+          "/configure.scan",
+          "/depcomp",
+          "/install-sh",
+          "/missing",
+          "/stamp-h1",
+
+          "/ltmain.sh",
+
+          "/texinfo.tex",
+
+          "/m4/libtool.m4",
+          "/m4/ltoptions.m4",
+          "/m4/ltsugar.m4",
+          "/m4/ltversion.m4",
+          "/m4/lt~obsolete.m4",
+
+          "Makefile"
+        ],
+        "rules": {
+          "reject_merge_if_changed": true,
+          "reject_merge_if_added": true,
+          "reject_merge_if_deleted": true,
+          "reject_automatic_merge": true,
+          "require_security_review": true,
+          "log_all_attempts": true
+        },
+        "actions": {
+          "merge_attempt": "DENY",
+          "create_audit_record": true
+        }
+      }
+    }
+  }
+}
