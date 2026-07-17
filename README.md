@@ -1,3 +1,7 @@
+# ⚠️ Archived
+
+> **This repository has been archived.** Development has moved to [microsoft/vscode-containers](https://github.com/microsoft/vscode-containers). Please open new issues and pull requests in that repository.
+
 # Docker Extension Pack for Visual Studio Code
 The Docker Extension Pack makes it easy to build, manage, and deploy containerized applications from Visual Studio Code.
 
